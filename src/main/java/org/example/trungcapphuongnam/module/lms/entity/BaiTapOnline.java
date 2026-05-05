@@ -1,0 +1,60 @@
+package org.example.trungcapphuongnam.module.lms.entity;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import lombok.*;
+import org.example.trungcapphuongnam.common.enums.Lms.LoaiBaiOnline;
+import org.example.trungcapphuongnam.common.enums.Lms.NguonTao;
+import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiBaiTapOnline;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "bai_tap_online")
+public class BaiTapOnline {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "chuong_trinh_mon_id")
+    private Long chuongTrinhMonId;
+
+    @Column(name = "nguoi_tao_tai_khoan_id")
+    private Long nguoiTaoTaiKhoanId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nguon_tao")
+    private NguonTao nguonTao;
+
+    @Column(name = "tieu_de")
+    private String tieuDe;
+
+    @Column(name = "mo_ta")
+    private String moTa;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loai_bai")
+    private LoaiBaiOnline loaiBai;
+
+    @Column(name = "tong_diem")
+    private BigDecimal tongDiem;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trang_thai")
+    private TrangThaiBaiTapOnline trangThai;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+}

@@ -1,0 +1,36 @@
+package org.example.trungcapphuongnam.module.lms.dto.request;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.validation.constraints.*;
+import lombok.*;
+import org.example.trungcapphuongnam.common.enums.Lms.HanhDongBaiTapLop;
+import org.example.trungcapphuongnam.common.enums.Lms.VaiTroThucHienLms;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LichSuBaiTapLopRequest {
+
+    @NotNull
+
+    private Long baiTapLopId;
+
+    @NotNull
+
+    private Long nguoiThucHienId;
+
+    private VaiTroThucHienLms vaiTroThucHien;
+
+    private HanhDongBaiTapLop hanhDong;
+
+    private JsonNode duLieuCu;
+
+    private JsonNode duLieuMoi;
+
+    @NotBlank
+
+    private String lyDo;
+
+}

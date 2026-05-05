@@ -1,0 +1,65 @@
+package org.example.trungcapphuongnam.module.lms.dto.request;
+
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import lombok.*;
+import org.example.trungcapphuongnam.common.enums.Lms.KetQuaDat;
+import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiKetQuaBaiTap;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class KetQuaBaiTapLopRequest {
+
+    @NotNull
+
+    private Long baiTapLopId;
+
+    @NotNull
+
+    private Long sinhVienId;
+
+    @NotNull
+
+    private Long lanLamDuocChonId;
+
+    @DecimalMin(value = "0")
+
+    private BigDecimal diemHeThong;
+
+    @DecimalMin(value = "0")
+
+    private BigDecimal diemGiaoVienChinhSua;
+
+    @DecimalMin(value = "0")
+
+    private BigDecimal diemCuoiCung;
+
+    private KetQuaDat ketQua;
+
+    private TrangThaiKetQuaBaiTap trangThai;
+
+    @NotNull
+
+    private Long diemChiTietId;
+
+    private String nhanXet;
+
+    private LocalDateTime ngayTinhDiem;
+
+    private LocalDateTime ngayChot;
+
+    @NotNull
+
+    private Long nguoiChotId;
+
+    private LocalDateTime ngayDaySangDiem;
+
+    @NotNull
+
+    private Long nguoiDaySangDiemId;
+
+}

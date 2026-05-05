@@ -1,0 +1,7 @@
+package org.example.trungcapphuongnam.common.exception;
+
+public class SinhVienException extends RuntimeException {
+    public SinhVienException(String message) {
+        super(message);
+    }
+}
