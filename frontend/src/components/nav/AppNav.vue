@@ -9,10 +9,10 @@
 
       <nav class="nav-menu">
         <router-link
-          v-for="item in menus"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
+            v-for="item in menus"
+            :key="item.path"
+            :to="item.path"
+            class="nav-item"
         >
           {{ item.label }}
         </router-link>
@@ -57,7 +57,7 @@ const menuByRole = {
   admin: [
     { label: 'Hệ thống', path: '/he-thong' },
     { label: 'Đào tạo', path: '/dao-tao' },
-    // { label: 'Chương trình', path: '/chuong-trinh' },
+    { label: 'Chương trình', path: '/chuong-trinh' },
     { label: 'Giảng dạy', path: '/giang-day' },
     { label: 'Điểm', path: '/diem' },
     { label: 'Sinh viên', path: '/sinh-vien' },
@@ -67,7 +67,7 @@ const menuByRole = {
   ],
   dao_tao: [
     { label: 'Đào tạo', path: '/dao-tao' },
-    // { label: 'Chương trình', path: '/chuong-trinh' },
+    { label: 'Chương trình', path: '/chuong-trinh' },
     { label: 'Sinh viên', path: '/sinh-vien' },
     { label: 'Giảng dạy', path: '/giang-day' },
     { label: 'Điểm', path: '/diem' },
@@ -76,7 +76,7 @@ const menuByRole = {
   ],
   nhan_vien: [
     { label: 'Đào tạo', path: '/dao-tao' },
-    // { label: 'Chương trình', path: '/chuong-trinh' },
+    { label: 'Chương trình', path: '/chuong-trinh' },
     { label: 'Sinh viên', path: '/sinh-vien' },
     { label: 'Học phí', path: '/hoc-phi' },
     { label: 'Điểm', path: '/diem' },

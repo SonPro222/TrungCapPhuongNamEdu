@@ -2,11 +2,11 @@
   <div class="crud-card">
     <div class="toolbar">
       <input
-        :value="keyword"
-        class="search-input"
-        type="text"
-        placeholder="Tìm kiếm..."
-        @input="$emit('update:keyword', $event.target.value)"
+          :value="keyword"
+          class="search-input"
+          type="text"
+          placeholder="Tìm kiếm..."
+          @input="$emit('update:keyword', $event.target.value)"
       />
       <button class="btn secondary" type="button" @click="$emit('reload')">Tải lại</button>
       <button v-if="showCreate" class="btn primary" type="button" @click="$emit('create')">Thêm mới</button>
@@ -17,28 +17,28 @@
     <div v-else class="table-wrap">
       <table>
         <thead>
-          <tr>
-            <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
-            <th class="action-col">Thao tác</th>
-          </tr>
+        <tr>
+          <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
+          <th class="action-col">Thao tác</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-if="!items.length">
-            <td :colspan="columns.length + 1" class="empty">Không có dữ liệu</td>
-          </tr>
-          <tr v-for="item in items" :key="item.id">
-            <td v-for="column in columns" :key="column.key">
-              <slot :name="`cell-${column.key}`" :item="item" :value="item[column.key]">
-                {{ formatValue(item[column.key]) }}
-              </slot>
-            </td>
-            <td class="actions">
-              <button v-if="showView" class="link-btn" type="button" @click="$emit('view', item)">Xem</button>
-              <button v-if="showEdit" class="link-btn" type="button" @click="$emit('edit', item)">Sửa</button>
-              <button v-if="showDelete" class="link-btn danger" type="button" @click="$emit('remove', item)">Xóa</button>
-              <slot name="row-actions" :item="item" />
-            </td>
-          </tr>
+        <tr v-if="!items.length">
+          <td :colspan="columns.length + 1" class="empty">Không có dữ liệu</td>
+        </tr>
+        <tr v-for="item in items" :key="item.id">
+          <td v-for="column in columns" :key="column.key">
+            <slot :name="`cell-${column.key}`" :item="item" :value="item[column.key]">
+              {{ formatValue(item[column.key]) }}
+            </slot>
+          </td>
+          <td class="actions">
+            <button v-if="showView" class="link-btn" type="button" @click="$emit('view', item)">Xem</button>
+            <button v-if="showEdit" class="link-btn" type="button" @click="$emit('edit', item)">Sửa</button>
+            <button v-if="showDelete" class="link-btn danger" type="button" @click="$emit('remove', item)">Xóa</button>
+            <slot name="row-actions" :item="item" />
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
@@ -70,28 +70,29 @@ const formatValue = (value) => {
 
 <style scoped>
 .crud-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(18, 72, 104, 0.08);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 16px 40px rgba(19, 57, 79, 0.08);
 }
 
 .toolbar {
   display: flex;
   gap: 10px;
-  padding: 14px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  padding: 16px;
+  border-bottom: 1px solid #e5edf3;
+  background: #f7fbfe;
 }
 
 .search-input {
   flex: 1;
   min-width: 220px;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
+  padding: 11px 13px;
+  border: 1px solid #c9d9e6;
+  border-radius: 14px;
   outline: none;
+  color: #123046;
 }
 
 .btn,
@@ -108,12 +109,12 @@ const formatValue = (value) => {
 
 .primary {
   color: #fff;
-  background: #2563eb;
+  background: #0f766e;
 }
 
 .secondary {
-  color: #0f172a;
-  background: #e2e8f0;
+  color: #123046;
+  background: #e9f3fa;
 }
 
 .table-wrap {
@@ -129,14 +130,15 @@ th,
 td {
   padding: 13px 14px;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e5edf3;
   vertical-align: top;
 }
 
 th {
-  color: #475569;
-  background: #f8fafc;
+  color: #496176;
+  background: #f7fbfe;
   font-size: 13px;
+  font-weight: 800;
   white-space: nowrap;
 }
 
@@ -152,7 +154,7 @@ th {
 }
 
 .link-btn {
-  color: #2563eb;
+  color: #0f766e;
   background: transparent;
   padding: 0;
 }

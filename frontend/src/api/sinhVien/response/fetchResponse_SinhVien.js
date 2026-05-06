@@ -1,6 +1,6 @@
 import apiClient from '../../apiConfig';
 
-const ENDPOINT = '/api/sinh-vien/sinh-vien';
+const ENDPOINT = '/api/sinh-vien';
 
 export const getAllSinhVien = (params = {}) => {
     return apiClient.get(ENDPOINT, { params });
@@ -11,7 +11,7 @@ export const getSinhVienById = (id) => {
 };
 
 export const getPageSinhVien = (params = {}) => {
-    return apiClient.get(`${ENDPOINT}/page`, { params });
+    return apiClient.get(`${ENDPOINT}`, { params });
 };
 
 export default {

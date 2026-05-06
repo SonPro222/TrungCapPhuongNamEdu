@@ -40,9 +40,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import DaoTaoPageShell from './shared/DaoTaoPageShell.vue';
-import DaoTaoCrudTable from './shared/DaoTaoCrudTable.vue';
-import DaoTaoFormModal from './shared/DaoTaoFormModal.vue';
+import DaoTaoPageShell from '@/components/shared/daoTao/DaoTaoPageShell.vue';
+import DaoTaoCrudTable from '@/components/shared/daoTao/DaoTaoCrudTable.vue';
+import DaoTaoFormModal from '@/components/shared/daoTao/DaoTaoFormModal.vue';
 import { getAllTrinhDoDaoTao, getTrinhDoDaoTaoById } from '@/api/daoTao/ApiRespone/TrinhDoDaoTaoController';
 import { createTrinhDoDaoTao, updateTrinhDoDaoTao, deleteTrinhDoDaoTao } from '@/api/daoTao/ApiRequest/TrinhDoDaoTaoController';
 import { getErrorMessage, matchKeyword, unwrapApiList } from '../../api/apiResponse.js';

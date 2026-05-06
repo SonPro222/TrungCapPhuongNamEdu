@@ -1,29 +1,28 @@
 <template>
-  <DaoTaoPageShell :title="titleText" description="Quản lý học kỳ theo loại chương trình. Nếu vào từ loại chương trình, danh sách được lọc theo loaiChuongTrinhId.">
+  <DaoTaoPageShell :title="titleText" :description="descriptionText">
     <template #breadcrumb>
-      <RouterLink :to="{ name: 'dao-tao-nganh' }">Ngành</RouterLink>
-      <span> / {{ titleText }}</span>
+      <RouterLink :to="{ name: 'dao-tao-loai-chuong-trinh' }">Loại chương trình</RouterLink>
+      <span v-if="loaiChuongTrinhId"> / Khung kỳ của loại {{ loaiChuongTrinhId }}</span>
+      <span v-else> / Khung kỳ</span>
     </template>
 
     <DaoTaoCrudTable
-      v-model:keyword="keyword"
-      :columns="columns"
-      :items="filteredItems"
-      :loading="loading"
-      :error="error"
-      @reload="fetchItems"
-      @create="openCreate"
-      @edit="openEdit"
-      @remove="removeItem"
-      @view="goDetail"
-    >
-
-    </DaoTaoCrudTable>
+        v-model:keyword="keyword"
+        :columns="columns"
+        :items="filteredItems"
+        :loading="loading"
+        :error="error"
+        @reload="fetchItems"
+        @create="openCreate"
+        @edit="openEdit"
+        @remove="removeItem"
+        @view="goDetail"
+    />
 
     <DaoTaoFormModal v-model="showForm" :title="formTitle" :saving="saving" @submit="saveItem">
       <div class="field">
         <label>ID loại chương trình</label>
-        <input v-model.number="form.loaiChuongTrinhId" type="number" />
+        <input v-model.number="form.loaiChuongTrinhId" type="number" required />
       </div>
       <div class="field">
         <label>Mã kỳ</label>
@@ -44,17 +43,20 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import DaoTaoPageShell from './shared/DaoTaoPageShell.vue';
-import DaoTaoCrudTable from './shared/DaoTaoCrudTable.vue';
-import DaoTaoFormModal from './shared/DaoTaoFormModal.vue';
-import { getAllKhungKy, getKhungKyById } from '@/api/daoTao/ApiRespone/KhungKyController';
+import DaoTaoPageShell from '@/components/shared/daoTao/DaoTaoPageShell.vue';
+import DaoTaoCrudTable from '@/components/shared/daoTao/DaoTaoCrudTable.vue';
+import DaoTaoFormModal from '@/components/shared/daoTao/DaoTaoFormModal.vue';
+import { getAllKhungKy } from '@/api/daoTao/ApiRespone/KhungKyController';
 import { createKhungKy, updateKhungKy, deleteKhungKy } from '@/api/daoTao/ApiRequest/KhungKyController';
 import { getErrorMessage, matchKeyword, unwrapApiList } from '../../api/apiResponse.js';
 
 const router = useRouter();
 const route = useRoute();
+
 const loaiChuongTrinhId = computed(() => route.params.loaiChuongTrinhId || null);
-const titleText = 'Khung kỳ';
+const titleText = computed(() => loaiChuongTrinhId.value ? 'Khung kỳ theo loại chương trình' : 'Khung kỳ');
+const descriptionText = computed(() => loaiChuongTrinhId.value ? 'Danh sách khung kỳ được lọc theo id loại chương trình.' : 'Danh sách toàn bộ khung kỳ.');
+
 const items = ref([]);
 const keyword = ref('');
 const loading = ref(false);
@@ -63,7 +65,13 @@ const error = ref('');
 const showForm = ref(false);
 const editingId = ref(null);
 
-const form = reactive({ loaiChuongTrinhId: null, maKy: '', tenKy: '', thuTu: null });
+const form = reactive({
+  loaiChuongTrinhId: null,
+  maKy: '',
+  tenKy: '',
+  thuTu: null,
+});
+
 const columns = [
   { key: 'id', label: 'ID' },
   { key: 'loaiChuongTrinhId', label: 'ID loại chương trình' },
@@ -73,21 +81,29 @@ const columns = [
 ];
 
 const formTitle = computed(() => editingId.value ? 'Cập nhật khung kỳ' : 'Thêm khung kỳ');
-const filteredItems = computed(() => items.value
-  .filter((item) => !loaiChuongTrinhId.value || String(item.loaiChuongTrinhId) === String(loaiChuongTrinhId.value))
-  .filter((item) => matchKeyword(item, keyword.value, ['maKy', 'tenKy', 'loaiChuongTrinhId'])));
+
+const filteredItems = computed(() => {
+  return items.value
+      .filter((item) => !loaiChuongTrinhId.value || String(item.loaiChuongTrinhId) === String(loaiChuongTrinhId.value))
+      .filter((item) => matchKeyword(item, keyword.value, ['maKy', 'tenKy', 'loaiChuongTrinhId']));
+});
 
 const resetForm = () => {
   editingId.value = null;
-  Object.assign(form, { loaiChuongTrinhId: loaiChuongTrinhId.value ? Number(loaiChuongTrinhId.value) : null, maKy: '', tenKy: '', thuTu: null });
+  Object.assign(form, {
+    loaiChuongTrinhId: loaiChuongTrinhId.value ? Number(loaiChuongTrinhId.value) : null,
+    maKy: '',
+    tenKy: '',
+    thuTu: null,
+  });
 };
 
 const fetchItems = async () => {
   loading.value = true;
   error.value = '';
+
   try {
-    const params = loaiChuongTrinhId.value ? { loaiChuongTrinhId: loaiChuongTrinhId.value } : {};
-    items.value = unwrapApiList(await getAllKhungKy(params));
+    items.value = unwrapApiList(await getAllKhungKy());
   } catch (err) {
     error.value = getErrorMessage(err);
   } finally {
@@ -113,9 +129,16 @@ const openEdit = (item) => {
 
 const saveItem = async () => {
   saving.value = true;
+
   try {
-    if (editingId.value) await updateKhungKy(editingId.value, { ...form });
-    else await createKhungKy({ ...form });
+    const payload = { ...form };
+
+    if (editingId.value) {
+      await updateKhungKy(editingId.value, payload);
+    } else {
+      await createKhungKy(payload);
+    }
+
     showForm.value = false;
     await fetchItems();
   } catch (err) {
@@ -127,6 +150,7 @@ const saveItem = async () => {
 
 const removeItem = async (item) => {
   if (!window.confirm(`Xóa khung kỳ ID ${item.id}?`)) return;
+
   try {
     await deleteKhungKy(item.id);
     await fetchItems();
@@ -135,10 +159,16 @@ const removeItem = async (item) => {
   }
 };
 
-const goDetail = async (item) => {
-  await getKhungKyById(item.id);
-  router.push({ name: 'dao-tao-khung-ky-detail', params: { id: item.id } });
-};
+// const goDetail = (item) => {
+//   router.push({ name: 'dao-tao-khung-ky-detail', params: { id: item.id } });
+// };
+
+const goDetail = (item) => {
+  router.push({
+    name: 'dao-tao-khung-ky-detail',
+    params: { khungKyId: item.id }
+  })
+}
 
 watch(() => route.params.loaiChuongTrinhId, fetchItems);
 onMounted(fetchItems);

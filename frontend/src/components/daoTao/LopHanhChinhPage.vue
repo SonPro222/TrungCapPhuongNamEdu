@@ -1,53 +1,48 @@
 <template>
-  <DaoTaoPageShell :title="titleText" description="Quản lý lớp hành chính theo chương trình version và khóa đào tạo. Nếu vào từ khóa, danh sách được lọc theo khoaDaoTaoId.">
+  <DaoTaoPageShell :title="titleText" :description="descriptionText">
     <template #breadcrumb>
-      <RouterLink :to="{ name: 'dao-tao-nganh' }">Ngành</RouterLink>
-      <span> / {{ titleText }}</span>
+      <RouterLink :to="{ name: 'dao-tao-khoa-dao-tao' }">Khóa đào tạo</RouterLink>
+      <span v-if="khoaDaoTaoId"> / Lớp hành chính của khóa {{ khoaDaoTaoId }}</span>
+      <span v-else> / Lớp hành chính</span>
     </template>
 
     <DaoTaoCrudTable
-      v-model:keyword="keyword"
-      :columns="columns"
-      :items="filteredItems"
-      :loading="loading"
-      :error="error"
-      @reload="fetchItems"
-      @create="openCreate"
-      @edit="openEdit"
-      @remove="removeItem"
-      @view="goDetail"
-    >
-
-    </DaoTaoCrudTable>
+        v-model:keyword="keyword"
+        :columns="columns"
+        :items="filteredItems"
+        :loading="loading"
+        :error="error"
+        @reload="fetchItems"
+        @create="openCreate"
+        @edit="openEdit"
+        @remove="removeItem"
+        @view="goDetail"
+    />
 
     <DaoTaoFormModal v-model="showForm" :title="formTitle" :saving="saving" @submit="saveItem">
+      <div class="field">
+        <label>ID khóa đào tạo</label>
+        <input v-model.number="form.khoaDaoTaoId" type="number" required />
+      </div>
+
       <div class="field">
         <label>Mã lớp</label>
         <input v-model.trim="form.maLop" required />
       </div>
+
       <div class="field">
         <label>Tên lớp</label>
         <input v-model.trim="form.tenLop" required />
       </div>
-      <div class="field">
-        <label>ID version chương trình</label>
-        <input v-model.number="form.chuongTrinhVersionId" type="number" />
-      </div>
-      <div class="field">
-        <label>ID khóa đào tạo</label>
-        <input v-model.number="form.khoaDaoTaoId" type="number" />
-      </div>
+
       <div class="field">
         <label>Sĩ số</label>
         <input v-model.number="form.siSo" type="number" />
       </div>
+
       <div class="field">
         <label>Trạng thái</label>
-        <input v-model.trim="form.trangThai" required />
-      </div>
-      <div class="field full">
-        <label>Ghi chú</label>
-        <textarea v-model.trim="form.ghiChu" />
+        <input v-model.trim="form.trangThai" />
       </div>
     </DaoTaoFormModal>
   </DaoTaoPageShell>
@@ -55,19 +50,29 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import DaoTaoPageShell from './shared/DaoTaoPageShell.vue';
-import DaoTaoCrudTable from './shared/DaoTaoCrudTable.vue';
-import DaoTaoFormModal from './shared/DaoTaoFormModal.vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import DaoTaoPageShell from '@/components/shared/daoTao/DaoTaoPageShell.vue';
+import DaoTaoCrudTable from '@/components/shared/daoTao/DaoTaoCrudTable.vue';
+import DaoTaoFormModal from '@/components/shared/daoTao/DaoTaoFormModal.vue';
 import { getAllLopHanhChinh, getLopHanhChinhById } from '@/api/daoTao/ApiRespone/LopHanhChinhController';
 import { createLopHanhChinh, updateLopHanhChinh, deleteLopHanhChinh } from '@/api/daoTao/ApiRequest/LopHanhChinhController';
-import { getErrorMessage, matchKeyword, unwrapApiList } from '../../api/apiResponse.js';
+import { getErrorMessage, matchKeyword, unwrapApiData, unwrapApiList } from '../../api/apiResponse.js';
 
-const router = useRouter();
 const route = useRoute();
+const router = useRouter();
+
 const khoaDaoTaoId = computed(() => route.params.khoaDaoTaoId || null);
-const chuongTrinhVersionId = computed(() => route.params.chuongTrinhVersionId || null);
-const titleText = 'Lớp hành chính';
+
+const titleText = computed(() => {
+  return khoaDaoTaoId.value ? 'Lớp hành chính theo khóa đào tạo' : 'Lớp hành chính';
+});
+
+const descriptionText = computed(() => {
+  return khoaDaoTaoId.value
+      ? 'Danh sách lớp hành chính được lọc theo id khóa đào tạo.'
+      : 'Quản lý danh sách lớp hành chính.';
+});
+
 const items = ref([]);
 const keyword = ref('');
 const loading = ref(false);
@@ -76,46 +81,51 @@ const error = ref('');
 const showForm = ref(false);
 const editingId = ref(null);
 
-const form = reactive({ maLop: '', tenLop: '', chuongTrinhVersionId: null, khoaDaoTaoId: null, siSo: null, trangThai: '', ghiChu: '' });
+const form = reactive({
+  khoaDaoTaoId: null,
+  maLop: '',
+  tenLop: '',
+  siSo: null,
+  trangThai: '',
+});
+
 const columns = [
   { key: 'id', label: 'ID' },
+  { key: 'khoaDaoTaoId', label: 'ID khóa đào tạo' },
   { key: 'maLop', label: 'Mã lớp' },
   { key: 'tenLop', label: 'Tên lớp' },
-  { key: 'chuongTrinhVersionId', label: 'ID version chương trình' },
-  { key: 'khoaDaoTaoId', label: 'ID khóa đào tạo' },
   { key: 'siSo', label: 'Sĩ số' },
   { key: 'trangThai', label: 'Trạng thái' },
-  { key: 'ghiChu', label: 'Ghi chú' },
 ];
 
-const formTitle = computed(() => editingId.value ? 'Cập nhật lớp hành chính' : 'Thêm lớp hành chính');
-const filteredItems = computed(() => items.value
-  .filter((item) => (!khoaDaoTaoId.value || String(item.khoaDaoTaoId) === String(khoaDaoTaoId.value))
-    && (!chuongTrinhVersionId.value || String(item.chuongTrinhVersionId) === String(chuongTrinhVersionId.value)))
-  .filter((item) => matchKeyword(item, keyword.value, ['maLop', 'tenLop', 'trangThai', 'ghiChu'])));
+const formTitle = computed(() => {
+  return editingId.value ? 'Cập nhật lớp hành chính' : 'Thêm lớp hành chính';
+});
+
+const filteredItems = computed(() => {
+  return items.value
+      .filter((item) => !khoaDaoTaoId.value || String(item.khoaDaoTaoId) === String(khoaDaoTaoId.value))
+      .filter((item) => matchKeyword(item, keyword.value, ['maLop', 'tenLop', 'khoaDaoTaoId', 'trangThai']));
+});
 
 const resetForm = () => {
   editingId.value = null;
+
   Object.assign(form, {
+    khoaDaoTaoId: khoaDaoTaoId.value ? Number(khoaDaoTaoId.value) : null,
     maLop: '',
     tenLop: '',
-    chuongTrinhVersionId: chuongTrinhVersionId.value ? Number(chuongTrinhVersionId.value) : null,
-    khoaDaoTaoId: khoaDaoTaoId.value ? Number(khoaDaoTaoId.value) : null,
     siSo: null,
-    trangThai: 'du_kien',
-    ghiChu: '',
+    trangThai: '',
   });
 };
 
 const fetchItems = async () => {
   loading.value = true;
   error.value = '';
+
   try {
-    const params = {
-      ...(khoaDaoTaoId.value ? { khoaDaoTaoId: khoaDaoTaoId.value } : {}),
-      ...(chuongTrinhVersionId.value ? { chuongTrinhVersionId: chuongTrinhVersionId.value } : {}),
-    };
-    items.value = unwrapApiList(await getAllLopHanhChinh(params));
+    items.value = unwrapApiList(await getAllLopHanhChinh());
   } catch (err) {
     error.value = getErrorMessage(err);
   } finally {
@@ -130,23 +140,30 @@ const openCreate = () => {
 
 const openEdit = (item) => {
   editingId.value = item.id;
+
   Object.assign(form, {
+    khoaDaoTaoId: item.khoaDaoTaoId ?? null,
     maLop: item.maLop ?? '',
     tenLop: item.tenLop ?? '',
-    chuongTrinhVersionId: item.chuongTrinhVersionId ?? null,
-    khoaDaoTaoId: item.khoaDaoTaoId ?? null,
     siSo: item.siSo ?? null,
     trangThai: item.trangThai ?? '',
-    ghiChu: item.ghiChu ?? '',
   });
+
   showForm.value = true;
 };
 
 const saveItem = async () => {
   saving.value = true;
+
   try {
-    if (editingId.value) await updateLopHanhChinh(editingId.value, { ...form });
-    else await createLopHanhChinh({ ...form });
+    const payload = { ...form };
+
+    if (editingId.value) {
+      await updateLopHanhChinh(editingId.value, payload);
+    } else {
+      await createLopHanhChinh(payload);
+    }
+
     showForm.value = false;
     await fetchItems();
   } catch (err) {
@@ -158,6 +175,7 @@ const saveItem = async () => {
 
 const removeItem = async (item) => {
   if (!window.confirm(`Xóa lớp hành chính ID ${item.id}?`)) return;
+
   try {
     await deleteLopHanhChinh(item.id);
     await fetchItems();
@@ -167,11 +185,21 @@ const removeItem = async (item) => {
 };
 
 const goDetail = async (item) => {
-  await getLopHanhChinhById(item.id);
-  router.push({ name: 'dao-tao-lop-hanh-chinh-detail', params: { id: item.id } });
+  try {
+    const response = await getLopHanhChinhById(item.id);
+    const detail = unwrapApiData(response);
+
+    router.push({
+      name: 'dao-tao-lop-hanh-chinh-detail',
+      params: { lopHanhChinhId: item.id },
+      state: { lopHanhChinh: detail },
+    });
+  } catch (err) {
+    alert(getErrorMessage(err));
+  }
 };
 
-watch(() => [route.params.khoaDaoTaoId, route.params.chuongTrinhVersionId], fetchItems);
+watch(() => route.params.khoaDaoTaoId, fetchItems);
 onMounted(fetchItems);
 </script>
 

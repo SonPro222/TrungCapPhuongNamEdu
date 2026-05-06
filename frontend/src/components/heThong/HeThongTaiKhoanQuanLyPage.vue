@@ -2,6 +2,7 @@
   <section class="system-page">
     <header class="page-head">
       <div>
+        <p class="eyebrow">Quản trị hệ thống</p>
         <h1>{{ currentConfig.title }}</h1>
         <p>{{ currentConfig.description }}</p>
       </div>
@@ -176,25 +177,25 @@
         <table>
           <thead><tr><th v-for="col in currentColumns" :key="col.key">{{ col.label }}</th><th>Thao tác</th></tr></thead>
           <tbody>
-            <tr v-if="loading"><td :colspan="currentColumns.length + 1">Đang tải dữ liệu...</td></tr>
-            <tr v-else-if="currentRows.length === 0"><td :colspan="currentColumns.length + 1">Không có dữ liệu</td></tr>
-            <tr v-for="row in currentRows" :key="row._rowKey">
-              <td v-for="col in currentColumns" :key="col.key">
-                <select v-if="col.edit === 'status'" :value="row[col.key] || ''" @change="quickChange(row, col.key, $event.target.value)">
-                  <option v-for="item in currentConfig.statuses" :key="item.value" :value="item.value">{{ item.label }}</option>
-                </select>
-                <select v-else-if="col.edit === 'accountStatus'" :value="row.trangThai || ''" @change="quickChangeAccountStatus(row, $event.target.value)">
-                  <option value="cho_kich_hoat">Chờ kích hoạt</option>
-                  <option value="da_kich_hoat">Đã kích hoạt</option>
-                  <option value="bi_khoa">Bị khóa</option>
-                </select>
-                <span v-else>{{ formatCell(row[col.key]) }}</span>
-              </td>
-              <td class="row-actions">
-                <button class="btn ghost tiny" type="button" @click="editRow(row)">Sửa</button>
-                <button class="btn danger tiny" type="button" @click="deleteRow(row)">Xóa</button>
-              </td>
-            </tr>
+          <tr v-if="loading"><td :colspan="currentColumns.length + 1">Đang tải dữ liệu...</td></tr>
+          <tr v-else-if="currentRows.length === 0"><td :colspan="currentColumns.length + 1">Không có dữ liệu</td></tr>
+          <tr v-for="row in currentRows" :key="row._rowKey">
+            <td v-for="col in currentColumns" :key="col.key">
+              <select v-if="col.edit === 'status'" :value="row[col.key] || ''" @change="quickChange(row, col.key, $event.target.value)">
+                <option v-for="item in currentConfig.statuses" :key="item.value" :value="item.value">{{ item.label }}</option>
+              </select>
+              <select v-else-if="col.edit === 'accountStatus'" :value="row.trangThai || ''" @change="quickChangeAccountStatus(row, $event.target.value)">
+                <option value="cho_kich_hoat">Chờ kích hoạt</option>
+                <option value="da_kich_hoat">Đã kích hoạt</option>
+                <option value="bi_khoa">Bị khóa</option>
+              </select>
+              <span v-else>{{ formatCell(row[col.key]) }}</span>
+            </td>
+            <td class="row-actions">
+              <button class="btn ghost tiny" type="button" @click="editRow(row)">Sửa</button>
+              <button class="btn danger tiny" type="button" @click="deleteRow(row)">Xóa</button>
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>
@@ -209,6 +210,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { HE_THONG_VIEW_CONFIG } from '@/config/heThong/heThongViewConfig.js';
 
 import { getAllTaiKhoan, getPageTaiKhoan } from '@/api/heThong/ApiRespone/TaiKhoanController.js';
 import { createTaiKhoan, deleteTaiKhoan, updateTaiKhoan } from '@/api/heThong/ApiRequest/TaiKhoanController.js';
@@ -258,52 +260,7 @@ const permissionForm = reactive({ maQuyen: '', tenQuyen: '', moTa: '' });
 const accountRoleForm = reactive({ taiKhoanId: '', vaiTroId: '' });
 const rolePermissionForm = reactive({ vaiTroId: '', quyenId: '' });
 
-const configs = {
-  sinhVien: {
-    title: 'Tài khoản sinh viên',
-    description: 'Quản lý tài khoản sinh viên, vai trò, quyền và liên kết tới hồ sơ sinh viên.',
-    tableTitle: 'Danh sách tài khoản sinh viên',
-    accountTypes: ['sinh_vien'],
-    statuses: [{ value: 'dang_hoc', label: 'Đang học' }, { value: 'bao_luu', label: 'Bảo lưu' }, { value: 'tot_nghiep', label: 'Tốt nghiệp' }, { value: 'nghi_hoc', label: 'Nghỉ học' }],
-  },
-  giangVien: {
-    title: 'Tài khoản giảng viên',
-    description: 'Quản lý tài khoản giảng viên, vai trò, quyền và trạng thái tài khoản.',
-    tableTitle: 'Danh sách tài khoản giảng viên',
-    accountTypes: ['giao_vien', 'giang_vien'],
-    statuses: [{ value: 'cho_kich_hoat', label: 'Chờ kích hoạt' }, { value: 'da_kich_hoat', label: 'Đã kích hoạt' }, { value: 'bi_khoa', label: 'Bị khóa' }],
-  },
-  nhanVien: {
-    title: 'Nhân viên',
-    description: 'Quản lý hồ sơ nhân viên và tài khoản phân quyền.',
-    tableTitle: 'Danh sách nhân viên',
-    accountTypes: ['nhan_vien'],
-    statuses: [{ value: 'dang_lam', label: 'Đang làm' }, { value: 'tam_nghi', label: 'Tạm nghỉ' }, { value: 'nghi_viec', label: 'Nghỉ việc' }],
-  },
-  daoTaoAdmin: {
-    title: 'Đào tạo và admin',
-    description: 'Quản lý nhân sự phòng đào tạo, tài khoản admin và phân quyền hệ thống.',
-    tableTitle: 'Danh sách đào tạo / admin',
-    accountTypes: ['dao_tao', 'admin'],
-    statuses: [{ value: 'dang_lam', label: 'Đang làm' }, { value: 'tam_nghi', label: 'Tạm nghỉ' }, { value: 'nghi_viec', label: 'Nghỉ việc' }],
-  },
-  vaiTroQuyen: {
-    title: 'Vai trò / Quyền',
-    description: 'Quản lý danh mục vai trò và quyền trong hệ thống.',
-    tableTitle: 'Danh sách vai trò và quyền',
-    accountTypes: [],
-    statuses: [],
-  },
-  lienKet: {
-    title: 'Liên kết phân quyền',
-    description: 'Gán vai trò cho tài khoản và gán quyền cho vai trò.',
-    tableTitle: 'Danh sách liên kết phân quyền',
-    accountTypes: [],
-    statuses: [],
-  },
-};
-
-const currentConfig = computed(() => configs[view.value] || configs.sinhVien);
+const currentConfig = computed(() => HE_THONG_VIEW_CONFIG[view.value] || HE_THONG_VIEW_CONFIG.sinhVien);
 const isAccountView = computed(() => view.value === 'sinhVien' || view.value === 'giangVien');
 const accountOptions = computed(() => taiKhoanItems.value);
 
@@ -781,50 +738,64 @@ function getErrorMessage(e) {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  padding: 24px;
+  color: #123046;
 }
 
 .page-head,
 .card,
 .table-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(18, 72, 104, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(19, 57, 79, 0.08);
 }
 
 .page-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 16px;
+  padding: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #27739e;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .page-head h1,
 .card h2,
 .table-head h2 {
   margin: 0;
-  color: #0f172a;
+  color: #123046;
+  font-weight: 800;
 }
 
 .page-head h1 {
-  font-size: 22px;
+  font-size: 30px;
+  line-height: 1.15;
 }
 
 .page-head p {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 13px;
+  margin: 12px 0 0;
+  color: #4d6780;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .card {
-  padding: 14px;
+  padding: 18px;
 }
 
 .card h2,
 .table-head h2 {
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .grid-form {
@@ -845,10 +816,10 @@ function getErrorMessage(e) {
 .toolbar label {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 700;
-  color: #334155;
+  color: #2e4b60;
 }
 
 .wide {
@@ -858,11 +829,11 @@ function getErrorMessage(e) {
 input,
 select {
   width: 100%;
-  min-height: 34px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 6px 9px;
-  color: #0f172a;
+  min-height: 42px;
+  border: 1px solid #c9d9e6;
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: #123046;
   background: #fff;
   outline: none;
 }
@@ -873,8 +844,8 @@ select[multiple] {
 
 input:focus,
 select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: #27739e;
+  box-shadow: 0 0 0 3px rgba(39, 115, 158, 0.12);
 }
 
 .actions,
@@ -891,13 +862,13 @@ select:focus {
 
 .table-head {
   justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e5edf3;
 }
 
 .table-head span,
 .pagination span {
-  color: #64748b;
+  color: #4d6780;
   font-size: 13px;
   font-weight: 700;
 }
@@ -918,11 +889,11 @@ th,
 td {
   min-width: 150px;
   max-width: 260px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 8px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  padding: 10px 12px;
   vertical-align: middle;
   font-size: 13px;
-  color: #0f172a;
+  color: #123046;
   background: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -933,8 +904,8 @@ th {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #f8fafc;
-  color: #334155;
+  background: #f7fbfe;
+  color: #496176;
   font-weight: 800;
 }
 
@@ -956,14 +927,14 @@ tbody tr:hover td {
 
 .pagination {
   justify-content: flex-end;
-  padding: 12px 14px;
-  border-top: 1px solid #e5e7eb;
+  padding: 14px 18px;
+  border-top: 1px solid #e5edf3;
 }
 
 .btn {
   border: 0;
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 12px;
+  padding: 10px 14px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -974,18 +945,18 @@ tbody tr:hover td {
 }
 
 .primary {
-  background: #2563eb;
+  background: #0f766e;
   color: #fff;
 }
 
 .secondary {
-  background: #0f172a;
+  background: #123046;
   color: #fff;
 }
 
 .ghost {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #e9f3fa;
+  color: #123046;
 }
 
 .danger {
@@ -994,7 +965,7 @@ tbody tr:hover td {
 }
 
 .small {
-  padding: 7px 10px;
+  padding: 8px 12px;
   font-size: 12px;
 }
 
@@ -1005,8 +976,8 @@ tbody tr:hover td {
 
 .message,
 .error {
-  padding: 10px 12px;
-  border-radius: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
   font-size: 13px;
   font-weight: 700;
 }

@@ -27,7 +27,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import DaoTaoPageShell from './shared/DaoTaoPageShell.vue';
+import DaoTaoPageShell from '@/components/shared/daoTao/DaoTaoPageShell.vue';
 import { getNganhById } from '@/api/daoTao/ApiRespone/NganhController';
 import { getErrorMessage, unwrapApiData } from '@/api/apiResponse.js';
 

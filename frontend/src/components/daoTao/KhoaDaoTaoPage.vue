@@ -6,19 +6,21 @@
     </template>
 
     <DaoTaoCrudTable
-      v-model:keyword="keyword"
-      :columns="columns"
-      :items="filteredItems"
-      :loading="loading"
-      :error="error"
-      @reload="fetchItems"
-      @create="openCreate"
-      @edit="openEdit"
-      @remove="removeItem"
-      @view="goDetail"
+        v-model:keyword="keyword"
+        :columns="columns"
+        :items="filteredItems"
+        :loading="loading"
+        :error="error"
+        @reload="fetchItems"
+        @create="openCreate"
+        @edit="openEdit"
+        @remove="removeItem"
+        @view="goDetail"
     >
       <template #row-actions="{ item }">
-        <button class="link-btn" type="button" @click="router.push({ name: 'dao-tao-khoa-lop-hanh-chinh', params: { khoaDaoTaoId: item.id } })">Lớp hành chính</button>
+        <button class="link-btn" type="button" @click="goLopHanhChinh(item)">
+          Lớp hành chính
+        </button>
       </template>
     </DaoTaoCrudTable>
 
@@ -49,16 +51,15 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import DaoTaoPageShell from './shared/DaoTaoPageShell.vue';
-import DaoTaoCrudTable from './shared/DaoTaoCrudTable.vue';
-import DaoTaoFormModal from './shared/DaoTaoFormModal.vue';
+import { useRouter } from 'vue-router';
+import DaoTaoPageShell from '@/components/shared/daoTao/DaoTaoPageShell.vue';
+import DaoTaoCrudTable from '@/components/shared/daoTao/DaoTaoCrudTable.vue';
+import DaoTaoFormModal from '@/components/shared/daoTao/DaoTaoFormModal.vue';
 import { getAllKhoaDaoTao, getKhoaDaoTaoById } from '@/api/daoTao/ApiRespone/KhoaDaoTaoController';
 import { createKhoaDaoTao, updateKhoaDaoTao, deleteKhoaDaoTao } from '@/api/daoTao/ApiRequest/KhoaDaoTaoController';
 import { getErrorMessage, matchKeyword, unwrapApiList } from '../../api/apiResponse.js';
 
 const router = useRouter();
-
 
 const titleText = 'Khóa đào tạo';
 const items = ref([]);
@@ -69,7 +70,14 @@ const error = ref('');
 const showForm = ref(false);
 const editingId = ref(null);
 
-const form = reactive({ maKhoa: '', tenKhoa: '', namBatDau: null, namKetThuc: null, ghiChu: '' });
+const form = reactive({
+  maKhoa: '',
+  tenKhoa: '',
+  namBatDau: null,
+  namKetThuc: null,
+  ghiChu: '',
+});
+
 const columns = [
   { key: 'id', label: 'ID' },
   { key: 'maKhoa', label: 'Mã khóa' },
@@ -80,16 +88,26 @@ const columns = [
 ];
 
 const formTitle = computed(() => editingId.value ? 'Cập nhật khóa đào tạo' : 'Thêm khóa đào tạo');
-const filteredItems = computed(() => items.value.filter((item) => matchKeyword(item, keyword.value, ['maKhoa', 'tenKhoa', 'ghiChu'])));
+
+const filteredItems = computed(() => {
+  return items.value.filter((item) => matchKeyword(item, keyword.value, ['maKhoa', 'tenKhoa', 'ghiChu']));
+});
 
 const resetForm = () => {
   editingId.value = null;
-  Object.assign(form, { maKhoa: '', tenKhoa: '', namBatDau: null, namKetThuc: null, ghiChu: '' });
+  Object.assign(form, {
+    maKhoa: '',
+    tenKhoa: '',
+    namBatDau: null,
+    namKetThuc: null,
+    ghiChu: '',
+  });
 };
 
 const fetchItems = async () => {
   loading.value = true;
   error.value = '';
+
   try {
     items.value = unwrapApiList(await getAllKhoaDaoTao());
   } catch (err) {
@@ -118,9 +136,14 @@ const openEdit = (item) => {
 
 const saveItem = async () => {
   saving.value = true;
+
   try {
-    if (editingId.value) await updateKhoaDaoTao(editingId.value, { ...form });
-    else await createKhoaDaoTao({ ...form });
+    if (editingId.value) {
+      await updateKhoaDaoTao(editingId.value, { ...form });
+    } else {
+      await createKhoaDaoTao({ ...form });
+    }
+
     showForm.value = false;
     await fetchItems();
   } catch (err) {
@@ -132,6 +155,7 @@ const saveItem = async () => {
 
 const removeItem = async (item) => {
   if (!window.confirm(`Xóa khóa đào tạo ID ${item.id}?`)) return;
+
   try {
     await deleteKhoaDaoTao(item.id);
     await fetchItems();
@@ -142,7 +166,17 @@ const removeItem = async (item) => {
 
 const goDetail = async (item) => {
   await getKhoaDaoTaoById(item.id);
-  router.push({ name: 'dao-tao-khoa-dao-tao-detail', params: { id: item.id } });
+  router.push({
+    name: 'dao-tao-khoa-dao-tao-detail',
+    params: { id: item.id },
+  });
+};
+
+const goLopHanhChinh = (item) => {
+  router.push({
+    name: 'dao-tao-khoa-lop-hanh-chinh',
+    params: { khoaDaoTaoId: item.id },
+  });
 };
 
 onMounted(fetchItems);

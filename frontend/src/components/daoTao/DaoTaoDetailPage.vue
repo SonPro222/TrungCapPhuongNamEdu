@@ -16,7 +16,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import DaoTaoPageShell from './shared/DaoTaoPageShell.vue';
+import DaoTaoPageShell from '@/components/shared/daoTao/DaoTaoPageShell.vue';
 
 const route = useRoute();
 const id = computed(() => route.params.id);
