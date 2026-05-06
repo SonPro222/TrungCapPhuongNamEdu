@@ -17,9 +17,19 @@
       @remove="removeItem"
       @view="goDetail"
     >
+<!--      <template #row-actions="{ item }">-->
+<!--        <button class="link-btn" type="button" @click="router.push({ name: 'dao-tao-loai-chuong-trinh-khung-ky', params: { loaiChuongTrinhId: item.id } })">Khung kỳ</button>-->
+<!--      </template>-->
       <template #row-actions="{ item }">
-        <button class="link-btn" type="button" @click="router.push({ name: 'dao-tao-loai-chuong-trinh-khung-ky', params: { loaiChuongTrinhId: item.id } })">Khung kỳ</button>
+        <button
+            class="link-btn"
+            type="button"
+            @click="router.push({ name: 'dao-tao-loai-chuong-trinh-khung-ky', params: { loaiChuongTrinhId: item.id } })"
+        >
+          Khung kỳ
+        </button>
       </template>
+
     </DaoTaoCrudTable>
 
     <DaoTaoFormModal v-model="showForm" :title="formTitle" :saving="saving" @submit="saveItem">
@@ -50,9 +60,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import DaoTaoPageShell from './shared/DaoTaoPageShell.vue';
-import DaoTaoCrudTable from './shared/DaoTaoCrudTable.vue';
-import DaoTaoFormModal from './shared/DaoTaoFormModal.vue';
+import DaoTaoPageShell from '@/components/shared/daoTao/DaoTaoPageShell.vue';
+import DaoTaoCrudTable from '@/components/shared/daoTao/DaoTaoCrudTable.vue';
+import DaoTaoFormModal from '@/components/shared/daoTao/DaoTaoFormModal.vue';
 import { getAllLoaiChuongTrinh, getLoaiChuongTrinhById } from '@/api/daoTao/ApiRespone/LoaiChuongTrinhController';
 import { createLoaiChuongTrinh, updateLoaiChuongTrinh, deleteLoaiChuongTrinh } from '@/api/daoTao/ApiRequest/LoaiChuongTrinhController';
 import { getErrorMessage, matchKeyword, unwrapApiList } from '../../api/apiResponse.js';

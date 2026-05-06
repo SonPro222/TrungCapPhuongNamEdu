@@ -1,6 +1,6 @@
 import apiClient from '../../apiConfig';
 
-const ENDPOINT = '/api/sinh-vien/sinh-vien';
+const ENDPOINT = '/api/sinh-vien';
 
 export const createSinhVien = (data) => {
   return apiClient.post(ENDPOINT, data);

@@ -9,7 +9,7 @@ import hocPhiRoutes from '@/router/module/hocPhiRoutes.js';
 import lmsRoutes from '@/router/module/lmsRoutes.js';
 import heThongRoutes from '@/router/module/heThongRoutes.js';
 import chuongTrinhRoutes from '@/router/module/chuongTrinhRoutes.js';
-import daoTaoRoutes from '@/router/module/daoTaoRoutes.js'
+import daoTaoRoutes from '@/router/module/daoTaoRoutes.js';
 import PublicLayout from '@/components/layout/PublicLayout.vue';
 import MainLayout from '@/components/layout/MainLayout.vue';
 import HomePage from '@/components/home/Home.vue';
@@ -20,6 +20,18 @@ import {
     getHomeByRole,
     normalizeRole,
 } from '@/utils/permission.js';
+
+const moduleRoutes = [
+    ...diemRoutes,
+    ...giangDayRoutes,
+    ...sinhVienRoutes,
+    ...thiRoutes,
+    ...hocPhiRoutes,
+    ...lmsRoutes,
+    ...heThongRoutes,
+    ...chuongTrinhRoutes,
+    ...daoTaoRoutes,
+];
 
 const routes = [
     {
@@ -42,17 +54,7 @@ const routes = [
     {
         path: '/',
         component: MainLayout,
-        children: [
-            ...diemRoutes,
-            ...giangDayRoutes,
-            ...sinhVienRoutes,
-            ...thiRoutes,
-            ...hocPhiRoutes,
-            ...lmsRoutes,
-            ...heThongRoutes,
-            ...chuongTrinhRoutes,
-            ...daoTaoRoutes,
-        ],
+        children: moduleRoutes,
     },
     {
         path: '/login',

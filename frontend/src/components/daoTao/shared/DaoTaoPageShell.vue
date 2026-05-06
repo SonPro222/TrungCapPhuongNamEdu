@@ -28,7 +28,8 @@ defineProps({
 
 <style scoped>
 .dao-tao-page {
-  padding: 22px;
+  padding: 24px;
+  color: #123046;
 }
 
 .page-head {
@@ -36,26 +37,30 @@ defineProps({
   justify-content: space-between;
   gap: 16px;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .eyebrow {
-  margin: 0 0 4px;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
+  margin: 0 0 8px;
+  color: #27739e;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 h1 {
   margin: 0;
-  color: #0f172a;
-  font-size: 28px;
+  color: #123046;
+  font-size: 30px;
   font-weight: 800;
+  line-height: 1.15;
 }
 
 .description {
-  margin: 8px 0 0;
-  color: #475569;
+  margin: 12px 0 0;
+  color: #4d6780;
+  line-height: 1.6;
 }
 
 .head-actions {
