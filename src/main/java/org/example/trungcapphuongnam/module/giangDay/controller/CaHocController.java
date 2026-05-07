@@ -5,7 +5,6 @@ import org.example.trungcapphuongnam.common.response.ApiResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.CaHocRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.CaHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.service.CaHocService;
-import org.example.trungcapphuongnam.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
