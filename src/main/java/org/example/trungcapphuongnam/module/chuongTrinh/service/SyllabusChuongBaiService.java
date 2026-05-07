@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface SyllabusChuongBaiService {
     Page<SyllabusChuongBaiResponse> findAll(Pageable pageable);
+    Page<SyllabusChuongBaiResponse> findAllBySyllabusMonId(Long syllabusMonId, Pageable pageable);
     SyllabusChuongBaiResponse findById(Long id);
     SyllabusChuongBaiResponse create(SyllabusChuongBaiRequest request);
     SyllabusChuongBaiResponse update(Long id, SyllabusChuongBaiRequest request);

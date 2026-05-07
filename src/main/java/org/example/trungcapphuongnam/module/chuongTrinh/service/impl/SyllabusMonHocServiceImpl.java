@@ -29,6 +29,12 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<SyllabusMonHocResponse> findAllByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable) {
+        return repository.findByChuongTrinhMonId(chuongTrinhMonId, pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public SyllabusMonHocResponse findById(Long id) {
         SyllabusMonHoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SyllabusMonHoc không tồn tại: " + id));

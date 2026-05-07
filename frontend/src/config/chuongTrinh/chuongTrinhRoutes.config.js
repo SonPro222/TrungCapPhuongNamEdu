@@ -1,5 +1,5 @@
-import { CHUONG_TRINH_FLOW } from './chuongTrinhRelation.config';
-import { CHUONG_TRINH_TABLE_CONFIG } from './chuongTrinhTable.config';
+import { CHUONG_TRINH_FLOW } from './chuongTrinhRelation.config.js';
+import { CHUONG_TRINH_TABLE_CONFIG } from './chuongTrinhTable.config.js';
 
 export const CHUONG_TRINH_MODULE_BASE = '/chuong-trinh';
 

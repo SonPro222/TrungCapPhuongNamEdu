@@ -1,171 +1,690 @@
-import { CHUONG_TRINH_COLUMNS } from './chuongTrinhColumns.config';
-
-const field = (key, label, type = 'text', extra = {}) => ({ key, label, type, ...extra });
-
-export const SELECT_OPTIONS = {
-  mucTieuLoai: [
-    { value: 'chung', label: 'Chung' },
-    { value: 'kien_thuc', label: 'Kiến thức' },
-    { value: 'ky_nang', label: 'Kỹ năng' },
-    { value: 'nang_luc_tu_chu_trach_nhiem', label: 'Năng lực tự chủ/trách nhiệm' },
-  ],
-  nangLucLoai: [
-    { value: 'co_ban', label: 'Cơ bản' },
-    { value: 'cot_loi', label: 'Cốt lõi' },
-    { value: 'nang_cao', label: 'Nâng cao' },
-  ],
-  loaiNhom: [
-    { value: 'chung', label: 'Chung' },
-    { value: 'co_so', label: 'Cơ sở' },
-    { value: 'chuyen_mon', label: 'Chuyên môn' },
-    { value: 'tu_chon', label: 'Tự chọn' },
-  ],
-  loaiMonCt: [
-    { value: 'bat_buoc', label: 'Bắt buộc' },
-    { value: 'tu_chon', label: 'Tự chọn' },
-  ],
-  loaiHocPhan: [
-    { value: 'mon_hoc', label: 'Môn học' },
-    { value: 'mo_dun', label: 'Mô-đun' },
-  ],
-  loaiTienQuyet: [
-    { value: 'tien_quyet', label: 'Tiên quyết' },
-    { value: 'song_hanh', label: 'Song hành' },
-    { value: 'hoc_truoc', label: 'Học trước' },
-  ],
-  donViDiem: [
-    { value: 'thang_10', label: 'Thang 10' },
-    { value: 'phan_tram', label: 'Phần trăm' },
-  ],
-  loaiDieuKienMon: [
-    { value: 'phong_hoc', label: 'Phòng học' },
-    { value: 'thiet_bi', label: 'Thiết bị' },
-    { value: 'hoc_lieu', label: 'Học liệu' },
-    { value: 'dung_cu', label: 'Dụng cụ' },
-    { value: 'nguyen_vat_lieu', label: 'Nguyên vật liệu' },
-    { value: 'khac', label: 'Khác' },
-  ],
-  ketQua: [
-    { value: 'dat', label: 'Đạt' },
-    { value: 'khong_dat', label: 'Không đạt' },
-  ],
-};
-
-export const CHUONG_TRINH_TABLE_CONFIG = {
-  nganh: {
-    key: 'nganh', title: 'Ngành', apiKey: 'nganh', idKey: 'id', childRoute: 'trinh-do-dao-tao', columns: CHUONG_TRINH_COLUMNS.nganh,
-    searchFields: ['maNganh', 'tenNganh', 'moTa'],
-    formFields: [field('maNganh', 'Mã ngành', 'text', { required: true }), field('tenNganh', 'Tên ngành', 'text', { required: true }), field('moTa', 'Mô tả', 'textarea')],
-    permissions: { create: ['ADMIN', 'DAO_TAO'], update: ['ADMIN', 'DAO_TAO'], delete: ['ADMIN'] },
-  },
-  'trinh-do-dao-tao': {
-    key: 'trinh-do-dao-tao', title: 'Trình độ đào tạo', apiKey: 'trinhDoDaoTao', idKey: 'id', childRoute: 'loai-chuong-trinh', columns: CHUONG_TRINH_COLUMNS['trinh-do-dao-tao'],
-    searchFields: ['maTrinhDo', 'tenTrinhDo', 'moTa'],
-    formFields: [field('maTrinhDo', 'Mã trình độ', 'text', { required: true }), field('tenTrinhDo', 'Tên trình độ', 'text', { required: true }), field('moTa', 'Mô tả', 'textarea')],
-    permissions: { create: ['ADMIN', 'DAO_TAO'], update: ['ADMIN', 'DAO_TAO'], delete: ['ADMIN'] },
-  },
-  'loai-chuong-trinh': {
-    key: 'loai-chuong-trinh', title: 'Loại chương trình', apiKey: 'loaiChuongTrinh', idKey: 'id', childRoute: 'chuong-trinh', columns: CHUONG_TRINH_COLUMNS['loai-chuong-trinh'],
-    searchFields: ['maLoai', 'tenLoai', 'moTa'],
-    formFields: [field('maLoai', 'Mã loại', 'text', { required: true }), field('tenLoai', 'Tên loại', 'text', { required: true }), field('soThang', 'Số tháng', 'number', { required: true }), field('soKy', 'Số kỳ', 'number', { required: true }), field('moTa', 'Mô tả', 'textarea')],
-    permissions: { create: ['ADMIN', 'DAO_TAO'], update: ['ADMIN', 'DAO_TAO'], delete: ['ADMIN'] },
-  },
-  'chuong-trinh': {
-    key: 'chuong-trinh', title: 'Chương trình đào tạo', apiKey: 'chuongTrinh', idKey: 'id', childRoute: 'chuong-trinh-version', columns: CHUONG_TRINH_COLUMNS['chuong-trinh'],
-    searchFields: ['maChuongTrinh', 'tenChuongTrinh', 'doiTuongTuyenSinh', 'thoiGianDaoTao'],
-    formFields: [field('nganhId', 'Ngành', 'select', { optionResource: 'nganh', required: true }), field('trinhDoId', 'Trình độ', 'select', { optionResource: 'trinh-do-dao-tao', required: true }), field('loaiChuongTrinhId', 'Loại chương trình', 'select', { optionResource: 'loai-chuong-trinh', required: true }), field('maChuongTrinh', 'Mã chương trình', 'text', { required: true }), field('tenChuongTrinh', 'Tên chương trình', 'text', { required: true }), field('doiTuongTuyenSinh', 'Đối tượng tuyển sinh', 'textarea'), field('thoiGianDaoTao', 'Thời gian đào tạo')],
-    permissions: { create: ['ADMIN', 'DAO_TAO'], update: ['ADMIN', 'DAO_TAO'], delete: ['ADMIN'] },
-  },
-  'chuong-trinh-version': {
-    key: 'chuong-trinh-version', title: 'Version chương trình', apiKey: 'chuongTrinhVersion', parentKey: 'chuongTrinhId', idKey: 'id', childRoute: 'syllabus-chuong-trinh', columns: CHUONG_TRINH_COLUMNS['chuong-trinh-version'],
-    searchFields: ['maVersion', 'tenVersion', 'soQuyetDinh', 'nguoiKy', 'coQuanBanHanh'],
-    formFields: [field('chuongTrinhId', 'Chương trình', 'select', { optionResource: 'chuong-trinh', required: true }), field('maVersion', 'Mã version', 'text', { required: true }), field('tenVersion', 'Tên version'), field('ngayApDung', 'Ngày áp dụng', 'date'), field('ngayHetHieuLuc', 'Ngày hết hiệu lực', 'date'), field('soQuyetDinh', 'Số quyết định'), field('ngayQuyetDinh', 'Ngày quyết định', 'date'), field('nguoiKy', 'Người ký'), field('coQuanBanHanh', 'Cơ quan ban hành'), field('fileQuyetDinh', 'File quyết định'), field('tongTinChi', 'Tổng tín chỉ', 'number'), field('tongSoGio', 'Tổng số giờ', 'number'), field('tongGioLyThuyet', 'Tổng giờ lý thuyết', 'number'), field('tongGioThucHanh', 'Tổng giờ thực hành', 'number'), field('tongGioKiemTra', 'Tổng giờ kiểm tra', 'number'), field('laHienHanh', 'Là hiện hành', 'checkbox')],
-    permissions: { create: ['ADMIN', 'DAO_TAO'], update: ['ADMIN', 'DAO_TAO'], delete: ['ADMIN'] },
-  },
-  'syllabus-chuong-trinh': {
-    key: 'syllabus-chuong-trinh', title: 'Syllabus chương trình', apiKey: 'syllabusChuongTrinh', parentKey: 'chuongTrinhVersionId', idKey: 'id', childRoute: 'muc-tieu-chuong-trinh', columns: CHUONG_TRINH_COLUMNS['syllabus-chuong-trinh'],
-    searchFields: ['moTaTongQuan', 'mucDich', 'yeuCauDaoTao', 'phuongPhapDaoTao'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('moTaTongQuan', 'Mô tả tổng quan', 'textarea'), field('mucDich', 'Mục đích', 'textarea'), field('yeuCauDaoTao', 'Yêu cầu đào tạo', 'textarea'), field('phuongPhapDaoTao', 'Phương pháp đào tạo', 'textarea'), field('ghiChu', 'Ghi chú', 'textarea')],
-  },
-  'muc-tieu-chuong-trinh': {
-    key: 'muc-tieu-chuong-trinh', title: 'Mục tiêu chương trình', apiKey: 'mucTieuChuongTrinh', parentKey: 'chuongTrinhVersionId', idKey: 'id', childRoute: 'nang-luc-dau-ra', columns: CHUONG_TRINH_COLUMNS['muc-tieu-chuong-trinh'],
-    searchFields: ['loai', 'noiDung'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('loai', 'Loại', 'select', { optionKey: 'mucTieuLoai', required: true }), field('noiDung', 'Nội dung', 'textarea', { required: true }), field('thuTu', 'Thứ tự', 'number')],
-  },
-  'nang-luc-dau-ra': {
-    key: 'nang-luc-dau-ra', title: 'Năng lực đầu ra', apiKey: 'nangLucDauRa', parentKey: 'chuongTrinhVersionId', idKey: 'id', childRoute: 'vi-tri-viec-lam', columns: CHUONG_TRINH_COLUMNS['nang-luc-dau-ra'],
-    searchFields: ['ma', 'noiDung', 'loai'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('ma', 'Mã'), field('noiDung', 'Nội dung', 'textarea', { required: true }), field('loai', 'Loại', 'select', { optionKey: 'nangLucLoai', required: true }), field('thuTu', 'Thứ tự', 'number')],
-  },
-  'vi-tri-viec-lam': {
-    key: 'vi-tri-viec-lam', title: 'Vị trí việc làm', apiKey: 'viTriViecLam', parentKey: 'chuongTrinhVersionId', idKey: 'id', childRoute: 'khung-ky', columns: CHUONG_TRINH_COLUMNS['vi-tri-viec-lam'],
-    searchFields: ['ten', 'moTa'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('ten', 'Tên vị trí', 'text', { required: true }), field('moTa', 'Mô tả', 'textarea'), field('thuTu', 'Thứ tự', 'number')],
-  },
-  'khung-ky': {
-    key: 'khung-ky', title: 'Khung kỳ', apiKey: 'khungKy', parentKey: 'loaiChuongTrinhId', idKey: 'id', childRoute: 'nhom-kien-thuc', columns: CHUONG_TRINH_COLUMNS['khung-ky'],
-    searchFields: ['maKy', 'tenKy'],
-    formFields: [field('loaiChuongTrinhId', 'Loại chương trình', 'select', { optionResource: 'loai-chuong-trinh', required: true }), field('maKy', 'Mã kỳ', 'text', { required: true }), field('tenKy', 'Tên kỳ', 'text', { required: true }), field('thuTu', 'Thứ tự', 'number', { required: true })],
-  },
-  'nhom-kien-thuc': {
-    key: 'nhom-kien-thuc', title: 'Nhóm kiến thức', apiKey: 'nhomKienThuc', parentKey: 'chuongTrinhVersionId', idKey: 'id', childRoute: 'mon-hoc', columns: CHUONG_TRINH_COLUMNS['nhom-kien-thuc'],
-    searchFields: ['ma', 'ten', 'loaiNhom'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('ma', 'Mã nhóm'), field('ten', 'Tên nhóm', 'text', { required: true }), field('thuTu', 'Thứ tự', 'number'), field('loaiNhom', 'Loại nhóm', 'select', { optionKey: 'loaiNhom', required: true }), field('tongTinChi', 'Tổng tín chỉ', 'number'), field('tongSoGio', 'Tổng số giờ', 'number'), field('tongGioLyThuyet', 'Giờ lý thuyết', 'number'), field('tongGioThucHanh', 'Giờ thực hành', 'number'), field('tongGioKiemTra', 'Giờ kiểm tra', 'number')],
-  },
-  'mon-hoc': {
-    key: 'mon-hoc', title: 'Môn học', apiKey: 'monHoc', idKey: 'id', childRoute: 'chuong-trinh-mon', columns: CHUONG_TRINH_COLUMNS['mon-hoc'],
-    searchFields: ['maMon', 'tenMon', 'moTa'],
-    formFields: [field('maMon', 'Mã môn'), field('tenMon', 'Tên môn', 'text', { required: true }), field('moTa', 'Mô tả', 'textarea')],
-  },
-  'chuong-trinh-mon': {
-    key: 'chuong-trinh-mon', title: 'Môn trong chương trình', apiKey: 'chuongTrinhMon', parentKey: 'chuongTrinhVersionId', idKey: 'id', childRoute: 'mon-tien-quyet', columns: CHUONG_TRINH_COLUMNS['chuong-trinh-mon'],
-    searchFields: ['maMonTrongCt', 'loai', 'loaiHocPhan', 'ghiChu'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('monHocId', 'Môn học', 'select', { optionResource: 'mon-hoc', required: true }), field('maMonTrongCt', 'Mã môn trong CT', 'text', { required: true }), field('khungKyId', 'Khung kỳ', 'select', { optionResource: 'khung-ky' }), field('nhomKienThucId', 'Nhóm kiến thức', 'select', { optionResource: 'nhom-kien-thuc' }), field('loai', 'Loại', 'select', { optionKey: 'loaiMonCt' }), field('loaiHocPhan', 'Loại học phần', 'select', { optionKey: 'loaiHocPhan' }), field('batBuoc', 'Bắt buộc', 'checkbox'), field('laMonDieuKien', 'Là môn điều kiện', 'checkbox'), field('thuTu', 'Thứ tự', 'number'), field('soTinChi', 'Số tín chỉ', 'number'), field('tongGio', 'Tổng giờ', 'number'), field('gioLyThuyet', 'Giờ lý thuyết', 'number'), field('gioThucHanh', 'Giờ thực hành', 'number'), field('gioKiemTra', 'Giờ kiểm tra', 'number'), field('ghiChu', 'Ghi chú', 'textarea')],
-  },
-  'mon-tien-quyet': {
-    key: 'mon-tien-quyet', title: 'Môn tiên quyết', apiKey: 'monTienQuyet', parentKey: 'monId', idKey: 'id', childRoute: 'nhom-tu-chon', columns: CHUONG_TRINH_COLUMNS['mon-tien-quyet'],
-    searchFields: ['loai', 'ghiChu'],
-    formFields: [field('monId', 'Môn chính', 'select', { optionResource: 'chuong-trinh-mon', required: true }), field('monDieuKienId', 'Môn điều kiện', 'select', { optionResource: 'chuong-trinh-mon', required: true }), field('loai', 'Loại', 'select', { optionKey: 'loaiTienQuyet', required: true }), field('ghiChu', 'Ghi chú', 'textarea')],
-  },
-  'nhom-tu-chon': {
-    key: 'nhom-tu-chon', title: 'Nhóm tự chọn', apiKey: 'nhomTuChon', parentKey: 'chuongTrinhVersionId', idKey: 'id', childRoute: 'syllabus-mon-hoc', columns: CHUONG_TRINH_COLUMNS['nhom-tu-chon'],
-    searchFields: ['ten', 'ghiChu'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('ten', 'Tên nhóm', 'text', { required: true }), field('soMonChon', 'Số môn chọn', 'number'), field('soTinChiCanDat', 'Số tín chỉ cần đạt', 'number'), field('ghiChu', 'Ghi chú', 'textarea')],
-  },
-  'syllabus-mon-hoc': {
-    key: 'syllabus-mon-hoc', title: 'Syllabus môn học', apiKey: 'syllabusMonHoc', parentKey: 'chuongTrinhMonId', idKey: 'id', childRoute: 'syllabus-chuong-bai', columns: CHUONG_TRINH_COLUMNS['syllabus-mon-hoc'],
-    searchFields: ['viTri', 'tinhChat', 'mucTieu', 'phuongPhapDanhGia', 'dieuKienHoanThanh'],
-    formFields: [field('chuongTrinhMonId', 'Môn trong chương trình', 'select', { optionResource: 'chuong-trinh-mon', required: true }), field('viTri', 'Vị trí'), field('tinhChat', 'Tính chất'), field('mucTieu', 'Mục tiêu', 'textarea'), field('phuongPhapDanhGia', 'Phương pháp đánh giá', 'textarea'), field('dieuKienHoanThanh', 'Điều kiện hoàn thành', 'textarea'), field('huongDan', 'Hướng dẫn', 'textarea'), field('diemDatToiThieu', 'Điểm đạt tối thiểu', 'number'), field('donViDiem', 'Đơn vị điểm', 'select', { optionKey: 'donViDiem' }), field('tyLeChuyenCanToiThieu', 'Tỷ lệ chuyên cần tối thiểu', 'number'), field('batBuocDuThi', 'Bắt buộc dự thi', 'checkbox'), field('congThucQuyDoi', 'Công thức quy đổi', 'textarea')],
-  },
-  'syllabus-chuong-bai': {
-    key: 'syllabus-chuong-bai', title: 'Chương/bài syllabus', apiKey: 'syllabusChuongBai', parentKey: 'syllabusMonId', idKey: 'id', childRoute: 'syllabus-tai-lieu', columns: CHUONG_TRINH_COLUMNS['syllabus-chuong-bai'],
-    searchFields: ['ten', 'noiDung', 'mucTieu'],
-    formFields: [field('syllabusMonId', 'Syllabus môn học', 'select', { optionResource: 'syllabus-mon-hoc', required: true }), field('ten', 'Tên chương/bài', 'text', { required: true }), field('tongGio', 'Tổng giờ', 'number'), field('gioLyThuyet', 'Giờ lý thuyết', 'number'), field('gioThucHanh', 'Giờ thực hành', 'number'), field('gioKiemTra', 'Giờ kiểm tra', 'number'), field('noiDung', 'Nội dung', 'textarea'), field('mucTieu', 'Mục tiêu', 'textarea'), field('thuTu', 'Thứ tự', 'number')],
-  },
-  'syllabus-tai-lieu': {
-    key: 'syllabus-tai-lieu', title: 'Tài liệu môn học', apiKey: 'syllabusTaiLieu', parentKey: 'syllabusMonId', idKey: 'id', childRoute: 'dieu-kien-mon-hoc', columns: CHUONG_TRINH_COLUMNS['syllabus-tai-lieu'],
-    searchFields: ['ten', 'tacGia', 'nhaXuatBan', 'loai', 'ghiChu'],
-    formFields: [field('syllabusMonId', 'Syllabus môn học', 'select', { optionResource: 'syllabus-mon-hoc', required: true }), field('ten', 'Tên tài liệu', 'text', { required: true }), field('tacGia', 'Tác giả'), field('namXuatBan', 'Năm xuất bản', 'number'), field('nhaXuatBan', 'Nhà xuất bản'), field('loai', 'Loại'), field('ghiChu', 'Ghi chú', 'textarea')],
-  },
-  'dieu-kien-mon-hoc': {
-    key: 'dieu-kien-mon-hoc', title: 'Điều kiện môn học', apiKey: 'dieuKienMonHoc', parentKey: 'syllabusMonId', idKey: 'id', childRoute: 'quy-doi-diem', columns: CHUONG_TRINH_COLUMNS['dieu-kien-mon-hoc'],
-    searchFields: ['loai', 'noiDung'],
-    formFields: [field('syllabusMonId', 'Syllabus môn học', 'select', { optionResource: 'syllabus-mon-hoc', required: true }), field('loai', 'Loại', 'select', { optionKey: 'loaiDieuKienMon', required: true }), field('noiDung', 'Nội dung', 'textarea', { required: true }), field('thuTu', 'Thứ tự', 'number')],
-  },
-  'quy-doi-diem': {
-    key: 'quy-doi-diem', title: 'Quy đổi điểm', apiKey: 'quyDoiDiem', parentKey: 'chuongTrinhMonId', idKey: 'id', childRoute: 'dieu-kien-tot-nghiep', columns: CHUONG_TRINH_COLUMNS['quy-doi-diem'],
-    searchFields: ['ketQua', 'congThuc', 'ghiChu'],
-    formFields: [field('chuongTrinhMonId', 'Môn trong chương trình', 'select', { optionResource: 'chuong-trinh-mon', required: true }), field('nguongTu', 'Ngưỡng từ', 'number'), field('nguongDen', 'Ngưỡng đến', 'number'), field('diemQuyDoi', 'Điểm quy đổi', 'number'), field('ketQua', 'Kết quả', 'select', { optionKey: 'ketQua' }), field('congThuc', 'Công thức', 'textarea'), field('ghiChu', 'Ghi chú', 'textarea')],
-  },
-  'dieu-kien-tot-nghiep': {
-    key: 'dieu-kien-tot-nghiep', title: 'Điều kiện tốt nghiệp', apiKey: 'dieuKienTotNghiep', parentKey: 'chuongTrinhVersionId', idKey: 'id', columns: CHUONG_TRINH_COLUMNS['dieu-kien-tot-nghiep'],
-    searchFields: ['noiDung'],
-    formFields: [field('chuongTrinhVersionId', 'Version chương trình', 'select', { optionResource: 'chuong-trinh-version', required: true }), field('noiDung', 'Nội dung', 'textarea', { required: true }), field('thuTu', 'Thứ tự', 'number')],
-  },
-};
-
-Object.keys(CHUONG_TRINH_TABLE_CONFIG).forEach((key) => {
-  if (!CHUONG_TRINH_TABLE_CONFIG[key].permissions) {
-    CHUONG_TRINH_TABLE_CONFIG[key].permissions = { create: ['ADMIN', 'DAO_TAO'], update: ['ADMIN', 'DAO_TAO'], delete: ['ADMIN'] };
-  }
+const column = (key, label, extras = {}) => ({
+    key,
+    label,
+    ...extras,
 });
+
+const field = (key, label, type = 'text', extras = {}) => ({
+    key,
+    label,
+    type,
+    ...extras,
+});
+
+export const STATIC_OPTIONS = {
+    mucTieuLoai: ['chung', 'kien_thuc', 'ky_nang', 'nang_luc_tu_chu_trach_nhiem'],
+    nangLucLoai: ['co_ban', 'cot_loi', 'nang_cao'],
+    loaiNhom: ['chung', 'co_so', 'chuyen_mon', 'tu_chon'],
+    loaiHocPhanCt: ['bat_buoc', 'tu_chon'],
+    loaiHocPhanType: ['mon_hoc', 'mo_dun'],
+    monTienQuyetLoai: ['tien_quyet', 'song_hanh', 'hoc_truoc'],
+    donViDiem: ['thang_10', 'phan_tram'],
+    dieuKienMonLoai: ['phong_hoc', 'thiet_bi', 'hoc_lieu', 'dung_cu', 'nguyen_vat_lieu', 'khac'],
+    ketQuaQuyDoi: ['dat', 'khong_dat'],
+};
+
+export const LOOKUP_CONFIG = {
+    nganh: {
+        label: (item) => `${item.maNganh || '---'} - ${item.tenNganh || 'Chưa có tên ngành'}`,
+    },
+    trinhDoDaoTao: {
+        label: (item) => `${item.maTrinhDo || '---'} - ${item.tenTrinhDo || 'Chưa có tên trình độ'}`,
+    },
+    loaiChuongTrinh: {
+        label: (item) => `${item.maLoai || '---'} - ${item.tenLoai || 'Chưa có tên loại'}`,
+    },
+    chuongTrinhDaoTao: {
+        label: (item) => `${item.maChuongTrinh || '---'} - ${item.tenChuongTrinh || 'Chưa có tên chương trình'}`,
+    },
+    versionChuongTrinh: {
+        label: (item, lookups) => {
+            const program = lookups.chuongTrinhDaoTao.find((entry) => Number(entry.id) === Number(item.chuongTrinhId));
+            const base = program ? `${program.maChuongTrinh || '---'} - ${program.tenChuongTrinh || 'Chưa có tên'}` : 'Chưa có CT';
+            return `${item.maVersion || '---'} - ${item.tenVersion || base}`;
+        },
+    },
+    khungKy: {
+        label: (item) => `${item.maKy || '---'} - ${item.tenKy || 'Chưa có tên kỳ'}`,
+    },
+    nhomKienThuc: {
+        label: (item) => `${item.ma || '---'} - ${item.ten || 'Chưa có tên nhóm'}`,
+    },
+    monHoc: {
+        label: (item) => `${item.maMon || '---'} - ${item.tenMon || 'Chưa có tên môn'}`,
+    },
+    chuongTrinhMon: {
+        label: (item, lookups) => {
+            const subject = lookups.monHoc.find((entry) => Number(entry.id) === Number(item.monHocId));
+            return `${item.maMonTrongCt || '---'} - ${subject?.tenMon || 'Chưa có tên môn'}`;
+        },
+    },
+    nhomTuChon: {
+        label: (item) => `${item.ten || 'Nhóm tự chọn'}${item.soMonChon ? ` (${item.soMonChon} môn)` : ''}`,
+    },
+    syllabusMonHoc: {
+        label: (item, lookups) => {
+            const course = lookups.chuongTrinhMon.find((entry) => Number(entry.id) === Number(item.chuongTrinhMonId));
+            return `${course?.maMonTrongCt || '---'} - ${item.viTri || item.tinhChat || 'Syllabus môn học'}`;
+        },
+    },
+};
+
+export const CHUONG_TRINH_TABLES = [
+    {
+        key: 'nganh',
+        routeName: 'chuong-trinh-nganh',
+        segment: 'nganh',
+        paramKey: 'nganhId',
+        title: 'Ngành',
+        api: { endpoint: '/api/dao-tao/nganh' },
+        routeParentKey: null,
+        childRouteKey: 'trinh-do-dao-tao',
+        filters: [],
+        columns: [
+            column('maNganh', 'Mã ngành'),
+            column('tenNganh', 'Tên ngành'),
+            column('moTa', 'Mô tả'),
+        ],
+        formFields: [
+            field('maNganh', 'Mã ngành', 'text', { required: true }),
+            field('tenNganh', 'Tên ngành', 'text', { required: true }),
+            field('moTa', 'Mô tả', 'textarea', { wide: true }),
+        ],
+        searchFields: ['maNganh', 'tenNganh', 'moTa'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'trinh-do-dao-tao',
+        routeName: 'chuong-trinh-trinh-do-dao-tao',
+        segment: 'trinh-do-dao-tao',
+        paramKey: 'trinhDoId',
+        title: 'Trình độ đào tạo',
+        api: { endpoint: '/api/dao-tao/trinh-do-dao-tao' },
+        routeParentKey: 'nganh',
+        childRouteKey: 'loai-chuong-trinh',
+        filters: [],
+        columns: [
+            column('maTrinhDo', 'Mã trình độ'),
+            column('tenTrinhDo', 'Tên trình độ'),
+            column('moTa', 'Mô tả'),
+        ],
+        formFields: [
+            field('maTrinhDo', 'Mã trình độ', 'text', { required: true }),
+            field('tenTrinhDo', 'Tên trình độ', 'text', { required: true }),
+            field('moTa', 'Mô tả', 'textarea', { wide: true }),
+        ],
+        searchFields: ['maTrinhDo', 'tenTrinhDo', 'moTa'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'loai-chuong-trinh',
+        routeName: 'chuong-trinh-loai-chuong-trinh',
+        segment: 'loai-chuong-trinh',
+        paramKey: 'loaiChuongTrinhId',
+        title: 'Loại chương trình',
+        api: { endpoint: '/api/dao-tao/loai-chuong-trinh' },
+        routeParentKey: 'trinh-do-dao-tao',
+        childRouteKey: 'chuong-trinh-dao-tao',
+        filters: [],
+        columns: [
+            column('maLoai', 'Mã loại'),
+            column('tenLoai', 'Tên loại'),
+            column('soThang', 'Số tháng', { format: 'number' }),
+            column('soKy', 'Số kỳ', { format: 'number' }),
+            column('moTa', 'Mô tả'),
+        ],
+        formFields: [
+            field('maLoai', 'Mã loại', 'text', { required: true }),
+            field('tenLoai', 'Tên loại', 'text', { required: true }),
+            field('soThang', 'Số tháng', 'number', { required: true }),
+            field('soKy', 'Số kỳ', 'number', { required: true }),
+            field('moTa', 'Mô tả', 'textarea', { wide: true }),
+        ],
+        searchFields: ['maLoai', 'tenLoai', 'moTa'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'chuong-trinh-dao-tao',
+        routeName: 'chuong-trinh-chuong-trinh-dao-tao',
+        segment: 'chuong-trinh-dao-tao',
+        paramKey: 'chuongTrinhId',
+        title: 'Chương trình đào tạo',
+        api: { endpoint: '/api/chuongTrinh/chuong-trinh' },
+        routeParentKey: 'loai-chuong-trinh',
+        childRouteKey: 'version-chuong-trinh',
+        filters: [
+            { contextParam: 'nganhId', field: 'nganhId', mode: 'server' },
+            { contextParam: 'trinhDoId', field: 'trinhDoId', mode: 'client' },
+            { contextParam: 'loaiChuongTrinhId', field: 'loaiChuongTrinhId', mode: 'client' },
+        ],
+        columns: [
+            column('maChuongTrinh', 'Mã chương trình'),
+            column('tenChuongTrinh', 'Tên chương trình'),
+            column('nganhId', 'Ngành', { format: 'lookup', lookupKey: 'nganh' }),
+            column('trinhDoId', 'Trình độ', { format: 'lookup', lookupKey: 'trinhDoDaoTao' }),
+            column('loaiChuongTrinhId', 'Loại CT', { format: 'lookup', lookupKey: 'loaiChuongTrinh' }),
+            column('thoiGianDaoTao', 'Thời gian đào tạo'),
+        ],
+        formFields: [
+            field('nganhId', 'Ngành', 'select', { required: true, optionKey: 'nganh', autoFromContext: true, contextParam: 'nganhId' }),
+            field('trinhDoId', 'Trình độ', 'select', { required: true, optionKey: 'trinhDoDaoTao', autoFromContext: true, contextParam: 'trinhDoId' }),
+            field('loaiChuongTrinhId', 'Loại chương trình', 'select', { required: true, optionKey: 'loaiChuongTrinh', autoFromContext: true, contextParam: 'loaiChuongTrinhId' }),
+            field('maChuongTrinh', 'Mã chương trình', 'text', { required: true }),
+            field('tenChuongTrinh', 'Tên chương trình', 'text', { required: true, wide: true }),
+            field('doiTuongTuyenSinh', 'Đối tượng tuyển sinh', 'textarea', { wide: true }),
+            field('thoiGianDaoTao', 'Thời gian đào tạo'),
+        ],
+        searchFields: ['maChuongTrinh', 'tenChuongTrinh', 'doiTuongTuyenSinh', 'thoiGianDaoTao'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'version-chuong-trinh',
+        routeName: 'chuong-trinh-version-chuong-trinh',
+        segment: 'version-chuong-trinh',
+        paramKey: 'versionId',
+        title: 'Version chương trình',
+        api: { endpoint: '/api/chuongTrinh/chuong-trinh-version' },
+        routeParentKey: 'chuong-trinh-dao-tao',
+        childRouteKey: 'syllabus-chuong-trinh',
+        filters: [{ contextParam: 'chuongTrinhId', field: 'chuongTrinhId', mode: 'server' }],
+        columns: [
+            column('maVersion', 'Mã version'),
+            column('tenVersion', 'Tên version'),
+            column('ngayApDung', 'Ngày áp dụng', { format: 'date' }),
+            column('tongTinChi', 'Tổng tín chỉ', { format: 'number' }),
+            column('laHienHanh', 'Hiện hành', { format: 'boolean' }),
+        ],
+        formFields: [
+            field('chuongTrinhId', 'Chương trình', 'select', { required: true, optionKey: 'chuongTrinhDaoTao', autoFromContext: true, contextParam: 'chuongTrinhId' }),
+            field('maVersion', 'Mã version', 'text', { required: true }),
+            field('tenVersion', 'Tên version', 'text', { wide: true }),
+            field('ngayApDung', 'Ngày áp dụng', 'date'),
+            field('ngayHetHieuLuc', 'Ngày hết hiệu lực', 'date'),
+            field('soQuyetDinh', 'Số quyết định'),
+            field('ngayQuyetDinh', 'Ngày quyết định', 'date'),
+            field('nguoiKy', 'Người ký'),
+            field('coQuanBanHanh', 'Cơ quan ban hành'),
+            field('fileQuyetDinh', 'File quyết định'),
+            field('tongTinChi', 'Tổng tín chỉ', 'number'),
+            field('tongSoGio', 'Tổng số giờ', 'number'),
+            field('tongGioLyThuyet', 'Tổng giờ lý thuyết', 'number'),
+            field('tongGioThucHanh', 'Tổng giờ thực hành', 'number'),
+            field('tongGioKiemTra', 'Tổng giờ kiểm tra', 'number'),
+            field('laHienHanh', 'Là hiện hành', 'checkbox'),
+        ],
+        searchFields: ['maVersion', 'tenVersion', 'soQuyetDinh', 'nguoiKy', 'coQuanBanHanh'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'syllabus-chuong-trinh',
+        routeName: 'chuong-trinh-syllabus-chuong-trinh',
+        segment: 'syllabus-chuong-trinh',
+        paramKey: 'syllabusChuongTrinhId',
+        title: 'Syllabus chương trình',
+        api: { endpoint: '/api/chuongTrinh/syllabus-chuong-trinh' },
+        routeParentKey: 'version-chuong-trinh',
+        childRouteKey: 'muc-tieu-chuong-trinh',
+        filters: [{ contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'client' }],
+        columns: [
+            column('chuongTrinhVersionId', 'Version', { format: 'lookup', lookupKey: 'versionChuongTrinh' }),
+            column('moTaTongQuan', 'Mô tả tổng quan'),
+            column('mucDich', 'Mục đích'),
+            column('phuongPhapDaoTao', 'Phương pháp đào tạo'),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('moTaTongQuan', 'Mô tả tổng quan', 'textarea', { wide: true }),
+            field('mucDich', 'Mục đích', 'textarea', { wide: true }),
+            field('yeuCauDaoTao', 'Yêu cầu đào tạo', 'textarea', { wide: true }),
+            field('phuongPhapDaoTao', 'Phương pháp đào tạo', 'textarea', { wide: true }),
+            field('ghiChu', 'Ghi chú', 'textarea', { wide: true }),
+        ],
+        searchFields: ['moTaTongQuan', 'mucDich', 'yeuCauDaoTao', 'phuongPhapDaoTao', 'ghiChu'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'muc-tieu-chuong-trinh',
+        routeName: 'chuong-trinh-muc-tieu-chuong-trinh',
+        segment: 'muc-tieu-chuong-trinh',
+        paramKey: 'mucTieuId',
+        title: 'Mục tiêu chương trình',
+        api: { endpoint: '/api/chuongTrinh/muc-tieu-chuong-trinh' },
+        routeParentKey: 'syllabus-chuong-trinh',
+        childRouteKey: 'nang-luc-dau-ra',
+        filters: [{ contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'client' }],
+        columns: [
+            column('loai', 'Loại', { format: 'enum' }),
+            column('noiDung', 'Nội dung'),
+            column('thuTu', 'Thứ tự', { format: 'number' }),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('loai', 'Loại mục tiêu', 'select', { required: true, optionKey: 'mucTieuLoai' }),
+            field('noiDung', 'Nội dung', 'textarea', { required: true, wide: true }),
+            field('thuTu', 'Thứ tự', 'number'),
+        ],
+        searchFields: ['loai', 'noiDung'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'nang-luc-dau-ra',
+        routeName: 'chuong-trinh-nang-luc-dau-ra',
+        segment: 'nang-luc-dau-ra',
+        paramKey: 'nangLucId',
+        title: 'Năng lực đầu ra',
+        api: { endpoint: '/api/chuongTrinh/nang-luc-dau-ra' },
+        routeParentKey: 'muc-tieu-chuong-trinh',
+        childRouteKey: 'vi-tri-viec-lam',
+        filters: [{ contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'client' }],
+        columns: [
+            column('ma', 'Mã'),
+            column('noiDung', 'Nội dung'),
+            column('loai', 'Loại', { format: 'enum' }),
+            column('thuTu', 'Thứ tự', { format: 'number' }),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('ma', 'Mã năng lực', 'text', { required: true }),
+            field('noiDung', 'Nội dung', 'textarea', { required: true, wide: true }),
+            field('loai', 'Loại năng lực', 'select', { required: true, optionKey: 'nangLucLoai' }),
+            field('thuTu', 'Thứ tự', 'number'),
+        ],
+        searchFields: ['ma', 'noiDung', 'loai'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'vi-tri-viec-lam',
+        routeName: 'chuong-trinh-vi-tri-viec-lam',
+        segment: 'vi-tri-viec-lam',
+        paramKey: 'viTriViecLamId',
+        title: 'Vị trí việc làm',
+        api: { endpoint: '/api/chuongTrinh/vi-tri-viec-lam' },
+        routeParentKey: 'nang-luc-dau-ra',
+        childRouteKey: 'khung-ky',
+        filters: [{ contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'client' }],
+        columns: [
+            column('ten', 'Tên vị trí'),
+            column('moTa', 'Mô tả'),
+            column('thuTu', 'Thứ tự', { format: 'number' }),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('ten', 'Tên vị trí', 'text', { required: true }),
+            field('moTa', 'Mô tả', 'textarea', { wide: true }),
+            field('thuTu', 'Thứ tự', 'number'),
+        ],
+        searchFields: ['ten', 'moTa'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'khung-ky',
+        routeName: 'chuong-trinh-khung-ky',
+        segment: 'khung-ky',
+        paramKey: 'khungKyId',
+        title: 'Khung kỳ',
+        api: { endpoint: '/api/dao-tao/khung-ky' },
+        routeParentKey: 'vi-tri-viec-lam',
+        childRouteKey: 'nhom-kien-thuc',
+        filters: [{ contextParam: 'loaiChuongTrinhId', field: 'loaiChuongTrinhId', mode: 'client' }],
+        columns: [
+            column('loaiChuongTrinhId', 'Loại CT', { format: 'lookup', lookupKey: 'loaiChuongTrinh' }),
+            column('maKy', 'Mã kỳ'),
+            column('tenKy', 'Tên kỳ'),
+            column('thuTu', 'Thứ tự', { format: 'number' }),
+        ],
+        formFields: [
+            field('loaiChuongTrinhId', 'Loại chương trình', 'select', { required: true, optionKey: 'loaiChuongTrinh', autoFromContext: true, contextParam: 'loaiChuongTrinhId' }),
+            field('maKy', 'Mã kỳ', 'text', { required: true }),
+            field('tenKy', 'Tên kỳ', 'text', { required: true }),
+            field('thuTu', 'Thứ tự', 'number', { required: true }),
+        ],
+        searchFields: ['maKy', 'tenKy'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'nhom-kien-thuc',
+        routeName: 'chuong-trinh-nhom-kien-thuc',
+        segment: 'nhom-kien-thuc',
+        paramKey: 'nhomKienThucId',
+        title: 'Nhóm kiến thức',
+        api: { endpoint: '/api/chuongTrinh/nhom-kien-thuc' },
+        routeParentKey: 'khung-ky',
+        childRouteKey: 'mon-hoc',
+        filters: [{ contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'server' }],
+        columns: [
+            column('ma', 'Mã nhóm'),
+            column('ten', 'Tên nhóm'),
+            column('loaiNhom', 'Loại nhóm', { format: 'enum' }),
+            column('tongTinChi', 'Tổng tín chỉ', { format: 'number' }),
+            column('tongSoGio', 'Tổng số giờ', { format: 'number' }),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('ma', 'Mã nhóm', 'text', { required: true }),
+            field('ten', 'Tên nhóm', 'text', { required: true, wide: true }),
+            field('thuTu', 'Thứ tự', 'number'),
+            field('loaiNhom', 'Loại nhóm', 'select', { required: true, optionKey: 'loaiNhom' }),
+            field('tongTinChi', 'Tổng tín chỉ', 'number'),
+            field('tongSoGio', 'Tổng số giờ', 'number'),
+            field('tongGioLyThuyet', 'Giờ lý thuyết', 'number'),
+            field('tongGioThucHanh', 'Giờ thực hành', 'number'),
+            field('tongGioKiemTra', 'Giờ kiểm tra', 'number'),
+        ],
+        searchFields: ['ma', 'ten', 'loaiNhom'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'mon-hoc',
+        routeName: 'chuong-trinh-mon-hoc',
+        segment: 'mon-hoc',
+        paramKey: 'monHocId',
+        title: 'Môn học',
+        api: { endpoint: '/api/chuongTrinh/mon-hoc' },
+        routeParentKey: 'nhom-kien-thuc',
+        childRouteKey: 'mon-trong-chuong-trinh',
+        filters: [],
+        columns: [
+            column('maMon', 'Mã môn'),
+            column('tenMon', 'Tên môn'),
+            column('moTa', 'Mô tả'),
+        ],
+        formFields: [
+            field('maMon', 'Mã môn', 'text'),
+            field('tenMon', 'Tên môn', 'text', { required: true, wide: true }),
+            field('moTa', 'Mô tả', 'textarea', { wide: true }),
+        ],
+        searchFields: ['maMon', 'tenMon', 'moTa'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'mon-trong-chuong-trinh',
+        routeName: 'chuong-trinh-mon-trong-chuong-trinh',
+        segment: 'mon-trong-chuong-trinh',
+        paramKey: 'chuongTrinhMonId',
+        title: 'Môn trong chương trình',
+        api: { endpoint: '/api/chuongTrinh/chuong-trinh-mon' },
+        routeParentKey: 'mon-hoc',
+        childRouteKey: 'mon-tien-quyet',
+        filters: [
+            { contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'server' },
+            { contextParam: 'monHocId', field: 'monHocId', mode: 'client' },
+            { contextParam: 'khungKyId', field: 'khungKyId', mode: 'client' },
+            { contextParam: 'nhomKienThucId', field: 'nhomKienThucId', mode: 'client' },
+        ],
+        columns: [
+            column('monHocId', 'Môn học', { format: 'lookup', lookupKey: 'monHoc' }),
+            column('maMonTrongCt', 'Mã môn trong CT'),
+            column('khungKyId', 'Khung kỳ', { format: 'lookup', lookupKey: 'khungKy' }),
+            column('nhomKienThucId', 'Nhóm kiến thức', { format: 'lookup', lookupKey: 'nhomKienThuc' }),
+            column('soTinChi', 'Số tín chỉ', { format: 'number' }),
+            column('batBuoc', 'Bắt buộc', { format: 'boolean' }),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('monHocId', 'Môn học', 'select', { required: true, optionKey: 'monHoc', autoFromContext: true, contextParam: 'monHocId' }),
+            field('maMonTrongCt', 'Mã môn trong CT', 'text', { required: true }),
+            field('khungKyId', 'Khung kỳ', 'select', { optionKey: 'khungKy', autoFromContext: true, contextParam: 'khungKyId' }),
+            field('nhomKienThucId', 'Nhóm kiến thức', 'select', { optionKey: 'nhomKienThuc', autoFromContext: true, contextParam: 'nhomKienThucId' }),
+            field('loai', 'Loại', 'select', { optionKey: 'loaiHocPhanCt' }),
+            field('loaiHocPhan', 'Loại học phần', 'select', { optionKey: 'loaiHocPhanType' }),
+            field('batBuoc', 'Bắt buộc', 'checkbox'),
+            field('laMonDieuKien', 'Là môn điều kiện', 'checkbox'),
+            field('thuTu', 'Thứ tự', 'number'),
+            field('soTinChi', 'Số tín chỉ', 'number'),
+            field('tongGio', 'Tổng giờ', 'number'),
+            field('gioLyThuyet', 'Giờ lý thuyết', 'number'),
+            field('gioThucHanh', 'Giờ thực hành', 'number'),
+            field('gioKiemTra', 'Giờ kiểm tra', 'number'),
+            field('ghiChu', 'Ghi chú', 'textarea', { wide: true }),
+        ],
+        searchFields: ['maMonTrongCt', 'loai', 'loaiHocPhan', 'ghiChu'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'mon-tien-quyet',
+        routeName: 'chuong-trinh-mon-tien-quyet',
+        segment: 'mon-tien-quyet',
+        paramKey: 'monTienQuyetId',
+        title: 'Môn tiên quyết',
+        api: { endpoint: '/api/chuongTrinh/mon-tien-quyet' },
+        routeParentKey: 'mon-trong-chuong-trinh',
+        childRouteKey: 'nhom-tu-chon',
+        filters: [{ contextParam: 'chuongTrinhMonId', field: 'monId', mode: 'client' }],
+        columns: [
+            column('monId', 'Môn chính', { format: 'lookup', lookupKey: 'chuongTrinhMon' }),
+            column('monDieuKienId', 'Môn điều kiện', { format: 'lookup', lookupKey: 'chuongTrinhMon' }),
+            column('loai', 'Loại', { format: 'enum' }),
+            column('ghiChu', 'Ghi chú'),
+        ],
+        formFields: [
+            field('monId', 'Môn chính', 'select', { required: true, optionKey: 'chuongTrinhMon', autoFromContext: true, contextParam: 'chuongTrinhMonId' }),
+            field('monDieuKienId', 'Môn điều kiện', 'select', { required: true, optionKey: 'chuongTrinhMon' }),
+            field('loai', 'Loại điều kiện', 'select', { required: true, optionKey: 'monTienQuyetLoai' }),
+            field('ghiChu', 'Ghi chú', 'textarea', { wide: true }),
+        ],
+        searchFields: ['loai', 'ghiChu'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'nhom-tu-chon',
+        routeName: 'chuong-trinh-nhom-tu-chon',
+        segment: 'nhom-tu-chon',
+        paramKey: 'nhomTuChonId',
+        title: 'Nhóm tự chọn',
+        api: { endpoint: '/api/chuongTrinh/nhom-tu-chon' },
+        routeParentKey: 'mon-tien-quyet',
+        childRouteKey: 'syllabus-mon-hoc',
+        filters: [{ contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'client' }],
+        columns: [
+            column('ten', 'Tên nhóm'),
+            column('soMonChon', 'Số môn chọn', { format: 'number' }),
+            column('soTinChiCanDat', 'Số tín chỉ cần đạt', { format: 'number' }),
+            column('ghiChu', 'Ghi chú'),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('ten', 'Tên nhóm', 'text', { required: true, wide: true }),
+            field('soMonChon', 'Số môn chọn', 'number'),
+            field('soTinChiCanDat', 'Số tín chỉ cần đạt', 'number'),
+            field('ghiChu', 'Ghi chú', 'textarea', { wide: true }),
+        ],
+        searchFields: ['ten', 'ghiChu'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'syllabus-mon-hoc',
+        routeName: 'chuong-trinh-syllabus-mon-hoc',
+        segment: 'syllabus-mon-hoc',
+        paramKey: 'syllabusMonHocId',
+        title: 'Syllabus môn học',
+        api: { endpoint: '/api/chuongTrinh/syllabus-mon-hoc' },
+        routeParentKey: 'nhom-tu-chon',
+        childRouteKey: 'chuong-bai-syllabus',
+        filters: [{ contextParam: 'chuongTrinhMonId', field: 'chuongTrinhMonId', mode: 'server' }],
+        columns: [
+            column('chuongTrinhMonId', 'Môn trong CT', { format: 'lookup', lookupKey: 'chuongTrinhMon' }),
+            column('viTri', 'Vị trí'),
+            column('tinhChat', 'Tính chất'),
+            column('diemDatToiThieu', 'Điểm đạt tối thiểu', { format: 'number' }),
+            column('batBuocDuThi', 'Bắt buộc dự thi', { format: 'boolean' }),
+        ],
+        formFields: [
+            field('chuongTrinhMonId', 'Môn trong chương trình', 'select', { required: true, optionKey: 'chuongTrinhMon', autoFromContext: true, contextParam: 'chuongTrinhMonId' }),
+            field('viTri', 'Vị trí'),
+            field('tinhChat', 'Tính chất'),
+            field('mucTieu', 'Mục tiêu', 'textarea', { wide: true }),
+            field('phuongPhapDanhGia', 'Phương pháp đánh giá', 'textarea', { wide: true }),
+            field('dieuKienHoanThanh', 'Điều kiện hoàn thành', 'textarea', { wide: true }),
+            field('huongDan', 'Hướng dẫn', 'textarea', { wide: true }),
+            field('diemDatToiThieu', 'Điểm đạt tối thiểu', 'number'),
+            field('donViDiem', 'Đơn vị điểm', 'select', { optionKey: 'donViDiem' }),
+            field('tyLeChuyenCanToiThieu', 'Tỷ lệ chuyên cần tối thiểu', 'number'),
+            field('batBuocDuThi', 'Bắt buộc dự thi', 'checkbox'),
+            field('congThucQuyDoi', 'Công thức quy đổi', 'textarea', { wide: true }),
+        ],
+        searchFields: ['viTri', 'tinhChat', 'mucTieu', 'phuongPhapDanhGia', 'dieuKienHoanThanh'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'chuong-bai-syllabus',
+        routeName: 'chuong-trinh-chuong-bai-syllabus',
+        segment: 'chuong-bai-syllabus',
+        paramKey: 'chuongBaiId',
+        title: 'Chương/bài syllabus',
+        api: { endpoint: '/api/chuongTrinh/syllabus-chuong-bai' },
+        routeParentKey: 'syllabus-mon-hoc',
+        childRouteKey: 'tai-lieu-mon-hoc',
+        filters: [{ contextParam: 'syllabusMonHocId', field: 'syllabusMonId', mode: 'server' }],
+        columns: [
+            column('ten', 'Tên chương/bài'),
+            column('tongGio', 'Tổng giờ', { format: 'number' }),
+            column('thuTu', 'Thứ tự', { format: 'number' }),
+            column('mucTieu', 'Mục tiêu'),
+        ],
+        formFields: [
+            field('syllabusMonId', 'Syllabus môn học', 'select', { required: true, optionKey: 'syllabusMonHoc', autoFromContext: true, contextParam: 'syllabusMonHocId' }),
+            field('ten', 'Tên chương/bài', 'text', { required: true, wide: true }),
+            field('tongGio', 'Tổng giờ', 'number'),
+            field('gioLyThuyet', 'Giờ lý thuyết', 'number'),
+            field('gioThucHanh', 'Giờ thực hành', 'number'),
+            field('gioKiemTra', 'Giờ kiểm tra', 'number'),
+            field('noiDung', 'Nội dung', 'textarea', { wide: true }),
+            field('mucTieu', 'Mục tiêu', 'textarea', { wide: true }),
+            field('thuTu', 'Thứ tự', 'number'),
+        ],
+        searchFields: ['ten', 'noiDung', 'mucTieu'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'tai-lieu-mon-hoc',
+        routeName: 'chuong-trinh-tai-lieu-mon-hoc',
+        segment: 'tai-lieu-mon-hoc',
+        paramKey: 'taiLieuId',
+        title: 'Tài liệu môn học',
+        api: { endpoint: '/api/chuongTrinh/syllabus-tai-lieu' },
+        routeParentKey: 'chuong-bai-syllabus',
+        childRouteKey: 'dieu-kien-mon-hoc',
+        filters: [{ contextParam: 'syllabusMonHocId', field: 'syllabusMonId', mode: 'client' }],
+        columns: [
+            column('ten', 'Tên tài liệu'),
+            column('tacGia', 'Tác giả'),
+            column('namXuatBan', 'Năm XB', { format: 'number' }),
+            column('nhaXuatBan', 'Nhà xuất bản'),
+            column('loai', 'Loại'),
+        ],
+        formFields: [
+            field('syllabusMonId', 'Syllabus môn học', 'select', { required: true, optionKey: 'syllabusMonHoc', autoFromContext: true, contextParam: 'syllabusMonHocId' }),
+            field('ten', 'Tên tài liệu', 'text', { required: true, wide: true }),
+            field('tacGia', 'Tác giả'),
+            field('namXuatBan', 'Năm xuất bản', 'number'),
+            field('nhaXuatBan', 'Nhà xuất bản'),
+            field('loai', 'Loại tài liệu'),
+            field('ghiChu', 'Ghi chú', 'textarea', { wide: true }),
+        ],
+        searchFields: ['ten', 'tacGia', 'nhaXuatBan', 'loai', 'ghiChu'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'dieu-kien-mon-hoc',
+        routeName: 'chuong-trinh-dieu-kien-mon-hoc',
+        segment: 'dieu-kien-mon-hoc',
+        paramKey: 'dieuKienMonHocId',
+        title: 'Điều kiện môn học',
+        api: { endpoint: '/api/chuongTrinh/dieu-kien-mon-hoc' },
+        routeParentKey: 'tai-lieu-mon-hoc',
+        childRouteKey: 'quy-doi-diem',
+        filters: [{ contextParam: 'syllabusMonHocId', field: 'syllabusMonId', mode: 'client' }],
+        columns: [
+            column('loai', 'Loại điều kiện', { format: 'enum' }),
+            column('noiDung', 'Nội dung'),
+            column('thuTu', 'Thứ tự', { format: 'number' }),
+        ],
+        formFields: [
+            field('syllabusMonId', 'Syllabus môn học', 'select', { required: true, optionKey: 'syllabusMonHoc', autoFromContext: true, contextParam: 'syllabusMonHocId' }),
+            field('loai', 'Loại điều kiện', 'select', { required: true, optionKey: 'dieuKienMonLoai' }),
+            field('noiDung', 'Nội dung', 'textarea', { required: true, wide: true }),
+            field('thuTu', 'Thứ tự', 'number'),
+        ],
+        searchFields: ['loai', 'noiDung'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'quy-doi-diem',
+        routeName: 'chuong-trinh-quy-doi-diem',
+        segment: 'quy-doi-diem',
+        paramKey: 'quyDoiDiemId',
+        title: 'Quy đổi điểm',
+        api: { endpoint: '/api/chuongTrinh/quy-doi-diem' },
+        routeParentKey: 'dieu-kien-mon-hoc',
+        childRouteKey: 'dieu-kien-tot-nghiep',
+        filters: [{ contextParam: 'chuongTrinhMonId', field: 'chuongTrinhMonId', mode: 'client' }],
+        columns: [
+            column('nguongTu', 'Ngưỡng từ', { format: 'number' }),
+            column('nguongDen', 'Ngưỡng đến', { format: 'number' }),
+            column('diemQuyDoi', 'Điểm quy đổi', { format: 'number' }),
+            column('ketQua', 'Kết quả', { format: 'enum' }),
+        ],
+        formFields: [
+            field('chuongTrinhMonId', 'Môn trong chương trình', 'select', { required: true, optionKey: 'chuongTrinhMon', autoFromContext: true, contextParam: 'chuongTrinhMonId' }),
+            field('nguongTu', 'Ngưỡng từ', 'number'),
+            field('nguongDen', 'Ngưỡng đến', 'number'),
+            field('diemQuyDoi', 'Điểm quy đổi', 'number'),
+            field('ketQua', 'Kết quả', 'select', { optionKey: 'ketQuaQuyDoi' }),
+            field('congThuc', 'Công thức', 'textarea', { wide: true }),
+            field('ghiChu', 'Ghi chú', 'textarea', { wide: true }),
+        ],
+        searchFields: ['ketQua', 'congThuc', 'ghiChu'],
+        permissions: { create: true, update: true, delete: true },
+    },
+    {
+        key: 'dieu-kien-tot-nghiep',
+        routeName: 'chuong-trinh-dieu-kien-tot-nghiep',
+        segment: 'dieu-kien-tot-nghiep',
+        paramKey: 'dieuKienTotNghiepId',
+        title: 'Điều kiện tốt nghiệp',
+        api: { endpoint: '/api/chuongTrinh/dieu-kien-tot-nghiep' },
+        routeParentKey: 'quy-doi-diem',
+        childRouteKey: null,
+        filters: [{ contextParam: 'versionId', field: 'chuongTrinhVersionId', mode: 'client' }],
+        columns: [
+            column('noiDung', 'Nội dung'),
+            column('thuTu', 'Thứ tự', { format: 'number' }),
+        ],
+        formFields: [
+            field('chuongTrinhVersionId', 'Version chương trình', 'select', { required: true, optionKey: 'versionChuongTrinh', autoFromContext: true, contextParam: 'versionId' }),
+            field('noiDung', 'Nội dung', 'textarea', { required: true, wide: true }),
+            field('thuTu', 'Thứ tự', 'number'),
+        ],
+        searchFields: ['noiDung'],
+        permissions: { create: true, update: true, delete: true },
+    },
+];
+
+export const CHUONG_TRINH_TABLE_MAP = Object.fromEntries(
+    CHUONG_TRINH_TABLES.map((table) => [table.key, table])
+);
+
+export const CHUONG_TRINH_ROOT_KEY = CHUONG_TRINH_TABLES[0].key;
+
+export function getRouteChain(tableKey) {
+    const chain = [];
+    let currentKey = tableKey;
+
+    while (currentKey) {
+        const table = CHUONG_TRINH_TABLE_MAP[currentKey];
+        if (!table) break;
+        chain.unshift(table);
+        currentKey = table.routeParentKey;
+    }
+
+    return chain;
+}
+
+export function buildRouteParams(tableKey, context = {}) {
+    return getRouteChain(tableKey).reduce((params, table) => {
+        if (context[table.paramKey] !== undefined && context[table.paramKey] !== null && context[table.paramKey] !== '') {
+            params[table.paramKey] = context[table.paramKey];
+        }
+        return params;
+    }, {});
+}

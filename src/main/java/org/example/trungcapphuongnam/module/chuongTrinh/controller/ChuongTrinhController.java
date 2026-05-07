@@ -19,8 +19,12 @@ public class ChuongTrinhController {
     private final ChuongTrinhService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhResponse>>> findAll(Pageable pageable,
+                                                                @RequestParam(required = false) Long nganhId) {
+        Page<ChuongTrinhResponse> result = nganhId == null
+                ? service.findAll(pageable)
+                : service.findAllByNganhId(nganhId, pageable);
+        return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

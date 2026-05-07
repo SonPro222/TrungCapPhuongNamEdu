@@ -29,6 +29,12 @@ public class ChuongTrinhMonServiceImpl implements ChuongTrinhMonService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ChuongTrinhMonResponse> findAllByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable) {
+        return repository.findByChuongTrinhVersionId(chuongTrinhVersionId, pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ChuongTrinhMonResponse findById(Long id) {
         ChuongTrinhMon entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ChuongTrinhMon không tồn tại: " + id));
