@@ -57,7 +57,9 @@ import {
   extractRole,
   extractStatus,
   extractToken,
+  extractPermissions,
   getHomeByRole,
+  saveAuthSession,
 } from '@/utils/authUtils.js';
 
 const router = useRouter();
@@ -105,10 +107,14 @@ const handleLogin = async () => {
       throw new Error('Tài khoản chưa được kích hoạt hoặc đã bị khóa');
     }
 
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('token', token);
-    localStorage.setItem('role', role);
-    localStorage.setItem('user', JSON.stringify(payload));
+    const permissions = extractPermissions(res);
+
+    saveAuthSession({
+      token,
+      role,
+      user: payload,
+      permissions,
+    });
 
     router.replace(getHomeByRole(role));
   } catch (error) {
