@@ -1,4 +1,4 @@
-<!-- src/components/home/HomePage.vue -->
+<!-- src/components/home/Home.vue -->
 <template>
   <section class="home-page">
     <div class="home-left">
@@ -36,7 +36,33 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import LoginPanel from '@/components/login/LoginPage.vue';
+import { getHomeByRole, normalizeRole } from '@/utils/permission.js';
+import { saveAuthSession } from '@/utils/authUtils.js';
+
+const route = useRoute();
+const router = useRouter();
+
+onMounted(() => {
+  const token = route.query.accessToken || route.query.token || route.query.jwt;
+  const role = normalizeRole(route.query.role || route.query.vaiTro || route.query.maVaiTro);
+
+  if (!token || !role) return;
+
+  let permissions = [];
+  if (route.query.permissions) {
+    try {
+      permissions = JSON.parse(route.query.permissions);
+    } catch (error) {
+      permissions = String(route.query.permissions).split(',').map((item) => item.trim()).filter(Boolean);
+    }
+  }
+
+  saveAuthSession({ token, role, user: route.query, permissions });
+  router.replace(getHomeByRole(role));
+});
 </script>
 
 <style scoped>
@@ -50,92 +76,15 @@ import LoginPanel from '@/components/login/LoginPage.vue';
   gap: clamp(24px, 5vw, 70px);
   overflow-x: hidden;
 }
-
-.home-left {
-  min-width: 0;
-}
-
-.badge {
-  width: fit-content;
-  padding: 9px 14px;
-  border-radius: 999px;
-  background: #dbeafe;
-  color: #1d4ed8;
-  font-weight: 900;
-  font-size: 13px;
-  margin-bottom: 18px;
-}
-
-h1 {
-  margin: 0;
-  color: #0f172a;
-  font-size: clamp(34px, 5vw, 64px);
-  line-height: 1.05;
-  font-weight: 950;
-  letter-spacing: -1.5px;
-}
-
-.subtitle {
-  max-width: 760px;
-  color: #475569;
-  font-size: clamp(16px, 2vw, 20px);
-  line-height: 1.7;
-  margin: 22px 0 28px;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
-  gap: 16px;
-}
-
-.card {
-  min-width: 0;
-  padding: 20px;
-  border-radius: 22px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
-}
-
-.card h3 {
-  margin: 0 0 10px;
-  color: #0f172a;
-  font-size: 17px;
-}
-
-.card p {
-  margin: 0;
-  color: #64748b;
-  line-height: 1.55;
-  font-size: 14px;
-}
-
-.home-login {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  min-width: 0;
-}
-
-@media (max-width: 1080px) {
-  .home-page {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .home-login {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 760px) {
-  .cards {
-    grid-template-columns: 1fr;
-  }
-
-  .home-page {
-    padding: 18px;
-  }
-}
+.home-left { min-width: 0; }
+.badge { width: fit-content; padding: 9px 14px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-weight: 900; font-size: 13px; margin-bottom: 18px; }
+h1 { margin: 0; color: #0f172a; font-size: clamp(34px, 5vw, 64px); line-height: 1.05; font-weight: 950; letter-spacing: -1.5px; }
+.subtitle { max-width: 760px; color: #475569; font-size: clamp(16px, 2vw, 20px); line-height: 1.7; margin: 22px 0 28px; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 16px; }
+.card { min-width: 0; padding: 20px; border-radius: 22px; background: white; border: 1px solid #e2e8f0; box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08); }
+.card h3 { margin: 0 0 10px; color: #0f172a; font-size: 17px; }
+.card p { margin: 0; color: #64748b; line-height: 1.55; font-size: 14px; }
+.home-login { width: 100%; display: flex; justify-content: flex-end; min-width: 0; }
+@media (max-width: 1080px) { .home-page { grid-template-columns: 1fr; align-items: start; } .home-login { justify-content: flex-start; } }
+@media (max-width: 760px) { .cards { grid-template-columns: 1fr; } .home-page { padding: 18px; } }
 </style>
