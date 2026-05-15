@@ -29,6 +29,12 @@ public class NhomKienThucServiceImpl implements NhomKienThucService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<NhomKienThucResponse> findAllByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable) {
+        return repository.findByChuongTrinhVersionId(chuongTrinhVersionId, pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public NhomKienThucResponse findById(Long id) {
         NhomKienThuc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("NhomKienThuc không tồn tại: " + id));

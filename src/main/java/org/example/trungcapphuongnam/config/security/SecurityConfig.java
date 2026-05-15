@@ -76,19 +76,20 @@ public class SecurityConfig {
 
                         .requestMatchers(SecurityUrls.PUBLIC_URLS).permitAll()
 
-                        .requestMatchers(SecurityUrls.AUTHENTICATED_URLS).authenticated()
+//                        .requestMatchers(SecurityUrls.AUTHENTICATED_URLS).authenticated()
+//
+//                        .requestMatchers(SecurityUrls.ADMIN_URLS)
+//                        .hasRole(RoleConstant.ADMIN)
+//
+//                        .requestMatchers(SecurityUrls.STUDENT_URLS)
+//                        .hasRole(RoleConstant.SINH_VIEN)
+//
+//                        .requestMatchers(SecurityUrls.LECTURER_URLS)
+//                        .hasRole(RoleConstant.GIAO_VIEN)
+//
+//                        .requestMatchers(SecurityUrls.ACADEMIC_OFFICE_URLS)
+//                        .hasRole(RoleConstant.DAO_TAO)
 
-                        .requestMatchers(SecurityUrls.ADMIN_URLS)
-                        .hasRole(RoleConstant.ADMIN)
-
-                        .requestMatchers(SecurityUrls.STUDENT_URLS)
-                        .hasRole(RoleConstant.SINH_VIEN)
-
-                        .requestMatchers(SecurityUrls.LECTURER_URLS)
-                        .hasRole(RoleConstant.GIAO_VIEN)
-
-                        .requestMatchers(SecurityUrls.ACADEMIC_OFFICE_URLS)
-                        .hasRole(RoleConstant.DAO_TAO)
 
                         .anyRequest().permitAll()
                 )

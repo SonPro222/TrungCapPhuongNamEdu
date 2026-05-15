@@ -29,6 +29,12 @@ public class SyllabusChuongBaiServiceImpl implements SyllabusChuongBaiService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<SyllabusChuongBaiResponse> findAllBySyllabusMonId(Long syllabusMonId, Pageable pageable) {
+        return repository.findBySyllabusMonId(syllabusMonId, pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public SyllabusChuongBaiResponse findById(Long id) {
         SyllabusChuongBai entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SyllabusChuongBai không tồn tại: " + id));
