@@ -1,0 +1,1 @@
+*,*::before,*::after{box-sizing:border-box}html,body,#app{min-height:100%;margin:0}body{font-family:Inter,Arial,sans-serif;font-size:13px;color:#0f172a;background:#f4f6f9}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}table{border-collapse:collapse;width:100%}

@@ -9,7 +9,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 
 // Router
-import router from './router/router.js'
+import router from '@/routerCha/router.js'
 
 const app = createApp(App)
 
