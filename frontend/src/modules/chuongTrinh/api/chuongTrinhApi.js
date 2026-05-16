@@ -1,46 +1,51 @@
-import apiClient from '@/core/api/apiClient';
-import { unwrapListResponse, unwrapResponse } from '@/core/api/axiosClient';
+import apiClient from '@/core/api/apiClient'
 
-const normalizeParams = (params = {}) => {
-  const cleaned = {};
+const BASE_URL = '/chuongTrinh'
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== '' && value !== null && value !== undefined) {
-      cleaned[key] = value;
+function createCrudApi(path) {
+    return {
+        getAll(params = {}) {
+            return apiClient.get(`${BASE_URL}/${path}`, { params })
+        },
+
+        getById(id) {
+            return apiClient.get(`${BASE_URL}/${path}/${id}`)
+        },
+
+        create(payload) {
+            return apiClient.post(`${BASE_URL}/${path}`, payload)
+        },
+
+        update(id, payload) {
+            return apiClient.put(`${BASE_URL}/${path}/${id}`, payload)
+        },
+
+        delete(id) {
+            return apiClient.delete(`${BASE_URL}/${path}/${id}`)
+        }
     }
-  });
-
-  return cleaned;
-};
+}
 
 export const chuongTrinhApi = {
-  async getList(endpoint, params = {}) {
-    const response = await apiClient.get(endpoint, {
-      params: normalizeParams(params),
-    });
+    chuongTrinh: createCrudApi('chuong-trinh'),
+    chuongTrinhVersion: createCrudApi('chuong-trinh-version'),
+    chuongTrinhMon: createCrudApi('chuong-trinh-mon'),
 
-    return unwrapListResponse(response);
-  },
+    monHoc: createCrudApi('mon-hoc'),
+    dieuKienMonHoc: createCrudApi('dieu-kien-mon-hoc'),
+    quyDoiDiem: createCrudApi('quy-doi-diem'),
 
-  async getDetail(endpoint, id) {
-    const response = await apiClient.get(`${endpoint}/${id}`);
-    return unwrapResponse(response);
-  },
+    syllabusChuongTrinh: createCrudApi('syllabus-chuong-trinh'),
+    syllabusMonHoc: createCrudApi('syllabus-mon-hoc'),
+    syllabusChuongBai: createCrudApi('syllabus-chuong-bai'),
+    syllabusTaiLieu: createCrudApi('syllabus-tai-lieu'),
 
-  async create(endpoint, payload) {
-    const response = await apiClient.post(endpoint, payload);
-    return unwrapResponse(response);
-  },
-
-  async update(endpoint, id, payload) {
-    const response = await apiClient.put(`${endpoint}/${id}`, payload);
-    return unwrapResponse(response);
-  },
-
-  async remove(endpoint, id) {
-    const response = await apiClient.delete(`${endpoint}/${id}`);
-    return unwrapResponse(response);
-  },
-};
-
-export const getRecordId = (record, idKey = 'id') => record?.[idKey] ?? record?.id ?? record?.ID ?? record?._id;
+    nhomKienThuc: createCrudApi('nhom-kien-thuc'),
+    mucTieuChuongTrinh: createCrudApi('muc-tieu-chuong-trinh'),
+    nangLucDauRa: createCrudApi('nang-luc-dau-ra'),
+    viTriViecLam: createCrudApi('vi-tri-viec-lam'),
+    dieuKienTotNghiep: createCrudApi('dieu-kien-tot-nghiep'),
+    nhomTuChon: createCrudApi('nhom-tu-chon'),
+    monTuChon: createCrudApi('mon-tu-chon'),
+    monTienQuyet: createCrudApi('mon-tien-quyet')
+}

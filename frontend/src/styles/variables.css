@@ -1,0 +1,15 @@
+/*variables.css*/
+
+:root {
+    --color-primary: #0f4c81;
+    --color-primary-dark: #0b365c;
+    --color-danger: #dc3545;
+    --color-border: #e5e7eb;
+    --color-bg: #f5f7fb;
+    --color-white: #ffffff;
+    --color-text: #1f2937;
+    --color-muted: #6b7280;
+
+    --header-height: 60px;
+    --radius: 8px;
+}

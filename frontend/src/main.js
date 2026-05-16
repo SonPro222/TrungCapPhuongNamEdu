@@ -1,9 +1,9 @@
-import './assets/main.css'
 
 // Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-
+//css
+import './styles/main.css'
 // Vue
 import { createApp } from 'vue'
 import App from './App.vue'
