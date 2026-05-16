@@ -1,64 +1,133 @@
-import ChuongTrinhDanhSach from '@/modules/chuongTrinh/pages/admin/danhSach/ChuongTrinhDanhSach.vue';
-import ChuongTrinhDaoTaoHome from '@/modules/chuongTrinh/pages/luongChuongTrinh/ChuongTrinhDaoTaoHome.vue';
-import ChiTietChuongTrinhDaoTao from '@/modules/chuongTrinh/pages/luongChuongTrinh/ChiTietChuongTrinhDaoTao.vue';
-import DanhSachPhienBanChuongTrinh from '@/modules/chuongTrinh/pages/luongChuongTrinh/DanhSachPhienBanChuongTrinh.vue';
-import ChiTietPhienBanChuongTrinh from '@/modules/chuongTrinh/pages/luongChuongTrinh/ChiTietPhienBanChuongTrinh.vue';
-import KhungChuongTrinhDaoTao from '@/modules/chuongTrinh/pages/luongChuongTrinh/KhungChuongTrinhDaoTao.vue';
-import ChiTietMonHocChuongTrinh from '@/modules/chuongTrinh/pages/luongChuongTrinh/ChiTietMonHocChuongTrinh.vue';
-import { CHUONG_TRINH_RESOURCES, CHUONG_TRINH_RESOURCE_KEYS } from '@/modules/chuongTrinh/constants/trangThaiChuongTrinh.js';
+import ChuongTrinhLayout from './layouts/ChuongTrinhLayout.vue'
 
-export default [
-  { path: '/chuong-trinh', redirect: '/quy-trinh/chuong-trinh' },
-  {
-    path: '/quy-trinh/chuong-trinh',
-    name: 'quy-trinh-chuong-trinh',
-    component: ChuongTrinhDaoTaoHome,
-    meta: { moduleKey: 'chuongTrinh', title: 'Chương trình' },
-  },
-
-
-  {
-    path: '/quy-trinh/chuong-trinh/:chuongTrinhId(\\d+)',
-    name: 'chi-tiet-chuong-trinh-dao-tao',
-    component: ChiTietChuongTrinhDaoTao,
-    meta: { moduleKey: 'chuongTrinh', title: 'Chi tiết chương trình' },
-  },
-  {
-    path: '/quy-trinh/chuong-trinh/:chuongTrinhId(\\d+)/phien-ban',
-    name: 'danh-sach-phien-ban-chuong-trinh',
-    component: DanhSachPhienBanChuongTrinh,
-    meta: { moduleKey: 'chuongTrinh', title: 'Phiên bản' },
-  },
-  {
-    path: '/quy-trinh/chuong-trinh/:chuongTrinhId(\\d+)/phien-ban/:versionId(\\d+)',
-    name: 'chi-tiet-phien-ban-chuong-trinh',
-    component: ChiTietPhienBanChuongTrinh,
-    meta: { moduleKey: 'chuongTrinh', title: 'Chi tiết phiên bản' },
-  },
-  {
-    path: '/quy-trinh/chuong-trinh/:chuongTrinhId(\\d+)/phien-ban/:versionId(\\d+)/khung',
-    name: 'khung-chuong-trinh-dao-tao',
-    component: KhungChuongTrinhDaoTao,
-    meta: { moduleKey: 'chuongTrinh', title: 'Khung chương trình' },
-  },
-  {
-    path: '/quy-trinh/chuong-trinh/:chuongTrinhId(\\d+)/phien-ban/:versionId(\\d+)/mon/:chuongTrinhMonId(\\d+)',
-    name: 'chi-tiet-mon-hoc-chuong-trinh',
-    component: ChiTietMonHocChuongTrinh,
-    meta: { moduleKey: 'chuongTrinh', title: 'Chi tiết môn học' },
-  },
-  {
-    path: '/du-lieu/chuong-trinh',
-    redirect: '/du-lieu/chuong-trinh/chuong-trinh',
-  },
-  ...CHUONG_TRINH_RESOURCES.map((resource) => ({
-    path: `/du-lieu/chuong-trinh/${resource.segment}`,
-    name: `du-lieu-chuong-trinh-${resource.segment}`,
-    component: ChuongTrinhDanhSach,
-    meta: { moduleKey: 'chuongTrinh', resourceKey: resource.key, title: resource.title },
-  })),
-  ...CHUONG_TRINH_RESOURCES.map((resource) => ({
-    path: `/chuong-trinh/quan-ly/${resource.segment}`,
-    redirect: `/du-lieu/chuong-trinh/${resource.segment}`,
-  })),
-];
+import AdminChuongTrinhPage from './pages/AdminChuongTrinhPage.vue'
+import AdminChuongTrinhVersionPage from './pages/AdminChuongTrinhVersionPage.vue'
+import AdminChuongTrinhMonPage from './pages/AdminChuongTrinhMonPage.vue'
+import AdminNhomKienThucPage from './pages/AdminNhomKienThucPage.vue'
+import AdminMucTieuChuongTrinhPage from './pages/AdminMucTieuChuongTrinhPage.vue'
+import AdminNangLucDauRaPage from './pages/AdminNangLucDauRaPage.vue'
+import AdminViTriViecLamPage from './pages/AdminViTriViecLamPage.vue'
+import AdminDieuKienTotNghiepPage from './pages/AdminDieuKienTotNghiepPage.vue'
+import AdminNhomTuChonPage from './pages/AdminNhomTuChonPage.vue'
+import AdminMonTuChonPage from './pages/AdminMonTuChonPage.vue'
+import AdminMonTienQuyetPage from './pages/AdminMonTienQuyetPage.vue'
+import AdminMonHocPage from './pages/AdminMonHocPage.vue'
+import AdminDieuKienMonHocPage from './pages/AdminDieuKienMonHocPage.vue'
+import AdminQuyDoiDiemPage from './pages/AdminQuyDoiDiemPage.vue'
+import AdminSyllabusChuongTrinhPage from './pages/AdminSyllabusChuongTrinhPage.vue'
+import AdminSyllabusMonHocPage from './pages/AdminSyllabusMonHocPage.vue'
+import AdminSyllabusChuongBaiPage from './pages/AdminSyllabusChuongBaiPage.vue'
+import AdminSyllabusTaiLieuPage from './pages/AdminSyllabusTaiLieuPage.vue'
+import { ROLES } from '@/core/constants/roles'
+import { requireAuth } from '@/core/guards/authGuard'
+import { requireAdmin } from '@/core/guards/adminGuard'
+import AdminXayDungChuongTrinhPage from './pages/AdminXayDungChuongTrinhPage.vue'
+export const chuongTrinhRoutes = [
+    {
+        path: 'chuong-trinh',
+        component: ChuongTrinhLayout,
+        beforeEnter: [requireAuth, requireAdmin],
+        meta: {
+            module: 'chuongTrinh',
+            title: 'Chương trình',
+            roles: [ROLES.ADMIN, ROLES.DAO_TAO]
+        },
+        children: [
+            {
+                path: '',
+                name: 'ChuongTrinh.ChuongTrinh',
+                component: AdminChuongTrinhPage
+            },
+            {
+                path: 'version',
+                name: 'ChuongTrinh.Version',
+                component: AdminChuongTrinhVersionPage
+            },
+            {
+                path: 'mon',
+                name: 'ChuongTrinh.Mon',
+                component: AdminChuongTrinhMonPage
+            },
+            {
+                path: 'nhom-kien-thuc',
+                name: 'ChuongTrinh.NhomKienThuc',
+                component: AdminNhomKienThucPage
+            },
+            {
+                path: 'muc-tieu',
+                name: 'ChuongTrinh.MucTieu',
+                component: AdminMucTieuChuongTrinhPage
+            },
+            {
+                path: 'nang-luc-dau-ra',
+                name: 'ChuongTrinh.NangLucDauRa',
+                component: AdminNangLucDauRaPage
+            },
+            {
+                path: 'vi-tri-viec-lam',
+                name: 'ChuongTrinh.ViTriViecLam',
+                component: AdminViTriViecLamPage
+            },
+            {
+                path: 'dieu-kien-tot-nghiep',
+                name: 'ChuongTrinh.DieuKienTotNghiep',
+                component: AdminDieuKienTotNghiepPage
+            },
+            {
+                path: 'nhom-tu-chon',
+                name: 'ChuongTrinh.NhomTuChon',
+                component: AdminNhomTuChonPage
+            },
+            {
+                path: 'mon-tu-chon',
+                name: 'ChuongTrinh.MonTuChon',
+                component: AdminMonTuChonPage
+            },
+            {
+                path: 'mon-tien-quyet',
+                name: 'ChuongTrinh.MonTienQuyet',
+                component: AdminMonTienQuyetPage
+            },
+            {
+                path: 'mon-hoc',
+                name: 'ChuongTrinh.MonHoc',
+                component: AdminMonHocPage
+            },
+            {
+                path: 'dieu-kien-mon-hoc',
+                name: 'ChuongTrinh.DieuKienMonHoc',
+                component: AdminDieuKienMonHocPage
+            },
+            {
+                path: 'quy-doi-diem',
+                name: 'ChuongTrinh.QuyDoiDiem',
+                component: AdminQuyDoiDiemPage
+            },
+            {
+                path: 'syllabus-chuong-trinh',
+                name: 'ChuongTrinh.SyllabusChuongTrinh',
+                component: AdminSyllabusChuongTrinhPage
+            },
+            {
+                path: 'syllabus-mon-hoc',
+                name: 'ChuongTrinh.SyllabusMonHoc',
+                component: AdminSyllabusMonHocPage
+            },
+            {
+                path: 'syllabus-chuong-bai',
+                name: 'ChuongTrinh.SyllabusChuongBai',
+                component: AdminSyllabusChuongBaiPage
+            },
+            {
+                path: 'syllabus-tai-lieu',
+                name: 'ChuongTrinh.SyllabusTaiLieu',
+                component: AdminSyllabusTaiLieuPage
+            },
+            {
+                path: 'xay-dung',
+                name: 'ChuongTrinh.XayDung',
+                component: AdminXayDungChuongTrinhPage
+            }
+        ]
+    }
+]

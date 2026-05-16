@@ -1,0 +1,219 @@
+/* global.css
+   CSS nền toàn hệ thống:
+   reset, body, link, input/button mặc định, layout admin/auth.
+   Không viết CSS của shared component hoặc module ở đây.
+*/
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+}
+
+.admin-header {
+    height: var(--header-height);
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 24px;
+}
+
+.admin-brand {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+}
+
+.admin-nav a {
+    color: white;
+}
+
+.admin-auth {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-main {
+    padding: 24px;
+}
+
+.auth-layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+}
+
+.auth-public-panel {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 64px;
+}
+
+.auth-form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    padding: 24px;
+}
+
+.error-text {
+    color: var(--color-danger);
+}
+/*==================LOGIN===================*/
+.login-divider {
+    text-align: center;
+    color: var(--color-muted);
+    margin: 8px 0;
+}.login-box {
+     width: 100%;
+     max-width: 380px;
+
+     background: white;
+
+     border-radius: 20px;
+
+     padding: 40px;
+
+     border: 1px solid var(--color-border);
+
+     box-shadow:
+             0 10px 30px rgba(0,0,0,0.08);
+
+     display: flex;
+     flex-direction: column;
+     gap: 18px;
+ }
+
+.login-header {
+    margin-bottom: 8px;
+}
+
+.login-header h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.login-header p {
+    margin-top: 8px;
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+.login-box input {
+    height: 44px;
+
+    border-radius: 10px;
+
+    border: 1px solid var(--color-border);
+
+    transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
+}
+
+.login-box input:focus {
+    outline: none;
+
+    border-color: var(--color-primary);
+
+    box-shadow:
+            0 0 0 4px rgba(15, 76, 129, 0.12);
+}
+
+.login-submit {
+    height: 46px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--color-primary);
+
+    color: white;
+
+    font-weight: 600;
+
+    transition:
+            transform 0.15s,
+            opacity 0.2s;
+}
+
+.login-submit:hover {
+    opacity: 0.95;
+}
+
+.login-submit:active {
+    transform: scale(0.99);
+}
+
+.login-divider {
+    position: relative;
+
+    text-align: center;
+
+    margin: 6px 0;
+
+    color: var(--color-muted);
+
+    font-size: 14px;
+}
+
+.login-divider::before {
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+    top: 50%;
+
+    width: 100%;
+    height: 1px;
+
+    background: var(--color-border);
+
+    z-index: 1;
+}
+
+.login-divider span {
+    position: relative;
+
+    z-index: 2;
+
+    background: white;
+
+    padding: 0 12px;
+}
