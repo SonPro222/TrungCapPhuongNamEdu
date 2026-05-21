@@ -1,33 +1,14 @@
 import { daoTaoApi } from '../api/daoTaoApi'
+import { normalizePage } from '@/modules/chuongTrinh/services/chuongTrinhService'
 
-function normalizePage(res) {
-    if (Array.isArray(res)) {
-        return {
-            items: res,
-            totalElements: res.length,
-            totalPages: 1,
-            page: 0,
-            size: res.length
-        }
-    }
+function cleanPayload(payload = {}) {
+    const out = {}
 
-    if (Array.isArray(res?.content)) {
-        return {
-            items: res.content,
-            totalElements: res.totalElements || 0,
-            totalPages: res.totalPages || 0,
-            page: res.number || 0,
-            size: res.size || 10
-        }
-    }
+    Object.entries(payload).forEach(([key, value]) => {
+        out[key] = value === '' ? null : value
+    })
 
-    return {
-        items: [],
-        totalElements: 0,
-        totalPages: 0,
-        page: 0,
-        size: 10
-    }
+    return out
 }
 
 function createCrudService(api) {
@@ -42,11 +23,11 @@ function createCrudService(api) {
         },
 
         async create(payload) {
-            return await api.create(payload)
+            return await api.create(cleanPayload(payload))
         },
 
         async update(id, payload) {
-            return await api.update(id, payload)
+            return await api.update(id, cleanPayload(payload))
         },
 
         async delete(id) {
@@ -59,7 +40,7 @@ export const daoTaoService = {
     nganh: createCrudService(daoTaoApi.nganh),
     trinhDoDaoTao: createCrudService(daoTaoApi.trinhDoDaoTao),
     loaiChuongTrinh: createCrudService(daoTaoApi.loaiChuongTrinh),
-    khoaDaoTao: createCrudService(daoTaoApi.khoaDaoTao),
     khungKy: createCrudService(daoTaoApi.khungKy),
+    khoaDaoTao: createCrudService(daoTaoApi.khoaDaoTao),
     lopHanhChinh: createCrudService(daoTaoApi.lopHanhChinh)
 }

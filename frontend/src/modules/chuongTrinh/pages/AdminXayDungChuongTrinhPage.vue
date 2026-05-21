@@ -1,902 +1,1106 @@
 <template>
-  <div class="build-page">
-    <aside class="build-sidebar">
-      <div class="build-sidebar-header">
-        <h3>Danh sách chương trình đào tạo</h3>
-
-        <FormInput
-            v-model="keyword"
-            placeholder="Tìm kiếm chương trình..."
-        />
-      </div>
-
-      <div class="program-list">
-        <button
-            v-for="ct in filteredChuongTrinhs"
-            :key="ct.id"
-            type="button"
-            class="program-card"
-            :class="{ active: buildState.chuongTrinh.selectedId === ct.id }"
-            @click="selectChuongTrinh(ct)"
-        >
-          <strong>{{ ct.tenChuongTrinh }}</strong>
-          <span>{{ ct.maChuongTrinh }}</span>
-          <small>{{ ct.tenNganh }} - {{ ct.tenTrinhDo }} - {{ ct.tenLoaiChuongTrinh }}</small>
-        </button>
-      </div>
-    </aside>
-
-    <section class="build-content">
-      <div class="build-toolbar">
+  <div class="xay-dung-page">
+    <header class="page-head">
+      <div>
         <h2>Xây dựng chương trình đào tạo</h2>
+        <p>Trang này dùng để chọn dữ liệu có sẵn hoặc tạo mới theo luồng. Tạo/chọn cha trước rồi tiếp tục tạo/chọn con.</p>
+      </div>
+      <div class="head-actions">
+        <button type="button" class="btn" @click="lamMoiLuon">Làm mới luồng nhập</button>
+        <button type="button" class="btn primary" @click="luuChuongTrinhTong">Lưu chương trình</button>
+      </div>
+    </header>
 
-        <div class="toolbar-actions">
-          <BaseButton label="Hủy" @click="resetAll" />
-          <BaseButton
-              label="Lưu toàn bộ"
-              variant="primary"
-              :loading="saving"
-              @click="saveAll"
-          />
-        </div>
+    <div v-if="thongBao" :class="['notice', loaiThongBao]">{{ thongBao }}</div>
+    <div v-if="errorMessage" class="notice error">{{ errorMessage }}</div>
+
+    <div class="flow-summary mini-scroll">
+      <span>Ngành: <b>{{ selected.nganh?.tenNganh || '-' }}</b></span>
+      <span>Trình độ: <b>{{ selected.trinhDoDaoTao?.tenTrinhDo || '-' }}</b></span>
+      <span>Loại CT: <b>{{ selected.loaiChuongTrinh?.tenLoai || '-' }}</b></span>
+      <span>CTĐT: <b>{{ selected.chuongTrinh?.tenChuongTrinh || '-' }}</b></span>
+      <span>Version: <b>{{ selected.chuongTrinhVersion?.tenVersion || '-' }}</b></span>
+      <span>Kỳ: <b>{{ selected.khungKy?.tenKy || '-' }}</b></span>
+      <span>Nhóm KT: <b>{{ selected.nhomKienThuc?.ten || '-' }}</b></span>
+      <span>Nhóm tự chọn: <b>{{ selected.nhomTuChon?.ten || '-' }}</b></span>
+      <span>Môn học: <b>{{ selected.monHoc?.tenMon || '-' }}</b></span>
+      <span>Môn CT: <b>{{ selected.chuongTrinhMon?.maMonTrongCt || '-' }}</b></span>
+      <span>Syllabus môn: <b>{{ selected.syllabusMonHoc?.id || '-' }}</b></span>
+    </div>
+
+    <section v-for="group in groups" :key="group.key" class="flow-group">
+      <div class="group-title">
+        <h3>{{ group.title }}</h3>
+        <p>{{ group.description }}</p>
       </div>
 
-      <BuildSection
-          title="1. Ngành"
-          description="Chọn ngành làm nền cho chương trình"
-          :locked="buildState.nganh.locked"
-          @save="saveStage('nganh')"
-          @toggle-lock="toggleStageLock('nganh')"
-      >
-        <div class="readonly-box">
-          {{ selectedChuongTrinh?.tenNganh || 'Chọn chương trình ở danh sách bên trái' }}
-        </div>
-      </BuildSection>
-
-      <template v-if="buildState.nganh.locked">
-        <BuildSection
-            title="2. Trình độ đào tạo + Loại chương trình"
-            description="Xác nhận trình độ và loại chương trình"
-            :locked="buildState.trinhDoLoai.locked"
-            @save="saveStage('trinhDoLoai')"
-            @toggle-lock="toggleStageLock('trinhDoLoai')"
-        >
-          <DataTable
-              :columns="trinhDoLoaiColumns"
-              :items="selectedChuongTrinh ? [selectedChuongTrinh] : []"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.trinhDoLoai.locked">
-        <BuildSection
-            title="3. Chương trình đào tạo"
-            description="Xác nhận chương trình đào tạo"
-            :locked="buildState.chuongTrinh.locked"
-            @save="saveStage('chuongTrinh')"
-            @toggle-lock="toggleStageLock('chuongTrinh')"
-        >
-          <DataTable
-              :columns="chuongTrinhColumns"
-              :items="selectedChuongTrinh ? [selectedChuongTrinh] : []"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.chuongTrinh.locked">
-        <BuildSection
-            title="4. Phiên bản chương trình"
-            description="Chọn một phiên bản để xây dựng chi tiết"
-            :locked="buildState.version.locked"
-            @save="saveStage('version')"
-            @toggle-lock="toggleStageLock('version')"
-        >
-          <DataTable
-              :columns="versionColumns"
-              :items="versions"
-              :loading="loading"
-          >
-            <template #actions="{ item }">
-              <input
-                  type="radio"
-                  name="selectedVersion"
-                  :checked="buildState.version.selectedId === item.id"
-                  :disabled="buildState.version.locked"
-                  @change="selectVersion(item)"
-              />
-            </template>
-          </DataTable>
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.version.locked">
-        <BuildSection
-            title="5. Khung kỳ / học kỳ"
-            description="Chọn các học kỳ thuộc phiên bản đã khóa"
-            :locked="buildState.khungKy.locked"
-            @save="saveStage('khungKy')"
-            @toggle-lock="toggleStageLock('khungKy')"
-        >
-          <DataTable
-              :columns="khungKyColumns"
-              :items="khungKys"
-              :loading="loading"
-          >
-            <template #actions="{ item }">
-              <input
-                  type="checkbox"
-                  :checked="isChecked('khungKy', item.id)"
-                  :disabled="buildState.khungKy.locked"
-                  @change="toggleCheck('khungKy', item.id)"
-              />
-            </template>
-          </DataTable>
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.khungKy.locked">
-        <BuildSection
-            title="6. Nhóm kiến thức"
-            description="Chọn nhóm kiến thức thuộc phiên bản"
-            :locked="buildState.nhomKienThuc.locked"
-            @save="saveStage('nhomKienThuc')"
-            @toggle-lock="toggleStageLock('nhomKienThuc')"
-        >
-          <DataTable
-              :columns="nhomKienThucColumns"
-              :items="nhomKienThucs"
-              :loading="loading"
-          >
-            <template #actions="{ item }">
-              <input
-                  type="checkbox"
-                  :checked="isChecked('nhomKienThuc', item.id)"
-                  :disabled="buildState.nhomKienThuc.locked"
-                  @change="toggleCheck('nhomKienThuc', item.id)"
-              />
-            </template>
-          </DataTable>
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.nhomKienThuc.locked">
-        <BuildSection
-            title="7. Môn học trong chương trình"
-            description="Chọn môn học theo khung kỳ và nhóm kiến thức"
-            :locked="buildState.chuongTrinhMon.locked"
-            @save="saveStage('chuongTrinhMon')"
-            @toggle-lock="toggleStageLock('chuongTrinhMon')"
-        >
-          <DataTable
-              :columns="chuongTrinhMonColumns"
-              :items="chuongTrinhMons"
-              :loading="loading"
-          >
-            <template #actions="{ item }">
-              <input
-                  type="checkbox"
-                  :checked="isChecked('chuongTrinhMon', item.id)"
-                  :disabled="buildState.chuongTrinhMon.locked"
-                  @change="toggleCheck('chuongTrinhMon', item.id)"
-              />
-            </template>
-          </DataTable>
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.chuongTrinhMon.locked">
-        <BuildSection
-            title="8. Môn tự chọn / môn tiên quyết / điều kiện môn"
-            description="Các bảng liên quan trực tiếp đến môn trong chương trình"
-            :locked="buildState.monLienQuan.locked"
-            @save="saveStage('monLienQuan')"
-            @toggle-lock="toggleStageLock('monLienQuan')"
-        >
-          <DataTable
-              :columns="monTuChonColumns"
-              :items="monTuChons"
-              :loading="loading"
-          />
-
-          <DataTable
-              :columns="monTienQuyetColumns"
-              :items="monTienQuyets"
-              :loading="loading"
-          />
-
-          <DataTable
-              :columns="dieuKienMonHocColumns"
-              :items="dieuKienMonHocs"
-              :loading="loading"
-          />
-
-          <DataTable
-              :columns="quyDoiDiemColumns"
-              :items="quyDoiDiems"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.monLienQuan.locked">
-        <BuildSection
-            title="9. Syllabus môn học"
-            description="Syllabus theo từng môn trong chương trình"
-            :locked="buildState.syllabusMonHoc.locked"
-            @save="saveStage('syllabusMonHoc')"
-            @toggle-lock="toggleStageLock('syllabusMonHoc')"
-        >
-          <DataTable
-              :columns="syllabusMonHocColumns"
-              :items="syllabusMonHocs"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.syllabusMonHoc.locked">
-        <BuildSection
-            title="10. Chương bài + tài liệu"
-            description="Chi tiết chương bài và tài liệu theo syllabus môn"
-            :locked="buildState.syllabusChiTiet.locked"
-            @save="saveStage('syllabusChiTiet')"
-            @toggle-lock="toggleStageLock('syllabusChiTiet')"
-        >
-          <DataTable
-              :columns="syllabusChuongBaiColumns"
-              :items="syllabusChuongBais"
-              :loading="loading"
-          />
-
-          <DataTable
-              :columns="syllabusTaiLieuColumns"
-              :items="syllabusTaiLieus"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.syllabusChiTiet.locked">
-        <BuildSection
-            title="11. Mục tiêu / năng lực đầu ra / vị trí việc làm / điều kiện tốt nghiệp"
-            description="Nhóm chuẩn đầu ra và điều kiện tốt nghiệp của phiên bản"
-            :locked="buildState.chuanDauRa.locked"
-            @save="saveStage('chuanDauRa')"
-            @toggle-lock="toggleStageLock('chuanDauRa')"
-        >
-          <DataTable
-              :columns="mucTieuColumns"
-              :items="mucTieus"
-              :loading="loading"
-          />
-
-          <DataTable
-              :columns="nangLucColumns"
-              :items="nangLucDauRas"
-              :loading="loading"
-          />
-
-          <DataTable
-              :columns="viTriColumns"
-              :items="viTriViecLams"
-              :loading="loading"
-          />
-
-          <DataTable
-              :columns="dieuKienColumns"
-              :items="dieuKienTotNghieps"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.chuanDauRa.locked">
-        <BuildSection
-            title="12. Syllabus chương trình"
-            description="Syllabus tổng cấp phiên bản chương trình"
-            :locked="buildState.syllabusChuongTrinh.locked"
-            @save="saveStage('syllabusChuongTrinh')"
-            @toggle-lock="toggleStageLock('syllabusChuongTrinh')"
-        >
-          <DataTable
-              :columns="syllabusChuongTrinhColumns"
-              :items="syllabusChuongTrinhs"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
-
-      <template v-if="buildState.syllabusChuongTrinh.locked">
-        <BuildSection
-            title="13. Khóa đào tạo + Lớp hành chính"
-            description="Tổ chức lớp hành chính theo khóa đào tạo"
-            :locked="buildState.toChucDaoTao.locked"
-            @save="saveStage('toChucDaoTao')"
-            @toggle-lock="toggleStageLock('toChucDaoTao')"
-        >
-          <DataTable
-              :columns="lopColumns"
-              :items="lopHanhChinhs"
-              :loading="loading"
-          />
-        </BuildSection>
-      </template>
+      <BangThemNghiepVu
+          v-for="bang in group.tables"
+          :key="bang.key"
+          v-bind="bang.config"
+          :items="bang.rows"
+          :all-items="bang.allRows"
+          :lookups="lookups"
+          :service="bang.service"
+          :selected-id="bang.selectedId"
+          :selected-ids="bang.selectedIds"
+          :saved-ids="bang.savedIds"
+          :can-toggle-save="bang.canToggleSave"
+          :viewed-id="bang.viewedId"
+          :parent-values="bang.parentValues"
+          :parent-text="bang.parentText"
+          :disabled="bang.disabled"
+          :disabled-text="bang.disabledText"
+          :loai-bang="bang.loaiBang"
+          @select="chonDongBang(bang, $event)"
+          @view="xemDongBang(bang, $event)"
+          @toggle-save="luuDongBang(bang, $event)"
+          @saved="sauKhiLuu(bang.key, $event)"
+          @deleted="sauKhiXoa(bang.key, $event)"
+          @notify="baoTin"
+      />
     </section>
+
+    <footer class="page-foot">
+      <button type="button" class="btn primary" @click="luuChuongTrinhTong">Lưu chương trình</button>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed } from 'vue'
+import BangThemNghiepVu from '../components/BangThemNghiepVu.vue'
+import { useXayDungChuongTrinh } from '../composables/useXayDungChuongTrinh'
 
-import DataTable from '@/shared/components/DataTable.vue'
-import BaseButton from '@/shared/components/BaseButton.vue'
-import FormInput from '@/shared/components/FormInput.vue'
+const {
+  thongBao,
+  loaiThongBao,
+  errorMessage,
+  selected,
+  viewed,
+  duLieu,
+  lookups,
+  services,
+  baoTin,
+  selectEntity,
+  viewEntity,
+  chonBangPhuVaoLuong,
+  toggleLuuBangPhu,
+  sauKhiLuu,
+  sauKhiXoa,
+  lamMoiLuon,
+  luuChuongTrinhTong
+} = useXayDungChuongTrinh()
 
-import { daoTaoService } from '@/modules/daoTao/services/daoTaoService'
-import { chuongTrinhService } from '../services/chuongTrinhService'
-import BuildSection from '../components/BuildSection.vue'
+const chuongTrinhParent = computed(() => ({
+  nganhId: selected.nganh?.id || null,
+  trinhDoId: selected.trinhDoDaoTao?.id || null,
+  loaiChuongTrinhId: selected.loaiChuongTrinh?.id || null
+}))
 
-const loading = ref(false)
-const saving = ref(false)
-const keyword = ref('')
-
-const chuongTrinhs = ref([])
-const versions = ref([])
-const khungKys = ref([])
-const nhomKienThucs = ref([])
-const chuongTrinhMons = ref([])
-const monTuChons = ref([])
-const monTienQuyets = ref([])
-const dieuKienMonHocs = ref([])
-const quyDoiDiems = ref([])
-const mucTieus = ref([])
-const nangLucDauRas = ref([])
-const viTriViecLams = ref([])
-const dieuKienTotNghieps = ref([])
-const syllabusChuongTrinhs = ref([])
-const syllabusMonHocs = ref([])
-const syllabusChuongBais = ref([])
-const syllabusTaiLieus = ref([])
-const lopHanhChinhs = ref([])
-
-const selectedChuongTrinh = ref(null)
-const selectedVersion = ref(null)
-
-const buildState = reactive({
-  nganh: { selectedId: null, selectedIds: [], locked: false },
-  trinhDoLoai: { selectedId: null, selectedIds: [], locked: false },
-  chuongTrinh: { selectedId: null, selectedIds: [], locked: false },
-  version: { selectedId: null, selectedIds: [], locked: false },
-  khungKy: { selectedId: null, selectedIds: [], locked: false },
-  nhomKienThuc: { selectedId: null, selectedIds: [], locked: false },
-  chuongTrinhMon: { selectedId: null, selectedIds: [], locked: false },
-  monLienQuan: { selectedId: null, selectedIds: [], locked: false },
-  syllabusMonHoc: { selectedId: null, selectedIds: [], locked: false },
-  syllabusChiTiet: { selectedId: null, selectedIds: [], locked: false },
-  chuanDauRa: { selectedId: null, selectedIds: [], locked: false },
-  syllabusChuongTrinh: { selectedId: null, selectedIds: [], locked: false },
-  toChucDaoTao: { selectedId: null, selectedIds: [], locked: false }
+const chuongTrinhParentText = computed(() => {
+  return `Đang chọn: Ngành ${selected.nganh?.tenNganh || '-'} | Trình độ ${selected.trinhDoDaoTao?.tenTrinhDo || '-'} | Loại CT ${selected.loaiChuongTrinh?.tenLoai || '-'}`
 })
 
-const filteredChuongTrinhs = computed(() => {
-  if (!keyword.value) return chuongTrinhs.value
+const chuongTrinhVersionParent = computed(() => ({
+  chuongTrinhId: selected.chuongTrinh?.id || null
+}))
 
-  return chuongTrinhs.value.filter((item) => {
-    const text = `${item.maChuongTrinh} ${item.tenChuongTrinh}`.toLowerCase()
-    return text.includes(keyword.value.toLowerCase())
-  })
+const chuongTrinhVersionParentText = computed(() => {
+  return `Đang chọn: Chương trình ${selected.chuongTrinh?.maChuongTrinh || '-'} - ${selected.chuongTrinh?.tenChuongTrinh || '-'}`
 })
 
-const trinhDoLoaiColumns = [
-  { key: 'tenTrinhDo', label: 'Trình độ đào tạo' },
-  { key: 'tenLoaiChuongTrinh', label: 'Loại chương trình' }
-]
+const versionParent = computed(() => ({
+  chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null
+}))
 
-const chuongTrinhColumns = [
-  { key: 'maChuongTrinh', label: 'Mã chương trình' },
-  { key: 'tenChuongTrinh', label: 'Tên chương trình' },
-  { key: 'tenNganh', label: 'Ngành' }
-]
+const versionParentText = computed(() => {
+  return `Đang chọn: Version ${selected.chuongTrinhVersion?.maVersion || '-'} - ${selected.chuongTrinhVersion?.tenVersion || '-'}`
+})
 
-const versionColumns = [
-  { key: 'maVersion', label: 'Mã version' },
-  { key: 'tenVersion', label: 'Tên version' },
-  { key: 'ngayApDung', label: 'Ngày áp dụng' }
-]
+const khungKyParent = computed(() => ({
+  chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
+  loaiChuongTrinhId: selected.loaiChuongTrinh?.id || null
+}))
 
-const khungKyColumns = [
-  { key: 'maKy', label: 'Mã kỳ' },
-  { key: 'tenKy', label: 'Tên kỳ' },
-  { key: 'thuTu', label: 'Thứ tự' }
-]
+const khungKyParentText = computed(() => {
+  return `Đang chọn: Version ${selected.chuongTrinhVersion?.tenVersion || '-'} | Loại CT ${selected.loaiChuongTrinh?.tenLoai || '-'}`
+})
 
-const nhomKienThucColumns = [
-  { key: 'ma', label: 'Mã nhóm' },
-  { key: 'ten', label: 'Tên nhóm' },
-  { key: 'tongTinChi', label: 'Số tín chỉ' }
-]
+const monHocParentText = computed(() => {
+  return `Đang chọn: Version ${selected.chuongTrinhVersion?.tenVersion || '-'} | Tạo môn học gốc trước khi tạo Chương trình môn`
+})
 
-const chuongTrinhMonColumns = [
-  { key: 'maMonTrongCt', label: 'Mã môn CT' },
-  { key: 'tenMon', label: 'Tên môn học' },
-  { key: 'tenNhomKienThuc', label: 'Nhóm kiến thức' },
-  { key: 'tenKy', label: 'Học kỳ' },
-  { key: 'soTinChi', label: 'Số tín chỉ' }
-]
+const chuongTrinhMonParent = computed(() => ({
+  chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
+  monHocId: selected.monHoc?.id || null,
+  khungKyId: selected.khungKy?.id || null,
+  nhomKienThucId: selected.nhomKienThuc?.id || null
+}))
 
-const monTuChonColumns = [
-  { key: 'tenNhomTuChon', label: 'Nhóm tự chọn' },
-  { key: 'tenChuongTrinhMon', label: 'Môn tự chọn' }
-]
+const chuongTrinhMonFilter = computed(() => ({
+  chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
+  khungKyId: selected.khungKy?.id || null,
+  nhomKienThucId: selected.nhomKienThuc?.id || null
+}))
 
-const monTienQuyetColumns = [
-  { key: 'tenMon', label: 'Môn' },
-  { key: 'tenMonDieuKien', label: 'Môn điều kiện' },
-  { key: 'loai', label: 'Loại' }
-]
+const chuongTrinhMonParentText = computed(() => {
+  return `Đang chọn: Version ${selected.chuongTrinhVersion?.tenVersion || '-'} | Môn học ${selected.monHoc?.tenMon || '-'} | Kỳ ${selected.khungKy?.tenKy || '-'} | Nhóm KT ${selected.nhomKienThuc?.ten || '-'}`
+})
 
-const dieuKienMonHocColumns = [
-  { key: 'tenSyllabusMon', label: 'Syllabus môn' },
-  { key: 'loai', label: 'Loại' },
-  { key: 'noiDung', label: 'Nội dung' }
-]
+const monTuChonParent = computed(() => ({
+  nhomId: selected.nhomTuChon?.id || null,
+  chuongTrinhMonId: selected.chuongTrinhMon?.id || null
+}))
 
-const quyDoiDiemColumns = [
-  { key: 'tenChuongTrinhMon', label: 'Môn trong CT' },
-  { key: 'nguongTu', label: 'Ngưỡng từ' },
-  { key: 'nguongDen', label: 'Ngưỡng đến' },
-  { key: 'diemQuyDoi', label: 'Điểm quy đổi' }
-]
+const monTuChonParentText = computed(() => {
+  return `Đang chọn: Nhóm tự chọn ${selected.nhomTuChon?.ten || '-'} | Môn CT ${selected.chuongTrinhMon?.maMonTrongCt || '-'}`
+})
 
-const mucTieuColumns = [
-  { key: 'loai', label: 'Loại' },
-  { key: 'noiDung', label: 'Nội dung' }
-]
+const chuongTrinhMonOnlyParent = computed(() => ({
+  chuongTrinhMonId: selected.chuongTrinhMon?.id || null
+}))
 
-const nangLucColumns = [
-  { key: 'ma', label: 'Mã' },
-  { key: 'noiDung', label: 'Nội dung' },
-  { key: 'loai', label: 'Loại' }
-]
+const chuongTrinhMonOnlyParentText = computed(() => {
+  return `Đang chọn: Môn trong chương trình ${selected.chuongTrinhMon?.maMonTrongCt || '-'} - ${selected.chuongTrinhMon?.tenMon || '-'}`
+})
 
-const viTriColumns = [
-  { key: 'ten', label: 'Vị trí việc làm' },
-  { key: 'moTa', label: 'Mô tả' }
-]
+const monTienQuyetParent = computed(() => ({
+  monId: selected.chuongTrinhMon?.id || null
+}))
 
-const dieuKienColumns = [
-  { key: 'noiDung', label: 'Điều kiện tốt nghiệp' }
-]
+const syllabusMonParent = computed(() => ({
+  syllabusMonId: selected.syllabusMonHoc?.id || null
+}))
 
-const syllabusChuongTrinhColumns = [
-  { key: 'moTaTongQuan', label: 'Mô tả tổng quan' },
-  { key: 'mucDich', label: 'Mục đích' },
-  { key: 'yeuCauDaoTao', label: 'Yêu cầu đào tạo' }
-]
+const syllabusMonParentText = computed(() => {
+  return `Đang chọn: Syllabus môn học ID ${selected.syllabusMonHoc?.id || '-'} | Môn CT ${selected.chuongTrinhMon?.maMonTrongCt || '-'}`
+})
 
-const syllabusMonHocColumns = [
-  { key: 'tenChuongTrinhMon', label: 'Môn học' },
-  { key: 'viTri', label: 'Vị trí' },
-  { key: 'tinhChat', label: 'Tính chất' }
-]
-
-const syllabusChuongBaiColumns = [
-  { key: 'tenSyllabusMon', label: 'Syllabus môn' },
-  { key: 'ten', label: 'Tên chương/bài' },
-  { key: 'tongGio', label: 'Tổng giờ' }
-]
-
-const syllabusTaiLieuColumns = [
-  { key: 'tenSyllabusMon', label: 'Syllabus môn' },
-  { key: 'ten', label: 'Tài liệu' },
-  { key: 'tacGia', label: 'Tác giả' }
-]
-
-const lopColumns = [
-  { key: 'maLop', label: 'Mã lớp' },
-  { key: 'tenLop', label: 'Tên lớp' },
-  { key: 'tenKhoa', label: 'Khóa đào tạo' },
-  { key: 'trangThai', label: 'Trạng thái' }
-]
-
-function isChecked(type, id) {
-  return buildState[type].selectedIds.includes(id)
+function dongDangDung(key) {
+  return viewed[key] || selected[key] || null
 }
 
-function toggleCheck(type, id) {
-  if (buildState[type].locked) return
+const chuongTrinhFilter = computed(() => ({
+  nganhId: dongDangDung('nganh')?.id || null,
+  trinhDoId: dongDangDung('trinhDoDaoTao')?.id || null,
+  loaiChuongTrinhId: dongDangDung('loaiChuongTrinh')?.id || null
+}))
 
-  if (buildState[type].selectedIds.includes(id)) {
-    buildState[type].selectedIds = buildState[type].selectedIds.filter((x) => x !== id)
+const chuongTrinhVersionFilter = computed(() => ({
+  chuongTrinhId: dongDangDung('chuongTrinh')?.id || null
+}))
+
+const versionFilter = computed(() => ({
+  chuongTrinhVersionId: dongDangDung('chuongTrinhVersion')?.id || null
+}))
+
+const khungKyFilter = computed(() => ({
+  chuongTrinhVersionId: dongDangDung('chuongTrinhVersion')?.id || null,
+  loaiChuongTrinhId: dongDangDung('loaiChuongTrinh')?.id || null
+}))
+
+const chuongTrinhMonViewFilter = computed(() => ({
+  chuongTrinhVersionId: dongDangDung('chuongTrinhVersion')?.id || null,
+  khungKyId: dongDangDung('khungKy')?.id || null,
+  nhomKienThucId: dongDangDung('nhomKienThuc')?.id || null,
+  monHocId: dongDangDung('monHoc')?.id || null
+}))
+
+const chuongTrinhMonOnlyFilter = computed(() => ({
+  chuongTrinhMonId: dongDangDung('chuongTrinhMon')?.id || null
+}))
+
+const syllabusMonFilter = computed(() => ({
+  syllabusMonId: dongDangDung('syllabusMonHoc')?.id || null
+}))
+
+function coGiaTriCha(value) {
+  return value !== null && value !== undefined && value !== ''
+}
+
+function locDongTheoCha(rows = [], parentValues = {}) {
+  const dieuKien = Object.entries(parentValues).filter(([, value]) => coGiaTriCha(value))
+  if (!dieuKien.length) return rows
+
+  return rows.filter((row) => {
+    return dieuKien.every(([key, value]) => String(row?.[key] ?? '') === String(value))
+  })
+}
+
+function layIdDongTheoCha(rows = [], parentValues = {}) {
+  const dieuKien = Object.entries(parentValues).filter(([, value]) => coGiaTriCha(value))
+  if (!dieuKien.length) return []
+
+  return rows
+      .filter((row) => {
+        return dieuKien.every(([key, value]) => String(row?.[key] ?? '') === String(value))
+      })
+      .map((row) => row?.id)
+      .filter((id) => id !== null && id !== undefined && id !== '')
+}
+
+function laySelectedIdsTheoBang(key, allRows = [], rows = [], parentValues = {}, filterValues = {}) {
+  if (key === 'trinhDoDaoTao' || key === 'loaiChuongTrinh') {
+    const nganhId = dongDangDung('nganh')?.id
+    if (!nganhId) return []
+    const field = key === 'trinhDoDaoTao' ? 'trinhDoId' : 'loaiChuongTrinhId'
+    return Array.from(new Set((duLieu.value.chuongTrinh || [])
+        .filter((row) => String(row.nganhId || '') === String(nganhId || ''))
+        .map((row) => row[field])
+        .filter((id) => id !== null && id !== undefined && id !== '')))
+  }
+
+  const bangGocNoiVersion = {
+    mucTieuChuongTrinh: { joinKey: 'chuongTrinhVersionMucTieu', gocIdKey: 'mucTieuGocId' },
+    nangLucDauRa: { joinKey: 'chuongTrinhVersionNangLuc', gocIdKey: 'nangLucGocId' },
+    viTriViecLam: { joinKey: 'chuongTrinhVersionViTriViecLam', gocIdKey: 'viTriGocId' },
+    dieuKienTotNghiep: { joinKey: 'chuongTrinhVersionDieuKienTotNghiep', gocIdKey: 'dieuKienGocId' }
+  }
+
+  if (bangGocNoiVersion[key]) {
+    const config = bangGocNoiVersion[key]
+    const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
+
+    if (!chuongTrinhVersionId) return []
+
+    return (duLieu.value[config.joinKey] || [])
+        .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
+        .map((row) => row[config.gocIdKey])
+        .filter((id) => id !== null && id !== undefined && id !== '')
+  }
+
+  if (key === 'nganh' || key === 'monHoc') {
+    return []
+  }
+
+  if (key === 'chuongTrinhMon') {
+    return layIdDongTheoCha(allRows, filterValues)
+  }
+
+  return layIdDongTheoCha(allRows.length ? allRows : rows, filterValues)
+}
+
+const bangXuongSongKeys = new Set([
+  'nganh',
+  'chuongTrinh',
+  'chuongTrinhVersion',
+  'khungKy',
+  'nhomKienThuc',
+  'monHoc',
+  'chuongTrinhMon',
+  'syllabusMonHoc'
+])
+
+
+function chonDongBang(bang, item) {
+  if (bangCoNutLuuLienKet.has(bang.key)) {
+    selectEntity(bang.key, item)
     return
   }
 
-  buildState[type].selectedIds.push(id)
-}
-
-function ensureStageCanLock(stage) {
-  if (stage === 'nganh') return Boolean(buildState.nganh.selectedId)
-  if (stage === 'trinhDoLoai') return Boolean(selectedChuongTrinh.value)
-  if (stage === 'chuongTrinh') return Boolean(buildState.chuongTrinh.selectedId)
-  if (stage === 'version') return Boolean(buildState.version.selectedId)
-
-  if (Array.isArray(buildState[stage].selectedIds)) {
-    return buildState[stage].selectedIds.length > 0 || stageAllowsEmpty(stage)
-  }
-
-  return true
-}
-
-function stageAllowsEmpty(stage) {
-  return [
-    'monLienQuan',
-    'syllabusMonHoc',
-    'syllabusChiTiet',
-    'chuanDauRa',
-    'syllabusChuongTrinh',
-    'toChucDaoTao'
-  ].includes(stage)
-}
-
-async function saveStage(stage) {
-  const payload = {
-    stage,
-    chuongTrinhId: buildState.chuongTrinh.selectedId,
-    versionId: buildState.version.selectedId,
-    selectedId: buildState[stage].selectedId,
-    selectedIds: buildState[stage].selectedIds
-  }
-
-  console.log('SAVE_STAGE', payload)
-}
-
-async function toggleStageLock(stage) {
-  if (!buildState[stage].locked && !ensureStageCanLock(stage)) {
-    alert('Phải chọn dữ liệu trước khi khóa bước này.')
+  if (bang.loaiBang === 'phu') {
+    chonBangPhuVaoLuong(bang.key, item, bang.parentValues, bang.service)
     return
   }
 
-  buildState[stage].locked = !buildState[stage].locked
+  selectEntity(bang.key, item)
 }
 
-async function loadChuongTrinhs() {
-  const [ctRes, nganhRes, trinhDoRes, loaiRes] = await Promise.all([
-    chuongTrinhService.chuongTrinh.getAll(),
-    daoTaoService.nganh.getAll(),
-    daoTaoService.trinhDoDaoTao.getAll(),
-    daoTaoService.loaiChuongTrinh.getAll()
-  ])
-
-  chuongTrinhs.value = ctRes.items.map((ct) => {
-    const nganh = nganhRes.items.find((x) => x.id === ct.nganhId)
-    const trinhDo = trinhDoRes.items.find((x) => x.id === ct.trinhDoId)
-    const loai = loaiRes.items.find((x) => x.id === ct.loaiChuongTrinhId)
-
-    return {
-      ...ct,
-      tenNganh: nganh?.tenNganh || ct.nganhId,
-      tenTrinhDo: trinhDo?.tenTrinhDo || ct.trinhDoId,
-      tenLoaiChuongTrinh: loai?.tenLoai || ct.loaiChuongTrinhId
-    }
-  })
+function xemDongBang(bang, item) {
+  viewEntity(bang.key, item)
 }
 
-async function selectChuongTrinh(chuongTrinh) {
-  selectedChuongTrinh.value = chuongTrinh
-  selectedVersion.value = null
 
-  resetAfterChuongTrinh()
+const bangCoNutLuuLienKet = new Set([
+  'chuongTrinhMon',
+  'mucTieuChuongTrinh',
+  'nangLucDauRa',
+  'viTriViecLam',
+  'dieuKienTotNghiep',
+  'monTienQuyet',
+  'dieuKienMonHoc',
+  'syllabusChuongBai',
+  'syllabusTaiLieu'
+])
 
-  buildState.nganh.selectedId = chuongTrinh.nganhId
-  buildState.trinhDoLoai.selectedId = `${chuongTrinh.trinhDoId}-${chuongTrinh.loaiChuongTrinhId}`
-  buildState.chuongTrinh.selectedId = chuongTrinh.id
-
-  const res = await chuongTrinhService.chuongTrinhVersion.getAll()
-  versions.value = res.items.filter((item) => item.chuongTrinhId === chuongTrinh.id)
+function luuDongBang(bang, item) {
+  toggleLuuBangPhu(bang.key, item, bang.parentValues, bang.service)
 }
 
-async function selectVersion(version) {
-  selectedVersion.value = version
-  buildState.version.selectedId = version.id
-  resetAfterVersion()
-  await loadVersionData(version.id)
-}
+const bangPhuHienDuLieuDayDu = new Set([
+  'mucTieuChuongTrinh',
+  'nangLucDauRa',
+  'viTriViecLam',
+  'dieuKienTotNghiep',
+  'syllabusChuongTrinh',
+  'monTienQuyet',
+  'quyDoiDiem',
+  'dieuKienMonHoc',
+  'syllabusChuongBai',
+  'syllabusTaiLieu'
+])
 
-function resetAfterChuongTrinh() {
-  Object.keys(buildState).forEach((key) => {
-    buildState[key].locked = false
-    buildState[key].selectedIds = []
-  })
+function taoBang(key, options = {}) {
+  const parentValues = options.parentValues || {}
+  const filterValues = options.filterValues || parentValues
+  const allRows = duLieu.value[key] || []
 
-  buildState.version.selectedId = null
-  resetChildData()
-}
+  const loaiBang = bangXuongSongKeys.has(key) ? 'xuong-song' : 'phu'
+  const hienDayDuBangPhu = loaiBang === 'phu' && bangPhuHienDuLieuDayDu.has(key)
 
-function resetAfterVersion() {
-  buildState.khungKy.locked = false
-  buildState.nhomKienThuc.locked = false
-  buildState.chuongTrinhMon.locked = false
-  buildState.monLienQuan.locked = false
-  buildState.syllabusMonHoc.locked = false
-  buildState.syllabusChiTiet.locked = false
-  buildState.chuanDauRa.locked = false
-  buildState.syllabusChuongTrinh.locked = false
-  buildState.toChucDaoTao.locked = false
+  const rows = hienDayDuBangPhu ? allRows : locDongTheoCha(allRows, filterValues)
 
-  buildState.khungKy.selectedIds = []
-  buildState.nhomKienThuc.selectedIds = []
-  buildState.chuongTrinhMon.selectedIds = []
-}
-
-function resetChildData() {
-  versions.value = []
-  khungKys.value = []
-  nhomKienThucs.value = []
-  chuongTrinhMons.value = []
-  monTuChons.value = []
-  monTienQuyets.value = []
-  dieuKienMonHocs.value = []
-  quyDoiDiems.value = []
-  mucTieus.value = []
-  nangLucDauRas.value = []
-  viTriViecLams.value = []
-  dieuKienTotNghieps.value = []
-  syllabusChuongTrinhs.value = []
-  syllabusMonHocs.value = []
-  syllabusChuongBais.value = []
-  syllabusTaiLieus.value = []
-  lopHanhChinhs.value = []
-}
-
-async function loadVersionData(versionId) {
-  loading.value = true
-
-  try {
-    const [
-      khungKyRes,
-      nhomRes,
-      ctmRes,
-      monHocRes,
-      monTuChonRes,
-      monTienQuyetRes,
-      dieuKienMonHocRes,
-      quyDoiDiemRes,
-      mucTieuRes,
-      nangLucRes,
-      viTriRes,
-      dieuKienRes,
-      syllabusCtRes,
-      syllabusMonRes,
-      chuongBaiRes,
-      taiLieuRes,
-      lopRes,
-      khoaRes
-    ] = await Promise.all([
-      daoTaoService.khungKy.getAll(),
-      chuongTrinhService.nhomKienThuc.getAll(),
-      chuongTrinhService.chuongTrinhMon.getAll(),
-      chuongTrinhService.monHoc.getAll(),
-      chuongTrinhService.monTuChon.getAll(),
-      chuongTrinhService.monTienQuyet.getAll(),
-      chuongTrinhService.dieuKienMonHoc.getAll(),
-      chuongTrinhService.quyDoiDiem.getAll(),
-      chuongTrinhService.mucTieuChuongTrinh.getAll(),
-      chuongTrinhService.nangLucDauRa.getAll(),
-      chuongTrinhService.viTriViecLam.getAll(),
-      chuongTrinhService.dieuKienTotNghiep.getAll(),
-      chuongTrinhService.syllabusChuongTrinh.getAll(),
-      chuongTrinhService.syllabusMonHoc.getAll(),
-      chuongTrinhService.syllabusChuongBai.getAll(),
-      chuongTrinhService.syllabusTaiLieu.getAll(),
-      daoTaoService.lopHanhChinh.getAll(),
-      daoTaoService.khoaDaoTao.getAll()
-    ])
-
-    const monHocs = monHocRes.items
-
-    khungKys.value = khungKyRes.items.filter((x) => x.chuongTrinhVersionId === versionId)
-    nhomKienThucs.value = nhomRes.items.filter((x) => x.chuongTrinhVersionId === versionId)
-
-    chuongTrinhMons.value = ctmRes.items
-        .filter((x) => x.chuongTrinhVersionId === versionId)
-        .map((item) => {
-          const mon = monHocs.find((x) => x.id === item.monHocId)
-          const nhom = nhomKienThucs.value.find((x) => x.id === item.nhomKienThucId)
-          const ky = khungKys.value.find((x) => x.id === item.khungKyId)
-
-          return {
-            ...item,
-            tenMon: mon?.tenMon || mon?.tenMonHoc || item.monHocId,
-            tenNhomKienThuc: nhom?.ten || item.nhomKienThucId,
-            tenKy: ky?.tenKy || item.khungKyId
-          }
-        })
-
-    monTuChons.value = monTuChonRes.items
-        .filter((item) => chuongTrinhMons.value.some((ctm) => ctm.id === item.chuongTrinhMonId))
-        .map((item) => {
-          const ctm = chuongTrinhMons.value.find((x) => x.id === item.chuongTrinhMonId)
-
-          return {
-            ...item,
-            tenChuongTrinhMon: ctm?.tenMon || item.chuongTrinhMonId
-          }
-        })
-
-    monTienQuyets.value = monTienQuyetRes.items
-        .filter((item) => chuongTrinhMons.value.some((ctm) => ctm.id === item.monId))
-        .map((item) => {
-          const mon = chuongTrinhMons.value.find((x) => x.id === item.monId)
-          const dieuKien = chuongTrinhMons.value.find((x) => x.id === item.monDieuKienId)
-
-          return {
-            ...item,
-            tenMon: mon?.tenMon || item.monId,
-            tenMonDieuKien: dieuKien?.tenMon || item.monDieuKienId
-          }
-        })
-
-    syllabusMonHocs.value = syllabusMonRes.items
-        .filter((x) => chuongTrinhMons.value.some((ctm) => ctm.id === x.chuongTrinhMonId))
-        .map((item) => {
-          const ctm = chuongTrinhMons.value.find((x) => x.id === item.chuongTrinhMonId)
-
-          return {
-            ...item,
-            tenChuongTrinhMon: ctm?.tenMon || item.chuongTrinhMonId
-          }
-        })
-
-    dieuKienMonHocs.value = dieuKienMonHocRes.items
-        .filter((item) => syllabusMonHocs.value.some((sm) => sm.id === item.syllabusMonId))
-        .map((item) => ({
-          ...item,
-          tenSyllabusMon: item.syllabusMonId
-        }))
-
-    quyDoiDiems.value = quyDoiDiemRes.items
-        .filter((item) => chuongTrinhMons.value.some((ctm) => ctm.id === item.chuongTrinhMonId))
-        .map((item) => {
-          const ctm = chuongTrinhMons.value.find((x) => x.id === item.chuongTrinhMonId)
-
-          return {
-            ...item,
-            tenChuongTrinhMon: ctm?.tenMon || item.chuongTrinhMonId
-          }
-        })
-
-    mucTieus.value = mucTieuRes.items.filter((x) => x.chuongTrinhVersionId === versionId)
-    nangLucDauRas.value = nangLucRes.items.filter((x) => x.chuongTrinhVersionId === versionId)
-    viTriViecLams.value = viTriRes.items.filter((x) => x.chuongTrinhVersionId === versionId)
-    dieuKienTotNghieps.value = dieuKienRes.items.filter((x) => x.chuongTrinhVersionId === versionId)
-    syllabusChuongTrinhs.value = syllabusCtRes.items.filter((x) => x.chuongTrinhVersionId === versionId)
-
-    syllabusChuongBais.value = chuongBaiRes.items
-        .filter((item) => syllabusMonHocs.value.some((sm) => sm.id === item.syllabusMonId))
-        .map((item) => ({
-          ...item,
-          tenSyllabusMon: item.syllabusMonId
-        }))
-
-    syllabusTaiLieus.value = taiLieuRes.items
-        .filter((item) => syllabusMonHocs.value.some((sm) => sm.id === item.syllabusMonId))
-        .map((item) => ({
-          ...item,
-          tenSyllabusMon: item.syllabusMonId
-        }))
-
-    lopHanhChinhs.value = lopRes.items
-        .filter((x) => x.chuongTrinhVersionId === versionId)
-        .map((item) => {
-          const khoa = khoaRes.items.find((x) => x.id === item.khoaDaoTaoId)
-
-          return {
-            ...item,
-            tenKhoa: khoa?.tenKhoa || item.khoaDaoTaoId
-          }
-        })
-
-    buildState.khungKy.selectedIds = khungKys.value.map((x) => x.id)
-    buildState.nhomKienThuc.selectedIds = nhomKienThucs.value.map((x) => x.id)
-    buildState.chuongTrinhMon.selectedIds = chuongTrinhMons.value.map((x) => x.id)
-  } finally {
-    loading.value = false
+  return {
+    key,
+    config: configs[key],
+    rows,
+    allRows,
+    service: services[key],
+    selectedId: selected[key]?.id || null,
+    viewedId: viewed[key]?.id || null,
+    selectedIds: laySelectedIdsTheoBang(key, allRows, rows, parentValues, filterValues),
+    savedIds: laySelectedIdsTheoBang(key, allRows, rows, parentValues, filterValues),
+    canToggleSave: bangCoNutLuuLienKet.has(key),
+    parentValues,
+    parentText: options.parentText || '',
+    loaiBang,
+    disabled: Boolean(options.disabled),
+    disabledText: options.disabledText || ''
   }
 }
 
-function resetAll() {
-  selectedChuongTrinh.value = null
-  selectedVersion.value = null
+const groups = computed(() => [
+  {
+    key: 'nen-tang',
+    title: '1. Tạo nền tảng chương trình',
+    description: 'Tạo Ngành, Trình độ đào tạo, Loại chương trình trước. Sau đó tạo Chương trình đào tạo gắn theo 3 id này.',
+    tables: [
+      taoBang('nganh'),
+      taoBang('trinhDoDaoTao'),
+      taoBang('loaiChuongTrinh'),
+      taoBang('chuongTrinh', {
+        parentValues: chuongTrinhParent.value,
+        filterValues: chuongTrinhFilter.value,
+        parentText: chuongTrinhParentText.value,
+        disabled: !selected.nganh || !selected.trinhDoDaoTao || !selected.loaiChuongTrinh,
+        disabledText: 'Cần lưu và chọn Ngành, Trình độ, Loại chương trình trước khi tạo Chương trình đào tạo.'
+      })
+    ]
+  },
+  {
+    key: 'version',
+    title: '2. Tạo phiên bản chương trình',
+    description: 'Version được tạo sau Chương trình đào tạo và tự nhận chuongTrinhId từ chương trình đang chọn.',
+    tables: [
+      taoBang('chuongTrinhVersion', {
+        parentValues: chuongTrinhVersionParent.value,
+        filterValues: chuongTrinhVersionFilter.value,
+        parentText: chuongTrinhVersionParentText.value,
+        disabled: !selected.chuongTrinh,
+        disabledText: 'Cần lưu và chọn Chương trình đào tạo trước khi tạo Version.'
+      })
+    ]
+  },
+  {
+    key: 'noi-dung-version',
+    title: '3. Tạo các bảng thuộc Version',
+    description: 'Các bảng ngang tầng này đều tự nhận chuongTrinhVersionId từ Version đang chọn.',
+    tables: [
+      taoBang('mucTieuChuongTrinh', { parentValues: versionParent.value, filterValues: versionFilter.value, parentText: versionParentText.value, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần lưu và chọn Version trước.' }),
+      taoBang('nangLucDauRa', { parentValues: versionParent.value, filterValues: versionFilter.value, parentText: versionParentText.value, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần lưu và chọn Version trước.' }),
+      taoBang('viTriViecLam', { parentValues: versionParent.value, filterValues: versionFilter.value, parentText: versionParentText.value, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần lưu và chọn Version trước.' }),
+      taoBang('dieuKienTotNghiep', { parentValues: versionParent.value, filterValues: versionFilter.value, parentText: versionParentText.value, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần lưu và chọn Version trước.' }),
+      taoBang('syllabusChuongTrinh', { parentValues: versionParent.value, filterValues: versionFilter.value, parentText: versionParentText.value, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần lưu và chọn Version trước.' }),
+      taoBang('nhomKienThuc', { parentValues: versionParent.value, filterValues: versionFilter.value, parentText: versionParentText.value, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần lưu và chọn Version trước.' }),
+      taoBang('nhomTuChon', { parentValues: versionParent.value, filterValues: versionFilter.value, parentText: versionParentText.value, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần lưu và chọn Version trước.' }),
+      taoBang('khungKy', { parentValues: khungKyParent.value, filterValues: khungKyFilter.value, parentText: khungKyParentText.value, disabled: !selected.chuongTrinhVersion || !selected.loaiChuongTrinh, disabledText: 'Cần lưu và chọn Version + Loại chương trình trước khi tạo Khung kỳ.' })
+    ]
+  },
+  {
+    key: 'mon',
+    title: '4. Tạo môn trong chương trình',
+    description: 'Tạo Môn học gốc trước, sau đó tạo Chương trình môn theo Version, Khung kỳ và Nhóm kiến thức đang chọn.',
+    tables: [
+      taoBang('monHoc', {
+        parentText: monHocParentText.value,
+        disabled: !selected.chuongTrinhVersion,
+        disabledText: 'Cần lưu và chọn Version trước khi tạo Môn học gốc cho luồng này.'
+      }),
+      taoBang('chuongTrinhMon', {
+        parentValues: chuongTrinhMonParent.value,
+        filterValues: chuongTrinhMonViewFilter.value,
+        parentText: chuongTrinhMonParentText.value,
+        disabled: !selected.chuongTrinhVersion,
+        disabledText: 'Cần lưu và chọn Version trước. Nếu chọn Môn học gốc thì khi lưu sẽ tự gắn monHocId; nếu không chọn thì bảng hiển thị tất cả môn CT theo Version/Kỳ.'
+      }),
+      taoBang('monTuChon', {
+        parentValues: monTuChonParent.value,
+        parentText: monTuChonParentText.value,
+        disabled: !selected.nhomTuChon || !selected.chuongTrinhMon,
+        disabledText: 'Cần lưu và chọn Nhóm tự chọn + Môn trong chương trình trước.'
+      }),
+      taoBang('monTienQuyet', {
+        parentValues: monTienQuyetParent.value,
+        filterValues: chuongTrinhMonOnlyFilter.value,
+        parentText: chuongTrinhMonOnlyParentText.value,
+        disabled: !selected.chuongTrinhMon,
+        disabledText: 'Cần lưu và chọn Môn trong chương trình trước.'
+      }),
+      taoBang('quyDoiDiem', {
+        parentValues: chuongTrinhMonOnlyParent.value,
+        filterValues: chuongTrinhMonOnlyFilter.value,
+        parentText: chuongTrinhMonOnlyParentText.value,
+        disabled: !selected.chuongTrinhMon,
+        disabledText: 'Cần lưu và chọn Môn trong chương trình trước.'
+      }),
+      taoBang('syllabusMonHoc', {
+        parentValues: chuongTrinhMonOnlyParent.value,
+        filterValues: chuongTrinhMonOnlyFilter.value,
+        parentText: chuongTrinhMonOnlyParentText.value,
+        disabled: !selected.chuongTrinhMon,
+        disabledText: 'Cần lưu và chọn Môn trong chương trình trước.'
+      })
+    ]
+  },
+  {
+    key: 'syllabus-mon',
+    title: '5. Tạo chi tiết Syllabus môn học',
+    description: 'Các bảng này tự nhận syllabusMonId từ Syllabus môn học đang chọn.',
+    tables: [
+      taoBang('dieuKienMonHoc', { parentValues: syllabusMonParent.value, filterValues: syllabusMonFilter.value, parentText: syllabusMonParentText.value, disabled: !selected.syllabusMonHoc, disabledText: 'Cần lưu và chọn Syllabus môn học trước.' }),
+      taoBang('syllabusChuongBai', { parentValues: syllabusMonParent.value, filterValues: syllabusMonFilter.value, parentText: syllabusMonParentText.value, disabled: !selected.syllabusMonHoc, disabledText: 'Cần lưu và chọn Syllabus môn học trước.' }),
+      taoBang('syllabusTaiLieu', { parentValues: syllabusMonParent.value, filterValues: syllabusMonFilter.value, parentText: syllabusMonParentText.value, disabled: !selected.syllabusMonHoc, disabledText: 'Cần lưu và chọn Syllabus môn học trước.' })
+    ]
+  }
+])
 
-  Object.keys(buildState).forEach((key) => {
-    buildState[key].selectedId = null
-    buildState[key].selectedIds = []
-    buildState[key].locked = false
-  })
-
-  resetChildData()
-}
-
-async function saveAll() {
-  saving.value = true
-
-  try {
-    console.log('SAVE_ALL_BUILD', buildState)
-  } finally {
-    saving.value = false
+const configs = {
+  nganh: {
+    title: '1. Ngành',
+    description: 'Tạo hoặc chọn ngành làm cha đầu tiên của chương trình.',
+    defaultForm: { maNganh: '', tenNganh: '', moTa: '' },
+    fields: [
+      { key: 'maNganh', label: 'Mã ngành', required: true },
+      { key: 'tenNganh', label: 'Tên ngành', required: true },
+      { key: 'moTa', label: 'Mô tả', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'maNganh', message: 'Mã ngành đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'maNganh', label: 'Mã ngành' },
+      { key: 'tenNganh', label: 'Tên ngành' },
+      { key: 'moTa', label: 'Mô tả' }
+    ]
+  },
+  trinhDoDaoTao: {
+    title: '2.1. Trình độ đào tạo',
+    defaultForm: { maTrinhDo: '', tenTrinhDo: '', moTa: '' },
+    fields: [
+      { key: 'maTrinhDo', label: 'Mã trình độ', required: true },
+      { key: 'tenTrinhDo', label: 'Tên trình độ', required: true },
+      { key: 'moTa', label: 'Mô tả', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'maTrinhDo', message: 'Mã trình độ đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'maTrinhDo', label: 'Mã' },
+      { key: 'tenTrinhDo', label: 'Tên trình độ' },
+      { key: 'moTa', label: 'Mô tả' }
+    ]
+  },
+  loaiChuongTrinh: {
+    title: '2.2. Loại chương trình',
+    defaultForm: { maLoai: '', tenLoai: '', soThang: null, soKy: null, moTa: '' },
+    fields: [
+      { key: 'maLoai', label: 'Mã loại', required: true },
+      { key: 'tenLoai', label: 'Tên loại', required: true },
+      { key: 'soThang', label: 'Số tháng', type: 'number' },
+      { key: 'soKy', label: 'Số kỳ', type: 'number' },
+      { key: 'moTa', label: 'Mô tả', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'maLoai', message: 'Mã loại chương trình đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'maLoai', label: 'Mã' },
+      { key: 'tenLoai', label: 'Tên loại' },
+      { key: 'soThang', label: 'Số tháng' },
+      { key: 'soKy', label: 'Số kỳ' }
+    ]
+  },
+  chuongTrinh: {
+    title: '2.3. Chương trình đào tạo',
+    defaultForm: { nganhId: null, trinhDoId: null, loaiChuongTrinhId: null, maChuongTrinh: '', tenChuongTrinh: '', doiTuongTuyenSinh: '', thoiGianDaoTao: '' },
+    fields: [
+      { key: 'nganhId', required: true, label: 'Ngành', type: 'select', lookup: 'nganh', labelKey: ['maNganh', 'tenNganh'], locked: true },
+      { key: 'trinhDoId', required: true, label: 'Trình độ', type: 'select', lookup: 'trinhDoDaoTao', labelKey: ['maTrinhDo', 'tenTrinhDo'], locked: true },
+      { key: 'loaiChuongTrinhId', required: true, label: 'Loại CT', type: 'select', lookup: 'loaiChuongTrinh', labelKey: ['maLoai', 'tenLoai'], locked: true },
+      { key: 'maChuongTrinh', label: 'Mã CTĐT', required: true },
+      { key: 'tenChuongTrinh', label: 'Tên CTĐT', required: true },
+      { key: 'doiTuongTuyenSinh', label: 'Đối tượng tuyển sinh' },
+      { key: 'thoiGianDaoTao', label: 'Thời gian đào tạo' }
+    ],
+    uniqueRules: [
+      { field: 'maChuongTrinh', message: 'Mã chương trình đào tạo đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'maChuongTrinh', label: 'Mã CTĐT' },
+      { key: 'tenChuongTrinh', label: 'Tên chương trình' },
+      { key: 'tenNganh', label: 'Ngành' },
+      { key: 'tenTrinhDo', label: 'Trình độ' },
+      { key: 'tenLoaiChuongTrinh', label: 'Loại CT' }
+    ]
+  },
+  chuongTrinhVersion: {
+    title: '3. Phiên bản chương trình',
+    defaultForm: { chuongTrinhId: null, maVersion: '', tenVersion: '', ngayApDung: '', ngayHetHieuLuc: '', soQuyetDinh: '', ngayQuyetDinh: '', nguoiKy: '', coQuanBanHanh: '', fileQuyetDinh: '', tongTinChi: null, tongSoGio: null, tongGioLyThuyet: null, tongGioThucHanh: null, tongGioKiemTra: null, laHienHanh: false },
+    fields: [
+      { key: 'chuongTrinhId', required: true, label: 'Chương trình', type: 'select', lookup: 'chuongTrinh', labelKey: ['maChuongTrinh', 'tenChuongTrinh'], locked: true },
+      { key: 'maVersion', label: 'Mã version', required: true },
+      { key: 'tenVersion', label: 'Tên version', required: true },
+      { key: 'ngayApDung', label: 'Ngày áp dụng', type: 'date' },
+      { key: 'ngayHetHieuLuc', label: 'Ngày hết hiệu lực', type: 'date' },
+      { key: 'soQuyetDinh', label: 'Số quyết định' },
+      { key: 'ngayQuyetDinh', label: 'Ngày quyết định', type: 'date' },
+      { key: 'nguoiKy', label: 'Người ký' },
+      { key: 'coQuanBanHanh', label: 'Cơ quan ban hành' },
+      { key: 'tongTinChi', label: 'Tổng tín chỉ', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'tongSoGio', label: 'Tổng giờ', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'tongGioLyThuyet', label: 'Giờ LT', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'tongGioThucHanh', label: 'Giờ TH', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'tongGioKiemTra', label: 'Giờ KT', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'laHienHanh', label: 'Hiện hành', type: 'boolean' }
+    ],
+    uniqueRules: [
+      { field: 'maVersion', scopeKeys: ['chuongTrinhId'], message: 'Mã version đã tồn tại trong Chương trình đang chọn.' }
+    ],
+    columns: [
+      { key: 'maVersion', label: 'Mã version' },
+      { key: 'tenVersion', label: 'Tên version' },
+      { key: 'tenChuongTrinh', label: 'Chương trình' },
+      { key: 'ngayApDung', label: 'Ngày áp dụng' },
+      { key: 'tongTinChi', label: 'Tín chỉ' },
+      { key: 'laHienHanh', label: 'Hiện hành' }
+    ]
+  },
+  mucTieuChuongTrinh: {
+    title: '4.1. Mục tiêu chương trình',
+    description: 'Kho mục tiêu gốc dùng chung. Khi bấm ✓, hệ thống gán mục tiêu gốc vào Version qua bảng chuong_trinh_version_muc_tieu.',
+    defaultForm: { ma: '', loai: 'chung', noiDung: '', ghiChu: '' },
+    fields: [
+      { key: 'ma', label: 'Mã mục tiêu', required: true },
+      { key: 'loai', label: 'Loại', type: 'select', lookup: 'loaiMucTieu', required: true },
+      { key: 'noiDung', label: 'Nội dung', type: 'textarea', required: true, wide: true },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'ma', message: 'Mã mục tiêu gốc đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'ma', label: 'Mã' },
+      { key: 'loai', label: 'Loại' },
+      { key: 'noiDung', label: 'Nội dung' },
+      { key: 'ghiChu', label: 'Ghi chú' },
+      { key: 'createdAt', label: 'Ngày tạo' },
+      { key: 'updatedAt', label: 'Ngày cập nhật' }
+    ]
+  },
+  nangLucDauRa: {
+    title: '4.2. Năng lực đầu ra',
+    description: 'Kho năng lực gốc dùng chung. Khi bấm ✓, hệ thống gán năng lực gốc vào Version qua bảng chuong_trinh_version_nang_luc.',
+    defaultForm: { ma: '', loai: 'co_ban', noiDung: '', ghiChu: '' },
+    fields: [
+      { key: 'ma', label: 'Mã năng lực', required: true },
+      { key: 'loai', label: 'Loại', type: 'select', lookup: 'loaiNangLuc', required: true },
+      { key: 'noiDung', label: 'Nội dung', type: 'textarea', required: true, wide: true },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'ma', scopeKeys: ['loai'], message: 'Mã năng lực gốc đã tồn tại với loại năng lực này.' },
+      { field: 'loai', scopeKeys: ['ma'], message: 'Loại năng lực đã tồn tại với mã năng lực này.' }
+    ],
+    columns: [
+      { key: 'ma', label: 'Mã' },
+      { key: 'loai', label: 'Loại' },
+      { key: 'noiDung', label: 'Nội dung' },
+      { key: 'ghiChu', label: 'Ghi chú' },
+      { key: 'createdAt', label: 'Ngày tạo' },
+      { key: 'updatedAt', label: 'Ngày cập nhật' }
+    ]
+  },
+  viTriViecLam: {
+    title: '4.3. Vị trí việc làm',
+    description: 'Kho vị trí việc làm gốc dùng chung. Khi bấm ✓, hệ thống gán vị trí vào Version qua bảng chuong_trinh_version_vi_tri_viec_lam.',
+    defaultForm: { ma: '', ten: '', moTa: '', ghiChu: '' },
+    fields: [
+      { key: 'ma', label: 'Mã vị trí', required: true },
+      { key: 'ten', label: 'Tên vị trí', required: true },
+      { key: 'moTa', label: 'Mô tả', type: 'textarea', wide: true },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'ma', message: 'Mã vị trí việc làm gốc đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'ma', label: 'Mã' },
+      { key: 'ten', label: 'Vị trí' },
+      { key: 'moTa', label: 'Mô tả' },
+      { key: 'ghiChu', label: 'Ghi chú' },
+      { key: 'createdAt', label: 'Ngày tạo' },
+      { key: 'updatedAt', label: 'Ngày cập nhật' }
+    ]
+  },
+  dieuKienTotNghiep: {
+    title: '4.4. Điều kiện tốt nghiệp',
+    description: 'Kho điều kiện tốt nghiệp gốc dùng chung. Khi bấm ✓, hệ thống gán điều kiện vào Version qua bảng chuong_trinh_version_dieu_kien_tot_nghiep.',
+    defaultForm: { ma: '', noiDung: '', ghiChu: '' },
+    fields: [
+      { key: 'ma', label: 'Mã điều kiện', required: true },
+      { key: 'noiDung', label: 'Nội dung', type: 'textarea', required: true, wide: true },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'ma', message: 'Mã điều kiện tốt nghiệp gốc đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'ma', label: 'Mã' },
+      { key: 'noiDung', label: 'Điều kiện' },
+      { key: 'ghiChu', label: 'Ghi chú' },
+      { key: 'createdAt', label: 'Ngày tạo' },
+      { key: 'updatedAt', label: 'Ngày cập nhật' }
+    ]
+  },
+  syllabusChuongTrinh: {
+    title: '4.5. Syllabus chương trình',
+    defaultForm: { chuongTrinhVersionId: null, moTaTongQuan: '', mucDich: '', yeuCauDaoTao: '', phuongPhapDaoTao: '', ghiChu: '' },
+    fields: [
+      { key: 'moTaTongQuan', label: 'Mô tả tổng quan', type: 'textarea', wide: true },
+      { key: 'mucDich', label: 'Mục đích', type: 'textarea', wide: true },
+      { key: 'yeuCauDaoTao', label: 'Yêu cầu đào tạo', type: 'textarea', wide: true },
+      { key: 'phuongPhapDaoTao', label: 'Phương pháp đào tạo', type: 'textarea', wide: true },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    columns: [
+      { key: 'moTaTongQuan', label: 'Mô tả' },
+      { key: 'mucDich', label: 'Mục đích' },
+      { key: 'phuongPhapDaoTao', label: 'Phương pháp' }
+    ]
+  },
+  nhomKienThuc: {
+    title: '4.6. Nhóm kiến thức',
+    defaultForm: { chuongTrinhVersionId: null, ma: '', ten: '', thuTu: null, loaiNhom: 'chung', tongTinChi: null, tongSoGio: null, tongGioLyThuyet: null, tongGioThucHanh: null, tongGioKiemTra: null },
+    fields: [
+      { key: 'ma', label: 'Mã nhóm', required: true },
+      { key: 'ten', label: 'Tên nhóm', required: true },
+      { key: 'loaiNhom', label: 'Loại nhóm', type: 'select', lookup: 'loaiNhom' },
+      { key: 'thuTu', label: 'Thứ tự', type: 'number' },
+      { key: 'tongTinChi', label: 'Tổng TC', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'tongSoGio', label: 'Tổng giờ', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'tongGioLyThuyet', label: 'Giờ LT', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'tongGioThucHanh', label: 'Giờ TH', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'tongGioKiemTra', label: 'Giờ KT', type: 'number', max: 999999.9, step: 0.1 }
+    ],
+    uniqueRules: [
+      { field: 'ma', scopeKeys: ['chuongTrinhVersionId'], message: 'Mã nhóm kiến thức đã tồn tại trong Version đang chọn.' },
+      { field: 'thuTu', scopeKeys: ['chuongTrinhVersionId'], message: 'Thứ tự nhóm kiến thức đã tồn tại trong Version đang chọn.' }
+    ],
+    columns: [
+      { key: 'ma', label: 'Mã' },
+      { key: 'ten', label: 'Tên nhóm' },
+      { key: 'loaiNhom', label: 'Loại' },
+      { key: 'tongTinChi', label: 'TC' },
+      { key: 'tongSoGio', label: 'Giờ' }
+    ]
+  },
+  nhomTuChon: {
+    title: '4.7. Nhóm tự chọn',
+    defaultForm: { chuongTrinhVersionId: null, ten: '', soMonChon: null, soTinChiCanDat: null, ghiChu: '' },
+    fields: [
+      { key: 'ten', label: 'Tên nhóm', required: true },
+      { key: 'soMonChon', label: 'Số môn chọn', type: 'number' },
+      { key: 'soTinChiCanDat', label: 'Số TC cần đạt', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'ten', scopeKeys: ['chuongTrinhVersionId'], message: 'Tên nhóm tự chọn đã tồn tại trong Version đang chọn.' }
+    ],
+    columns: [
+      { key: 'ten', label: 'Tên nhóm' },
+      { key: 'soMonChon', label: 'Số môn chọn' },
+      { key: 'soTinChiCanDat', label: 'TC cần đạt' },
+      { key: 'ghiChu', label: 'Ghi chú' }
+    ]
+  },
+  khungKy: {
+    title: '4.8. Khung kỳ',
+    defaultForm: { chuongTrinhVersionId: null, loaiChuongTrinhId: null, maKy: '', tenKy: '', thuTu: null },
+    fields: [
+      { key: 'maKy', label: 'Mã kỳ', required: true },
+      { key: 'tenKy', label: 'Tên kỳ', required: true },
+      { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 }
+    ],
+    uniqueRules: [
+      { field: 'maKy', scopeKeys: ['chuongTrinhVersionId', 'loaiChuongTrinhId'], message: 'Mã kỳ đã tồn tại trong Version và Loại chương trình đang chọn.' },
+      { field: 'thuTu', scopeKeys: ['chuongTrinhVersionId', 'loaiChuongTrinhId'], message: 'Thứ tự khung kỳ đã tồn tại trong Version và Loại chương trình đang chọn.' }
+    ],
+    columns: [
+      { key: 'maKy', label: 'Mã kỳ' },
+      { key: 'tenKy', label: 'Tên kỳ' },
+      { key: 'tenVersion', label: 'Version' },
+      { key: 'tenLoaiChuongTrinh', label: 'Loại CT' },
+      { key: 'thuTu', label: 'Thứ tự' }
+    ]
+  },
+  monHoc: {
+    title: '5.1. Môn học gốc',
+    allowToggleSelect: true,
+    defaultForm: { maMon: '', tenMon: '', moTa: '' },
+    fields: [
+      { key: 'maMon', label: 'Mã môn', required: true },
+      { key: 'tenMon', label: 'Tên môn', required: true },
+      { key: 'moTa', label: 'Mô tả', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'maMon', message: 'Mã môn học gốc đã tồn tại.' }
+    ],
+    columns: [
+      { key: 'maMon', label: 'Mã môn' },
+      { key: 'tenMon', label: 'Tên môn' },
+      { key: 'moTa', label: 'Mô tả' }
+    ]
+  },
+  chuongTrinhMon: {
+    title: '5.2. Chương trình môn',
+    defaultForm: { chuongTrinhVersionId: null, monHocId: null, maMonTrongCt: '', khungKyId: null, nhomKienThucId: null, loai: 'bat_buoc', loaiHocPhan: 'mon_hoc', batBuoc: true, laMonDieuKien: false, thuTu: null, soTinChi: null, tongGio: null, gioLyThuyet: null, gioThucHanh: null, gioKiemTra: null, ghiChu: '' },
+    fields: [
+      { key: 'maMonTrongCt', label: 'Mã môn CT', required: true },
+      { key: 'loai', label: 'Loại môn', type: 'select', lookup: 'loaiMon' },
+      { key: 'loaiHocPhan', label: 'Loại học phần', type: 'select', lookup: 'loaiHocPhan' },
+      { key: 'batBuoc', label: 'Bắt buộc', type: 'boolean' },
+      { key: 'laMonDieuKien', label: 'Môn điều kiện', type: 'boolean' },
+      { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 },
+      { key: 'soTinChi', label: 'Số tín chỉ', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'tongGio', label: 'Tổng giờ', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'gioLyThuyet', label: 'Giờ LT', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'gioThucHanh', label: 'Giờ TH', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'gioKiemTra', label: 'Giờ KT', type: 'number', max: 999999.9, step: 0.1 },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    requiredParentKeys: [
+      { key: 'chuongTrinhVersionId', label: 'Version chương trình' },
+      { key: 'monHocId', label: 'Môn học gốc' },
+      { key: 'khungKyId', label: 'Khung kỳ' }
+    ],
+    uniqueRules: [
+      { field: 'maMonTrongCt', scopeKeys: ['chuongTrinhVersionId'], message: 'Mã môn CT đã tồn tại trong Version chương trình này.' },
+      { field: 'thuTu', scopeKeys: ['chuongTrinhVersionId', 'khungKyId'], message: 'Thứ tự môn trong Chương trình môn đã tồn tại trong Version/Kỳ đang chọn.' }
+    ],
+    columns: [
+      { key: 'maMonTrongCt', label: 'Mã môn CT' },
+      { key: 'tenMon', label: 'Môn học' },
+      { key: 'tenVersion', label: 'Version' },
+      { key: 'tenKy', label: 'Kỳ' },
+      { key: 'tenNhomKienThuc', label: 'Nhóm KT' },
+      { key: 'loai', label: 'Loại' },
+      { key: 'soTinChi', label: 'TC' },
+      { key: 'tongGio', label: 'Giờ' }
+    ]
+  },
+  monTuChon: {
+    title: '5.3. Môn tự chọn',
+    defaultForm: { nhomId: null, chuongTrinhMonId: null },
+    fields: [
+      { key: 'nhomId', required: true, label: 'Nhóm tự chọn', type: 'select', lookup: 'nhomTuChon', labelKey: ['ten'], locked: true },
+      { key: 'chuongTrinhMonId', required: true, label: 'Môn CT', type: 'select', lookup: 'chuongTrinhMon', labelKey: ['maMonTrongCt', 'tenMon'], locked: true }
+    ],
+    uniqueRules: [
+      { field: 'chuongTrinhMonId', scopeKeys: ['nhomId'], message: 'Môn tự chọn này đã tồn tại trong Nhóm tự chọn đang chọn.' }
+    ],
+    columns: [
+      { key: 'tenNhomTuChon', label: 'Nhóm tự chọn' },
+      { key: 'tenChuongTrinhMon', label: 'Môn CT' }
+    ]
+  },
+  monTienQuyet: {
+    title: '5.4. Môn tiên quyết',
+    defaultForm: { monId: null, monDieuKienId: null, loai: 'tien_quyet', ghiChu: '' },
+    fields: [
+      { key: 'monDieuKienId', label: 'Môn điều kiện', type: 'select', lookup: 'chuongTrinhMon', labelKey: ['maMonTrongCt', 'tenMon'], required: true },
+      { key: 'loai', label: 'Loại điều kiện', type: 'select', lookup: 'loaiDieuKien' },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'monDieuKienId', scopeKeys: ['monId'], message: 'Môn điều kiện đã tồn tại cho Môn trong chương trình đang chọn.' }
+    ],
+    columns: [
+      { key: 'tenMon', label: 'Môn chính' },
+      { key: 'tenMonDieuKien', label: 'Môn điều kiện' },
+      { key: 'loai', label: 'Loại' },
+      { key: 'ghiChu', label: 'Ghi chú' }
+    ]
+  },
+  quyDoiDiem: {
+    title: '5.5. Quy đổi điểm',
+    defaultForm: { chuongTrinhMonId: null, nguongTu: null, nguongDen: null, diemQuyDoi: null, ketQua: 'dat', congThuc: '', ghiChu: '' },
+    fields: [
+      { key: 'nguongTu', label: 'Ngưỡng từ', type: 'number', max: 999.99, step: 0.01 },
+      { key: 'nguongDen', label: 'Ngưỡng đến', type: 'number', max: 999.99, step: 0.01 },
+      { key: 'diemQuyDoi', label: 'Điểm quy đổi', type: 'number', max: 999.99, step: 0.01 },
+      { key: 'ketQua', label: 'Kết quả', type: 'select', lookup: 'ketQua' },
+      { key: 'congThuc', label: 'Công thức' },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    columns: [
+      { key: 'tenChuongTrinhMon', label: 'Môn CT' },
+      { key: 'nguongTu', label: 'Từ' },
+      { key: 'nguongDen', label: 'Đến' },
+      { key: 'diemQuyDoi', label: 'Điểm' },
+      { key: 'ketQua', label: 'Kết quả' }
+    ]
+  },
+  syllabusMonHoc: {
+    title: '5.6. Syllabus môn học',
+    defaultForm: { chuongTrinhMonId: null, viTri: '', tinhChat: '', mucTieu: '', phuongPhapDanhGia: '', dieuKienHoanThanh: '', huongDan: '', diemDatToiThieu: null, donViDiem: 'thang_10', tyLeChuyenCanToiThieu: null, batBuocDuThi: true, congThucQuyDoi: '' },
+    fields: [
+      { key: 'viTri', label: 'Vị trí', type: 'textarea', wide: true },
+      { key: 'tinhChat', label: 'Tính chất', type: 'textarea', wide: true },
+      { key: 'mucTieu', label: 'Mục tiêu', type: 'textarea', wide: true },
+      { key: 'phuongPhapDanhGia', label: 'Phương pháp đánh giá', type: 'textarea', wide: true },
+      { key: 'dieuKienHoanThanh', label: 'Điều kiện hoàn thành', type: 'textarea', wide: true },
+      { key: 'diemDatToiThieu', label: 'Điểm đạt tối thiểu', type: 'number', max: 999.99, step: 0.01 },
+      { key: 'donViDiem', label: 'Đơn vị điểm', type: 'select', lookup: 'donViDiem' },
+      { key: 'tyLeChuyenCanToiThieu', label: 'Tỷ lệ chuyên cần tối thiểu', type: 'number', max: 999.99, step: 0.01 },
+      { key: 'batBuocDuThi', label: 'Bắt buộc dự thi', type: 'boolean' },
+      { key: 'congThucQuyDoi', label: 'Công thức quy đổi' },
+      { key: 'huongDan', label: 'Hướng dẫn', type: 'textarea', wide: true }
+    ],
+    columns: [
+      { key: 'tenChuongTrinhMon', label: 'Môn CT' },
+      { key: 'viTri', label: 'Vị trí' },
+      { key: 'tinhChat', label: 'Tính chất' },
+      { key: 'diemDatToiThieu', label: 'Điểm đạt' },
+      { key: 'donViDiem', label: 'Đơn vị điểm' }
+    ]
+  },
+  dieuKienMonHoc: {
+    title: '6.1. Điều kiện môn học',
+    defaultForm: { syllabusMonId: null, loai: 'khac', noiDung: '', thuTu: null },
+    fields: [
+      { key: 'loai', label: 'Loại', type: 'select', lookup: 'loaiDieuKienMonHoc' },
+      { key: 'noiDung', label: 'Nội dung', type: 'textarea', required: true, wide: true },
+      { key: 'thuTu', label: 'Thứ tự', type: 'number' }
+    ],
+    uniqueRules: [
+      { field: 'thuTu', scopeKeys: ['syllabusMonId'], message: 'Thứ tự điều kiện môn học đã tồn tại trong Syllabus môn đang chọn.' }
+    ],
+    columns: [
+      { key: 'loai', label: 'Loại' },
+      { key: 'noiDung', label: 'Nội dung' },
+      { key: 'thuTu', label: 'Thứ tự' }
+    ]
+  },
+  syllabusChuongBai: {
+    title: '6.2. Syllabus chương bài',
+    defaultForm: { syllabusMonId: null, ten: '', tongGio: null, gioLyThuyet: null, gioThucHanh: null, gioKiemTra: null, noiDung: '', mucTieu: '', thuTu: null },
+    fields: [
+      { key: 'ten', label: 'Tên chương/bài', required: true },
+      { key: 'thuTu', label: 'Thứ tự', type: 'number' },
+      { key: 'tongGio', label: 'Tổng giờ', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'gioLyThuyet', label: 'Giờ LT', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'gioThucHanh', label: 'Giờ TH', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'gioKiemTra', label: 'Giờ KT', type: 'number', max: 9999.9, step: 0.1 },
+      { key: 'noiDung', label: 'Nội dung', type: 'textarea', wide: true },
+      { key: 'mucTieu', label: 'Mục tiêu', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'ten', scopeKeys: ['syllabusMonId'], message: 'Tên chương/bài đã tồn tại trong Syllabus môn đang chọn.' },
+      { field: 'thuTu', scopeKeys: ['syllabusMonId'], message: 'Thứ tự chương/bài đã tồn tại trong Syllabus môn đang chọn.' }
+    ],
+    columns: [
+      { key: 'ten', label: 'Tên chương/bài' },
+      { key: 'thuTu', label: 'Thứ tự' },
+      { key: 'tongGio', label: 'Tổng giờ' },
+      { key: 'gioLyThuyet', label: 'LT' },
+      { key: 'gioThucHanh', label: 'TH' },
+      { key: 'gioKiemTra', label: 'KT' }
+    ]
+  },
+  syllabusTaiLieu: {
+    title: '6.3. Syllabus tài liệu',
+    defaultForm: { syllabusMonId: null, ten: '', tacGia: '', namXuatBan: null, nhaXuatBan: '', loai: 'GIAO_TRINH', ghiChu: '' },
+    fields: [
+      { key: 'ten', label: 'Tên tài liệu', required: true },
+      { key: 'tacGia', label: 'Tác giả' },
+      { key: 'namXuatBan', label: 'Năm xuất bản', type: 'number' },
+      { key: 'nhaXuatBan', label: 'Nhà xuất bản' },
+      { key: 'loai', label: 'Loại tài liệu', type: 'select', lookup: 'loaiTaiLieu' },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
+    ],
+    uniqueRules: [
+      { field: 'ten', scopeKeys: ['syllabusMonId'], message: 'Tên tài liệu đã tồn tại trong Syllabus môn đang chọn.' }
+    ],
+    columns: [
+      { key: 'ten', label: 'Tên tài liệu' },
+      { key: 'tacGia', label: 'Tác giả' },
+      { key: 'namXuatBan', label: 'Năm' },
+      { key: 'nhaXuatBan', label: 'NXB' },
+      { key: 'loai', label: 'Loại' }
+    ]
   }
 }
 
-onMounted(loadChuongTrinhs)
 </script>
 
 <style scoped>
-.build-page {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  min-height: calc(100vh - var(--header-height) - 48px);
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+.xay-dung-page {
+  width: 100%;
+  min-height: calc(100vh - 56px);
+  padding: 12px;
+  background: #f3f4f6;
+  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.build-sidebar {
-  border-right: 1px solid var(--color-border);
-  padding: 16px;
-  overflow: auto;
-}
-
-.build-sidebar-header {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.program-list {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.program-card {
-  text-align: left;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-white);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.program-card.active {
-  background: #eef5ff;
-  border-color: var(--color-primary);
-}
-
-.build-content {
-  padding: 16px;
-  overflow: auto;
-}
-
-.build-toolbar {
+.page-head,
+.page-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #ffffff;
+  margin-bottom: 10px;
 }
 
-.toolbar-actions {
+.page-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.page-head p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.head-actions {
   display: flex;
-  gap: 10px;
+  gap: 6px;
 }
 
-.readonly-box {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  background: var(--color-white);
+.btn {
+  min-height: 28px;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #111827;
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #f8fafc;
+}
+
+.btn.primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.notice {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 13px;
+}
+
+.notice.error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.flow-summary {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #ffffff;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.flow-summary span {
+  padding-right: 8px;
+  border-right: 1px solid #e5e7eb;
+}
+
+.flow-group {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #e5e7eb;
+}
+
+.group-title {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.group-title h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.group-title p {
+  margin: 4px 0 0;
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.mini-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
+}
+
+.mini-scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.mini-scroll::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 999px;
+}
+
+.mini-scroll::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+@media (max-width: 800px) {
+  .page-head,
+  .page-foot {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 </style>
