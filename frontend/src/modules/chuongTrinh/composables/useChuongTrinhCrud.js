@@ -53,7 +53,7 @@ export function useChuongTrinhCrud(service, defaultForm) {
             pagination.size = res.size
         } catch (error) {
             console.error('FETCH_CHUONG_TRINH_ERROR:', error)
-            errorMessage.value = error?.message || 'Không tải được dữ liệu'
+            errorMessage.value = layThongBaoLoi(error, 'Không tải được dữ liệu')
         } finally {
             loading.value = false
         }
@@ -84,7 +84,7 @@ export function useChuongTrinhCrud(service, defaultForm) {
             await fetchItems()
         } catch (error) {
             console.error('SAVE_CHUONG_TRINH_ERROR:', error)
-            errorMessage.value = error?.message || 'Lưu dữ liệu thất bại'
+            errorMessage.value = layThongBaoLoi(error, 'Lưu dữ liệu thất bại')
         } finally {
             saving.value = false
         }
@@ -98,7 +98,7 @@ export function useChuongTrinhCrud(service, defaultForm) {
             await fetchItems()
         } catch (error) {
             console.error('DELETE_CHUONG_TRINH_ERROR:', error)
-            errorMessage.value = error?.message || 'Xóa dữ liệu thất bại'
+            errorMessage.value = layThongBaoLoi(error, 'Xóa dữ liệu thất bại')
         }
     }
 

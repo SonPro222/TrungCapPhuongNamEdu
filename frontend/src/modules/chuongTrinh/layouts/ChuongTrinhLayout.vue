@@ -1,13 +1,13 @@
 <template>
   <section class="chuong-trinh-layout">
     <PageHeader
-        title="Module chương trình"
-        description="Xây dựng chương trình đào tạo, phiên bản, môn học, mục tiêu, năng lực và điều kiện tốt nghiệp"
+        title="Quản lý chương trình đào tạo"
+        description="Chọn Xây dựng chương trình để quản lý dữ liệu, hoặc Đào tạo xem để xem/sửa chương trình theo luồng cha con."
     />
 
     <ChuongTrinhMenu />
     <div class="chuong-trinh-content">
-      <RouterView :key="$route.meta.entity" />
+      <RouterView :key="$route.fullPath" />
     </div>
   </section>
 </template>
