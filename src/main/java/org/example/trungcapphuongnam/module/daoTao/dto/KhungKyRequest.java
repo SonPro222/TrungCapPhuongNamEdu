@@ -16,6 +16,8 @@ public class KhungKyRequest {
 
     private Long loaiChuongTrinhId;
 
+    private Long khungKyGocId;
+
     @NotBlank(message = "maKy không được để trống")
     private String maKy;
 

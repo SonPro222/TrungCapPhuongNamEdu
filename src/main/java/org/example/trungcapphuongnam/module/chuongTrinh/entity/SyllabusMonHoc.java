@@ -21,6 +21,9 @@ public class SyllabusMonHoc {
     @Column(name = "chuong_trinh_mon_id")
     private Long chuongTrinhMonId;
 
+    @Column(name = "syllabus_mon_hoc_goc_id")
+    private Long syllabusMonHocGocId;
+
     @Column(name = "vi_tri")
     private String viTri;
 

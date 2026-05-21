@@ -5,9 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MucTieuChuongTrinhGoc;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Repository
-public interface MucTieuChuongTrinhGocRepository extends JpaRepository<MucTieuChuongTrinhGoc, Long> {
+public interface MucTieuChuongTrinhGocRepository extends JpaRepository<MucTieuChuongTrinhGoc, Long>, JpaSpecificationExecutor<MucTieuChuongTrinhGoc> {
 
     Page<MucTieuChuongTrinhGoc> findByMa(String ma, Pageable pageable);
 

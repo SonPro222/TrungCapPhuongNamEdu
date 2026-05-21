@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersio
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ChuongTrinhVersionDieuKienTotNghiepMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhVersionDieuKienTotNghiepService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,14 @@ public class ChuongTrinhVersionDieuKienTotNghiepServiceImpl implements ChuongTri
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionDieuKienTotNghiepResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<ChuongTrinhVersionDieuKienTotNghiepResponse> findAll(Long chuongTrinhVersionId, Long dieuKienGocId, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<ChuongTrinhVersionDieuKienTotNghiep>empty()
+                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                    .and(LocJpa.eq("dieuKienGocId", dieuKienGocId))
+                    .and(LocJpa.keyword(keyword, "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -80,16 +87,5 @@ public class ChuongTrinhVersionDieuKienTotNghiepServiceImpl implements ChuongTri
         repository.deleteById(id);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionDieuKienTotNghiepResponse> findAllByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable) {
-        return repository.findByChuongTrinhVersionId(chuongTrinhVersionId, pageable).map(mapper::toResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionDieuKienTotNghiepResponse> findAllByDieuKienGocId(Long dieuKienGocId, Pageable pageable) {
-        return repository.findByDieuKienGocId(dieuKienGocId, pageable).map(mapper::toResponse);
-    }
 
 }

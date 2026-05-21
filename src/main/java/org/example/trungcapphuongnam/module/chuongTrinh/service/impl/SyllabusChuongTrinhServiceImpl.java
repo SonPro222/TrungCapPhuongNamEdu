@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,20 +25,15 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
 
     @Override
     @Transactional(readOnly = true)
-    public Page<SyllabusChuongTrinhResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public Page<SyllabusChuongTrinhResponse> findAllByChuongTrinhVersionId(
-            Long chuongTrinhVersionId,
-            Pageable pageable
-    ) {
-        return repository.findByChuongTrinhVersionId(
-                chuongTrinhVersionId,
+    public Page<SyllabusChuongTrinhResponse> findAll(Long chuongTrinhVersionId, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<SyllabusChuongTrinh>empty()
+                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                    .and(LocJpa.keyword(keyword, "moTaTongQuan", "mucDich", "yeuCauDaoTao", "phuongPhapDaoTao", "ghiChu")),
                 pageable
         ).map(mapper::toResponse);
     }
+
     @Override
     @Transactional(readOnly = true)
     public SyllabusChuongTrinhResponse findById(Long id) {

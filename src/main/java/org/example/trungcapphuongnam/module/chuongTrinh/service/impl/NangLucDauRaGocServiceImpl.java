@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.NangLucDauRaGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.NangLucDauRaGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.NangLucDauRaGocService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,14 @@ public class NangLucDauRaGocServiceImpl implements NangLucDauRaGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<NangLucDauRaGocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<NangLucDauRaGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<NangLucDauRaGoc>empty()
+                    .and(LocJpa.like("ma", ma))
+                    .and(LocJpa.like("loai", loai))
+                    .and(LocJpa.keyword(keyword, "ma", "loai", "noiDung", "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -64,12 +71,6 @@ public class NangLucDauRaGocServiceImpl implements NangLucDauRaGocService {
             throw new ResourceNotFoundException("Nang Luc Dau Ra Goc không tồn tại: " + id);
         }
         repository.deleteById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<NangLucDauRaGocResponse> findAllByMa(String ma, Pageable pageable) {
-        return repository.findByMa(ma, pageable).map(mapper::toResponse);
     }
 
 }

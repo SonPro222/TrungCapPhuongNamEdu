@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 @Repository
-public interface DieuKienMonHocRepository extends JpaRepository<DieuKienMonHoc, Long> {
+public interface DieuKienMonHocRepository extends JpaRepository<DieuKienMonHoc, Long>, JpaSpecificationExecutor<DieuKienMonHoc> {
     Page<DieuKienMonHoc> findBySyllabusMonId(
             Long syllabusMonId,
             Pageable pageable

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,11 @@ public class MonHocServiceImpl implements MonHocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MonHocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<MonHocResponse> findAll(String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.keyword(keyword, "maMon", "tenMon", "moTa"),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override

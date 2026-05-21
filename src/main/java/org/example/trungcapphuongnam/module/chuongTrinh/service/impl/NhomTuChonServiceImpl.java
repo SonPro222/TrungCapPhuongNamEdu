@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -25,20 +26,15 @@ public class NhomTuChonServiceImpl implements NhomTuChonService {
     private final ChuongTrinhNghiepVuValidator validator;
     @Override
     @Transactional(readOnly = true)
-    public Page<NhomTuChonResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public Page<NhomTuChonResponse> findAllByChuongTrinhVersionId(
-            Long chuongTrinhVersionId,
-            Pageable pageable
-    ) {
-        return repository.findByChuongTrinhVersionId(
-                chuongTrinhVersionId,
+    public Page<NhomTuChonResponse> findAll(Long chuongTrinhVersionId, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<NhomTuChon>empty()
+                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                    .and(LocJpa.keyword(keyword, "ten", "ghiChu")),
                 pageable
         ).map(mapper::toResponse);
     }
+
     @Override
     @Transactional(readOnly = true)
     public NhomTuChonResponse findById(Long id) {

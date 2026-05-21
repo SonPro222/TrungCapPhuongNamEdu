@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMonQuy
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ChuongTrinhMonQuyDoiDiemMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhMonQuyDoiDiemMauService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,14 @@ public class ChuongTrinhMonQuyDoiDiemMauServiceImpl implements ChuongTrinhMonQuy
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAll(Long chuongTrinhMonId, Long quyDoiDiemMauId, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<ChuongTrinhMonQuyDoiDiemMau>empty()
+                    .and(LocJpa.eq("chuongTrinhMonId", chuongTrinhMonId))
+                    .and(LocJpa.eq("quyDoiDiemMauId", quyDoiDiemMauId))
+                    .and(LocJpa.keyword(keyword, "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -81,16 +88,5 @@ public class ChuongTrinhMonQuyDoiDiemMauServiceImpl implements ChuongTrinhMonQuy
         repository.deleteById(id);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAllByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable) {
-        return repository.findByChuongTrinhMonId(chuongTrinhMonId, pageable).map(mapper::toResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAllByQuyDoiDiemMauId(Long quyDoiDiemMauId, Pageable pageable) {
-        return repository.findByQuyDoiDiemMauId(quyDoiDiemMauId, pageable).map(mapper::toResponse);
-    }
 
 }

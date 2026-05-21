@@ -18,6 +18,7 @@ public class KhungKyMapper {
                     .chuongTrinhVersionId(request.getChuongTrinhVersionId())
                     .loaiChuongTrinhId(request.getLoaiChuongTrinhId())
                     .maKy(request.getMaKy())
+                    .khungKyGocId(request.getKhungKyGocId())
                     .tenKy(request.getTenKy())
                     .thuTu(request.getThuTu())
                     .build();
@@ -33,6 +34,7 @@ public class KhungKyMapper {
                     .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
                     .loaiChuongTrinhId(entity.getLoaiChuongTrinhId())
                     .maKy(entity.getMaKy())
+                    .khungKyGocId(entity.getKhungKyGocId())
                     .tenKy(entity.getTenKy())
                     .thuTu(entity.getThuTu())
                     .build();
@@ -41,6 +43,7 @@ public class KhungKyMapper {
         public void updateEntity(KhungKy entity, KhungKyRequest request) {
             entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
             entity.setLoaiChuongTrinhId(request.getLoaiChuongTrinhId());
+            entity.setKhungKyGocId(request.getKhungKyGocId());
             entity.setMaKy(request.getMaKy());
             entity.setTenKy(request.getTenKy());
             entity.setThuTu(request.getThuTu());

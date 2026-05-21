@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
+import org.example.trungcapphuongnam.module.daoTao.entity.KhungKyGoc;
+import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyGocRepository;
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,6 +27,7 @@ public class KhungKyServiceImpl implements KhungKyService {
     private final KhungKyRepository repository;
     private final KhungKyMapper mapper;
     private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
+    private final KhungKyGocRepository khungKyGocRepository;
     @Override
     @Transactional(readOnly = true)
     public Page<KhungKyResponse> findAll(Pageable pageable) {
@@ -61,6 +64,9 @@ public class KhungKyServiceImpl implements KhungKyService {
         xoaChuongTrinhCascadeService.xoaTheoKhungKyId(id);
     }
     private void validate(KhungKyRequest request, Long id) {
+        if (request == null) {
+            throw new BadRequestException("Dữ liệu khung kỳ không hợp lệ");
+        }
 
         request.setMaKy(TextUtil.trimRequired(request.getMaKy()));
         request.setTenKy(TextUtil.trimRequired(request.getTenKy()));
@@ -78,6 +84,25 @@ public class KhungKyServiceImpl implements KhungKyService {
                     "Version chương trình không tồn tại: "
                             + request.getChuongTrinhVersionId()
             );
+        }
+
+        if (request.getKhungKyGocId() != null) {
+            KhungKyGoc khungKyGoc = khungKyGocRepository.findById(request.getKhungKyGocId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Khung kỳ gốc không tồn tại: " + request.getKhungKyGocId()
+                    ));
+
+            request.setMaKy(khungKyGoc.getMaKy());
+            request.setTenKy(khungKyGoc.getTenKy());
+            request.setThuTu(khungKyGoc.getThuTu());
+        }
+
+        if (request.getThuTu() == null) {
+            throw new BadRequestException("thuTu không được để trống");
+        }
+
+        if (request.getThuTu() <= 0) {
+            throw new BadRequestException("thuTu phải lớn hơn 0");
         }
 
         if (id == null) {
@@ -100,6 +125,16 @@ public class KhungKyServiceImpl implements KhungKyService {
                 );
             }
 
+            if (request.getKhungKyGocId() != null
+                    && repository.existsByChuongTrinhVersionIdAndKhungKyGocId(
+                    request.getChuongTrinhVersionId(),
+                    request.getKhungKyGocId()
+            )) {
+                throw new DuplicateResourceException(
+                        "Khung kỳ gốc đã được gán vào version chương trình này"
+                );
+            }
+
         } else {
 
             if (repository.existsByChuongTrinhVersionIdAndMaKyAndIdNot(
@@ -119,6 +154,17 @@ public class KhungKyServiceImpl implements KhungKyService {
             )) {
                 throw new DuplicateResourceException(
                         "Thứ tự kỳ đã tồn tại trong version chương trình"
+                );
+            }
+
+            if (request.getKhungKyGocId() != null
+                    && repository.existsByChuongTrinhVersionIdAndKhungKyGocIdAndIdNot(
+                    request.getChuongTrinhVersionId(),
+                    request.getKhungKyGocId(),
+                    id
+            )) {
+                throw new DuplicateResourceException(
+                        "Khung kỳ gốc đã được gán vào version chương trình này"
                 );
             }
         }

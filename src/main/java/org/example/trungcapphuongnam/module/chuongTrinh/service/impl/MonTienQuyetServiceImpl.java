@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,17 +25,17 @@ public class MonTienQuyetServiceImpl implements MonTienQuyetService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MonTienQuyetResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<MonTienQuyetResponse> findAll(Long monId, Long monDieuKienId, String loai, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<MonTienQuyet>empty()
+                    .and(LocJpa.eq("monId", monId))
+                    .and(LocJpa.eq("monDieuKienId", monDieuKienId))
+                    .and(LocJpa.like("loai", loai))
+                    .and(LocJpa.keyword(keyword, "loai", "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
-    @Override
-    @Transactional(readOnly = true)
-    public Page<MonTienQuyetResponse> findAllByMonId(
-            Long monId,
-            Pageable pageable
-    ) {
-        return repository.findByMonId(monId, pageable).map(mapper::toResponse);
-    }
+
     @Override
     @Transactional(readOnly = true)
     public MonTienQuyetResponse findById(Long id) {

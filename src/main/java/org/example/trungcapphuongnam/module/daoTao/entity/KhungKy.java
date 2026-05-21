@@ -33,6 +33,9 @@ public class KhungKy {
     @Column(name = "loai_chuong_trinh_id")
     private Long loaiChuongTrinhId;
 
+    @Column(name = "khung_ky_goc_id")
+    private Long khungKyGocId;
+
     @Column(name = "ma_ky", nullable = false, length = 50)
     private String maKy;
 

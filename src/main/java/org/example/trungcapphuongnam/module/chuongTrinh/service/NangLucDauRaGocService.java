@@ -6,8 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NangLucDauRa
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NangLucDauRaGocResponse;
 
 public interface NangLucDauRaGocService {
-    Page<NangLucDauRaGocResponse> findAll(Pageable pageable);
-
+    Page<NangLucDauRaGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable);
     NangLucDauRaGocResponse findById(Long id);
 
     NangLucDauRaGocResponse create(NangLucDauRaGocRequest request);
@@ -15,9 +14,4 @@ public interface NangLucDauRaGocService {
     NangLucDauRaGocResponse update(Long id, NangLucDauRaGocRequest request);
 
     void delete(Long id);
-
-    Page<NangLucDauRaGocResponse> findAllByMa(String ma, Pageable pageable);
-
-
-
 }

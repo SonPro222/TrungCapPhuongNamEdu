@@ -20,44 +20,18 @@ public class ChuongTrinhMonController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAll(
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) Long khungKyId,
+            @RequestParam(required = false) Long monHocId,
+            @RequestParam(required = false) Long nhomKienThucId,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String loaiHocPhan,
+            @RequestParam(required = false) Boolean batBuoc,
+            @RequestParam(required = false) Boolean laMonDieuKien,
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
-    }
-
-    @GetMapping("/theo-version/{chuongTrinhVersionId}")
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAllByChuongTrinhVersionId(
-            @PathVariable Long chuongTrinhVersionId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
-        ));
-    }
-
-    @GetMapping("/theo-khung-ky/{khungKyId}")
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAllByKhungKyId(
-            @PathVariable Long khungKyId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByKhungKyId(khungKyId, pageable)
-        ));
-    }
-
-    @GetMapping("/theo-version/{chuongTrinhVersionId}/theo-khung-ky/{khungKyId}")
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAllByChuongTrinhVersionIdAndKhungKyId(
-            @PathVariable Long chuongTrinhVersionId,
-            @PathVariable Long khungKyId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByChuongTrinhVersionIdAndKhungKyId(
-                        chuongTrinhVersionId,
-                        khungKyId,
-                        pageable
-                )
-        ));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, khungKyId, monHocId, nhomKienThucId, loai, loaiHocPhan, batBuoc, laMonDieuKien, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

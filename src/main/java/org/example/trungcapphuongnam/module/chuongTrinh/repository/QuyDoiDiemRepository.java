@@ -8,8 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 @Repository
-public interface QuyDoiDiemRepository extends JpaRepository<QuyDoiDiem, Long> {
+public interface QuyDoiDiemRepository extends JpaRepository<QuyDoiDiem, Long>, JpaSpecificationExecutor<QuyDoiDiem> {
     Page<QuyDoiDiem> findByChuongTrinhMonId(
             Long chuongTrinhMonId,
             Pageable pageable

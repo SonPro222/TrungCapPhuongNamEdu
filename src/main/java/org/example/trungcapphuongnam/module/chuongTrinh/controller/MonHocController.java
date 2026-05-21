@@ -20,8 +20,11 @@ public class MonHocController {
     private final MonHocService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MonHocResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<MonHocResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

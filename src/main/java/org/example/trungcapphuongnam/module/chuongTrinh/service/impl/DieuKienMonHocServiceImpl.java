@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,20 +25,16 @@ public class DieuKienMonHocServiceImpl implements DieuKienMonHocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<DieuKienMonHocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public Page<DieuKienMonHocResponse> findAllBySyllabusMonId(
-            Long syllabusMonId,
-            Pageable pageable
-    ) {
-        return repository.findBySyllabusMonId(
-                syllabusMonId,
+    public Page<DieuKienMonHocResponse> findAll(Long syllabusMonId, String loai, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<DieuKienMonHoc>empty()
+                    .and(LocJpa.eq("syllabusMonId", syllabusMonId))
+                    .and(LocJpa.like("loai", loai))
+                    .and(LocJpa.keyword(keyword, "loai", "noiDung")),
                 pageable
         ).map(mapper::toResponse);
     }
+
     @Override
     @Transactional(readOnly = true)
     public DieuKienMonHocResponse findById(Long id) {

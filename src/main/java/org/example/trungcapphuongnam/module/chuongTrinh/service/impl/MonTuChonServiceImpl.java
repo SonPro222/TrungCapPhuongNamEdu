@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,43 +25,15 @@ public class MonTuChonServiceImpl implements MonTuChonService {
     private final ChuongTrinhNghiepVuValidator validator;
     @Override
     @Transactional(readOnly = true)
-    public Page<MonTuChonResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public Page<MonTuChonResponse> findAllByNhomId(
-            Long nhomId,
-            Pageable pageable
-    ) {
-        return repository.findByNhomId(nhomId, pageable).map(mapper::toResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<MonTuChonResponse> findAllByChuongTrinhMonId(
-            Long chuongTrinhMonId,
-            Pageable pageable
-    ) {
-        return repository.findByChuongTrinhMonId(
-                chuongTrinhMonId,
+    public Page<MonTuChonResponse> findAll(Long nhomId, Long chuongTrinhMonId, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<MonTuChon>empty()
+                    .and(LocJpa.eq("nhomId", nhomId))
+                    .and(LocJpa.eq("chuongTrinhMonId", chuongTrinhMonId)),
                 pageable
         ).map(mapper::toResponse);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<MonTuChonResponse> findAllByNhomIdAndChuongTrinhMonId(
-            Long nhomId,
-            Long chuongTrinhMonId,
-            Pageable pageable
-    ) {
-        return repository.findByNhomIdAndChuongTrinhMonId(
-                nhomId,
-                chuongTrinhMonId,
-                pageable
-        ).map(mapper::toResponse);
-    }
     @Override
     @Transactional(readOnly = true)
     public MonTuChonResponse findById(Long id) {

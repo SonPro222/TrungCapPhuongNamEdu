@@ -21,19 +21,12 @@ public class QuyDoiDiemController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<QuyDoiDiemResponse>>> findAll(
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhMonId,
+            @RequestParam(required = false) String ketQua,
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
-    }
-
-    @GetMapping("/theo-mon/{chuongTrinhMonId}")
-    public ResponseEntity<ApiResponse<Page<QuyDoiDiemResponse>>> findAllByChuongTrinhMonId(
-            @PathVariable Long chuongTrinhMonId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByChuongTrinhMonId(chuongTrinhMonId, pageable)
-        ));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhMonId, ketQua, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

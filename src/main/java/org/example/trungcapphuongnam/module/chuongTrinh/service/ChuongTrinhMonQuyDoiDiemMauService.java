@@ -6,8 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ChuongTrinhM
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ChuongTrinhMonQuyDoiDiemMauResponse;
 
 public interface ChuongTrinhMonQuyDoiDiemMauService {
-    Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAll(Pageable pageable);
-
+    Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAll(Long chuongTrinhMonId, Long quyDoiDiemMauId, String keyword, Pageable pageable);
     ChuongTrinhMonQuyDoiDiemMauResponse findById(Long id);
 
     ChuongTrinhMonQuyDoiDiemMauResponse create(ChuongTrinhMonQuyDoiDiemMauRequest request);
@@ -15,8 +14,4 @@ public interface ChuongTrinhMonQuyDoiDiemMauService {
     ChuongTrinhMonQuyDoiDiemMauResponse update(Long id, ChuongTrinhMonQuyDoiDiemMauRequest request);
 
     void delete(Long id);
-
-    Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAllByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable);
-
-    Page<ChuongTrinhMonQuyDoiDiemMauResponse> findAllByQuyDoiDiemMauId(Long quyDoiDiemMauId, Pageable pageable);
 }

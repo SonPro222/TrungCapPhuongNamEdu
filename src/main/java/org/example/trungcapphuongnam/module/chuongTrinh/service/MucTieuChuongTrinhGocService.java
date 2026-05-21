@@ -6,8 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.MucTieuChuon
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.MucTieuChuongTrinhGocResponse;
 
 public interface MucTieuChuongTrinhGocService {
-    Page<MucTieuChuongTrinhGocResponse> findAll(Pageable pageable);
-
+    Page<MucTieuChuongTrinhGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable);
     MucTieuChuongTrinhGocResponse findById(Long id);
 
     MucTieuChuongTrinhGocResponse create(MucTieuChuongTrinhGocRequest request);
@@ -15,7 +14,4 @@ public interface MucTieuChuongTrinhGocService {
     MucTieuChuongTrinhGocResponse update(Long id, MucTieuChuongTrinhGocRequest request);
 
     void delete(Long id);
-
-    Page<MucTieuChuongTrinhGocResponse> findAllByMa(String ma, Pageable pageable);
-
 }

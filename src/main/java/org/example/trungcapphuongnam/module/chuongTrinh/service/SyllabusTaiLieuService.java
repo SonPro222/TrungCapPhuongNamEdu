@@ -6,14 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SyllabusTaiLieuService {
-    Page<SyllabusTaiLieuResponse> findAll(Pageable pageable);
+    Page<SyllabusTaiLieuResponse> findAll(Long syllabusMonId, String loai, String keyword, Pageable pageable);
     SyllabusTaiLieuResponse findById(Long id);
     SyllabusTaiLieuResponse create(SyllabusTaiLieuRequest request);
     SyllabusTaiLieuResponse update(Long id, SyllabusTaiLieuRequest request);
     void delete(Long id);
-
-    Page<SyllabusTaiLieuResponse> findAllBySyllabusMonId(
-            Long syllabusMonId,
-            Pageable pageable
-    );
 }

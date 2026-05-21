@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.MucTieuChuongTrin
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.MucTieuChuongTrinhGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.MucTieuChuongTrinhGocService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,14 @@ public class MucTieuChuongTrinhGocServiceImpl implements MucTieuChuongTrinhGocSe
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MucTieuChuongTrinhGocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<MucTieuChuongTrinhGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<MucTieuChuongTrinhGoc>empty()
+                    .and(LocJpa.like("ma", ma))
+                    .and(LocJpa.like("loai", loai))
+                    .and(LocJpa.keyword(keyword, "ma", "loai", "noiDung", "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -64,12 +71,6 @@ public class MucTieuChuongTrinhGocServiceImpl implements MucTieuChuongTrinhGocSe
             throw new ResourceNotFoundException("Muc Tieu Chuong Trinh Goc không tồn tại: " + id);
         }
         repository.deleteById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<MucTieuChuongTrinhGocResponse> findAllByMa(String ma, Pageable pageable) {
-        return repository.findByMa(ma, pageable).map(mapper::toResponse);
     }
 
 }

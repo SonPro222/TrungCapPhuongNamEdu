@@ -17,6 +17,8 @@ public class KhungKyResponse {
 
     private Long loaiChuongTrinhId;
 
+    private Long khungKyGocId;
+
     private String maKy;
 
     private String tenKy;

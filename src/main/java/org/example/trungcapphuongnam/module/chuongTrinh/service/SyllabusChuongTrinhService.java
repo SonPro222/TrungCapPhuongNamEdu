@@ -6,13 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SyllabusChuongTrinhService {
-    Page<SyllabusChuongTrinhResponse> findAll(Pageable pageable);
+    Page<SyllabusChuongTrinhResponse> findAll(Long chuongTrinhVersionId, String keyword, Pageable pageable);
     SyllabusChuongTrinhResponse findById(Long id);
     SyllabusChuongTrinhResponse create(SyllabusChuongTrinhRequest request);
     SyllabusChuongTrinhResponse update(Long id, SyllabusChuongTrinhRequest request);
     void delete(Long id);
-    Page<SyllabusChuongTrinhResponse> findAllByChuongTrinhVersionId(
-            Long chuongTrinhVersionId,
-            Pageable pageable
-    );
 }

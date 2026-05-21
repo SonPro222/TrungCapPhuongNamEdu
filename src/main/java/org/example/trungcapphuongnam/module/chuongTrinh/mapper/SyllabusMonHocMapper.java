@@ -12,6 +12,7 @@ public class SyllabusMonHocMapper {
         if (request == null) return null;
         return SyllabusMonHoc.builder()
                 .chuongTrinhMonId(request.getChuongTrinhMonId())
+                .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
                 .viTri(request.getViTri())
                 .tinhChat(request.getTinhChat())
                 .mucTieu(request.getMucTieu())
@@ -33,6 +34,7 @@ public class SyllabusMonHocMapper {
         return SyllabusMonHocResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhMonId(entity.getChuongTrinhMonId())
+                .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
                 .viTri(entity.getViTri())
                 .tinhChat(entity.getTinhChat())
                 .mucTieu(entity.getMucTieu())
@@ -52,6 +54,7 @@ public class SyllabusMonHocMapper {
     public void updateEntity(SyllabusMonHoc entity, SyllabusMonHocRequest request) {
         if (entity == null || request == null) return;
         entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
+        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
         entity.setViTri(request.getViTri());
         entity.setTinhChat(request.getTinhChat());
         entity.setMucTieu(request.getMucTieu());

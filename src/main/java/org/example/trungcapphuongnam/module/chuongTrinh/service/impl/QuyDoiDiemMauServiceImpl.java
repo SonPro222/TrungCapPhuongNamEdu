@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiemMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.QuyDoiDiemMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.QuyDoiDiemMauService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,14 @@ public class QuyDoiDiemMauServiceImpl implements QuyDoiDiemMauService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<QuyDoiDiemMauResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<QuyDoiDiemMauResponse> findAll(String ma, String ketQua, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<QuyDoiDiemMau>empty()
+                    .and(LocJpa.like("ma", ma))
+                    .and(LocJpa.like("ketQua", ketQua))
+                    .and(LocJpa.keyword(keyword, "ma", "ten", "ketQua", "congThuc", "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -64,12 +71,6 @@ public class QuyDoiDiemMauServiceImpl implements QuyDoiDiemMauService {
             throw new ResourceNotFoundException("Quy Doi Diem Mau không tồn tại: " + id);
         }
         repository.deleteById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<QuyDoiDiemMauResponse> findAllByMa(String ma, Pageable pageable) {
-        return repository.findByMa(ma, pageable).map(mapper::toResponse);
     }
 
 }

@@ -5,9 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersionViTriViecLam;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Repository
-public interface ChuongTrinhVersionViTriViecLamRepository extends JpaRepository<ChuongTrinhVersionViTriViecLam, Long> {
+public interface ChuongTrinhVersionViTriViecLamRepository extends JpaRepository<ChuongTrinhVersionViTriViecLam, Long>, JpaSpecificationExecutor<ChuongTrinhVersionViTriViecLam> {
 
     Page<ChuongTrinhVersionViTriViecLam> findByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable);
     Page<ChuongTrinhVersionViTriViecLam> findByViTriGocId(Long viTriGocId, Pageable pageable);

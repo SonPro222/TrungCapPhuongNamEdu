@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 @Repository
-public interface MonTienQuyetRepository extends JpaRepository<MonTienQuyet, Long> {
+public interface MonTienQuyetRepository extends JpaRepository<MonTienQuyet, Long>, JpaSpecificationExecutor<MonTienQuyet> {
     Page<MonTienQuyet> findByMonId(
             Long monId,
             Pageable pageable

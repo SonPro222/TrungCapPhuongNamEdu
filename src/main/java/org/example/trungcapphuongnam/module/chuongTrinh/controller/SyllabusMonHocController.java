@@ -21,18 +21,14 @@ public class SyllabusMonHocController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<SyllabusMonHocResponse>>> findAll(
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
-    }
-
-    @GetMapping("/theo-mon/{chuongTrinhMonId}")
-    public ResponseEntity<ApiResponse<Page<SyllabusMonHocResponse>>> findAllByChuongTrinhMonId(
-            @PathVariable Long chuongTrinhMonId,
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhMonId,
+            @RequestParam(required = false) Long syllabusMonHocGocId,
+            @RequestParam(required = false) Boolean batBuocDuThi,
+            @RequestParam(required = false) String keyword
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByChuongTrinhMonId(chuongTrinhMonId, pageable)
+                service.findAll(chuongTrinhMonId, syllabusMonHocGocId, batBuocDuThi, keyword, pageable)
         ));
     }
 

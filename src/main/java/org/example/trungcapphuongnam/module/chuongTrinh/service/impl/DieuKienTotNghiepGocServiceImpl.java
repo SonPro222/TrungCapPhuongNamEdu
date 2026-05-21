@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.DieuKienTotNghiep
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.DieuKienTotNghiepGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.DieuKienTotNghiepGocService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +22,15 @@ public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocServ
     private final ChuongTrinhNghiepVuValidator validator;
     private final DieuKienTotNghiepGocRepository repository;
     private final DieuKienTotNghiepGocMapper mapper;
-
     @Override
     @Transactional(readOnly = true)
-    public Page<DieuKienTotNghiepGocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<DieuKienTotNghiepGocResponse> findAll(String ma, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<DieuKienTotNghiepGoc>empty()
+                    .and(LocJpa.like("ma", ma))
+                    .and(LocJpa.keyword(keyword, "ma", "noiDung", "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -64,12 +69,6 @@ public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocServ
             throw new ResourceNotFoundException("Dieu Kien Tot Nghiep Goc không tồn tại: " + id);
         }
         repository.deleteById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<DieuKienTotNghiepGocResponse> findAllByMa(String ma, Pageable pageable) {
-        return repository.findByMa(ma, pageable).map(mapper::toResponse);
     }
 
 }

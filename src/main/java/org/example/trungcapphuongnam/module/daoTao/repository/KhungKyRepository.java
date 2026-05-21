@@ -36,6 +36,15 @@ public interface KhungKyRepository extends JpaRepository<KhungKy, Long> {
             Integer thuTu,
             Long id
     );
+    boolean existsByChuongTrinhVersionIdAndKhungKyGocId(
+            Long chuongTrinhVersionId,
+            Long khungKyGocId
+    );
 
+    boolean existsByChuongTrinhVersionIdAndKhungKyGocIdAndIdNot(
+            Long chuongTrinhVersionId,
+            Long khungKyGocId,
+            Long id
+    );
 
 }

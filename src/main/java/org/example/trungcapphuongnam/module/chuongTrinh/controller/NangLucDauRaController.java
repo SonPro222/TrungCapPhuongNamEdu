@@ -21,19 +21,13 @@ public class NangLucDauRaController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<NangLucDauRaResponse>>> findAll(
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) String ma,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
-    }
-
-    @GetMapping("/theo-version/{chuongTrinhVersionId}")
-    public ResponseEntity<ApiResponse<Page<NangLucDauRaResponse>>> findAllByChuongTrinhVersionId(
-            @PathVariable Long chuongTrinhVersionId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
-        ));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, ma, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

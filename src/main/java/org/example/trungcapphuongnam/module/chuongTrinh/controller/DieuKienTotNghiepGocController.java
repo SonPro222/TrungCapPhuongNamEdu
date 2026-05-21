@@ -19,17 +19,11 @@ public class DieuKienTotNghiepGocController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<DieuKienTotNghiepGocResponse>>> findAll(
-        Pageable pageable,
-        @RequestParam(required = false) String ma
+            Pageable pageable,
+            @RequestParam(required = false) String ma,
+            @RequestParam(required = false) String keyword
     ) {
-        Page<DieuKienTotNghiepGocResponse> result;
-
-        if (ma != null) {
-            result = service.findAllByMa(ma, pageable);
-        } else {
-            result = service.findAll(pageable);
-        }
-        return ResponseEntity.ok(ApiResponse.ok(result));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(ma, keyword, pageable)));
     }
 
     @GetMapping("/{id}")

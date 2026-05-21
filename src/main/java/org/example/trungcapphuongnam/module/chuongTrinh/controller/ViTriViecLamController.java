@@ -21,19 +21,11 @@ public class ViTriViecLamController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ViTriViecLamResponse>>> findAll(
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
-    }
-
-    @GetMapping("/theo-version/{chuongTrinhVersionId}")
-    public ResponseEntity<ApiResponse<Page<ViTriViecLamResponse>>> findAllByChuongTrinhVersionId(
-            @PathVariable Long chuongTrinhVersionId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
-        ));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

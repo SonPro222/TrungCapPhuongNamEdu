@@ -21,19 +21,12 @@ public class SyllabusTaiLieuController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<SyllabusTaiLieuResponse>>> findAll(
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) Long syllabusMonId,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
-    }
-
-    @GetMapping("/theo-syllabus/{syllabusMonId}")
-    public ResponseEntity<ApiResponse<Page<SyllabusTaiLieuResponse>>> findAllBySyllabusMonId(
-            @PathVariable Long syllabusMonId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllBySyllabusMonId(syllabusMonId, pageable)
-        ));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusMonId, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

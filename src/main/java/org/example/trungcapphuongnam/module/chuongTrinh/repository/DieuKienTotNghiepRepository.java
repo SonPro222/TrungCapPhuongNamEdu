@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 @Repository
-public interface DieuKienTotNghiepRepository extends JpaRepository<DieuKienTotNghiep, Long> {
+public interface DieuKienTotNghiepRepository extends JpaRepository<DieuKienTotNghiep, Long>, JpaSpecificationExecutor<DieuKienTotNghiep> {
     Page<DieuKienTotNghiep> findByChuongTrinhVersionId(
             Long chuongTrinhVersionId,
             Pageable pageable

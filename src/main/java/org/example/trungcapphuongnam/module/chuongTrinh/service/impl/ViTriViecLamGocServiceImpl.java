@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLamGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ViTriViecLamGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ViTriViecLamGocService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,13 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ViTriViecLamGocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<ViTriViecLamGocResponse> findAll(String ma, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<ViTriViecLamGoc>empty()
+                    .and(LocJpa.like("ma", ma))
+                    .and(LocJpa.keyword(keyword, "ma", "ten", "moTa", "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -64,12 +70,6 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
             throw new ResourceNotFoundException("Vi Tri Viec Lam Goc không tồn tại: " + id);
         }
         repository.deleteById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ViTriViecLamGocResponse> findAllByMa(String ma, Pageable pageable) {
-        return repository.findByMa(ma, pageable).map(mapper::toResponse);
     }
 
 }

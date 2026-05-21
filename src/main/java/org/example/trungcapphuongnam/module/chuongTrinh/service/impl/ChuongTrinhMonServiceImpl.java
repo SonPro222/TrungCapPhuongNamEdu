@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -24,40 +25,22 @@ public class ChuongTrinhMonServiceImpl implements ChuongTrinhMonService {
     private final ChuongTrinhNghiepVuValidator validator;
     @Override
     @Transactional(readOnly = true)
-    public Page<ChuongTrinhMonResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhMonResponse> findAllByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable) {
-        return repository.findByChuongTrinhVersionId(chuongTrinhVersionId, pageable).map(mapper::toResponse);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhMonResponse> findAllByKhungKyId(
-            Long khungKyId,
-            Pageable pageable
-    ) {
-        return repository.findByKhungKyId(
-                khungKyId,
+    public Page<ChuongTrinhMonResponse> findAll(Long chuongTrinhVersionId, Long khungKyId, Long monHocId, Long nhomKienThucId, String loai, String loaiHocPhan, Boolean batBuoc, Boolean laMonDieuKien, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<ChuongTrinhMon>empty()
+                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                    .and(LocJpa.eq("khungKyId", khungKyId))
+                    .and(LocJpa.eq("monHocId", monHocId))
+                    .and(LocJpa.eq("nhomKienThucId", nhomKienThucId))
+                    .and(LocJpa.like("loai", loai))
+                    .and(LocJpa.like("loaiHocPhan", loaiHocPhan))
+                    .and(LocJpa.eq("batBuoc", batBuoc))
+                    .and(LocJpa.eq("laMonDieuKien", laMonDieuKien))
+                    .and(LocJpa.keyword(keyword, "maMonTrongCt", "loai", "loaiHocPhan", "ghiChu")),
                 pageable
         ).map(mapper::toResponse);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhMonResponse> findAllByChuongTrinhVersionIdAndKhungKyId(
-            Long chuongTrinhVersionId,
-            Long khungKyId,
-            Pageable pageable
-    ) {
-        return repository.findByChuongTrinhVersionIdAndKhungKyId(
-                chuongTrinhVersionId,
-                khungKyId,
-                pageable
-        ).map(mapper::toResponse);
-    }
     @Override
     @Transactional(readOnly = true)
     public ChuongTrinhMonResponse findById(Long id) {

@@ -13,7 +13,7 @@ public class SyllabusMonHocRequest {
 
     @NotNull(message = "chuong_trinh_mon_id không được để trống")
     private Long chuongTrinhMonId;
-
+    private Long syllabusMonHocGocId;
     private String viTri;
 
     private String tinhChat;

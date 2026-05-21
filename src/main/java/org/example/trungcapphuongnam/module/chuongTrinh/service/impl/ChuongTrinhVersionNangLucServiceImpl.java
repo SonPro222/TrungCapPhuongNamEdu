@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersio
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ChuongTrinhVersionNangLucMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhVersionNangLucService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,14 @@ public class ChuongTrinhVersionNangLucServiceImpl implements ChuongTrinhVersionN
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionNangLucResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<ChuongTrinhVersionNangLucResponse> findAll(Long chuongTrinhVersionId, Long nangLucGocId, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<ChuongTrinhVersionNangLuc>empty()
+                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                    .and(LocJpa.eq("nangLucGocId", nangLucGocId))
+                    .and(LocJpa.keyword(keyword, "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -80,16 +87,5 @@ public class ChuongTrinhVersionNangLucServiceImpl implements ChuongTrinhVersionN
         repository.deleteById(id);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionNangLucResponse> findAllByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable) {
-        return repository.findByChuongTrinhVersionId(chuongTrinhVersionId, pageable).map(mapper::toResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionNangLucResponse> findAllByNangLucGocId(Long nangLucGocId, Pageable pageable) {
-        return repository.findByNangLucGocId(nangLucGocId, pageable).map(mapper::toResponse);
-    }
 
 }

@@ -20,19 +20,13 @@ public class ChuongTrinhController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ChuongTrinhResponse>>> findAll(
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) Long nganhId,
+            @RequestParam(required = false) Long trinhDoId,
+            @RequestParam(required = false) Long loaiChuongTrinhId,
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
-    }
-
-    @GetMapping("/theo-nganh/{nganhId}")
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhResponse>>> findAllByNganhId(
-            @PathVariable Long nganhId,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                service.findAllByNganhId(nganhId, pageable)
-        ));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(nganhId, trinhDoId, loaiChuongTrinhId, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

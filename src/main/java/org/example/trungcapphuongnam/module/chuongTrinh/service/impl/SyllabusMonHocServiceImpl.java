@@ -14,27 +14,46 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
+
     private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
     private final SyllabusMonHocRepository repository;
     private final SyllabusMonHocMapper mapper;
     private final ChuongTrinhNghiepVuValidator validator;
-    @Override
-    @Transactional(readOnly = true)
-    public Page<SyllabusMonHocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
-    }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<SyllabusMonHocResponse> findAllByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable) {
-        return repository.findByChuongTrinhMonId(chuongTrinhMonId, pageable).map(mapper::toResponse);
+    public Page<SyllabusMonHocResponse> findAll(
+            Long chuongTrinhMonId,
+            Long syllabusMonHocGocId,
+            Boolean batBuocDuThi,
+            String keyword,
+            Pageable pageable
+    ) {
+        return repository.findAll(
+                LocJpa.<SyllabusMonHoc>empty()
+                        .and(LocJpa.eq("chuongTrinhMonId", chuongTrinhMonId))
+                        .and(LocJpa.eq("syllabusMonHocGocId", syllabusMonHocGocId))
+                        .and(LocJpa.eq("batBuocDuThi", batBuocDuThi))
+                        .and(LocJpa.keyword(
+                                keyword,
+                                "viTri",
+                                "tinhChat",
+                                "mucTieu",
+                                "phuongPhapDanhGia",
+                                "dieuKienHoanThanh",
+                                "huongDan",
+                                "donViDiem",
+                                "congThucQuyDoi"
+                        )),
+                pageable
+        ).map(mapper::toResponse);
     }
-
     @Override
     @Transactional(readOnly = true)
     public SyllabusMonHocResponse findById(Long id) {
