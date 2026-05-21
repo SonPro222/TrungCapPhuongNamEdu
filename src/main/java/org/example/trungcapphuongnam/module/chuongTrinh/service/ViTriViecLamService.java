@@ -11,4 +11,8 @@ public interface ViTriViecLamService {
     ViTriViecLamResponse create(ViTriViecLamRequest request);
     ViTriViecLamResponse update(Long id, ViTriViecLamRequest request);
     void delete(Long id);
+    Page<ViTriViecLamResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
 }

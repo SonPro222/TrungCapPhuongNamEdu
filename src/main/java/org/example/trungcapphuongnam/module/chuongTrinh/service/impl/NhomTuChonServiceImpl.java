@@ -6,8 +6,10 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomTuChonR
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChon;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.NhomTuChonMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.NhomTuChonRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomTuChonService;
 import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,16 +19,26 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class NhomTuChonServiceImpl implements NhomTuChonService {
-
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
     private final NhomTuChonRepository repository;
     private final NhomTuChonMapper mapper;
-
+    private final ChuongTrinhNghiepVuValidator validator;
     @Override
     @Transactional(readOnly = true)
     public Page<NhomTuChonResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<NhomTuChonResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhVersionId(
+                chuongTrinhVersionId,
+                pageable
+        ).map(mapper::toResponse);
+    }
     @Override
     @Transactional(readOnly = true)
     public NhomTuChonResponse findById(Long id) {
@@ -37,6 +49,7 @@ public class NhomTuChonServiceImpl implements NhomTuChonService {
 
     @Override
     public NhomTuChonResponse create(NhomTuChonRequest request) {
+        validator.validateNhomTuChon(request, null);
         NhomTuChon entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -45,6 +58,7 @@ public class NhomTuChonServiceImpl implements NhomTuChonService {
     public NhomTuChonResponse update(Long id, NhomTuChonRequest request) {
         NhomTuChon entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("NhomTuChon không tồn tại: " + id));
+        validator.validateNhomTuChon(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -54,6 +68,7 @@ public class NhomTuChonServiceImpl implements NhomTuChonService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("NhomTuChon không tồn tại: " + id);
         }
-        repository.deleteById(id);
+
+        xoaChuongTrinhCascadeService.xoaTheoNhomTuChonId(id);
     }
 }

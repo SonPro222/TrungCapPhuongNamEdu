@@ -11,4 +11,8 @@ public interface SyllabusChuongTrinhService {
     SyllabusChuongTrinhResponse create(SyllabusChuongTrinhRequest request);
     SyllabusChuongTrinhResponse update(Long id, SyllabusChuongTrinhRequest request);
     void delete(Long id);
+    Page<SyllabusChuongTrinhResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
 }

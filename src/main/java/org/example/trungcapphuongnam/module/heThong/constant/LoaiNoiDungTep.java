@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.module.chuongTrinh.constant;
+package org.example.trungcapphuongnam.module.heThong.constant;
 
 public enum LoaiNoiDungTep {
     HINH_ANH,

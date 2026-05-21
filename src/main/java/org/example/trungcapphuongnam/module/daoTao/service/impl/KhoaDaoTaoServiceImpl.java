@@ -10,6 +10,7 @@ import org.example.trungcapphuongnam.module.daoTao.dto.KhoaDaoTaoResponse;
 import org.example.trungcapphuongnam.module.daoTao.entity.KhoaDaoTao;
 import org.example.trungcapphuongnam.module.daoTao.mapper.KhoaDaoTaoMapper;
 import org.example.trungcapphuongnam.module.daoTao.repository.KhoaDaoTaoRepository;
+import org.example.trungcapphuongnam.module.daoTao.repository.LopHanhChinhRepository;
 import org.example.trungcapphuongnam.module.daoTao.service.KhoaDaoTaoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class KhoaDaoTaoServiceImpl implements KhoaDaoTaoService {
-
+    private final LopHanhChinhRepository lopHanhChinhRepository;
     private final KhoaDaoTaoRepository repository;
     private final KhoaDaoTaoMapper mapper;
 
@@ -55,10 +56,14 @@ public class KhoaDaoTaoServiceImpl implements KhoaDaoTaoService {
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
-
     @Override
     public void delete(Long id) {
-        if (!repository.existsById(id)) throw new ResourceNotFoundException("Khóa đào tạo không tồn tại: " + id);
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Khóa đào tạo không tồn tại: " + id);
+        }
+
+        lopHanhChinhRepository.deleteByKhoaDaoTaoId(id);
+
         repository.deleteById(id);
     }
 

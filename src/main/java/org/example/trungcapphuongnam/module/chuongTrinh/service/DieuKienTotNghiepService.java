@@ -11,4 +11,8 @@ public interface DieuKienTotNghiepService {
     DieuKienTotNghiepResponse create(DieuKienTotNghiepRequest request);
     DieuKienTotNghiepResponse update(Long id, DieuKienTotNghiepRequest request);
     void delete(Long id);
+    Page<DieuKienTotNghiepResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
 }

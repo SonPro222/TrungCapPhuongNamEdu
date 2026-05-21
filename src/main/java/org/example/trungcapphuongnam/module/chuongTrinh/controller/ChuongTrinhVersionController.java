@@ -20,12 +20,20 @@ public class ChuongTrinhVersionController {
     private final ChuongTrinhVersionService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhVersionResponse>>> findAll(Pageable pageable,
-                                                                @RequestParam(required = false) Long chuongTrinhId) {
-        Page<ChuongTrinhVersionResponse> result = chuongTrinhId == null
-                ? service.findAll(pageable)
-                : service.findAllByChuongTrinhId(chuongTrinhId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(result));
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhVersionResponse>>> findAll(
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-chuong-trinh/{chuongTrinhId}")
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhVersionResponse>>> findAllByChuongTrinhId(
+            @PathVariable Long chuongTrinhId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhId(chuongTrinhId, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

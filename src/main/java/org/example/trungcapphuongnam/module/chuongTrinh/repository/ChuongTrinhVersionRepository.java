@@ -9,4 +9,11 @@ import org.springframework.data.domain.Pageable;
 @Repository
 public interface ChuongTrinhVersionRepository extends JpaRepository<ChuongTrinhVersion, Long> {
     Page<ChuongTrinhVersion> findByChuongTrinhId(Long chuongTrinhId, Pageable pageable);
+    boolean existsByChuongTrinhIdAndMaVersion(Long chuongTrinhId, String maVersion);
+
+    boolean existsByChuongTrinhIdAndMaVersionAndIdNot(Long chuongTrinhId, String maVersion, Long id);
+
+    boolean existsByChuongTrinhIdAndLaHienHanhTrue(Long chuongTrinhId);
+
+    boolean existsByChuongTrinhIdAndLaHienHanhTrueAndIdNot(Long chuongTrinhId, Long id);
 }

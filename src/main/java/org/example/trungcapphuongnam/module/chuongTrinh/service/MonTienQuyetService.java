@@ -11,4 +11,9 @@ public interface MonTienQuyetService {
     MonTienQuyetResponse create(MonTienQuyetRequest request);
     MonTienQuyetResponse update(Long id, MonTienQuyetRequest request);
     void delete(Long id);
+
+    Page<MonTienQuyetResponse> findAllByMonId(
+            Long monId,
+            Pageable pageable
+    );
 }

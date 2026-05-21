@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.QuyDoiDiemR
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiem;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.QuyDoiDiemMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.QuyDoiDiemRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.QuyDoiDiemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final QuyDoiDiemRepository repository;
     private final QuyDoiDiemMapper mapper;
 
@@ -26,7 +27,17 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
     public Page<QuyDoiDiemResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<QuyDoiDiemResponse> findAllByChuongTrinhMonId(
+            Long chuongTrinhMonId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhMonId(
+                chuongTrinhMonId,
+                pageable
+        ).map(mapper::toResponse);
+    }
     @Override
     @Transactional(readOnly = true)
     public QuyDoiDiemResponse findById(Long id) {
@@ -37,6 +48,7 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
 
     @Override
     public QuyDoiDiemResponse create(QuyDoiDiemRequest request) {
+        validator.validateQuyDoiDiem(request, null);
         QuyDoiDiem entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -45,6 +57,7 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
     public QuyDoiDiemResponse update(Long id, QuyDoiDiemRequest request) {
         QuyDoiDiem entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("QuyDoiDiem không tồn tại: " + id));
+        validator.validateQuyDoiDiem(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

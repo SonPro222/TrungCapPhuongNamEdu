@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusTai
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusTaiLieu;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusTaiLieuMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusTaiLieuRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusTaiLieuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class SyllabusTaiLieuServiceImpl implements SyllabusTaiLieuService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final SyllabusTaiLieuRepository repository;
     private final SyllabusTaiLieuMapper mapper;
 
@@ -26,7 +27,17 @@ public class SyllabusTaiLieuServiceImpl implements SyllabusTaiLieuService {
     public Page<SyllabusTaiLieuResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SyllabusTaiLieuResponse> findAllBySyllabusMonId(
+            Long syllabusMonId,
+            Pageable pageable
+    ) {
+        return repository.findBySyllabusMonId(
+                syllabusMonId,
+                pageable
+        ).map(mapper::toResponse);
+    }
     @Override
     @Transactional(readOnly = true)
     public SyllabusTaiLieuResponse findById(Long id) {
@@ -37,6 +48,7 @@ public class SyllabusTaiLieuServiceImpl implements SyllabusTaiLieuService {
 
     @Override
     public SyllabusTaiLieuResponse create(SyllabusTaiLieuRequest request) {
+        validator.validateSyllabusTaiLieu(request, null);
         SyllabusTaiLieu entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -45,6 +57,7 @@ public class SyllabusTaiLieuServiceImpl implements SyllabusTaiLieuService {
     public SyllabusTaiLieuResponse update(Long id, SyllabusTaiLieuRequest request) {
         SyllabusTaiLieu entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SyllabusTaiLieu không tồn tại: " + id));
+        validator.validateSyllabusTaiLieu(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

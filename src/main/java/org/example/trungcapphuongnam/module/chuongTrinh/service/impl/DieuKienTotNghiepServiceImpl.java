@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienTot
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.DieuKienTotNghiep;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.DieuKienTotNghiepMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.DieuKienTotNghiepRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.DieuKienTotNghiepService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class DieuKienTotNghiepServiceImpl implements DieuKienTotNghiepService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final DieuKienTotNghiepRepository repository;
     private final DieuKienTotNghiepMapper mapper;
 
@@ -26,7 +27,17 @@ public class DieuKienTotNghiepServiceImpl implements DieuKienTotNghiepService {
     public Page<DieuKienTotNghiepResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DieuKienTotNghiepResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhVersionId(
+                chuongTrinhVersionId,
+                pageable
+        ).map(mapper::toResponse);
+    }
     @Override
     @Transactional(readOnly = true)
     public DieuKienTotNghiepResponse findById(Long id) {
@@ -38,6 +49,7 @@ public class DieuKienTotNghiepServiceImpl implements DieuKienTotNghiepService {
     @Override
     public DieuKienTotNghiepResponse create(DieuKienTotNghiepRequest request) {
         DieuKienTotNghiep entity = mapper.toEntity(request);
+        validator.validateDieuKienTotNghiep(request, null);
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -45,6 +57,7 @@ public class DieuKienTotNghiepServiceImpl implements DieuKienTotNghiepService {
     public DieuKienTotNghiepResponse update(Long id, DieuKienTotNghiepRequest request) {
         DieuKienTotNghiep entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("DieuKienTotNghiep không tồn tại: " + id));
+        validator.validateDieuKienTotNghiep(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

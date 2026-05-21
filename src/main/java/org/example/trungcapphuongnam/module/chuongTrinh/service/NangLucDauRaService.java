@@ -11,4 +11,9 @@ public interface NangLucDauRaService {
     NangLucDauRaResponse create(NangLucDauRaRequest request);
     NangLucDauRaResponse update(Long id, NangLucDauRaRequest request);
     void delete(Long id);
+    Page<NangLucDauRaResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
+
 }

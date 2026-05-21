@@ -11,4 +11,10 @@ public interface MucTieuChuongTrinhService {
     MucTieuChuongTrinhResponse create(MucTieuChuongTrinhRequest request);
     MucTieuChuongTrinhResponse update(Long id, MucTieuChuongTrinhRequest request);
     void delete(Long id);
+
+    Page<MucTieuChuongTrinhResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
+
 }

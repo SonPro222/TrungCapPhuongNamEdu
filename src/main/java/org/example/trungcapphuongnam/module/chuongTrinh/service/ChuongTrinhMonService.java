@@ -12,4 +12,15 @@ public interface ChuongTrinhMonService {
     ChuongTrinhMonResponse create(ChuongTrinhMonRequest request);
     ChuongTrinhMonResponse update(Long id, ChuongTrinhMonRequest request);
     void delete(Long id);
+
+    Page<ChuongTrinhMonResponse> findAllByKhungKyId(
+            Long khungKyId,
+            Pageable pageable
+    );
+
+    Page<ChuongTrinhMonResponse> findAllByChuongTrinhVersionIdAndKhungKyId(
+            Long chuongTrinhVersionId,
+            Long khungKyId,
+            Pageable pageable
+    );
 }

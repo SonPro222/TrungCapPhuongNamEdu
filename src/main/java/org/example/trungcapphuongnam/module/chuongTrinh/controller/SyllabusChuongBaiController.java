@@ -20,12 +20,20 @@ public class SyllabusChuongBaiController {
     private final SyllabusChuongBaiService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SyllabusChuongBaiResponse>>> findAll(Pageable pageable,
-                                                                @RequestParam(required = false) Long syllabusMonId) {
-        Page<SyllabusChuongBaiResponse> result = syllabusMonId == null
-                ? service.findAll(pageable)
-                : service.findAllBySyllabusMonId(syllabusMonId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(result));
+    public ResponseEntity<ApiResponse<Page<SyllabusChuongBaiResponse>>> findAll(
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-syllabus/{syllabusMonId}")
+    public ResponseEntity<ApiResponse<Page<SyllabusChuongBaiResponse>>> findAllBySyllabusMonId(
+            @PathVariable Long syllabusMonId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllBySyllabusMonId(syllabusMonId, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

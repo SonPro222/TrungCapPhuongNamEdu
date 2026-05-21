@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomKienThu
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomKienThuc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.NhomKienThucMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.NhomKienThucRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomKienThucService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class NhomKienThucServiceImpl implements NhomKienThucService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final NhomKienThucRepository repository;
     private final NhomKienThucMapper mapper;
 
@@ -43,6 +44,7 @@ public class NhomKienThucServiceImpl implements NhomKienThucService {
 
     @Override
     public NhomKienThucResponse create(NhomKienThucRequest request) {
+        validator.validateNhomKienThuc(request, null);
         NhomKienThuc entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -51,6 +53,7 @@ public class NhomKienThucServiceImpl implements NhomKienThucService {
     public NhomKienThucResponse update(Long id, NhomKienThucRequest request) {
         NhomKienThuc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("NhomKienThuc không tồn tại: " + id));
+        validator.validateNhomKienThuc(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

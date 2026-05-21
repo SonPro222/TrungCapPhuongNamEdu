@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MonHocRepository extends JpaRepository<MonHoc, Long> {
+    boolean existsByMaMon(String maMon);
+
+    boolean existsByMaMonAndIdNot(String maMon, Long id);
 }

@@ -20,8 +20,20 @@ public class MonTienQuyetController {
     private final MonTienQuyetService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MonTienQuyetResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<MonTienQuyetResponse>>> findAll(
+            Pageable pageable
+    ) {
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-mon/{chuongTrinhMonId}")
+    public ResponseEntity<ApiResponse<Page<MonTienQuyetResponse>>> findAllByMonId(
+            @PathVariable Long chuongTrinhMonId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByMonId(chuongTrinhMonId, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLa
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLam;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ViTriViecLamMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ViTriViecLamRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ViTriViecLamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class ViTriViecLamServiceImpl implements ViTriViecLamService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final ViTriViecLamRepository repository;
     private final ViTriViecLamMapper mapper;
 
@@ -26,7 +27,17 @@ public class ViTriViecLamServiceImpl implements ViTriViecLamService {
     public Page<ViTriViecLamResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ViTriViecLamResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhVersionId(
+                chuongTrinhVersionId,
+                pageable
+        ).map(mapper::toResponse);
+    }
     @Override
     @Transactional(readOnly = true)
     public ViTriViecLamResponse findById(Long id) {
@@ -38,6 +49,7 @@ public class ViTriViecLamServiceImpl implements ViTriViecLamService {
     @Override
     public ViTriViecLamResponse create(ViTriViecLamRequest request) {
         ViTriViecLam entity = mapper.toEntity(request);
+        validator.validateViTriViecLam(request, null);
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -45,6 +57,7 @@ public class ViTriViecLamServiceImpl implements ViTriViecLamService {
     public ViTriViecLamResponse update(Long id, ViTriViecLamRequest request) {
         ViTriViecLam entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ViTriViecLam không tồn tại: " + id));
+        validator.validateViTriViecLam(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

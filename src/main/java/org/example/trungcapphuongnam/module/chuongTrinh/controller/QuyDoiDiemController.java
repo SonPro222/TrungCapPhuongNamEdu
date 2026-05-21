@@ -20,8 +20,20 @@ public class QuyDoiDiemController {
     private final QuyDoiDiemService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<QuyDoiDiemResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<QuyDoiDiemResponse>>> findAll(
+            Pageable pageable
+    ) {
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-mon/{chuongTrinhMonId}")
+    public ResponseEntity<ApiResponse<Page<QuyDoiDiemResponse>>> findAllByChuongTrinhMonId(
+            @PathVariable Long chuongTrinhMonId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhMonId(chuongTrinhMonId, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

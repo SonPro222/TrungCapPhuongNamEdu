@@ -1,4 +1,7 @@
 package org.example.trungcapphuongnam.common.enums.ChuongTrinh;
 
-public class LoaiNangLucDauRa {
+public enum LoaiNangLucDauRa {
+    co_ban,
+    cot_loi,
+    nang_cao
 }

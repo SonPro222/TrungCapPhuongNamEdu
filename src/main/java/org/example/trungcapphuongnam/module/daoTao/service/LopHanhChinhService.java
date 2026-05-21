@@ -6,9 +6,30 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface LopHanhChinhService {
+
     Page<LopHanhChinhResponse> findAll(Pageable pageable);
+
+    Page<LopHanhChinhResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
+
+    Page<LopHanhChinhResponse> findAllByKhoaDaoTaoId(
+            Long khoaDaoTaoId,
+            Pageable pageable
+    );
+
+    Page<LopHanhChinhResponse> findAllByChuongTrinhVersionIdAndKhoaDaoTaoId(
+            Long chuongTrinhVersionId,
+            Long khoaDaoTaoId,
+            Pageable pageable
+    );
+
     LopHanhChinhResponse findById(Long id);
+
     LopHanhChinhResponse create(LopHanhChinhRequest request);
+
     LopHanhChinhResponse update(Long id, LopHanhChinhRequest request);
+
     void delete(Long id);
 }

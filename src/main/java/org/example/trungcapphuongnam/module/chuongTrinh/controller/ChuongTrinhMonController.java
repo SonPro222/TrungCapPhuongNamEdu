@@ -19,12 +19,45 @@ public class ChuongTrinhMonController {
     private final ChuongTrinhMonService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAll(Pageable pageable,
-                                                                @RequestParam(required = false) Long chuongTrinhVersionId) {
-        Page<ChuongTrinhMonResponse> result = chuongTrinhVersionId == null
-                ? service.findAll(pageable)
-                : service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(result));
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAll(
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}")
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAllByChuongTrinhVersionId(
+            @PathVariable Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-khung-ky/{khungKyId}")
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAllByKhungKyId(
+            @PathVariable Long khungKyId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByKhungKyId(khungKyId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}/theo-khung-ky/{khungKyId}")
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAllByChuongTrinhVersionIdAndKhungKyId(
+            @PathVariable Long chuongTrinhVersionId,
+            @PathVariable Long khungKyId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhVersionIdAndKhungKyId(
+                        chuongTrinhVersionId,
+                        khungKyId,
+                        pageable
+                )
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

@@ -6,8 +6,10 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMon
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocService;
 import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
-
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
     private final SyllabusMonHocRepository repository;
     private final SyllabusMonHocMapper mapper;
-
+    private final ChuongTrinhNghiepVuValidator validator;
     @Override
     @Transactional(readOnly = true)
     public Page<SyllabusMonHocResponse> findAll(Pageable pageable) {
@@ -43,14 +45,18 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
 
     @Override
     public SyllabusMonHocResponse create(SyllabusMonHocRequest request) {
+        validator.validateSyllabusMonHoc(request, null);
+
         SyllabusMonHoc entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
-
     @Override
     public SyllabusMonHocResponse update(Long id, SyllabusMonHocRequest request) {
+        validator.validateSyllabusMonHoc(request, id);
+
         SyllabusMonHoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SyllabusMonHoc không tồn tại: " + id));
+
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -60,6 +66,7 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("SyllabusMonHoc không tồn tại: " + id);
         }
-        repository.deleteById(id);
+
+        xoaChuongTrinhCascadeService.xoaTheoSyllabusMonHocId(id);
     }
 }

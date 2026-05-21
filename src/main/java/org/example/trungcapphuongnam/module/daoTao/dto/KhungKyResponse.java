@@ -8,8 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class KhungKyResponse {
+
     private Long id;
+
+    private Long chuongTrinhVersionId;
 
     private Long loaiChuongTrinhId;
 
@@ -18,6 +22,4 @@ public class KhungKyResponse {
     private String tenKy;
 
     private Integer thuTu;
-
-
 }

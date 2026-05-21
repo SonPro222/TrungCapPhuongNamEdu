@@ -9,4 +9,10 @@ import org.springframework.data.domain.Pageable;
 @Repository
 public interface SyllabusChuongBaiRepository extends JpaRepository<SyllabusChuongBai, Long> {
     Page<SyllabusChuongBai> findBySyllabusMonId(Long syllabusMonId, Pageable pageable);
+
+
+    void deleteBySyllabusMonId(Long syllabusMonId);
+    boolean existsBySyllabusMonIdAndThuTu(Long syllabusMonId, Integer thuTu);
+
+    boolean existsBySyllabusMonIdAndThuTuAndIdNot(Long syllabusMonId, Integer thuTu, Long id);
 }

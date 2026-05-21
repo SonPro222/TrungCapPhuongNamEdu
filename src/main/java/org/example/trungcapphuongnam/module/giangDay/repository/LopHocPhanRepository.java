@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LopHocPhanRepository extends JpaRepository<LopHocPhan, Long> {
+    void deleteByChuongTrinhMonId(Long chuongTrinhMonId);
 }

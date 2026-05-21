@@ -11,4 +11,9 @@ public interface DieuKienMonHocService {
     DieuKienMonHocResponse create(DieuKienMonHocRequest request);
     DieuKienMonHocResponse update(Long id, DieuKienMonHocRequest request);
     void delete(Long id);
+
+    Page<DieuKienMonHocResponse> findAllBySyllabusMonId(
+            Long syllabusMonId,
+            Pageable pageable
+    );
 }

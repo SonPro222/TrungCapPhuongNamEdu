@@ -20,8 +20,45 @@ public class LopHanhChinhController {
     private final LopHanhChinhService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<LopHanhChinhResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<LopHanhChinhResponse>>> findAll(
+            Pageable pageable
+    ) {
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}")
+    public ResponseEntity<ApiResponse<Page<LopHanhChinhResponse>>> findAllByChuongTrinhVersionId(
+            @PathVariable Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-khoa/{khoaDaoTaoId}")
+    public ResponseEntity<ApiResponse<Page<LopHanhChinhResponse>>> findAllByKhoaDaoTaoId(
+            @PathVariable Long khoaDaoTaoId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByKhoaDaoTaoId(khoaDaoTaoId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}/theo-khoa/{khoaDaoTaoId}")
+    public ResponseEntity<ApiResponse<Page<LopHanhChinhResponse>>> findAllByChuongTrinhVersionIdAndKhoaDaoTaoId(
+            @PathVariable Long chuongTrinhVersionId,
+            @PathVariable Long khoaDaoTaoId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhVersionIdAndKhoaDaoTaoId(
+                        chuongTrinhVersionId,
+                        khoaDaoTaoId,
+                        pageable
+                )
+        ));
     }
 
     @GetMapping(DaoTaoPath.ID)

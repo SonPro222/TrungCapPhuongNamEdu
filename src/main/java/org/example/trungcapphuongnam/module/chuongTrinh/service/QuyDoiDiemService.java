@@ -11,4 +11,9 @@ public interface QuyDoiDiemService {
     QuyDoiDiemResponse create(QuyDoiDiemRequest request);
     QuyDoiDiemResponse update(Long id, QuyDoiDiemRequest request);
     void delete(Long id);
+
+    Page<QuyDoiDiemResponse> findAllByChuongTrinhMonId(
+            Long chuongTrinhMonId,
+            Pageable pageable
+    );
 }

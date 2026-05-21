@@ -8,8 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class KhungKyRequest {
-    @NotNull(message = "loaiChuongTrinhId không được để trống")
+
+    @NotNull(message = "chuongTrinhVersionId không được để trống")
+    private Long chuongTrinhVersionId;
+
     private Long loaiChuongTrinhId;
 
     @NotBlank(message = "maKy không được để trống")
@@ -21,6 +25,4 @@ public class KhungKyRequest {
     @NotNull(message = "thuTu không được để trống")
     @Positive(message = "thuTu phải lớn hơn 0")
     private Integer thuTu;
-
-
 }

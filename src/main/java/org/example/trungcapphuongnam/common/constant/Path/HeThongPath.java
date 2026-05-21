@@ -15,6 +15,6 @@ public final class HeThongPath {
     public static final String TAI_KHOAN_VAI_TRO = BASE + "/tai-khoan-vai-tro";
     public static final String VAI_TRO = BASE + "/vai-tro";
     public static final String VAI_TRO_QUYEN = BASE + "/vai-tro-quyen";
-
+    public static final String TEP_DINH_KEM = BASE + "/tep-dinh-kem";
     public static final String ID = "/{id}";
 }

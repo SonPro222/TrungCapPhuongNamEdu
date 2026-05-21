@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChu
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinh;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusChuongTrinhMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusChuongTrinhRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusChuongTrinhService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final SyllabusChuongTrinhRepository repository;
     private final SyllabusChuongTrinhMapper mapper;
 
@@ -26,7 +27,17 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
     public Page<SyllabusChuongTrinhResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SyllabusChuongTrinhResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhVersionId(
+                chuongTrinhVersionId,
+                pageable
+        ).map(mapper::toResponse);
+    }
     @Override
     @Transactional(readOnly = true)
     public SyllabusChuongTrinhResponse findById(Long id) {
@@ -37,6 +48,8 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
 
     @Override
     public SyllabusChuongTrinhResponse create(SyllabusChuongTrinhRequest request) {
+        validator.validateSyllabusChuongTrinh(request, null);
+
         SyllabusChuongTrinh entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -45,6 +58,7 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
     public SyllabusChuongTrinhResponse update(Long id, SyllabusChuongTrinhRequest request) {
         SyllabusChuongTrinh entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SyllabusChuongTrinh không tồn tại: " + id));
+        validator.validateSyllabusChuongTrinh(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

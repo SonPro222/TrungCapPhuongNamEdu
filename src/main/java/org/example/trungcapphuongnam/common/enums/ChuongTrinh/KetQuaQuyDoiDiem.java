@@ -1,4 +1,6 @@
 package org.example.trungcapphuongnam.common.enums.ChuongTrinh;
 
-public class KetQuaQuyDoiDiem {
+public enum KetQuaQuyDoiDiem {
+    dat,
+    khong_dat
 }

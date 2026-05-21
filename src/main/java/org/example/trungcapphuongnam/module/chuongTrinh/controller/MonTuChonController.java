@@ -20,8 +20,45 @@ public class MonTuChonController {
     private final MonTuChonService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MonTuChonResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<MonTuChonResponse>>> findAll(
+            Pageable pageable
+    ) {
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-nhom/{nhomId}")
+    public ResponseEntity<ApiResponse<Page<MonTuChonResponse>>> findAllByNhomId(
+            @PathVariable Long nhomId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByNhomId(nhomId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-mon/{chuongTrinhMonId}")
+    public ResponseEntity<ApiResponse<Page<MonTuChonResponse>>> findAllByChuongTrinhMonId(
+            @PathVariable Long chuongTrinhMonId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhMonId(chuongTrinhMonId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-nhom/{nhomId}/theo-mon/{chuongTrinhMonId}")
+    public ResponseEntity<ApiResponse<Page<MonTuChonResponse>>> findAllByNhomIdAndChuongTrinhMonId(
+            @PathVariable Long nhomId,
+            @PathVariable Long chuongTrinhMonId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByNhomIdAndChuongTrinhMonId(
+                        nhomId,
+                        chuongTrinhMonId,
+                        pageable
+                )
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

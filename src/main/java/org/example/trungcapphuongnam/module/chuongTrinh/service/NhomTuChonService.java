@@ -11,4 +11,8 @@ public interface NhomTuChonService {
     NhomTuChonResponse create(NhomTuChonRequest request);
     NhomTuChonResponse update(Long id, NhomTuChonRequest request);
     void delete(Long id);
+    Page<NhomTuChonResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
 }

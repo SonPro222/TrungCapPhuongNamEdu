@@ -14,12 +14,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class NganhServiceImpl implements NganhService {
-
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
     private final NganhRepository repository;
     private final NganhMapper mapper;
 
@@ -58,8 +58,14 @@ public class NganhServiceImpl implements NganhService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) throw new ResourceNotFoundException("Ngành không tồn tại: " + id);
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Ngành không tồn tại: " + id);
+        }
+
+        xoaChuongTrinhCascadeService.xoaTheoNganhId(id);
+
         repository.deleteById(id);
     }
 

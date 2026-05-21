@@ -20,8 +20,20 @@ public class MucTieuChuongTrinhController {
     private final MucTieuChuongTrinhService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MucTieuChuongTrinhResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<MucTieuChuongTrinhResponse>>> findAll(
+            Pageable pageable
+    ) {
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}")
+    public ResponseEntity<ApiResponse<Page<MucTieuChuongTrinhResponse>>> findAllByChuongTrinhVersionId(
+            @PathVariable Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

@@ -2,18 +2,23 @@ package org.example.trungcapphuongnam.module.daoTao.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+@Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Entity
 @Table(
         name = "khung_ky",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_khung_ky_loai_ma", columnNames = {"loai_chuong_trinh_id", "ma_ky"}),
-                @UniqueConstraint(name = "uk_khung_ky_loai_thu_tu", columnNames = {"loai_chuong_trinh_id", "thu_tu"})
+                @UniqueConstraint(
+                        name = "uk_khung_ky_version_ma",
+                        columnNames = {"chuong_trinh_version_id", "ma_ky"}
+                ),
+                @UniqueConstraint(
+                        name = "uk_khung_ky_version_thu_tu",
+                        columnNames = {"chuong_trinh_version_id", "thu_tu"}
+                )
         }
 )
 public class KhungKy {
@@ -22,7 +27,10 @@ public class KhungKy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "loai_chuong_trinh_id", nullable = false)
+    @Column(name = "chuong_trinh_version_id", nullable = false)
+    private Long chuongTrinhVersionId;
+
+    @Column(name = "loai_chuong_trinh_id")
     private Long loaiChuongTrinhId;
 
     @Column(name = "ma_ky", nullable = false, length = 50)

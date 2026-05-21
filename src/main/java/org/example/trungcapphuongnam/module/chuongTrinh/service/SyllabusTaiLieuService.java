@@ -11,4 +11,9 @@ public interface SyllabusTaiLieuService {
     SyllabusTaiLieuResponse create(SyllabusTaiLieuRequest request);
     SyllabusTaiLieuResponse update(Long id, SyllabusTaiLieuRequest request);
     void delete(Long id);
+
+    Page<SyllabusTaiLieuResponse> findAllBySyllabusMonId(
+            Long syllabusMonId,
+            Pageable pageable
+    );
 }

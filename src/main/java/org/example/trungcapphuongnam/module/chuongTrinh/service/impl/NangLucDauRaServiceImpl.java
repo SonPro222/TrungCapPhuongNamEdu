@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NangLucDauR
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NangLucDauRa;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.NangLucDauRaMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.NangLucDauRaRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.NangLucDauRaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class NangLucDauRaServiceImpl implements NangLucDauRaService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final NangLucDauRaRepository repository;
     private final NangLucDauRaMapper mapper;
 
@@ -25,6 +26,17 @@ public class NangLucDauRaServiceImpl implements NangLucDauRaService {
     @Transactional(readOnly = true)
     public Page<NangLucDauRaResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<NangLucDauRaResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhVersionId(
+                chuongTrinhVersionId,
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -38,6 +50,7 @@ public class NangLucDauRaServiceImpl implements NangLucDauRaService {
     @Override
     public NangLucDauRaResponse create(NangLucDauRaRequest request) {
         NangLucDauRa entity = mapper.toEntity(request);
+        validator.validateNangLucDauRa(request, null);
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -45,6 +58,7 @@ public class NangLucDauRaServiceImpl implements NangLucDauRaService {
     public NangLucDauRaResponse update(Long id, NangLucDauRaRequest request) {
         NangLucDauRa entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("NangLucDauRa không tồn tại: " + id));
+        validator.validateNangLucDauRa(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

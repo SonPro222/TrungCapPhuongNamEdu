@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.MonHocRespo
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.MonHocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.MonHocRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.MonHocService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class MonHocServiceImpl implements MonHocService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final MonHocRepository repository;
     private final MonHocMapper mapper;
 
@@ -37,12 +38,14 @@ public class MonHocServiceImpl implements MonHocService {
 
     @Override
     public MonHocResponse create(MonHocRequest request) {
+        validator.validateMonHoc(request, null);
         MonHoc entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
 
     @Override
     public MonHocResponse update(Long id, MonHocRequest request) {
+        validator.validateMonHoc(request, id);
         MonHoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("MonHoc không tồn tại: " + id));
         mapper.updateEntity(entity, request);
