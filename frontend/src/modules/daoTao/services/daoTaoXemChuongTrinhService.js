@@ -1,7 +1,7 @@
 import { daoTaoService } from '@/modules/daoTao/services/daoTaoService'
-import { chuongTrinhService } from './chuongTrinhService'
+import { chuongTrinhService } from '@/modules/chuongTrinh/services/chuongTrinhService'
 
-export const xayDungChuongTrinhService = {
+export const daoTaoXemChuongTrinhService = {
     nganh: daoTaoService.nganh,
     trinhDoDaoTao: daoTaoService.trinhDoDaoTao,
     loaiChuongTrinh: daoTaoService.loaiChuongTrinh,

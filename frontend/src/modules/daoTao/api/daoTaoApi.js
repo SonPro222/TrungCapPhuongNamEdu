@@ -31,6 +31,5 @@ export const daoTaoApi = {
     trinhDoDaoTao: createCrudApi('trinh-do-dao-tao'),
     loaiChuongTrinh: createCrudApi('loai-chuong-trinh'),
     khungKy: createCrudApi('khung-ky'),
-    khoaDaoTao: createCrudApi('khoa-dao-tao'),
-    lopHanhChinh: createCrudApi('lop-hanh-chinh')
+    khungKyGoc: createCrudApi('khung-ky-goc')
 }

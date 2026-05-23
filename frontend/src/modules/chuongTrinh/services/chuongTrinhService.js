@@ -117,8 +117,19 @@ export const chuongTrinhService = {
     chuongTrinhVersionDieuKienTotNghiep: createCrudService(chuongTrinhApi.chuongTrinhVersionDieuKienTotNghiep),
 
     syllabusChuongTrinh: createCrudService(chuongTrinhApi.syllabusChuongTrinh),
+    syllabusChuongTrinhGoc: createCrudService(chuongTrinhApi.syllabusChuongTrinhGoc),
+    nhomKienThucGoc: createCrudService(chuongTrinhApi.nhomKienThucGoc),
+    nhomTuChonGoc: createCrudService(chuongTrinhApi.nhomTuChonGoc),
     syllabusMonHoc: createCrudService(chuongTrinhApi.syllabusMonHoc),
+    syllabusMonHocGoc: createCrudService(chuongTrinhApi.syllabusMonHocGoc),
+    syllabusMonHocGocChuongBai: createCrudService(chuongTrinhApi.syllabusMonHocGocChuongBai),
+    syllabusMonHocGocDieuKien: createCrudService(chuongTrinhApi.syllabusMonHocGocDieuKien),
+    syllabusMonHocGocTaiLieu: createCrudService(chuongTrinhApi.syllabusMonHocGocTaiLieu),
     dieuKienMonHoc: createCrudService(chuongTrinhApi.dieuKienMonHoc),
+    dieuKienMonHocGoc: createCrudService(chuongTrinhApi.dieuKienMonHocGoc),
+    syllabusMonHocDieuKien: createCrudService(chuongTrinhApi.syllabusMonHocDieuKien),
+    taiLieuGoc: createCrudService(chuongTrinhApi.taiLieuGoc),
+    syllabusMonHocTaiLieu: createCrudService(chuongTrinhApi.syllabusMonHocTaiLieu),
     syllabusChuongBai: createCrudService(chuongTrinhApi.syllabusChuongBai),
     syllabusTaiLieu: createCrudService(chuongTrinhApi.syllabusTaiLieu)
 }

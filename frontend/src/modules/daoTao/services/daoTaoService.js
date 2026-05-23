@@ -41,6 +41,5 @@ export const daoTaoService = {
     trinhDoDaoTao: createCrudService(daoTaoApi.trinhDoDaoTao),
     loaiChuongTrinh: createCrudService(daoTaoApi.loaiChuongTrinh),
     khungKy: createCrudService(daoTaoApi.khungKy),
-    khoaDaoTao: createCrudService(daoTaoApi.khoaDaoTao),
-    lopHanhChinh: createCrudService(daoTaoApi.lopHanhChinh)
+    khungKyGoc: createCrudService(daoTaoApi.khungKyGoc)
 }

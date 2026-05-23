@@ -2,7 +2,7 @@
   <section class="chuong-trinh-layout">
     <PageHeader
         title="Quản lý chương trình đào tạo"
-        description="Chọn Xây dựng chương trình để quản lý dữ liệu, hoặc Đào tạo xem để xem/sửa chương trình theo luồng cha con."
+        description="Xây dựng chương trình đào tạo theo luồng từ ngành đến syllabus tài liệu."
     />
 
     <ChuongTrinhMenu />

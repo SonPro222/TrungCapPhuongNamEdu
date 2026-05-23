@@ -93,14 +93,14 @@
       <table>
         <thead>
         <tr>
-          <th class="col-action col-action-wide">Chọn / Lưu</th>
+          <th v-if="hienCotTrangThai" class="col-action col-action-wide">Trạng thái</th>
           <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
           <th class="col-action">Thao tác</th>
         </tr>
         </thead>
         <tbody>
         <tr v-if="!hienThiItems.length">
-          <td :colspan="columns.length + 2" class="empty-cell">Bảng đang trống. Nhập form phía trên rồi bấm Lưu.</td>
+          <td :colspan="columns.length + (hienCotTrangThai ? 2 : 1)" class="empty-cell">Bảng đang trống. Nhập form phía trên rồi bấm Lưu.</td>
         </tr>
         <template v-else>
           <tr
@@ -108,23 +108,30 @@
               :key="item.id || item.__localId"
               :class="{ selected: isSelected(item), related: isRelated(item), viewing: isViewing(item) }"
           >
-            <td class="col-action col-action-wide action-pair">
-              <button type="button" :class="['btn tiny choose-btn', { chosen: isSelected(item) }]" title="Chọn vào luồng" @click="selectItem(item)">✓</button>
+            <td v-if="hienCotTrangThai" class="col-action col-action-wide action-pair status-action-cell">
+              <span :class="['status-badge', layTrangThaiDong(item).className]">{{ layTrangThaiDong(item).label }}</span>
+              <button
+                  v-if="canSelect"
+                  type="button"
+                  :class="['btn tiny choose-btn', { chosen: isSelected(item) }]"
+                  title="Chọn dòng này trong ngữ cảnh hiện tại"
+                  @click="selectItem(item)"
+              >✓</button>
               <button
                   v-if="canToggleSave"
                   type="button"
                   :class="['btn tiny save-link-btn', { saved: isSaved(item) }]"
-                  :title="isSaved(item) ? 'Không lưu khỏi luồng đang chọn' : 'Lưu vào luồng đang chọn'"
+                  :title="isSaved(item) ? 'Bỏ lưu khỏi ngữ cảnh đang chọn' : 'Lưu/gán vào ngữ cảnh đang chọn'"
                   @click="toggleSaveItem(item)"
               >
-                {{ isSaved(item) ? 'Không lưu' : 'Lưu' }}
+                {{ isSaved(item) ? 'Bỏ lưu' : 'Lưu' }}
               </button>
             </td>
             <td v-for="column in columns" :key="column.key" :class="cellClass(column)">
               {{ displayValue(item, column) }}
             </td>
             <td class="col-action actions-cell">
-              <button v-if="canView" type="button" class="btn tiny view-btn" @click="viewItem(item)">Xem thêm</button>
+              <button v-if="canView" type="button" class="btn tiny view-btn" @click="viewItem(item)">{{ viewLabel }}</button>
               <button type="button" class="btn tiny" @click="editItem(item)">Sửa</button>
               <button type="button" class="btn tiny danger" @click="deleteItem(item)">Xóa</button>
             </td>
@@ -158,7 +165,10 @@ const props = defineProps({
   savedIds: { type: Array, default: () => [] },
   tableMessage: { type: Object, default: () => ({}) },
   canToggleSave: { type: Boolean, default: false },
+  canSelect: { type: Boolean, default: true },
+  canShowSavedStatus: { type: Boolean, default: false },
   canView: { type: Boolean, default: false },
+  viewLabel: { type: String, default: 'Xem thêm' },
   viewedId: { type: [Number, String], default: null },
   excludedSelectedIds: { type: Array, default: () => [] },
   uniqueRules: { type: Array, default: () => [] },
@@ -182,6 +192,7 @@ const localMessageType = ref('success')
 const editingId = ref(null)
 const saving = ref(false)
 const moBang = ref(true)
+
 const cachedItems = ref([])
 
 function canGiuDanhSachKhiPropsRong() {
@@ -207,6 +218,7 @@ const hienThiItems = computed(() => {
 const visibleFields = computed(() => props.fields.filter((field) => !field.hidden))
 const thongBaoBang = computed(() => props.tableMessage?.message || localMessage.value)
 const loaiThongBaoBang = computed(() => props.tableMessage?.type || localMessageType.value)
+const hienCotTrangThai = computed(() => props.canSelect || props.canToggleSave || props.canShowSavedStatus)
 
 function baoTinTaiBang(message, type = 'success') {
   localMessage.value = message
@@ -591,9 +603,16 @@ function isRelated(item) {
 function isSaved(item) {
   const itemId = item?.id
   if (itemId === null || itemId === undefined || itemId === '') return false
-  if (String(props.selectedId || '') === String(itemId)) return true
-  const ids = props.savedIds.length ? props.savedIds : props.selectedIds
-  return ids.some((id) => String(id || '') === String(itemId))
+  return props.savedIds.some((id) => String(id || '') === String(itemId))
+}
+
+function layTrangThaiDong(item) {
+  if (isSaved(item)) return { label: '✓ Đã lưu', className: 'da-luu' }
+  if (isSelected(item)) return { label: '● Đang chọn', className: 'dang-chon' }
+  if (props.canToggleSave) return { label: '+ Chưa lưu', className: 'chua-luu' }
+  if (props.canSelect) return { label: '+ Chưa chọn', className: 'co-the-chon' }
+  if (props.canShowSavedStatus) return { label: '+ Chưa lưu', className: 'chua-luu' }
+  return { label: 'Trạng thái', className: 'co-the-chon' }
 }
 
 function isViewing(item) {
@@ -607,6 +626,8 @@ function isDangChonTrucTiep(item) {
 }
 
 function selectItem(item) {
+  if (!props.canSelect) return
+
   if (props.allowToggleSelect && isDangChonTrucTiep(item)) {
     emit('select', null)
     resetForm()
@@ -1053,10 +1074,22 @@ tr.selected td:first-child {
   color: #166534;
 }
 
+.btn.view-btn {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.btn.view-btn:hover {
+  border-color: #1e40af;
+  background: #1e40af;
+}
+
 .btn.view-btn.related,
 .btn.view-btn.viewing {
-  border-color: #2563eb;
-  background: #2563eb;
+  border-color: #1e40af;
+  background: #1e40af;
   color: #ffffff;
 }
 
@@ -1071,7 +1104,48 @@ tr.selected td:first-child {
 
 .action-pair {
   display: flex;
+  align-items: center;
   gap: 4px;
+}
+
+
+.status-action-cell {
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge.da-luu {
+  border: 1px solid #86efac;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.chua-luu {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.status-badge.dang-chon {
+  border: 1px solid #93c5fd;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.co-the-chon {
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #374151;
 }
 
 .actions-cell {

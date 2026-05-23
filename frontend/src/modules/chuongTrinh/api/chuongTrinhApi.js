@@ -58,8 +58,19 @@ export const chuongTrinhApi = {
     chuongTrinhVersionDieuKienTotNghiep: createCrudApi('chuong-trinh-version-dieu-kien-tot-nghiep'),
 
     syllabusChuongTrinh: createCrudApi('syllabus-chuong-trinh'),
+    syllabusChuongTrinhGoc: createCrudApi('syllabus-chuong-trinh-goc'),
+    nhomKienThucGoc: createCrudApi('nhom-kien-thuc-goc'),
+    nhomTuChonGoc: createCrudApi('nhom-tu-chon-goc'),
     syllabusMonHoc: createCrudApi('syllabus-mon-hoc'),
+    syllabusMonHocGoc: createCrudApi('syllabus-mon-hoc-goc'),
+    syllabusMonHocGocChuongBai: createCrudApi('syllabus-mon-hoc-goc-chuong-bai'),
+    syllabusMonHocGocDieuKien: createCrudApi('syllabus-mon-hoc-goc-dieu-kien'),
+    syllabusMonHocGocTaiLieu: createCrudApi('syllabus-mon-hoc-goc-tai-lieu'),
     dieuKienMonHoc: createCrudApi('dieu-kien-mon-hoc'),
+    dieuKienMonHocGoc: createCrudApi('dieu-kien-mon-hoc-goc'),
+    syllabusMonHocDieuKien: createCrudApi('syllabus-mon-hoc-dieu-kien'),
+    taiLieuGoc: createCrudApi('tai-lieu-goc'),
+    syllabusMonHocTaiLieu: createCrudApi('syllabus-mon-hoc-tai-lieu'),
     syllabusChuongBai: createCrudApi('syllabus-chuong-bai'),
     syllabusTaiLieu: createCrudApi('syllabus-tai-lieu')
 }
