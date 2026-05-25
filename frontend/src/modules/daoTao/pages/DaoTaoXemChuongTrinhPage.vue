@@ -703,8 +703,30 @@ function xemDongBang(bang, item) {
     return
   }
 
-  if (['khungKy', 'nhomKienThuc', 'nhomTuChon'].includes(bang.key)) {
-    router.push({ name: 'DaoTao.XemChuongTrinh.Mon', params: { nganhId: selected.nganh?.id, chuongTrinhId: selected.chuongTrinh?.id, versionId: selected.chuongTrinhVersion?.id } })
+  if (bang.key === 'khungKy') {
+    router.push({
+      name: 'DaoTao.XemChuongTrinh.Mon',
+      params: {
+        nganhId: selected.nganh?.id,
+        chuongTrinhId: selected.chuongTrinh?.id,
+        versionId: selected.chuongTrinhVersion?.id
+      },
+      query: {
+        khungKyId: item.id
+      }
+    })
+    return
+  }
+
+  if (['nhomKienThuc', 'nhomTuChon'].includes(bang.key)) {
+    router.push({
+      name: 'DaoTao.XemChuongTrinh.Mon',
+      params: {
+        nganhId: selected.nganh?.id,
+        chuongTrinhId: selected.chuongTrinh?.id,
+        versionId: selected.chuongTrinhVersion?.id
+      }
+    })
     return
   }
 
@@ -1000,7 +1022,10 @@ function napLuaChonTheoRoute() {
     const loai = timDongTheoId('loaiChuongTrinh', chuongTrinh.loaiChuongTrinhId)
     if (loai) selectEntity('loaiChuongTrinh', loai)
   }
-
+  const khungKyTheoQuery = timDongTheoId('khungKy', route.query.khungKyId)
+  if (khungKyTheoQuery && String(selected.khungKy?.id || '') !== String(khungKyTheoQuery.id)) {
+    selectEntity('khungKy', khungKyTheoQuery)
+  }
   const version = timDongTheoId('chuongTrinhVersion', route.params.versionId)
   if (version && String(selected.chuongTrinhVersion?.id || '') !== String(version.id)) selectEntity('chuongTrinhVersion', version)
 
@@ -1189,7 +1214,15 @@ const groups = computed(() => {
       mau: 'mau-vang',
       tables: [
         taoBang('khungKyGoc', { linkParentValues: khungKyParent.value, parentText: `${versionParentText.value} | Kho khung kỳ gốc dùng chung.`, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần chọn Version trước.' }),
-        taoBang('khungKy', { parentValues: khungKyParent.value, filterValues: khungKyFilter.value, parentText: khungKyParentText.value, canView: false, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần chọn Version trước.' }),
+        taoBang('khungKy', {
+          parentValues: khungKyParent.value,
+          filterValues: khungKyFilter.value,
+          parentText: khungKyParentText.value,
+          canView: true,
+          viewLabel: 'Xem môn của kỳ',
+          disabled: !selected.chuongTrinhVersion,
+          disabledText: 'Cần chọn Version trước.'
+        }),
         taoBang('nhomKienThucGoc', { linkParentValues: versionParent.value, parentText: `${versionParentText.value} | Kho nhóm kiến thức gốc dùng chung.`, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần chọn Version trước.' }),
         taoBang('nhomKienThuc', { parentValues: nhomKienThucParent.value, filterValues: versionFilter.value, parentText: nhomKienThucParentText.value, canView: false, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần chọn Version trước.' }),
         taoBang('nhomTuChonGoc', { linkParentValues: versionParent.value, parentText: `${versionParentText.value} | Kho nhóm tự chọn gốc dùng chung.`, disabled: !selected.chuongTrinhVersion, disabledText: 'Cần chọn Version trước.' }),
@@ -1556,11 +1589,12 @@ const configs = {
   },
   chuongTrinhMon: {
     title: '5.2. Chương trình môn',
-    defaultForm: { chuongTrinhVersionId: null, monHocId: null, maMonTrongCt: '', khungKyId: null, nhomKienThucId: null, loai: 'bat_buoc', loaiHocPhan: 'mon_hoc', batBuoc: true, laMonDieuKien: false, thuTu: null, soTinChi: null, tongGio: null, gioLyThuyet: null, gioThucHanh: null, gioKiemTra: null, ghiChu: '' },
+    defaultForm: { chuongTrinhVersionId: null, monHocId: null, maMonTrongCt: '', khungKyId: null, nhomKienThucId: null, loai: 'bat_buoc', loaiHocPhan: 'mon_hoc', loaiPhamVi: 'mon_chuyen_nganh', batBuoc: true, laMonDieuKien: false, thuTu: null, soTinChi: null, tongGio: null, gioLyThuyet: null, gioThucHanh: null, gioKiemTra: null, ghiChu: '' },
     fields: [
       { key: 'maMonTrongCt', label: 'Mã môn CT', required: true },
       { key: 'loai', label: 'Loại môn', type: 'select', lookup: 'loaiMon' },
       { key: 'loaiHocPhan', label: 'Loại học phần', type: 'select', lookup: 'loaiHocPhan' },
+      { key: 'loaiPhamVi', label: 'Phạm vi môn', type: 'select', lookup: 'loaiPhamViMon' },
       { key: 'batBuoc', label: 'Bắt buộc', type: 'boolean' },
       { key: 'laMonDieuKien', label: 'Môn điều kiện', type: 'boolean' },
       { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 },
@@ -1587,6 +1621,7 @@ const configs = {
       { key: 'tenKy', label: 'Kỳ' },
       { key: 'tenNhomKienThuc', label: 'Nhóm KT' },
       { key: 'loai', label: 'Loại' },
+      { key: 'loaiPhamVi', label: 'Phạm vi' },
       { key: 'soTinChi', label: 'TC' },
       { key: 'tongGio', label: 'Giờ' }
     ]

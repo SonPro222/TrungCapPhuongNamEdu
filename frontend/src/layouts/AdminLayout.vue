@@ -9,6 +9,10 @@
         <RouterLink to="/admin">Dashboard</RouterLink>
         <RouterLink to="/admin/dao-tao">Đào tạo</RouterLink>
         <RouterLink to="/admin/chuong-trinh">Chương trình</RouterLink>
+        <RouterLink to="/admin/sinh-vien">Sinh viên</RouterLink>
+        <RouterLink to="/admin/giang-day">Giảng dạy</RouterLink>
+        <RouterLink to="/admin/he-thong">Hệ thống</RouterLink>
+
       </nav>
 
       <div class="admin-auth">

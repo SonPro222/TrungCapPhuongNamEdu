@@ -29,6 +29,10 @@ export const luaChonEnum = {
         { id: 'mon_hoc', ten: 'Môn học' },
         { id: 'mo_dun', ten: 'Mô đun' }
     ],
+    loaiPhamViMon: [
+        { id: 'mon_chuyen_nganh', ten: 'Môn chuyên ngành' },
+        { id: 'mon_chung', ten: 'Môn học chung' }
+    ],
     loaiDieuKien: [
         { id: 'tien_quyet', ten: 'Tiên quyết' },
         { id: 'song_hanh', ten: 'Song hành' },
@@ -387,7 +391,7 @@ export function useXayDungChuongTrinh() {
             if (!service?.getAll) continue
 
             try {
-                const result = await service.getAll({ size: 1000 })
+                const result = await service.getAll({ size:200 })
                 rawData[key] = layDanhSachTuKetQua(result)
             } catch (error) {
                 console.warn(`Không tải được dữ liệu có sẵn của bảng ${key}`, error)

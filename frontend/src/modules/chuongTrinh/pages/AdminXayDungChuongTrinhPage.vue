@@ -1007,11 +1007,12 @@ const configs = {
   },
   chuongTrinhMon: {
     title: '5.2. Chương trình môn - Môn trong chương trình',
-    defaultForm: { chuongTrinhVersionId: null, monHocId: null, maMonTrongCt: '', khungKyId: null, nhomKienThucId: null, loai: 'bat_buoc', loaiHocPhan: 'mon_hoc', batBuoc: true, laMonDieuKien: false, thuTu: null, soTinChi: null, tongGio: null, gioLyThuyet: null, gioThucHanh: null, gioKiemTra: null, ghiChu: '' },
+    defaultForm: { chuongTrinhVersionId: null, monHocId: null, maMonTrongCt: '', khungKyId: null, nhomKienThucId: null, loai: 'bat_buoc', loaiHocPhan: 'mon_hoc', loaiPhamVi: 'mon_chuyen_nganh', batBuoc: true, laMonDieuKien: false, thuTu: null, soTinChi: null, tongGio: null, gioLyThuyet: null, gioThucHanh: null, gioKiemTra: null, ghiChu: '' },
     fields: [
       { key: 'maMonTrongCt', label: 'Mã môn CT', required: true },
       { key: 'loai', label: 'Loại môn', type: 'select', lookup: 'loaiMon' },
       { key: 'loaiHocPhan', label: 'Loại học phần', type: 'select', lookup: 'loaiHocPhan' },
+      { key: 'loaiPhamVi', label: 'Phạm vi môn', type: 'select', lookup: 'loaiPhamViMon' },
       { key: 'batBuoc', label: 'Bắt buộc', type: 'boolean' },
       { key: 'laMonDieuKien', label: 'Môn điều kiện', type: 'boolean' },
       { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 },
@@ -1038,6 +1039,7 @@ const configs = {
       { key: 'tenKy', label: 'Kỳ' },
       { key: 'tenNhomKienThuc', label: 'Nhóm KT' },
       { key: 'loai', label: 'Loại' },
+      { key: 'loaiPhamVi', label: 'Phạm vi' },
       { key: 'soTinChi', label: 'TC' },
       { key: 'tongGio', label: 'Giờ' }
     ]

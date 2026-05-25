@@ -1,5 +1,6 @@
 import LoginPage from './pages/LoginPage.vue'
 import OAuthRedirectPage from './pages/OAuthRedirectPage.vue'
+import DoiMatKhauSinhVienPage from './pages/DoiMatKhauSinhVienPage.vue'
 
 export const authRoutes = [
     {
@@ -9,6 +10,15 @@ export const authRoutes = [
         meta: {
             public: true,
             title: 'Đăng nhập'
+        }
+    },
+    {
+        path: 'doi-mat-khau-sinh-vien',
+        name: 'Auth.DoiMatKhauSinhVien',
+        component: DoiMatKhauSinhVienPage,
+        meta: {
+            public: true,
+            title: 'Đổi mật khẩu sinh viên'
         }
     }
 ]

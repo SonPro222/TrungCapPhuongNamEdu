@@ -983,10 +983,10 @@ async function deleteItem(item) {
 
 .table-wrap {
   width: 100%;
+  max-width: 100%;
   overflow: auto;
   padding-top: 6px;
 }
-
 .bang-them-nghiep-vu.bang-phu .table-wrap {
   max-height: 340px;
 }
