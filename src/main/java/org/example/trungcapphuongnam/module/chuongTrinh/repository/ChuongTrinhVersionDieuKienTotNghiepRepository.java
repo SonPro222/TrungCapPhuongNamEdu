@@ -17,4 +17,7 @@ public interface ChuongTrinhVersionDieuKienTotNghiepRepository extends JpaReposi
 
     boolean existsByChuongTrinhVersionIdAndDieuKienGocIdAndIdNot(Long chuongTrinhVersionId, Long dieuKienGocId, Long id);
 
+    void deleteByChuongTrinhVersionId(Long chuongTrinhVersionId);
+
+    void deleteByDieuKienGocId(Long dieuKienGocId);
 }

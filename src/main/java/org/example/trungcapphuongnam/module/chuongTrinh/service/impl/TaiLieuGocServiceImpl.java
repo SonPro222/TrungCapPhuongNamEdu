@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.mapper.TaiLieuGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.TaiLieuGocRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.TaiLieuGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class TaiLieuGocServiceImpl implements TaiLieuGocService {
     private final ChuongTrinhNghiepVuValidator validator;
     private final TaiLieuGocRepository repository;
     private final TaiLieuGocMapper mapper;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
 
     @Override
     @Transactional(readOnly = true)
@@ -71,6 +73,8 @@ public class TaiLieuGocServiceImpl implements TaiLieuGocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Tài liệu gốc không tồn tại: " + id);
         }
+
+        xoaChuongTrinhCascadeService.xoaTheoTaiLieuGocId(id);
 
         repository.deleteById(id);
     }

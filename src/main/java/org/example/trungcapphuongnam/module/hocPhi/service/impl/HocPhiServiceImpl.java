@@ -2,11 +2,11 @@ package org.example.trungcapphuongnam.module.hocPhi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiHocPhi;
+import org.example.trungcapphuongnam.module.hocPhi.enums.TrangThaiHocPhi;
 import org.example.trungcapphuongnam.module.hocPhi.dto.request.HocPhiRequest;
 import org.example.trungcapphuongnam.module.hocPhi.dto.response.HocPhiResponse;
 import org.example.trungcapphuongnam.module.hocPhi.entity.HocPhi;
-import org.example.trungcapphuongnam.module.hocPhi.exception.HocPhiNotFoundException;
+import org.example.trungcapphuongnam.module.hocPhi.HocPhiNotFoundException;
 import org.example.trungcapphuongnam.module.hocPhi.mapper.HocPhiMapper;
 import org.example.trungcapphuongnam.module.hocPhi.repository.HocPhiRepository;
 import org.example.trungcapphuongnam.module.hocPhi.service.HocPhiService;

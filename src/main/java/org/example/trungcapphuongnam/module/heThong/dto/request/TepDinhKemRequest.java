@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.heThong.dto.request;
 
 
 import lombok.*;
-import org.example.trungcapphuongnam.module.heThong.constant.LoaiNguoiGui;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiNguoiGui;
 
 @Getter
 @Setter

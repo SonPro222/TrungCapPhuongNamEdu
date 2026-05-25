@@ -1,6 +1,6 @@
 package org.example.trungcapphuongnam.config.security;
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiTaiKhoan;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiTaiKhoan;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoanVaiTro;
 import org.example.trungcapphuongnam.module.heThong.entity.VaiTroQuyen;

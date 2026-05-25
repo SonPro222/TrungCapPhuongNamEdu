@@ -2,14 +2,14 @@ package org.example.trungcapphuongnam.module.hocPhi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiHocPhi;
+import org.example.trungcapphuongnam.module.hocPhi.enums.TrangThaiHocPhi;
 import org.example.trungcapphuongnam.module.hocPhi.dto.request.GiaoDichHocPhiRequest;
 import org.example.trungcapphuongnam.module.hocPhi.dto.response.GiaoDichHocPhiResponse;
 import org.example.trungcapphuongnam.module.hocPhi.entity.GiaoDichHocPhi;
 import org.example.trungcapphuongnam.module.hocPhi.entity.HocPhi;
-import org.example.trungcapphuongnam.module.hocPhi.exception.GiaoDichHocPhiNotFoundException;
-import org.example.trungcapphuongnam.module.hocPhi.exception.HocPhiBusinessException;
-import org.example.trungcapphuongnam.module.hocPhi.exception.HocPhiNotFoundException;
+import org.example.trungcapphuongnam.module.hocPhi.GiaoDichHocPhiNotFoundException;
+import org.example.trungcapphuongnam.module.hocPhi.HocPhiBusinessException;
+import org.example.trungcapphuongnam.module.hocPhi.HocPhiNotFoundException;
 import org.example.trungcapphuongnam.module.hocPhi.mapper.GiaoDichHocPhiMapper;
 import org.example.trungcapphuongnam.module.hocPhi.repository.GiaoDichHocPhiRepository;
 import org.example.trungcapphuongnam.module.hocPhi.repository.HocPhiRepository;

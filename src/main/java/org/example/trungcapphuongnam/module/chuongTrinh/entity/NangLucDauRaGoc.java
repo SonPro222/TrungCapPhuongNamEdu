@@ -3,8 +3,8 @@ package org.example.trungcapphuongnam.module.chuongTrinh.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import org.example.trungcapphuongnam.module.chuongTrinh.constant.LoaiNangLucDauRa;
-import org.example.trungcapphuongnam.module.chuongTrinh.constant.LoaiNangLucDauRaConverter;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiNangLucDauRa;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiNangLucDauRaConverter;
 
 @Getter
 @Setter

@@ -47,4 +47,5 @@ public interface KhungKyRepository extends JpaRepository<KhungKy, Long> {
             Long id
     );
 
+    Page<KhungKy> findByKhungKyGocId(Long khungKyGocId, Pageable pageable);
 }

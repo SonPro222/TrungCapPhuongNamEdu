@@ -1,16 +1,17 @@
 package org.example.trungcapphuongnam.module.heThong.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.HeThongPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
 import org.example.trungcapphuongnam.module.heThong.dto.request.NhatKyDangNhapRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.NhatKyDangNhapResponse;
 import org.example.trungcapphuongnam.module.heThong.service.NhatKyDangNhapService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(HeThongPath.NHAT_KY_DANG_NHAP)
@@ -20,9 +21,16 @@ public class NhatKyDangNhapController {
     private final NhatKyDangNhapService nhatKyDangNhapService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<NhatKyDangNhapResponse>>> getAll() {
+    public ResponseEntity<ApiResponse<Page<NhatKyDangNhapResponse>>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size
+    ) {
         return ResponseEntity.ok(
-                ApiResponse.ok(nhatKyDangNhapService.getAll())
+                ApiResponse.ok(
+                        nhatKyDangNhapService.getAll(
+                                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))
+                        )
+                )
         );
     }
 
@@ -40,8 +48,10 @@ public class NhatKyDangNhapController {
     }
 
     @PutMapping(HeThongPath.ID)
-    public ResponseEntity<ApiResponse<NhatKyDangNhapResponse>> update(@PathVariable Long id,
-                                                             @RequestBody NhatKyDangNhapRequest request) {
+    public ResponseEntity<ApiResponse<NhatKyDangNhapResponse>> update(
+            @PathVariable Long id,
+            @RequestBody NhatKyDangNhapRequest request
+    ) {
         return ResponseEntity.ok(
                 ApiResponse.ok(nhatKyDangNhapService.update(id, request))
         );

@@ -25,11 +25,28 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
 
     @Override
     @Transactional(readOnly = true)
-    public Page<SyllabusChuongTrinhResponse> findAll(Long chuongTrinhVersionId, String keyword, Pageable pageable) {
+    public Page<SyllabusChuongTrinhResponse> findAll(
+            Long chuongTrinhVersionId,
+            Long syllabusChuongTrinhGocId,
+            String keyword,
+            Pageable pageable
+    ) {
         return repository.findAll(
                 LocJpa.<SyllabusChuongTrinh>empty()
-                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                    .and(LocJpa.keyword(keyword, "moTaTongQuan", "mucDich", "yeuCauDaoTao", "phuongPhapDaoTao", "ghiChu")),
+                        .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                        .and(LocJpa.eq("syllabusChuongTrinhGocId", syllabusChuongTrinhGocId))
+                        .and(LocJpa.keyword(
+                                keyword,
+                                "mucTieu",
+                                "doiTuongTuyenSinh",
+                                "thoiGianDaoTao",
+                                "khoiLuongKienThuc",
+                                "dieuKienTotNghiep",
+                                "phuongPhapDaoTao",
+                                "phuongPhapDanhGia",
+                                "huongDanThucHien",
+                                "ghiChu"
+                        )),
                 pageable
         ).map(mapper::toResponse);
     }
@@ -53,12 +70,13 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
     @Override
     public SyllabusChuongTrinhResponse update(Long id, SyllabusChuongTrinhRequest request) {
         SyllabusChuongTrinh entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("SyllabusChuongTrinh không tồn tại: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Syllabus chương trình không tồn tại: " + id));
+
         validator.validateSyllabusChuongTrinh(request, id);
+
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
-
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {

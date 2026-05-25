@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.thi.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Thi.SinhVienDuThiTrangThai;
+import org.example.trungcapphuongnam.module.thi.enums.SinhVienDuThiTrangThai;
 
 @Getter
 @Setter

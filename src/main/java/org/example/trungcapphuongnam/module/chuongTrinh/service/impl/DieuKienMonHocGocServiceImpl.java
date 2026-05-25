@@ -2,11 +2,9 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.exception.BadRequestException;
-import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
-import org.example.trungcapphuongnam.module.chuongTrinh.constant.LoaiDieuKienMonHoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiDieuKienMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.DieuKienMonHocGocRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienMonHocGocResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.DieuKienMonHocGoc;
@@ -14,6 +12,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.mapper.DieuKienMonHocGoc
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.DieuKienMonHocGocRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.DieuKienMonHocGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,7 @@ public class DieuKienMonHocGocServiceImpl implements DieuKienMonHocGocService {
 
     private final DieuKienMonHocGocRepository repository;
     private final DieuKienMonHocGocMapper mapper;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
 
     @Override
     @Transactional(readOnly = true)
@@ -73,6 +73,8 @@ public class DieuKienMonHocGocServiceImpl implements DieuKienMonHocGocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Điều kiện môn học gốc không tồn tại: " + id);
         }
+
+        xoaChuongTrinhCascadeService.xoaTheoDieuKienMonHocGocId(id);
 
         repository.deleteById(id);
     }

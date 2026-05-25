@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 
 
 import lombok.*;
-import org.example.trungcapphuongnam.module.chuongTrinh.constant.LoaiDieuKienMonHoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiDieuKienMonHoc;
 
 import java.time.LocalDateTime;
 

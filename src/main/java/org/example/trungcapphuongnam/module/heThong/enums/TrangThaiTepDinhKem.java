@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.module.heThong.constant;
+package org.example.trungcapphuongnam.module.heThong.enums;
 
 
 public enum TrangThaiTepDinhKem {

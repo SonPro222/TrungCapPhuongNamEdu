@@ -6,7 +6,6 @@ public final class ChuongTrinhPath {
     private  ChuongTrinhPath() {}
 
     public static final String BASE = ApiPath.API + "/chuongTrinh";
-
     public static final String CHUONG_TRINH = BASE + "/chuong-trinh";
     public static final String CHUONG_TRINH_MON = BASE + "/chuong-trinh-mon";
     public static final String MON = CHUONG_TRINH_MON;
@@ -35,5 +34,8 @@ public final class ChuongTrinhPath {
     public static final String SYLLABUS_MON_HOC_GOC_CHUONG_BAI = BASE + "/syllabus-mon-hoc-goc-chuong-bai";
     public static final String SYLLABUS_MON_HOC_GOC_DIEU_KIEN = BASE + "/syllabus-mon-hoc-goc-dieu-kien";
     public static final String SYLLABUS_MON_HOC_GOC_TAI_LIEU = BASE + "/syllabus-mon-hoc-goc-tai-lieu";
+    public static final String SYLLABUS_CHUONG_TRINH_GOC = BASE + "/syllabus-chuong-trinh-goc";
+    public static final String NHOM_KIEN_THUC_GOC = BASE + "/nhom-kien-thuc-goc";
+    public static final String NHOM_TU_CHON_GOC = BASE + "/nhom-tu-chon-goc";
     public static final String ID = "/{id}";
 }

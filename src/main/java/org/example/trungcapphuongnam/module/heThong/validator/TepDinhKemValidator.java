@@ -1,8 +1,8 @@
 package org.example.trungcapphuongnam.module.heThong.validator;
 
 import org.example.trungcapphuongnam.module.heThong.HeThongException;
-import org.example.trungcapphuongnam.module.heThong.constant.LoaiNoiDungTep;
 import org.example.trungcapphuongnam.module.heThong.dto.request.TepDinhKemRequest;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiNoiDungTep;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;

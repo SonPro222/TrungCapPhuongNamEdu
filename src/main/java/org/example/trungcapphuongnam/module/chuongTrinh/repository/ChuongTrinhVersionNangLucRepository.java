@@ -17,4 +17,8 @@ public interface ChuongTrinhVersionNangLucRepository extends JpaRepository<Chuon
 
     boolean existsByChuongTrinhVersionIdAndNangLucGocIdAndIdNot(Long chuongTrinhVersionId, Long nangLucGocId, Long id);
 
+
+    void deleteByChuongTrinhVersionId(Long chuongTrinhVersionId);
+
+    void deleteByNangLucGocId(Long nangLucGocId);
 }

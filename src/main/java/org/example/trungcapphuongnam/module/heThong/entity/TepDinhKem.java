@@ -3,9 +3,9 @@ package org.example.trungcapphuongnam.module.heThong.entity;
 
 import jakarta.persistence.*;
         import lombok.*;
-import org.example.trungcapphuongnam.module.heThong.constant.LoaiNguoiGui;
-import org.example.trungcapphuongnam.module.heThong.constant.LoaiNoiDungTep;
-import org.example.trungcapphuongnam.module.heThong.constant.TrangThaiTepDinhKem;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiNguoiGui;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiNoiDungTep;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiTepDinhKem;
 
 import java.time.LocalDateTime;
 

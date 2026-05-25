@@ -17,4 +17,8 @@ public interface ChuongTrinhVersionViTriViecLamRepository extends JpaRepository<
 
     boolean existsByChuongTrinhVersionIdAndViTriGocIdAndIdNot(Long chuongTrinhVersionId, Long viTriGocId, Long id);
 
+
+    void deleteByChuongTrinhVersionId(Long chuongTrinhVersionId);
+
+    void deleteByViTriGocId(Long viTriGocId);
 }

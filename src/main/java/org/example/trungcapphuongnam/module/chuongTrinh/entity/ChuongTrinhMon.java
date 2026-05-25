@@ -23,7 +23,8 @@ public class ChuongTrinhMon {
 
     @Column(name = "mon_hoc_id")
     private Long monHocId;
-
+    @Column(name = "loai_pham_vi")
+    private String loaiPhamVi;
     @Column(name = "ma_mon_trong_ct")
     private String maMonTrongCt;
 

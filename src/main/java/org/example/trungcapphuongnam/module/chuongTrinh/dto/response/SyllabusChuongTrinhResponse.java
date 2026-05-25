@@ -12,6 +12,7 @@ public class SyllabusChuongTrinhResponse {
     private Long id;
 
     private Long chuongTrinhVersionId;
+    private Long syllabusChuongTrinhGocId;
 
     private String moTaTongQuan;
 

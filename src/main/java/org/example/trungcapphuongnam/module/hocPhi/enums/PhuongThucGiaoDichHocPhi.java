@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.enums;
+package org.example.trungcapphuongnam.module.hocPhi.enums;
 
 public enum PhuongThucGiaoDichHocPhi {
     tien_mat,

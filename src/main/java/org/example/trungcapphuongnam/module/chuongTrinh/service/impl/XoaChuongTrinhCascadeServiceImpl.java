@@ -45,6 +45,23 @@ public class XoaChuongTrinhCascadeServiceImpl implements XoaChuongTrinhCascadeSe
     private final KhungKyRepository khungKyRepository;
     private final LopHanhChinhRepository lopHanhChinhRepository;
 
+
+    //Mới thêm
+    private final ChuongTrinhVersionMucTieuRepository chuongTrinhVersionMucTieuRepository;
+    private final ChuongTrinhVersionNangLucRepository chuongTrinhVersionNangLucRepository;
+    private final ChuongTrinhVersionViTriViecLamRepository chuongTrinhVersionViTriViecLamRepository;
+    private final ChuongTrinhVersionDieuKienTotNghiepRepository chuongTrinhVersionDieuKienTotNghiepRepository;
+
+    private final ChuongTrinhMonQuyDoiDiemMauRepository chuongTrinhMonQuyDoiDiemMauRepository;
+
+    private final SyllabusMonHocDieuKienRepository syllabusMonHocDieuKienRepository;
+    private final SyllabusMonHocTaiLieuRepository syllabusMonHocTaiLieuRepository;
+
+    private final SyllabusMonHocGocChuongBaiRepository syllabusMonHocGocChuongBaiRepository;
+    private final SyllabusMonHocGocDieuKienRepository syllabusMonHocGocDieuKienRepository;
+    private final SyllabusMonHocGocTaiLieuRepository syllabusMonHocGocTaiLieuRepository;
+    private final SyllabusMonHocGocRepository syllabusMonHocGocRepository;
+
     @Override
     @Transactional
     public void xoaTheoNganhId(Long nganhId) {
@@ -89,6 +106,12 @@ public class XoaChuongTrinhCascadeServiceImpl implements XoaChuongTrinhCascadeSe
 
         lopHanhChinhRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
 
+        //Mới
+        chuongTrinhVersionMucTieuRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
+        chuongTrinhVersionNangLucRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
+        chuongTrinhVersionViTriViecLamRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
+        chuongTrinhVersionDieuKienTotNghiepRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
+
         mucTieuChuongTrinhRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
         nangLucDauRaRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
         viTriViecLamRepository.deleteByChuongTrinhVersionId(chuongTrinhVersionId);
@@ -118,6 +141,15 @@ public class XoaChuongTrinhCascadeServiceImpl implements XoaChuongTrinhCascadeSe
     @Override
     @Transactional
     public void xoaTheoSyllabusMonHocId(Long syllabusMonHocId) {
+//        dieuKienMonHocRepository.deleteBySyllabusMonId(syllabusMonHocId);
+//        syllabusChuongBaiRepository.deleteBySyllabusMonId(syllabusMonHocId);
+//        syllabusTaiLieuRepository.deleteBySyllabusMonId(syllabusMonHocId);
+//
+//        syllabusMonHocRepository.deleteById(syllabusMonHocId);
+
+        syllabusMonHocDieuKienRepository.deleteBySyllabusMonId(syllabusMonHocId);
+        syllabusMonHocTaiLieuRepository.deleteBySyllabusMonId(syllabusMonHocId);
+
         dieuKienMonHocRepository.deleteBySyllabusMonId(syllabusMonHocId);
         syllabusChuongBaiRepository.deleteBySyllabusMonId(syllabusMonHocId);
         syllabusTaiLieuRepository.deleteBySyllabusMonId(syllabusMonHocId);
@@ -142,5 +174,97 @@ public class XoaChuongTrinhCascadeServiceImpl implements XoaChuongTrinhCascadeSe
     public void xoaTheoNhomTuChonId(Long nhomTuChonId) {
         monTuChonRepository.deleteByNhomId(nhomTuChonId);
         nhomTuChonRepository.deleteById(nhomTuChonId);
+    }
+
+    //
+    @Override
+    @Transactional
+    public void xoaTheoSyllabusMonHocGocId(Long syllabusMonHocGocId) {
+        syllabusMonHocRepository
+                .findBySyllabusMonHocGocId(syllabusMonHocGocId, Pageable.unpaged())
+                .getContent()
+                .forEach(item -> xoaTheoSyllabusMonHocId(item.getId()));
+
+        syllabusMonHocGocChuongBaiRepository.deleteBySyllabusMonHocGocId(syllabusMonHocGocId);
+        syllabusMonHocGocDieuKienRepository.deleteBySyllabusMonHocGocId(syllabusMonHocGocId);
+        syllabusMonHocGocTaiLieuRepository.deleteBySyllabusMonHocGocId(syllabusMonHocGocId);
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoKhungKyGocId(Long khungKyGocId) {
+        khungKyRepository
+                .findByKhungKyGocId(khungKyGocId, Pageable.unpaged())
+                .getContent()
+                .forEach(item -> xoaTheoKhungKyId(item.getId()));
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoNhomKienThucGocId(Long nhomKienThucGocId) {
+        nhomKienThucRepository
+                .findByNhomKienThucGocId(nhomKienThucGocId, Pageable.unpaged())
+                .getContent()
+                .forEach(nhom -> {
+                    chuongTrinhMonRepository
+                            .findByNhomKienThucId(nhom.getId(), Pageable.unpaged())
+                            .getContent()
+                            .forEach(mon -> xoaTheoChuongTrinhMonId(mon.getId()));
+
+                    nhomKienThucRepository.deleteById(nhom.getId());
+                });
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoNhomTuChonGocId(Long nhomTuChonGocId) {
+        nhomTuChonRepository
+                .findByNhomTuChonGocId(nhomTuChonGocId, Pageable.unpaged())
+                .getContent()
+                .forEach(item -> xoaTheoNhomTuChonId(item.getId()));
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoMucTieuGocId(Long mucTieuGocId) {
+        chuongTrinhVersionMucTieuRepository.deleteByMucTieuGocId(mucTieuGocId);
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoNangLucGocId(Long nangLucGocId) {
+        chuongTrinhVersionNangLucRepository.deleteByNangLucGocId(nangLucGocId);
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoViTriGocId(Long viTriGocId) {
+        chuongTrinhVersionViTriViecLamRepository.deleteByViTriGocId(viTriGocId);
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoDieuKienTotNghiepGocId(Long dieuKienGocId) {
+        chuongTrinhVersionDieuKienTotNghiepRepository.deleteByDieuKienGocId(dieuKienGocId);
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoQuyDoiDiemMauId(Long quyDoiDiemMauId) {
+        chuongTrinhMonQuyDoiDiemMauRepository.deleteByQuyDoiDiemMauId(quyDoiDiemMauId);
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoDieuKienMonHocGocId(Long dieuKienGocId) {
+        syllabusMonHocDieuKienRepository.deleteByDieuKienGocId(dieuKienGocId);
+        syllabusMonHocGocDieuKienRepository.deleteByDieuKienGocId(dieuKienGocId);
+    }
+
+    @Override
+    @Transactional
+    public void xoaTheoTaiLieuGocId(Long taiLieuGocId) {
+        syllabusMonHocTaiLieuRepository.deleteByTaiLieuGocId(taiLieuGocId);
+        syllabusMonHocGocTaiLieuRepository.deleteByTaiLieuGocId(taiLieuGocId);
     }
 }

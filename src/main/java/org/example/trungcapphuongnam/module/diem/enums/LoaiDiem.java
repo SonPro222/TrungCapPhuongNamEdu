@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.enums;
+package org.example.trungcapphuongnam.module.diem.enums;
 
 public enum LoaiDiem {
     chuyen_can,

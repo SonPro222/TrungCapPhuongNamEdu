@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
     private final ChuongTrinhNghiepVuValidator validator;
     private final ViTriViecLamGocRepository repository;
     private final ViTriViecLamGocMapper mapper;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
 
     @Override
     @Transactional(readOnly = true)
@@ -69,6 +71,9 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Vi Tri Viec Lam Goc không tồn tại: " + id);
         }
+
+        xoaChuongTrinhCascadeService.xoaTheoViTriGocId(id);
+
         repository.deleteById(id);
     }
 

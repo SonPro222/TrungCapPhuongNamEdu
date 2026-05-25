@@ -19,11 +19,12 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class ChuongTrinhNghiepVuValidator {
-
+    private final SyllabusChuongTrinhGocRepository syllabusChuongTrinhGocRepository;
     private final NganhRepository nganhRepository;
     private final TrinhDoDaoTaoRepository trinhDoDaoTaoRepository;
     private final LoaiChuongTrinhRepository loaiChuongTrinhRepository;
@@ -72,6 +73,45 @@ public class ChuongTrinhNghiepVuValidator {
     private final SyllabusMonHocGocTaiLieuRepository syllabusMonHocGocTaiLieuRepository;
     private final SyllabusMonHocDieuKienRepository syllabusMonHocDieuKienRepository;
     private final SyllabusMonHocTaiLieuRepository syllabusMonHocTaiLieuRepository;
+
+    private final NhomKienThucGocRepository nhomKienThucGocRepository;
+    private final NhomTuChonGocRepository nhomTuChonGocRepository;
+
+
+    public void validateNhomKienThucGoc(NhomKienThucGocRequest request, Long id) {
+        notNull(request, "Dữ liệu nhóm kiến thức gốc không hợp lệ");
+
+        String ma = trimRequired(request.getMa(), "Mã nhóm kiến thức gốc");
+        trimRequired(request.getTen(), "Tên nhóm kiến thức gốc");
+        String loaiNhom = trimRequired(request.getLoaiNhom(), "Loại nhóm kiến thức gốc");
+
+        if (!List.of("chung", "co_so", "chuyen_mon", "tu_chon").contains(loaiNhom)) {
+            throw new BadRequestException("Loại nhóm kiến thức gốc không hợp lệ: " + loaiNhom);
+        }
+
+        if (id == null && nhomKienThucGocRepository.existsByMa(ma)) {
+            throw new DuplicateResourceException("Mã nhóm kiến thức gốc đã tồn tại: " + ma);
+        }
+
+        if (id != null && nhomKienThucGocRepository.existsByMaAndIdNot(ma, id)) {
+            throw new DuplicateResourceException("Mã nhóm kiến thức gốc đã tồn tại: " + ma);
+        }
+    }
+
+    public void validateNhomTuChonGoc(NhomTuChonGocRequest request, Long id) {
+        notNull(request, "Dữ liệu nhóm tự chọn gốc không hợp lệ");
+
+        String ma = trimRequired(request.getMa(), "Mã nhóm tự chọn gốc");
+        trimRequired(request.getTen(), "Tên nhóm tự chọn gốc");
+
+        if (id == null && nhomTuChonGocRepository.existsByMa(ma)) {
+            throw new DuplicateResourceException("Mã nhóm tự chọn gốc đã tồn tại: " + ma);
+        }
+
+        if (id != null && nhomTuChonGocRepository.existsByMaAndIdNot(ma, id)) {
+            throw new DuplicateResourceException("Mã nhóm tự chọn gốc đã tồn tại: " + ma);
+        }
+    }
     public void validateChuongTrinh(ChuongTrinhRequest request, Long id) {
         notNull(request, "Dữ liệu chương trình không hợp lệ");
 
@@ -94,7 +134,20 @@ public class ChuongTrinhNghiepVuValidator {
             throw new DuplicateResourceException("Mã chương trình đã tồn tại: " + ma);
         }
     }
+    public void validateSyllabusChuongTrinhGoc(SyllabusChuongTrinhGocRequest request, Long id) {
+        notNull(request, "Dữ liệu syllabus chương trình gốc không hợp lệ");
 
+        String ma = trimRequired(request.getMa(), "Mã syllabus chương trình gốc");
+        trimRequired(request.getTen(), "Tên syllabus chương trình gốc");
+
+        if (id == null && syllabusChuongTrinhGocRepository.existsByMa(ma)) {
+            throw new DuplicateResourceException("Mã syllabus chương trình gốc đã tồn tại: " + ma);
+        }
+
+        if (id != null && syllabusChuongTrinhGocRepository.existsByMaAndIdNot(ma, id)) {
+            throw new DuplicateResourceException("Mã syllabus chương trình gốc đã tồn tại: " + ma);
+        }
+    }
     public void validateChuongTrinhVersion(ChuongTrinhVersionRequest request, Long id) {
         notNull(request, "Dữ liệu phiên bản chương trình không hợp lệ");
 
@@ -138,15 +191,7 @@ public class ChuongTrinhNghiepVuValidator {
             throw new DuplicateResourceException("Mã phiên bản đã tồn tại trong chương trình: " + maVersion);
         }
 
-        if (Boolean.TRUE.equals(request.getLaHienHanh())) {
-            if (id == null && chuongTrinhVersionRepository.existsByChuongTrinhIdAndLaHienHanhTrue(chuongTrinhId)) {
-                throw new DuplicateResourceException("Chương trình này đã có một phiên bản hiện hành");
-            }
 
-            if (id != null && chuongTrinhVersionRepository.existsByChuongTrinhIdAndLaHienHanhTrueAndIdNot(chuongTrinhId, id)) {
-                throw new DuplicateResourceException("Chương trình này đã có một phiên bản hiện hành");
-            }
-        }
     }
     public void validateSyllabusMonHocDieuKien(SyllabusMonHocDieuKienRequest request, Long id) {
         notNull(request, "Dữ liệu gán điều kiện môn học vào syllabus không hợp lệ");
@@ -347,6 +392,24 @@ public class ChuongTrinhNghiepVuValidator {
                 throw new DuplicateResourceException("Thứ tự nhóm kiến thức đã tồn tại trong version: " + request.getThuTu());
             }
         }
+        if (request.getNhomKienThucGocId() != null) {
+            requireExists(
+                    nhomKienThucGocRepository,
+                    request.getNhomKienThucGocId(),
+                    "Nhóm kiến thức gốc"
+            );
+        }
+        if (request.getNhomKienThucGocId() != null) {
+            Long gocId = request.getNhomKienThucGocId();
+
+            if (id == null && nhomKienThucRepository.existsByChuongTrinhVersionIdAndNhomKienThucGocId(versionId, gocId)) {
+                throw new DuplicateResourceException("Nhóm kiến thức gốc đã được gán vào version này");
+            }
+
+            if (id != null && nhomKienThucRepository.existsByChuongTrinhVersionIdAndNhomKienThucGocIdAndIdNot(versionId, gocId, id)) {
+                throw new DuplicateResourceException("Nhóm kiến thức gốc đã được gán vào version này");
+            }
+        }
     }
 
     public void validateNhomTuChon(NhomTuChonRequest request, Long id) {
@@ -374,6 +437,24 @@ public class ChuongTrinhNghiepVuValidator {
 
         if (id != null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndTenAndIdNot(versionId, ten, id)) {
             throw new DuplicateResourceException("Tên nhóm tự chọn đã tồn tại trong version: " + ten);
+        }
+        if (request.getNhomTuChonGocId() != null) {
+            requireExists(
+                    nhomTuChonGocRepository,
+                    request.getNhomTuChonGocId(),
+                    "Nhóm tự chọn gốc"
+            );
+        }
+        if (request.getNhomTuChonGocId() != null) {
+            Long gocId = request.getNhomTuChonGocId();
+
+            if (id == null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndNhomTuChonGocId(versionId, gocId)) {
+                throw new DuplicateResourceException("Nhóm tự chọn gốc đã được gán vào version này");
+            }
+
+            if (id != null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndNhomTuChonGocIdAndIdNot(versionId, gocId, id)) {
+                throw new DuplicateResourceException("Nhóm tự chọn gốc đã được gán vào version này");
+            }
         }
     }
 
@@ -707,12 +788,32 @@ public class ChuongTrinhNghiepVuValidator {
 
         requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
 
+        if (request.getSyllabusChuongTrinhGocId() != null) {
+            requireExists(
+                    syllabusChuongTrinhGocRepository,
+                    request.getSyllabusChuongTrinhGocId(),
+                    "Syllabus chương trình gốc"
+            );
+        }
+
         if (id == null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionId(versionId)) {
-            throw new DuplicateResourceException("Version này đã có syllabus chương trình");
+            throw new DuplicateResourceException("Phiên bản chương trình này đã có syllabus chương trình");
         }
 
         if (id != null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionIdAndIdNot(versionId, id)) {
-            throw new DuplicateResourceException("Version này đã có syllabus chương trình");
+            throw new DuplicateResourceException("Phiên bản chương trình này đã có syllabus chương trình");
+        }
+
+        if (request.getSyllabusChuongTrinhGocId() != null) {
+            Long gocId = request.getSyllabusChuongTrinhGocId();
+
+            if (id == null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocId(versionId, gocId)) {
+                throw new DuplicateResourceException("Syllabus chương trình gốc đã được áp dụng cho version này");
+            }
+
+            if (id != null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocIdAndIdNot(versionId, gocId, id)) {
+                throw new DuplicateResourceException("Syllabus chương trình gốc đã được áp dụng cho version này");
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.daoTao.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.enums.TrangThaiLopHanhChinh;
+import org.example.trungcapphuongnam.module.daoTao.enums.TrangThaiLopHanhChinh;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;

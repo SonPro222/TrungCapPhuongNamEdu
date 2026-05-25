@@ -17,4 +17,9 @@ public interface SyllabusMonHocGocDieuKienRepository
     boolean existsBySyllabusMonHocGocIdAndThuTu(Long syllabusMonHocGocId, Integer thuTu);
 
     boolean existsBySyllabusMonHocGocIdAndThuTuAndIdNot(Long syllabusMonHocGocId, Integer thuTu, Long id);
+
+    void deleteBySyllabusMonHocGocId(Long syllabusMonHocGocId);
+
+    void deleteByDieuKienGocId(Long dieuKienGocId);
+
 }

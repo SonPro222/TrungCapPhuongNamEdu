@@ -13,6 +13,7 @@ public class SyllabusChuongTrinhMapper {
         return SyllabusChuongTrinh.builder()
                 .chuongTrinhVersionId(request.getChuongTrinhVersionId())
                 .moTaTongQuan(request.getMoTaTongQuan())
+                .syllabusChuongTrinhGocId(request.getSyllabusChuongTrinhGocId())
                 .mucDich(request.getMucDich())
                 .yeuCauDaoTao(request.getYeuCauDaoTao())
                 .phuongPhapDaoTao(request.getPhuongPhapDaoTao())
@@ -25,6 +26,7 @@ public class SyllabusChuongTrinhMapper {
         return SyllabusChuongTrinhResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
+                .syllabusChuongTrinhGocId(entity.getSyllabusChuongTrinhGocId())
                 .moTaTongQuan(entity.getMoTaTongQuan())
                 .mucDich(entity.getMucDich())
                 .yeuCauDaoTao(entity.getYeuCauDaoTao())
@@ -36,6 +38,7 @@ public class SyllabusChuongTrinhMapper {
     public void updateEntity(SyllabusChuongTrinh entity, SyllabusChuongTrinhRequest request) {
         if (entity == null || request == null) return;
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
+        entity.setSyllabusChuongTrinhGocId(request.getSyllabusChuongTrinhGocId());
         entity.setMoTaTongQuan(request.getMoTaTongQuan());
         entity.setMucDich(request.getMucDich());
         entity.setYeuCauDaoTao(request.getYeuCauDaoTao());

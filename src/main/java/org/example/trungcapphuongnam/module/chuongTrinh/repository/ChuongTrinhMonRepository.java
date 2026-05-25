@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
+
 @Repository
 public interface ChuongTrinhMonRepository extends JpaRepository<ChuongTrinhMon, Long>, JpaSpecificationExecutor<ChuongTrinhMon> {
     Page<ChuongTrinhMon> findByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable);
@@ -31,4 +33,8 @@ public interface ChuongTrinhMonRepository extends JpaRepository<ChuongTrinhMon, 
     boolean existsByChuongTrinhVersionIdAndKhungKyIdAndThuTu(Long chuongTrinhVersionId, Long khungKyId, Integer thuTu);
 
     boolean existsByChuongTrinhVersionIdAndKhungKyIdAndThuTuAndIdNot(Long chuongTrinhVersionId, Long khungKyId, Integer thuTu, Long id);
+
+    Page<ChuongTrinhMon> findByNhomKienThucId(Long nhomKienThucId, Pageable pageable);
+    List<ChuongTrinhMon> findByMonHocId(Long monHocId);
+    List<ChuongTrinhMon> findByChuongTrinhVersionId(Long chuongTrinhVersionId);
 }

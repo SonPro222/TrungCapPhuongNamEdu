@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.enums;
+package org.example.trungcapphuongnam.module.hocPhi.enums;
 
 public enum TrangThaiHocPhi {
     chua_dong,

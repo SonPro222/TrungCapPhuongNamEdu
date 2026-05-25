@@ -14,7 +14,7 @@ public class NhomKienThucRequest {
     private Long chuongTrinhVersionId;
 
     private String ma;
-
+    private Long nhomKienThucGocId;
     @NotBlank(message = "ten không được để trống")
     private String ten;
 

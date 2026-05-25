@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.hocPhi.dto.request;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.TrangThaiHocPhi;
+import org.example.trungcapphuongnam.module.hocPhi.enums.TrangThaiHocPhi;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

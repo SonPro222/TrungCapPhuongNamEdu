@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.enums.Thi;
+package org.example.trungcapphuongnam.module.thi.enums;
 
 public enum BaiThiSinhVienTrangThai {
     dang_lam,

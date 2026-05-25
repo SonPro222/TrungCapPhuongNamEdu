@@ -12,7 +12,7 @@ public class NhomKienThucResponse {
     private Long id;
 
     private Long chuongTrinhVersionId;
-
+    private Long nhomKienThucGocId;
     private String ma;
 
     private String ten;

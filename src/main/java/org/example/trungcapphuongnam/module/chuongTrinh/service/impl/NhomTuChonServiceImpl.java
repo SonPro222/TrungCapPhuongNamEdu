@@ -26,11 +26,17 @@ public class NhomTuChonServiceImpl implements NhomTuChonService {
     private final ChuongTrinhNghiepVuValidator validator;
     @Override
     @Transactional(readOnly = true)
-    public Page<NhomTuChonResponse> findAll(Long chuongTrinhVersionId, String keyword, Pageable pageable) {
+    public Page<NhomTuChonResponse> findAll(
+            Long chuongTrinhVersionId,
+            Long nhomTuChonGocId,
+            String keyword,
+            Pageable pageable
+    ) {
         return repository.findAll(
                 LocJpa.<NhomTuChon>empty()
-                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                    .and(LocJpa.keyword(keyword, "ten", "ghiChu")),
+                        .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                        .and(LocJpa.eq("nhomTuChonGocId", nhomTuChonGocId))
+                        .and(LocJpa.keyword(keyword, "ten", "ghiChu")),
                 pageable
         ).map(mapper::toResponse);
     }

@@ -19,7 +19,8 @@ public class NhomTuChon {
 
     @Column(name = "chuong_trinh_version_id")
     private Long chuongTrinhVersionId;
-
+    @Column(name = "nhom_tu_chon_goc_id")
+    private Long nhomTuChonGocId;
     @Column(name = "ten")
     private String ten;
 

@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class NangLucDauRaGocServiceImpl implements NangLucDauRaGocService {
     private final ChuongTrinhNghiepVuValidator validator;
     private final NangLucDauRaGocRepository repository;
     private final NangLucDauRaGocMapper mapper;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
 
     @Override
     @Transactional(readOnly = true)
@@ -70,6 +72,9 @@ public class NangLucDauRaGocServiceImpl implements NangLucDauRaGocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Nang Luc Dau Ra Goc không tồn tại: " + id);
         }
+
+        xoaChuongTrinhCascadeService.xoaTheoNangLucGocId(id);
+
         repository.deleteById(id);
     }
 

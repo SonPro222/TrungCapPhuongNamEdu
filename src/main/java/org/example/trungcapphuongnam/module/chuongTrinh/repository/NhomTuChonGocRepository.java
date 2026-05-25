@@ -1,4 +1,16 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.repository;
 
-public class NhomTuChonGocRepository {
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChonGoc;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface NhomTuChonGocRepository
+        extends JpaRepository<NhomTuChonGoc, Long>, JpaSpecificationExecutor<NhomTuChonGoc> {
+
+    boolean existsByMa(String ma);
+
+    boolean existsByMaAndIdNot(String ma, Long id);
+
 }

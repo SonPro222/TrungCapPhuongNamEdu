@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.enums;
+package org.example.trungcapphuongnam.module.giangDay.enums;
 
 public enum TrangThaiSinhVienLopHocPhan {
     da_dang_ky,

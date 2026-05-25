@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocServ
     private final ChuongTrinhNghiepVuValidator validator;
     private final DieuKienTotNghiepGocRepository repository;
     private final DieuKienTotNghiepGocMapper mapper;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
+
     @Override
     @Transactional(readOnly = true)
     public Page<DieuKienTotNghiepGocResponse> findAll(String ma, String keyword, Pageable pageable) {
@@ -68,6 +71,9 @@ public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocServ
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Dieu Kien Tot Nghiep Goc không tồn tại: " + id);
         }
+
+        xoaChuongTrinhCascadeService.xoaTheoDieuKienTotNghiepGocId(id);
+
         repository.deleteById(id);
     }
 

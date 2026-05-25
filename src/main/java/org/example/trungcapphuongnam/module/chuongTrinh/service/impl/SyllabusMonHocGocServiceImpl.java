@@ -13,6 +13,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.repository.MonHocReposit
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class SyllabusMonHocGocServiceImpl implements SyllabusMonHocGocService {
     private final SyllabusMonHocGocRepository repository;
     private final SyllabusMonHocGocMapper mapper;
     private final ChuongTrinhNghiepVuValidator validator;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
     @Override
     @Transactional(readOnly = true)
     public Page<SyllabusMonHocGocResponse> findAll(Long monHocId, String ma, String keyword, Pageable pageable) {
@@ -82,6 +84,8 @@ public class SyllabusMonHocGocServiceImpl implements SyllabusMonHocGocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Syllabus môn học gốc không tồn tại: " + id);
         }
+
+        xoaChuongTrinhCascadeService.xoaTheoSyllabusMonHocGocId(id);
 
         repository.deleteById(id);
     }

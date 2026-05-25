@@ -20,8 +20,15 @@ public class DiemChiTietController {
     private final DiemChiTietService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<DiemChiTietResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<DiemChiTietResponse>>> findAll(
+            @RequestParam(required = false) Long sinhVienId,
+            @RequestParam(required = false) Long lopHocPhanId,
+            @RequestParam(required = false) Long baiKiemTraId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findTheoBoLoc(sinhVienId, lopHocPhanId, baiKiemTraId, pageable)
+        ));
     }
 
     @GetMapping(DiemPath.ID)

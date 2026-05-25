@@ -1,12 +1,11 @@
 package org.example.trungcapphuongnam.module.lms.dto.response;
 
-import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.LoaiBaiOnline;
-import org.example.trungcapphuongnam.common.enums.Lms.NguonTao;
-import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiBaiTapOnline;
+import org.example.trungcapphuongnam.module.lms.enums.LoaiBaiOnline;
+import org.example.trungcapphuongnam.module.lms.enums.NguonTao;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiBaiTapOnline;
 
 @Getter
 @Setter

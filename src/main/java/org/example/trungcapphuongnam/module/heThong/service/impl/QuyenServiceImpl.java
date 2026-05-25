@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.heThong.dto.request.QuyenRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.QuyenResponse;
 import org.example.trungcapphuongnam.module.heThong.entity.Quyen;
-import org.example.trungcapphuongnam.module.heThong.exception.HeThongNotFoundException;
+import org.example.trungcapphuongnam.module.heThong.HeThongNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.mapper.QuyenMapper;
 import org.example.trungcapphuongnam.module.heThong.repository.QuyenRepository;
 import org.example.trungcapphuongnam.module.heThong.service.QuyenService;
@@ -24,8 +24,9 @@ public class QuyenServiceImpl implements QuyenService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<QuyenResponse> getAll() { return quyenRepository.findAll().stream().map(quyenMapper::toResponse).toList(); }
-
+    public List<QuyenResponse> getAll() {
+        return search(null, PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "id"))).getContent();
+    }
     @Override
     @Transactional(readOnly = true)
     public Page<QuyenResponse> search(String keyword, Pageable pageable) {

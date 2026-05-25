@@ -12,6 +12,9 @@ public class LopHocPhanMapper {
         if (request == null) return null;
         return LopHocPhan.builder()
                 .chuongTrinhMonId(request.getChuongTrinhMonId())
+                .monHocId(request.getMonHocId())
+                .loaiLopHocPhan(request.getLoaiLopHocPhan())
+                .siSoToiThieu(request.getSiSoToiThieu())
                 .maLop(request.getMaLop())
                 .tenLop(request.getTenLop())
                 .soLuongToiDa(request.getSoLuongToiDa())
@@ -27,6 +30,9 @@ public class LopHocPhanMapper {
         return LopHocPhanResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhMonId(entity.getChuongTrinhMonId())
+                .monHocId(entity.getMonHocId())
+                .loaiLopHocPhan(entity.getLoaiLopHocPhan())
+                .siSoToiThieu(entity.getSiSoToiThieu())
                 .maLop(entity.getMaLop())
                 .tenLop(entity.getTenLop())
                 .soLuongToiDa(entity.getSoLuongToiDa())
@@ -42,6 +48,9 @@ public class LopHocPhanMapper {
     public void updateEntity(LopHocPhan entity, LopHocPhanRequest request) {
         if (entity == null || request == null) return;
         entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
+        entity.setMonHocId(request.getMonHocId());
+        entity.setLoaiLopHocPhan(request.getLoaiLopHocPhan());
+        entity.setSiSoToiThieu(request.getSiSoToiThieu());
         entity.setMaLop(request.getMaLop());
         entity.setTenLop(request.getTenLop());
         entity.setSoLuongToiDa(request.getSoLuongToiDa());

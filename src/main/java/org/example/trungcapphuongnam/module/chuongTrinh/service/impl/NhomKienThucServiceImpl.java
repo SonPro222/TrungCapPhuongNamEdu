@@ -25,17 +25,22 @@ public class NhomKienThucServiceImpl implements NhomKienThucService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<NhomKienThucResponse> findAll(Long chuongTrinhVersionId, String ma, String loaiNhom, String keyword, Pageable pageable) {
+    public Page<NhomKienThucResponse> findAll(
+            Long chuongTrinhVersionId,
+            Long nhomKienThucGocId,
+            String loaiNhom,
+            String keyword,
+            Pageable pageable
+    ) {
         return repository.findAll(
                 LocJpa.<NhomKienThuc>empty()
-                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                    .and(LocJpa.like("ma", ma))
-                    .and(LocJpa.like("loaiNhom", loaiNhom))
-                    .and(LocJpa.keyword(keyword, "ma", "ten", "loaiNhom")),
+                        .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                        .and(LocJpa.eq("nhomKienThucGocId", nhomKienThucGocId))
+                        .and(LocJpa.like("loaiNhom", loaiNhom))
+                        .and(LocJpa.keyword(keyword, "ma", "ten", "loaiNhom", "ghiChu")),
                 pageable
         ).map(mapper::toResponse);
     }
-
     @Override
     @Transactional(readOnly = true)
     public NhomKienThucResponse findById(Long id) {

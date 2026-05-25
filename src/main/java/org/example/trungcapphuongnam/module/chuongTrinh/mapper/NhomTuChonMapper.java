@@ -13,6 +13,7 @@ public class NhomTuChonMapper {
         return NhomTuChon.builder()
                 .chuongTrinhVersionId(request.getChuongTrinhVersionId())
                 .ten(request.getTen())
+                .nhomTuChonGocId(request.getNhomTuChonGocId())
                 .soMonChon(request.getSoMonChon())
                 .soTinChiCanDat(request.getSoTinChiCanDat())
                 .ghiChu(request.getGhiChu())
@@ -24,6 +25,7 @@ public class NhomTuChonMapper {
         return NhomTuChonResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
+                .nhomTuChonGocId(entity.getNhomTuChonGocId())
                 .ten(entity.getTen())
                 .soMonChon(entity.getSoMonChon())
                 .soTinChiCanDat(entity.getSoTinChiCanDat())
@@ -35,6 +37,7 @@ public class NhomTuChonMapper {
         if (entity == null || request == null) return;
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
         entity.setTen(request.getTen());
+        entity.setNhomTuChonGocId(request.getNhomTuChonGocId());
         entity.setSoMonChon(request.getSoMonChon());
         entity.setSoTinChiCanDat(request.getSoTinChiCanDat());
         entity.setGhiChu(request.getGhiChu());

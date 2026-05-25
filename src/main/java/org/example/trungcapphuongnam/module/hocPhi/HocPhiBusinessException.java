@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.module.hocPhi.exception;
+package org.example.trungcapphuongnam.module.hocPhi;
 
 public class HocPhiBusinessException extends RuntimeException {
     public HocPhiBusinessException(String message) {

@@ -1,19 +1,19 @@
 package org.example.trungcapphuongnam.module.heThong.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.heThong.HeThongNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.dto.request.NhatKyDangNhapRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.NhatKyDangNhapResponse;
 import org.example.trungcapphuongnam.module.heThong.entity.NhatKyDangNhap;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;
-import org.example.trungcapphuongnam.module.heThong.exception.HeThongNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.mapper.NhatKyDangNhapMapper;
 import org.example.trungcapphuongnam.module.heThong.repository.NhatKyDangNhapRepository;
 import org.example.trungcapphuongnam.module.heThong.repository.TaiKhoanRepository;
 import org.example.trungcapphuongnam.module.heThong.service.NhatKyDangNhapService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,8 @@ public class NhatKyDangNhapServiceImpl implements NhatKyDangNhapService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NhatKyDangNhapResponse> getAll() {
-        return nhatKyDangNhapRepository.findAll().stream().map(nhatKyDangNhapMapper::toResponse).toList();
+    public Page<NhatKyDangNhapResponse> getAll(Pageable pageable) {
+        return nhatKyDangNhapRepository.findAll(pageable).map(nhatKyDangNhapMapper::toResponse);
     }
 
     @Override
@@ -65,6 +65,7 @@ public class NhatKyDangNhapServiceImpl implements NhatKyDangNhapService {
         if (taiKhoanId == null) {
             return null;
         }
+
         return taiKhoanRepository.findById(taiKhoanId)
                 .orElseThrow(() -> new HeThongNotFoundException("Không tìm thấy tài khoản với id = " + taiKhoanId));
     }

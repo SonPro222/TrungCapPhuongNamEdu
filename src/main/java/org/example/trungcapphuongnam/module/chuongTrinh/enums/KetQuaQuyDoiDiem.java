@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.enums.ChuongTrinh;
+package org.example.trungcapphuongnam.module.chuongTrinh.enums;
 
 public enum KetQuaQuyDoiDiem {
     dat,

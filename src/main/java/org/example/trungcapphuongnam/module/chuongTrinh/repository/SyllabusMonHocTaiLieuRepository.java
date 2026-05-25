@@ -19,4 +19,6 @@ public interface SyllabusMonHocTaiLieuRepository
     boolean existsBySyllabusMonIdAndThuTuAndIdNot(Long syllabusMonId, Integer thuTu, Long id);
 
     void deleteBySyllabusMonId(Long syllabusMonId);
+
+    void deleteByTaiLieuGocId(Long taiLieuGocId);
 }

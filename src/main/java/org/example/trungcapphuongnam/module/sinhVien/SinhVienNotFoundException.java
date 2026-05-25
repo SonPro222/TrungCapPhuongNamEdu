@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.exception;
+package org.example.trungcapphuongnam.module.sinhVien;
 
 public class SinhVienNotFoundException extends SinhVienException {
     public SinhVienNotFoundException(String resource, Long id) {

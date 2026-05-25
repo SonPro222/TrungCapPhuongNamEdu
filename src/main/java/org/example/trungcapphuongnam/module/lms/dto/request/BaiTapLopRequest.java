@@ -3,8 +3,8 @@ package org.example.trungcapphuongnam.module.lms.dto.request;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.CachTinhDiem;
-import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiBaiTapLop;
+import org.example.trungcapphuongnam.module.lms.enums.CachTinhDiem;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiBaiTapLop;
 
 @Getter
 @Setter

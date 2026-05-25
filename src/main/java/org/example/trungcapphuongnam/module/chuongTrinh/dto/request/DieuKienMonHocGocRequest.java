@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
 
 
 import lombok.*;
-        import org.example.trungcapphuongnam.module.chuongTrinh.constant.LoaiDieuKienMonHoc;
+        import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiDieuKienMonHoc;
 
 @Getter
 @Setter

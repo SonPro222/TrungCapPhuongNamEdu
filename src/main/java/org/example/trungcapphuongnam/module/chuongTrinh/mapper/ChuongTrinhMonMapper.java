@@ -18,6 +18,7 @@ public class ChuongTrinhMonMapper {
                 .nhomKienThucId(request.getNhomKienThucId())
                 .loai(request.getLoai())
                 .loaiHocPhan(request.getLoaiHocPhan())
+                .loaiPhamVi(chuanHoaLoaiPhamVi(request.getLoaiPhamVi()))
                 .batBuoc(request.getBatBuoc())
                 .laMonDieuKien(request.getLaMonDieuKien())
                 .thuTu(request.getThuTu())
@@ -43,6 +44,7 @@ public class ChuongTrinhMonMapper {
                 .nhomKienThucId(entity.getNhomKienThucId())
                 .loai(entity.getLoai())
                 .loaiHocPhan(entity.getLoaiHocPhan())
+                .loaiPhamVi(entity.getLoaiPhamVi())
                 .batBuoc(entity.getBatBuoc())
                 .laMonDieuKien(entity.getLaMonDieuKien())
                 .thuTu(entity.getThuTu())
@@ -66,6 +68,7 @@ public class ChuongTrinhMonMapper {
         entity.setNhomKienThucId(request.getNhomKienThucId());
         entity.setLoai(request.getLoai());
         entity.setLoaiHocPhan(request.getLoaiHocPhan());
+        entity.setLoaiPhamVi(chuanHoaLoaiPhamVi(request.getLoaiPhamVi()));
         entity.setBatBuoc(request.getBatBuoc());
         entity.setLaMonDieuKien(request.getLaMonDieuKien());
         entity.setThuTu(request.getThuTu());
@@ -77,5 +80,12 @@ public class ChuongTrinhMonMapper {
         entity.setGhiChu(request.getGhiChu());
         entity.setCreatedAt(request.getCreatedAt());
         entity.setUpdatedAt(request.getUpdatedAt());
+    }
+    private String chuanHoaLoaiPhamVi(String value) {
+        if (value == null || value.isBlank()) {
+            return "mon_chuyen_nganh";
+        }
+
+        return value.trim();
     }
 }

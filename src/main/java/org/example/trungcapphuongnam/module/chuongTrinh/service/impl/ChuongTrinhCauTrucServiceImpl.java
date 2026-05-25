@@ -28,45 +28,36 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
 
     private final ChuongTrinhRepository chuongTrinhRepository;
     private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
-
     private final MucTieuChuongTrinhRepository mucTieuChuongTrinhRepository;
     private final NangLucDauRaRepository nangLucDauRaRepository;
     private final ViTriViecLamRepository viTriViecLamRepository;
     private final DieuKienTotNghiepRepository dieuKienTotNghiepRepository;
     private final SyllabusChuongTrinhRepository syllabusChuongTrinhRepository;
-
     private final NhomKienThucRepository nhomKienThucRepository;
     private final NhomTuChonRepository nhomTuChonRepository;
     private final MonTuChonRepository monTuChonRepository;
-
     private final KhungKyRepository khungKyRepository;
     private final ChuongTrinhMonRepository chuongTrinhMonRepository;
     private final MonHocRepository monHocRepository;
-
     private final MonTienQuyetRepository monTienQuyetRepository;
     private final QuyDoiDiemRepository quyDoiDiemRepository;
     private final SyllabusMonHocRepository syllabusMonHocRepository;
     private final DieuKienMonHocRepository dieuKienMonHocRepository;
     private final SyllabusChuongBaiRepository syllabusChuongBaiRepository;
     private final SyllabusTaiLieuRepository syllabusTaiLieuRepository;
-
     private final ChuongTrinhMapper chuongTrinhMapper;
     private final ChuongTrinhVersionMapper chuongTrinhVersionMapper;
-
     private final MucTieuChuongTrinhMapper mucTieuChuongTrinhMapper;
     private final NangLucDauRaMapper nangLucDauRaMapper;
     private final ViTriViecLamMapper viTriViecLamMapper;
     private final DieuKienTotNghiepMapper dieuKienTotNghiepMapper;
     private final SyllabusChuongTrinhMapper syllabusChuongTrinhMapper;
-
     private final NhomKienThucMapper nhomKienThucMapper;
     private final NhomTuChonMapper nhomTuChonMapper;
     private final MonTuChonMapper monTuChonMapper;
-
     private final KhungKyMapper khungKyMapper;
     private final ChuongTrinhMonMapper chuongTrinhMonMapper;
     private final MonHocMapper monHocMapper;
-
     private final MonTienQuyetMapper monTienQuyetMapper;
     private final QuyDoiDiemMapper quyDoiDiemMapper;
     private final SyllabusMonHocMapper syllabusMonHocMapper;

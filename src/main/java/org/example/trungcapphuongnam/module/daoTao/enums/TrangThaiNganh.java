@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.enums;
+package org.example.trungcapphuongnam.module.daoTao.enums;
 
 public enum TrangThaiNganh {
     dang_dao_tao,

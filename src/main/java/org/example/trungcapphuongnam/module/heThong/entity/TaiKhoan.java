@@ -2,8 +2,8 @@ package org.example.trungcapphuongnam.module.heThong.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.LoaiTaiKhoan;
-import org.example.trungcapphuongnam.common.enums.TrangThaiTaiKhoan;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiTaiKhoan;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiTaiKhoan;
 
 
 import java.time.LocalDateTime;

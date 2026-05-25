@@ -4,8 +4,8 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.KetQuaDat;
-import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiKetQuaBaiTap;
+import org.example.trungcapphuongnam.module.lms.enums.KetQuaDat;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiKetQuaBaiTap;
 
 @Getter
 @Setter

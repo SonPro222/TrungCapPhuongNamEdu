@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.sinhVien.validator;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.exception.SinhVienException;
+import org.example.trungcapphuongnam.module.sinhVien.SinhVienException;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinh;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersion;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhRepository;
@@ -11,7 +11,6 @@ import org.example.trungcapphuongnam.module.daoTao.repository.NganhRepository;
 import org.example.trungcapphuongnam.module.heThong.repository.TaiKhoanRepository;
 import org.example.trungcapphuongnam.module.sinhVien.dto.request.SinhVienRequest;
 import org.example.trungcapphuongnam.module.sinhVien.dto.request.TiepNhanSinhVienRequest;
-import org.example.trungcapphuongnam.module.sinhVien.entity.SinhVien;
 import org.example.trungcapphuongnam.module.sinhVien.repository.SinhVienRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -122,15 +121,21 @@ public class SinhVienValidator {
             MultipartFile cccdSau,
             MultipartFile bangCap
     ) {
-        requireFile(anhChanDung, "Ảnh chân dung");
-        requireFile(cccdTruoc, "CCCD mặt trước");
-        requireFile(cccdSau, "CCCD mặt sau");
-        requireFile(bangCap, "Bằng cấp");
+        if (anhChanDung != null && !anhChanDung.isEmpty()) {
+            validateImage(anhChanDung, "Ảnh chân dung");
+        }
 
-        validateImage(anhChanDung, "Ảnh chân dung");
-        validateImageOrPdf(cccdTruoc, "CCCD mặt trước");
-        validateImageOrPdf(cccdSau, "CCCD mặt sau");
-        validateImageOrPdf(bangCap, "Bằng cấp");
+        if (cccdTruoc != null && !cccdTruoc.isEmpty()) {
+            validateImageOrPdf(cccdTruoc, "CCCD mặt trước");
+        }
+
+        if (cccdSau != null && !cccdSau.isEmpty()) {
+            validateImageOrPdf(cccdSau, "CCCD mặt sau");
+        }
+
+        if (bangCap != null && !bangCap.isEmpty()) {
+            validateImageOrPdf(bangCap, "Bằng cấp");
+        }
     }
 
     public void validateTepKhac(MultipartFile file, String ten) {
@@ -178,24 +183,17 @@ public class SinhVienValidator {
         String email = normalizeEmail(request.getEmail());
         request.setEmail(email);
 
-        sinhVienRepository.findAll().stream()
-                .filter(item -> !item.getId().equals(id))
-                .filter(item -> item.getMaSinhVien().equals(request.getMaSinhVien()))
-                .findFirst()
-                .ifPresent(item -> { throw new SinhVienException("Mã sinh viên đã tồn tại"); });
+        if (sinhVienRepository.existsByMaSinhVienAndIdNot(request.getMaSinhVien(), id)) {
+            throw new SinhVienException("Mã sinh viên đã tồn tại");
+        }
 
-        sinhVienRepository.findAll().stream()
-                .filter(item -> !item.getId().equals(id))
-                .filter(item -> item.getEmail().equalsIgnoreCase(email))
-                .findFirst()
-                .ifPresent(item -> { throw new SinhVienException("Email sinh viên đã tồn tại"); });
+        if (sinhVienRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+            throw new SinhVienException("Email sinh viên đã tồn tại");
+        }
 
-        if (request.getTaiKhoanId() != null) {
-            sinhVienRepository.findAll().stream()
-                    .filter(item -> !item.getId().equals(id))
-                    .filter(item -> request.getTaiKhoanId().equals(item.getTaiKhoanId()))
-                    .findFirst()
-                    .ifPresent(item -> { throw new SinhVienException("Tài khoản đã được gắn với sinh viên khác"); });
+        if (request.getTaiKhoanId() != null
+                && sinhVienRepository.existsByTaiKhoanIdAndIdNot(request.getTaiKhoanId(), id)) {
+            throw new SinhVienException("Tài khoản đã được gắn với sinh viên khác");
         }
     }
 

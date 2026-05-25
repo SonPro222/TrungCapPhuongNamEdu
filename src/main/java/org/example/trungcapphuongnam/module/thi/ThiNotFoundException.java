@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.common.exception;
+package org.example.trungcapphuongnam.module.thi;
 
 public class ThiNotFoundException extends ThiException {
     public ThiNotFoundException(String resource, Long id) {

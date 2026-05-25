@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.module.chuongTrinh.constant;
+package org.example.trungcapphuongnam.module.chuongTrinh.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

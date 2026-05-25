@@ -14,7 +14,4 @@ public interface ChuongTrinhVersionRepository extends JpaRepository<ChuongTrinhV
 
     boolean existsByChuongTrinhIdAndMaVersionAndIdNot(Long chuongTrinhId, String maVersion, Long id);
 
-    boolean existsByChuongTrinhIdAndLaHienHanhTrue(Long chuongTrinhId);
-
-    boolean existsByChuongTrinhIdAndLaHienHanhTrueAndIdNot(Long chuongTrinhId, Long id);
 }

@@ -7,8 +7,19 @@ import org.springframework.data.domain.Pageable;
 
 public interface DiemChiTietService {
     Page<DiemChiTietResponse> findAll(Pageable pageable);
+
+    Page<DiemChiTietResponse> findTheoBoLoc(
+            Long sinhVienId,
+            Long lopHocPhanId,
+            Long baiKiemTraId,
+            Pageable pageable
+    );
+
     DiemChiTietResponse findById(Long id);
+
     DiemChiTietResponse create(DiemChiTietRequest request);
+
     DiemChiTietResponse update(Long id, DiemChiTietRequest request);
+
     void delete(Long id);
 }

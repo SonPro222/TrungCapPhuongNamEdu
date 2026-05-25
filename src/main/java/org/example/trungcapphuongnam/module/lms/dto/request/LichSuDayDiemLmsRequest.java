@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.lms.dto.request;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.HanhDongDayDiemLms;
+import org.example.trungcapphuongnam.module.lms.enums.HanhDongDayDiemLms;
 
 @Getter
 @Setter

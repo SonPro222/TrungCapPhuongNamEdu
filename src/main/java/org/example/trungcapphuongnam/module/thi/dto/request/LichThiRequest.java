@@ -4,8 +4,9 @@ package org.example.trungcapphuongnam.module.thi.dto.request;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Thi.LichThiHinhThuc;
-import org.example.trungcapphuongnam.common.enums.Thi.LichThiTrangThai;
+import org.example.trungcapphuongnam.module.thi.enums.LichThiHinhThuc;
+import org.example.trungcapphuongnam.module.thi.enums.LichThiTrangThai;
+
 
 @Getter
 @Setter

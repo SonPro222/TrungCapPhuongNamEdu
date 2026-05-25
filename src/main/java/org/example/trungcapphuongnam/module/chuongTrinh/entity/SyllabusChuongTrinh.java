@@ -19,7 +19,8 @@ public class SyllabusChuongTrinh {
 
     @Column(name = "chuong_trinh_version_id")
     private Long chuongTrinhVersionId;
-
+    @Column(name = "syllabus_chuong_trinh_goc_id")
+    private Long syllabusChuongTrinhGocId;
     @Column(name = "mo_ta_tong_quan")
     private String moTaTongQuan;
 

@@ -14,5 +14,5 @@ public interface SyllabusMonHocRepository extends JpaRepository<SyllabusMonHoc, 
 
     boolean existsByChuongTrinhMonIdAndIdNot(Long chuongTrinhMonId, Long id);
 
-
+    Page<SyllabusMonHoc> findBySyllabusMonHocGocId(Long syllabusMonHocGocId, Pageable pageable);
 }

@@ -3,10 +3,10 @@ package org.example.trungcapphuongnam.module.lms.dto.request;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.LoaiCauHoi;
-import org.example.trungcapphuongnam.common.enums.Lms.MucDoCauHoi;
-import org.example.trungcapphuongnam.common.enums.Lms.NguonTao;
-import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiSuDung;
+import org.example.trungcapphuongnam.module.lms.enums.LoaiCauHoi;
+import org.example.trungcapphuongnam.module.lms.enums.MucDoCauHoi;
+import org.example.trungcapphuongnam.module.lms.enums.NguonTao;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiSuDung;
 
 @Getter
 @Setter

@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.thi.dto.response;
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Thi.SinhVienDuThiTrangThai;
+import org.example.trungcapphuongnam.module.thi.enums.SinhVienDuThiTrangThai;
 
 @Getter
 @Setter

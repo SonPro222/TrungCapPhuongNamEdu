@@ -3,8 +3,9 @@ package org.example.trungcapphuongnam.module.thi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Thi.LichThiHinhThuc;
-import org.example.trungcapphuongnam.common.enums.Thi.LichThiTrangThai;
+import org.example.trungcapphuongnam.module.thi.enums.LichThiHinhThuc;
+import org.example.trungcapphuongnam.module.thi.enums.LichThiTrangThai;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

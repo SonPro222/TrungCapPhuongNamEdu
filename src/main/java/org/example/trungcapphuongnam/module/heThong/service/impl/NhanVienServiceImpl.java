@@ -5,7 +5,7 @@ import org.example.trungcapphuongnam.module.heThong.dto.request.NhanVienRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.NhanVienResponse;
 import org.example.trungcapphuongnam.module.heThong.entity.NhanVien;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;
-import org.example.trungcapphuongnam.module.heThong.exception.HeThongNotFoundException;
+import org.example.trungcapphuongnam.module.heThong.HeThongNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.mapper.NhanVienMapper;
 import org.example.trungcapphuongnam.module.heThong.repository.NhanVienRepository;
 import org.example.trungcapphuongnam.module.heThong.repository.TaiKhoanRepository;
@@ -17,7 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,7 +30,14 @@ public class NhanVienServiceImpl implements NhanVienService {
     @Override
     @Transactional(readOnly = true)
     public List<NhanVienResponse> getAll() {
-        return nhanVienRepository.findAll().stream().map(nhanVienMapper::toResponse).toList();
+        return search(
+                null,
+                null,
+                null,
+                null,
+                null,
+                PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "id"))
+        ).getContent();
     }
 
     @Override

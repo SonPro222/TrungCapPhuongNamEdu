@@ -6,6 +6,7 @@ import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.util.TextUtil;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocRequest;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocResponse;
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKyGoc;
@@ -24,6 +25,7 @@ public class KhungKyGocServiceImpl implements KhungKyGocService {
 
     private final KhungKyGocRepository repository;
     private final KhungKyGocMapper mapper;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
 
     @Override
     @Transactional(readOnly = true)
@@ -71,6 +73,8 @@ public class KhungKyGocServiceImpl implements KhungKyGocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Khung kỳ gốc không tồn tại: " + id);
         }
+
+        xoaChuongTrinhCascadeService.xoaTheoKhungKyGocId(id);
 
         repository.deleteById(id);
     }

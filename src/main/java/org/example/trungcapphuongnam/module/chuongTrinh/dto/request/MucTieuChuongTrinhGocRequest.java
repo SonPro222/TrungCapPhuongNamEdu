@@ -1,8 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
 
 import lombok.*;
-import java.time.LocalDateTime;
-import org.example.trungcapphuongnam.module.chuongTrinh.constant.LoaiMucTieuChuongTrinh;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiMucTieuChuongTrinh;
 
 @Getter
 @Setter

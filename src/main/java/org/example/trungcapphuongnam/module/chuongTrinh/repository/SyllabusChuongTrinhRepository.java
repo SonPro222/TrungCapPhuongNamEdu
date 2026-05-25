@@ -16,4 +16,15 @@ public interface SyllabusChuongTrinhRepository extends JpaRepository<SyllabusChu
     boolean existsByChuongTrinhVersionId(Long chuongTrinhVersionId);
 
     boolean existsByChuongTrinhVersionIdAndIdNot(Long chuongTrinhVersionId, Long id);
+
+    boolean existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocId(
+            Long chuongTrinhVersionId,
+            Long syllabusChuongTrinhGocId
+    );
+
+    boolean existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocIdAndIdNot(
+            Long chuongTrinhVersionId,
+            Long syllabusChuongTrinhGocId,
+            Long id
+    );
 }

@@ -16,4 +16,8 @@ public interface ChuongTrinhMonQuyDoiDiemMauRepository extends JpaRepository<Chu
     boolean existsByChuongTrinhMonIdAndQuyDoiDiemMauId(Long chuongTrinhMonId, Long quyDoiDiemMauId);
 
     boolean existsByChuongTrinhMonIdAndQuyDoiDiemMauIdAndIdNot(Long chuongTrinhMonId, Long quyDoiDiemMauId, Long id);
+
+    void deleteByChuongTrinhMonId(Long chuongTrinhMonId);
+
+    void deleteByQuyDoiDiemMauId(Long quyDoiDiemMauId);
 }

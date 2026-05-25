@@ -18,5 +18,16 @@ public interface NhomTuChonRepository extends JpaRepository<NhomTuChon, Long>, J
     boolean existsByChuongTrinhVersionIdAndTenAndIdNot(Long chuongTrinhVersionId, String ten, Long id);
 
 
+    boolean existsByChuongTrinhVersionIdAndNhomTuChonGocId(
+            Long chuongTrinhVersionId,
+            Long nhomTuChonGocId
+    );
 
+    boolean existsByChuongTrinhVersionIdAndNhomTuChonGocIdAndIdNot(
+            Long chuongTrinhVersionId,
+            Long nhomTuChonGocId,
+            Long id
+    );
+
+    Page<NhomTuChon> findByNhomTuChonGocId(Long nhomTuChonGocId, Pageable pageable);
 }

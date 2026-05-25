@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
-import org.example.trungcapphuongnam.module.chuongTrinh.constant.KetQuaDatKhongDat;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.KetQuaDatKhongDat;
 
 @Getter
 @Setter

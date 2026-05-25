@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.module.chuongTrinh.constant;
+package org.example.trungcapphuongnam.module.chuongTrinh.enums;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

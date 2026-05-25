@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VaiTroQuyenRepository extends JpaRepository<VaiTroQuyen, Long>, JpaSpecificationExecutor<VaiTroQuyen> {
+
+    boolean existsByVaiTro_IdAndQuyen_Id(Long vaiTroId, Long quyenId);
 }

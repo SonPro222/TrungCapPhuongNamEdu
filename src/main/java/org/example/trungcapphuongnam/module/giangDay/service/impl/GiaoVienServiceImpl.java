@@ -1,17 +1,19 @@
 package org.example.trungcapphuongnam.module.giangDay.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.GiaoVienRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.GiaoVienResponse;
 import org.example.trungcapphuongnam.module.giangDay.entity.GiaoVien;
-import org.example.trungcapphuongnam.module.giangDay.exception.GiangDayNotFoundException;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiGiaoVien;
 import org.example.trungcapphuongnam.module.giangDay.mapper.GiaoVienMapper;
 import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
 import org.example.trungcapphuongnam.module.giangDay.service.GiaoVienService;
-import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.giangDay.validator.GiaoVienValidator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +22,44 @@ public class GiaoVienServiceImpl implements GiaoVienService {
 
     private final GiaoVienRepository repository;
     private final GiaoVienMapper mapper;
+    private final GiaoVienValidator validator;
 
     @Override
     @Transactional(readOnly = true)
-    public List<GiaoVienResponse> getAll() {
-        return repository.findAll().stream().map(mapper::toResponse).toList();
+    public Page<GiaoVienResponse> getAll(String keyword, TrangThaiGiaoVien trangThai, Pageable pageable) {
+        String tuKhoa = keyword == null ? "" : keyword.trim();
+
+        if (!tuKhoa.isBlank() && trangThai != null) {
+            return repository
+                    .findByTrangThaiAndMaGiaoVienContainingIgnoreCaseOrTrangThaiAndHoTenContainingIgnoreCaseOrTrangThaiAndEmailContainingIgnoreCase(
+                            trangThai,
+                            tuKhoa,
+                            trangThai,
+                            tuKhoa,
+                            trangThai,
+                            tuKhoa,
+                            pageable
+                    )
+                    .map(mapper::toResponse);
+        }
+
+        if (!tuKhoa.isBlank()) {
+            return repository
+                    .findByMaGiaoVienContainingIgnoreCaseOrHoTenContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                            tuKhoa,
+                            tuKhoa,
+                            tuKhoa,
+                            pageable
+                    )
+                    .map(mapper::toResponse);
+        }
+
+        if (trangThai != null) {
+            return repository.findByTrangThai(trangThai, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Override
@@ -35,14 +70,14 @@ public class GiaoVienServiceImpl implements GiaoVienService {
 
     @Override
     public GiaoVienResponse create(GiaoVienRequest request) {
-        validate(request);
+        validator.validateCreate(request);
         GiaoVien entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
 
     @Override
     public GiaoVienResponse update(Long id, GiaoVienRequest request) {
-        validate(request);
+        validator.validateUpdate(id, request);
         GiaoVien entity = findEntity(id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
@@ -56,10 +91,6 @@ public class GiaoVienServiceImpl implements GiaoVienService {
 
     private GiaoVien findEntity(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new GiangDayNotFoundException("GiaoVien không tồn tại với id = " + id));
-    }
-
-    private void validate(GiaoVienRequest request) {
-        // Không có rule validate đặc biệt.
+                .orElseThrow(() -> new GiangDayNotFoundException("Giáo viên không tồn tại với id = " + id));
     }
 }

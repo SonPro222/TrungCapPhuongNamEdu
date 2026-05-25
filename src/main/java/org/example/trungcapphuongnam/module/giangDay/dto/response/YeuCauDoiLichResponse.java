@@ -1,10 +1,9 @@
 package org.example.trungcapphuongnam.module.giangDay.dto.response;
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.TrangThaiYeuCauDoiLich;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiYeuCauDoiLich;
 
 import java.time.*;
-import java.math.BigDecimal;
 
 @Getter
 @Setter

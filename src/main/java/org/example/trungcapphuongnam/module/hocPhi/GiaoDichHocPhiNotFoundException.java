@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.module.hocPhi.exception;
+package org.example.trungcapphuongnam.module.hocPhi;
 
 public class GiaoDichHocPhiNotFoundException extends RuntimeException {
     public GiaoDichHocPhiNotFoundException(Long id) {

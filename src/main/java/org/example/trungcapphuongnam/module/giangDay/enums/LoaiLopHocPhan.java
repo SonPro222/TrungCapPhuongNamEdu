@@ -1,4 +1,6 @@
 package org.example.trungcapphuongnam.module.giangDay.enums;
 
-public class LoaiLopHocPhan {
+public enum LoaiLopHocPhan {
+    CHUYEN_NGANH,
+    HOC_CHUNG
 }

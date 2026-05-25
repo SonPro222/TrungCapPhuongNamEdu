@@ -3,8 +3,8 @@ package org.example.trungcapphuongnam.module.lms.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.NguonGiao;
-import org.example.trungcapphuongnam.common.enums.Lms.PhamViGiaoBai;
+import org.example.trungcapphuongnam.module.lms.enums.NguonGiao;
+import org.example.trungcapphuongnam.module.lms.enums.PhamViGiaoBai;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

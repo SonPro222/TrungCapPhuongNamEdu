@@ -1,11 +1,11 @@
 package org.example.trungcapphuongnam.module.lms.dto.response;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.validation.constraints.*;
+
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.HanhDongBaiTapLop;
-import org.example.trungcapphuongnam.common.enums.Lms.VaiTroThucHienLms;
+import org.example.trungcapphuongnam.module.lms.enums.HanhDongBaiTapLop;
+import org.example.trungcapphuongnam.module.lms.enums.VaiTroThucHienLms;
 
 @Getter
 @Setter
