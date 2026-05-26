@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.example.trungcapphuongnam.common.constant.Path.ChuongTrinhPath;
+
 @RestController
 @RequestMapping(ChuongTrinhPath.CHUONG_TRINH)
 @RequiredArgsConstructor
@@ -21,12 +22,20 @@ public class ChuongTrinhController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ChuongTrinhResponse>>> findAll(
             Pageable pageable,
+            @RequestParam(required = false) Long nganhLoaiChuongTrinhId,
             @RequestParam(required = false) Long nganhId,
             @RequestParam(required = false) Long trinhDoId,
             @RequestParam(required = false) Long loaiChuongTrinhId,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(nganhId, trinhDoId, loaiChuongTrinhId, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(
+                nganhLoaiChuongTrinhId,
+                nganhId,
+                trinhDoId,
+                loaiChuongTrinhId,
+                keyword,
+                pageable
+        )));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

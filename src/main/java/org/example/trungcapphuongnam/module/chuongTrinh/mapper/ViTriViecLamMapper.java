@@ -15,6 +15,9 @@ public class ViTriViecLamMapper {
                 .ten(request.getTen())
                 .moTa(request.getMoTa())
                 .thuTu(request.getThuTu())
+                .ma(request.getMa())
+                .ghiChu(request.getGhiChu())
+
                 .build();
     }
 
@@ -26,6 +29,10 @@ public class ViTriViecLamMapper {
                 .ten(entity.getTen())
                 .moTa(entity.getMoTa())
                 .thuTu(entity.getThuTu())
+                .ma(entity.getMa())
+                .ghiChu(entity.getGhiChu())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -35,5 +42,8 @@ public class ViTriViecLamMapper {
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
         entity.setThuTu(request.getThuTu());
+        entity.setMa(request.getMa());
+        entity.setGhiChu(request.getGhiChu());
+
     }
 }

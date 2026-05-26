@@ -1,5 +1,6 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 import lombok.*;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -20,5 +21,11 @@ public class NangLucDauRaResponse {
     private String loai;
 
     private Integer thuTu;
+
+    private String ghiChu;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

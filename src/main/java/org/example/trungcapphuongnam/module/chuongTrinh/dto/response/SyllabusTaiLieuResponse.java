@@ -1,5 +1,6 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 import lombok.*;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -24,5 +25,13 @@ public class SyllabusTaiLieuResponse {
     private String loai;
 
     private String ghiChu;
+
+    private String ma;
+
+    private String duongDan;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

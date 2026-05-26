@@ -17,6 +17,9 @@ public class NhomTuChonMapper {
                 .soMonChon(request.getSoMonChon())
                 .soTinChiCanDat(request.getSoTinChiCanDat())
                 .ghiChu(request.getGhiChu())
+                .ma(request.getMa())
+                .moTa(request.getMoTa())
+
                 .build();
     }
 
@@ -30,6 +33,10 @@ public class NhomTuChonMapper {
                 .soMonChon(entity.getSoMonChon())
                 .soTinChiCanDat(entity.getSoTinChiCanDat())
                 .ghiChu(entity.getGhiChu())
+                .ma(entity.getMa())
+                .moTa(entity.getMoTa())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -41,5 +48,9 @@ public class NhomTuChonMapper {
         entity.setSoMonChon(request.getSoMonChon());
         entity.setSoTinChiCanDat(request.getSoTinChiCanDat());
         entity.setGhiChu(request.getGhiChu());
+        entity.setMa(request.getMa());
+        entity.setMoTa(request.getMoTa());
+
+
     }
 }

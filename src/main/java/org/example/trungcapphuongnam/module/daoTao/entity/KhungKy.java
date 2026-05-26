@@ -2,6 +2,9 @@ package org.example.trungcapphuongnam.module.daoTao.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -44,4 +47,13 @@ public class KhungKy {
 
     @Column(name = "thu_tu", nullable = false)
     private Integer thuTu;
+
+    @Column(name = "mo_ta", columnDefinition = "TEXT")
+    private String moTa;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
 }

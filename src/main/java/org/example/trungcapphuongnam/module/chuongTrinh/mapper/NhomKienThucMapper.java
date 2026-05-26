@@ -22,6 +22,8 @@ public class NhomKienThucMapper {
                 .tongGioLyThuyet(request.getTongGioLyThuyet())
                 .tongGioThucHanh(request.getTongGioThucHanh())
                 .tongGioKiemTra(request.getTongGioKiemTra())
+                .moTa(request.getMoTa())
+
                 .build();
     }
 
@@ -40,6 +42,9 @@ public class NhomKienThucMapper {
                 .tongGioLyThuyet(entity.getTongGioLyThuyet())
                 .tongGioThucHanh(entity.getTongGioThucHanh())
                 .tongGioKiemTra(entity.getTongGioKiemTra())
+                .moTa(entity.getMoTa())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -56,5 +61,8 @@ public class NhomKienThucMapper {
         entity.setTongGioLyThuyet(request.getTongGioLyThuyet());
         entity.setTongGioThucHanh(request.getTongGioThucHanh());
         entity.setTongGioKiemTra(request.getTongGioKiemTra());
+        entity.setMoTa(request.getMoTa());
+
+
     }
 }

@@ -1,6 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
 import lombok.*;
 import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -24,5 +25,13 @@ public class SyllabusTaiLieuRequest {
     private String loai;
 
     private String ghiChu;
+
+    private String ma;
+
+    private String duongDan;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

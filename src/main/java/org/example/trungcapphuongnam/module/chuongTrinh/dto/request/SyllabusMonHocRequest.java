@@ -40,4 +40,12 @@ public class SyllabusMonHocRequest {
 
     private LocalDateTime updatedAt;
 
+    private Long monHocId;
+
+    private String ma;
+
+    private String ten;
+
+    private String ghiChu;
+
 }

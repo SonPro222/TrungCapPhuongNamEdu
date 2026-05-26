@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
 import lombok.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -29,5 +30,13 @@ public class SyllabusChuongBaiRequest {
     private String mucTieu;
 
     private Integer thuTu;
+
+    private Long syllabusMonHocGocId;
+
+    private String ghiChu;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

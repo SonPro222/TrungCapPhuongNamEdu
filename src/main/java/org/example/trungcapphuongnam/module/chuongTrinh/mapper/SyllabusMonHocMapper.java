@@ -24,8 +24,11 @@ public class SyllabusMonHocMapper {
                 .tyLeChuyenCanToiThieu(request.getTyLeChuyenCanToiThieu())
                 .batBuocDuThi(request.getBatBuocDuThi())
                 .congThucQuyDoi(request.getCongThucQuyDoi())
-                .createdAt(request.getCreatedAt())
-                .updatedAt(request.getUpdatedAt())
+
+                .monHocId(request.getMonHocId())
+                .ma(request.getMa())
+                .ten(request.getTen())
+                .ghiChu(request.getGhiChu())
                 .build();
     }
 
@@ -48,6 +51,10 @@ public class SyllabusMonHocMapper {
                 .congThucQuyDoi(entity.getCongThucQuyDoi())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .monHocId(entity.getMonHocId())
+                .ma(entity.getMa())
+                .ten(entity.getTen())
+                .ghiChu(entity.getGhiChu())
                 .build();
     }
 
@@ -66,7 +73,11 @@ public class SyllabusMonHocMapper {
         entity.setTyLeChuyenCanToiThieu(request.getTyLeChuyenCanToiThieu());
         entity.setBatBuocDuThi(request.getBatBuocDuThi());
         entity.setCongThucQuyDoi(request.getCongThucQuyDoi());
-        entity.setCreatedAt(request.getCreatedAt());
-        entity.setUpdatedAt(request.getUpdatedAt());
+
+        entity.setMonHocId(request.getMonHocId());
+        entity.setMa(request.getMa());
+        entity.setTen(request.getTen());
+        entity.setGhiChu(request.getGhiChu());
+
     }
 }

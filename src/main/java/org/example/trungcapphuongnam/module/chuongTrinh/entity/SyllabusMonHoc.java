@@ -63,4 +63,17 @@ public class SyllabusMonHoc {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "mon_hoc_id")
+    private Long monHocId;
+
+    @Column(name = "ma")
+    private String ma;
+
+    @Column(name = "ten")
+    private String ten;
+
+    @Column(name = "ghi_chu")
+    private String ghiChu;
+
+
 }

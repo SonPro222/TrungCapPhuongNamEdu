@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
+import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -119,19 +119,19 @@ public class DiemDanhServiceImpl implements DiemDanhService {
     public DiemDanhResponse create(DiemDanhRequest request) {
         validator.validateCreate(request);
         DiemDanh entity = mapper.toEntity(request);
+        chuanHoaThoiGianDiemDanh(entity);
         DiemDanh saved = repository.save(entity);
         return getById(saved.getId());
     }
-
     @Override
     public DiemDanhResponse update(Long id, DiemDanhRequest request) {
         validator.validateUpdate(id, request);
         DiemDanh entity = findEntity(id);
         mapper.updateEntity(entity, request);
+        chuanHoaThoiGianDiemDanh(entity);
         DiemDanh saved = repository.save(entity);
         return getById(saved.getId());
     }
-
     @Override
     public void delete(Long id) {
         DiemDanh entity = findEntity(id);
@@ -228,5 +228,15 @@ public class DiemDanhServiceImpl implements DiemDanhService {
         }
 
         return response;
+    }
+    private void chuanHoaThoiGianDiemDanh(DiemDanh entity) {
+        if (entity.getTrangThai() == TrangThaiDiemDanh.chua_diem_danh) {
+            entity.setThoiGianDiemDanh(null);
+            return;
+        }
+
+        if (entity.getThoiGianDiemDanh() == null) {
+            entity.setThoiGianDiemDanh(LocalDateTime.now());
+        }
     }
 }

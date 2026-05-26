@@ -7,10 +7,18 @@ import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LichHocRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
-import org.example.trungcapphuongnam.module.giangDay.entity.*;
+import org.example.trungcapphuongnam.module.giangDay.entity.CaHoc;
+import org.example.trungcapphuongnam.module.giangDay.entity.GiaoVien;
+import org.example.trungcapphuongnam.module.giangDay.entity.LichHoc;
+import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.entity.PhongHoc;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLichHoc;
 import org.example.trungcapphuongnam.module.giangDay.mapper.LichHocMapper;
-import org.example.trungcapphuongnam.module.giangDay.repository.*;
+import org.example.trungcapphuongnam.module.giangDay.repository.CaHocRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.LichHocRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.PhongHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.service.LichHocService;
 import org.example.trungcapphuongnam.module.giangDay.validator.LichHocValidator;
 import org.springframework.data.domain.Page;
@@ -18,9 +26,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.example.trungcapphuongnam.module.giangDay.entity.DiemDanh;
+import org.example.trungcapphuongnam.module.giangDay.entity.SinhVienLopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiDiemDanh;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiSinhVienLopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.repository.DiemDanhRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.SinhVienLopHocPhanRepository;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,10 +52,12 @@ public class LichHocServiceImpl implements LichHocService {
     private final CaHocRepository caHocRepository;
     private final LichHocMapper mapper;
     private final LichHocValidator validator;
-
+    private final DiemDanhRepository diemDanhRepository;
+    private final SinhVienLopHocPhanRepository sinhVienLopHocPhanRepository;
     @Override
     @Transactional(readOnly = true)
     public Page<LichHocResponse> getAll(
+            Long lopHocPhanId,
             String keywordLop,
             String keywordGiaoVien,
             String keywordPhong,
@@ -50,7 +68,16 @@ public class LichHocServiceImpl implements LichHocService {
             Pageable pageable
     ) {
         Page<LichHoc> page = repository.findAll(
-                buildSpecification(keywordLop, keywordGiaoVien, keywordPhong, keywordCa, trangThai, tuNgay, denNgay),
+                buildSpecification(
+                        lopHocPhanId,
+                        keywordLop,
+                        keywordGiaoVien,
+                        keywordPhong,
+                        keywordCa,
+                        trangThai,
+                        tuNgay,
+                        denNgay
+                ),
                 pageable
         );
 
@@ -134,6 +161,7 @@ public class LichHocServiceImpl implements LichHocService {
         validator.validateCreate(request);
         LichHoc entity = mapper.toEntity(request);
         LichHoc saved = repository.save(entity);
+        taoDiemDanhChoBuoiHoc(saved);
         return getById(saved.getId());
     }
 
@@ -158,6 +186,7 @@ public class LichHocServiceImpl implements LichHocService {
     }
 
     private Specification<LichHoc> buildSpecification(
+            Long lopHocPhanId,
             String keywordLop,
             String keywordGiaoVien,
             String keywordPhong,
@@ -168,6 +197,10 @@ public class LichHocServiceImpl implements LichHocService {
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (lopHocPhanId != null) {
+                predicates.add(cb.equal(root.get("lopHocPhanId"), lopHocPhanId));
+            }
 
             if (trangThai != null) {
                 predicates.add(cb.equal(root.get("trangThai"), trangThai));
@@ -293,5 +326,43 @@ public class LichHocServiceImpl implements LichHocService {
         }
 
         return response;
+    }
+    private void taoDiemDanhChoBuoiHoc(LichHoc lichHoc) {
+        if (lichHoc == null || lichHoc.getId() == null || lichHoc.getLopHocPhanId() == null) {
+            return;
+        }
+
+        if (lichHoc.getTrangThai() == TrangThaiLichHoc.nghi) {
+            return;
+        }
+
+        List<SinhVienLopHocPhan> danhSachSinhVien = sinhVienLopHocPhanRepository
+                .findByLopHocPhanIdAndTrangThaiInOrderByIdDesc(
+                        lichHoc.getLopHocPhanId(),
+                        List.of(
+                                TrangThaiSinhVienLopHocPhan.da_dang_ky,
+                                TrangThaiSinhVienLopHocPhan.dang_hoc,
+                                TrangThaiSinhVienLopHocPhan.hoc_lai
+                        )
+                );
+
+        List<DiemDanh> danhSachDiemDanh = danhSachSinhVien.stream()
+                .filter(item -> item.getSinhVienId() != null)
+                .filter(item -> !diemDanhRepository.existsByLichHocIdAndSinhVienId(
+                        lichHoc.getId(),
+                        item.getSinhVienId()
+                ))
+                .map(item -> DiemDanh.builder()
+                        .lichHocId(lichHoc.getId())
+                        .sinhVienId(item.getSinhVienId())
+                        .trangThai(TrangThaiDiemDanh.chua_diem_danh)
+                        .thoiGianDiemDanh(null)
+                        .ghiChu(null)
+                        .build())
+                .toList();
+
+        if (!danhSachDiemDanh.isEmpty()) {
+            diemDanhRepository.saveAll(danhSachDiemDanh);
+        }
     }
 }

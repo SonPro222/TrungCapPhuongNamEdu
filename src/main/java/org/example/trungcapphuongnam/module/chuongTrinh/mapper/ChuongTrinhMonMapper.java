@@ -28,8 +28,7 @@ public class ChuongTrinhMonMapper {
                 .gioThucHanh(request.getGioThucHanh())
                 .gioKiemTra(request.getGioKiemTra())
                 .ghiChu(request.getGhiChu())
-                .createdAt(request.getCreatedAt())
-                .updatedAt(request.getUpdatedAt())
+
                 .build();
     }
 
@@ -78,8 +77,7 @@ public class ChuongTrinhMonMapper {
         entity.setGioThucHanh(request.getGioThucHanh());
         entity.setGioKiemTra(request.getGioKiemTra());
         entity.setGhiChu(request.getGhiChu());
-        entity.setCreatedAt(request.getCreatedAt());
-        entity.setUpdatedAt(request.getUpdatedAt());
+
     }
     private String chuanHoaLoaiPhamVi(String value) {
         if (value == null || value.isBlank()) {

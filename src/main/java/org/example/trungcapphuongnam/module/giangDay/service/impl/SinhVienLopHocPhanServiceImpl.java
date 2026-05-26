@@ -32,6 +32,13 @@ import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.example.trungcapphuongnam.module.sinhVien.entity.SinhVien;
+
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -121,23 +128,30 @@ public class SinhVienLopHocPhanServiceImpl implements SinhVienLopHocPhanService 
             throw new GiangDayException("Lớp học phần không được để trống");
         }
 
-        Page<SinhVienLopHocPhan> pageDangHoc = repository.findByLopHocPhanIdAndTrangThai(
+        Page<SinhVienLopHocPhan> pageDangHoc = repository.findByLopHocPhanIdAndTrangThaiIn(
                 lopHocPhanId,
-                TrangThaiSinhVienLopHocPhan.dang_hoc,
+                validator.trangThaiDangTinhSiSo(),
                 pageable
         );
 
         List<Long> sinhVienIds = pageDangHoc.getContent()
                 .stream()
                 .map(SinhVienLopHocPhan::getSinhVienId)
+                .filter(Objects::nonNull)
                 .toList();
 
         if (sinhVienIds.isEmpty()) {
             return new PageImpl<>(List.of(), pageable, pageDangHoc.getTotalElements());
         }
 
-        List<SinhVienResponse> content = sinhVienRepository.findByIdIn(sinhVienIds)
+        Map<Long, SinhVien> sinhVienMap = sinhVienRepository.findAllById(sinhVienIds)
                 .stream()
+                .collect(Collectors.toMap(SinhVien::getId, Function.identity()));
+
+        List<SinhVienResponse> content = sinhVienIds
+                .stream()
+                .map(sinhVienMap::get)
+                .filter(Objects::nonNull)
                 .map(sinhVienMapper::toResponse)
                 .toList();
 

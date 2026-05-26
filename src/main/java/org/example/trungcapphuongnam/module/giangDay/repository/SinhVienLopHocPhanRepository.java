@@ -57,4 +57,9 @@ public interface SinhVienLopHocPhanRepository extends JpaRepository<SinhVienLopH
             Long lopHocPhanId,
             Collection<TrangThaiSinhVienLopHocPhan> trangThais
     );
+    Page<SinhVienLopHocPhan> findByLopHocPhanIdAndTrangThaiIn(
+            Long lopHocPhanId,
+            Collection<TrangThaiSinhVienLopHocPhan> trangThais,
+            Pageable pageable
+    );
 }

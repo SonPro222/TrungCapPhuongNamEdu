@@ -28,4 +28,5 @@ public class DieuKienTotNghiepGoc {
     private LocalDateTime createdAt;
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
+
 }

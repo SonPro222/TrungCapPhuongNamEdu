@@ -19,21 +19,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.example.trungcapphuongnam.module.giangDay.service.SaoChepCauHinhDanhGiaService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.example.trungcapphuongnam.module.giangDay.service.SaoChepCotDiemTuChuongTrinhMonService;
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class LopHocPhanServiceImpl implements LopHocPhanService {
-
+    private final SaoChepCotDiemTuChuongTrinhMonService saoChepCotDiemTuChuongTrinhMonService;
     private final LopHocPhanValidator validator;
     private final LopHocPhanRepository repository;
     private final ChuongTrinhMonRepository chuongTrinhMonRepository;
     private final LopHocPhanMapper mapper;
-
+    private final SaoChepCauHinhDanhGiaService saoChepCauHinhDanhGiaService;
     @Override
     @Transactional(readOnly = true)
     public Page<LopHocPhanResponse> getAll(
@@ -66,7 +66,21 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
         LopHocPhan entity = mapper.toEntity(request);
         chuanHoaLopHocPhan(entity);
 
-        return mapper.toResponse(repository.save(entity));
+        LopHocPhan saved = repository.save(entity);
+        if (saved.getChuongTrinhMonId() != null) {
+            saoChepCotDiemTuChuongTrinhMonService.saoChep(
+                    saved.getId(),
+                    saved.getChuongTrinhMonId()
+            );
+        }
+        if (saved.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH) {
+            saoChepCauHinhDanhGiaService.saoChepTuChuongTrinhMonSangLopHocPhan(
+                    saved.getId(),
+                    saved.getChuongTrinhMonId()
+            );
+        }
+
+        return mapper.toResponse(saved);
     }
 
     @Override

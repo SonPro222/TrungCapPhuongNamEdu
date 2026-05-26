@@ -18,6 +18,9 @@ public class SyllabusTaiLieuMapper {
                 .nhaXuatBan(request.getNhaXuatBan())
                 .loai(request.getLoai())
                 .ghiChu(request.getGhiChu())
+                .ma(request.getMa())
+                .duongDan(request.getDuongDan())
+
                 .build();
     }
 
@@ -32,6 +35,10 @@ public class SyllabusTaiLieuMapper {
                 .nhaXuatBan(entity.getNhaXuatBan())
                 .loai(entity.getLoai())
                 .ghiChu(entity.getGhiChu())
+                .ma(entity.getMa())
+                .duongDan(entity.getDuongDan())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -44,5 +51,9 @@ public class SyllabusTaiLieuMapper {
         entity.setNhaXuatBan(request.getNhaXuatBan());
         entity.setLoai(request.getLoai());
         entity.setGhiChu(request.getGhiChu());
+        entity.setMa(request.getMa());
+        entity.setDuongDan(request.getDuongDan());
+
+
     }
 }

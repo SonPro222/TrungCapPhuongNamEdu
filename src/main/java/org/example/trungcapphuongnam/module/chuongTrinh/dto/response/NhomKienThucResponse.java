@@ -1,6 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -30,5 +31,11 @@ public class NhomKienThucResponse {
     private BigDecimal tongGioThucHanh;
 
     private BigDecimal tongGioKiemTra;
+
+    private String moTa;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

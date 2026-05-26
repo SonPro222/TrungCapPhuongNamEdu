@@ -14,6 +14,9 @@ public class DieuKienTotNghiepMapper {
                 .chuongTrinhVersionId(request.getChuongTrinhVersionId())
                 .noiDung(request.getNoiDung())
                 .thuTu(request.getThuTu())
+                .ma(request.getMa())
+                .ghiChu(request.getGhiChu())
+
                 .build();
     }
 
@@ -24,6 +27,10 @@ public class DieuKienTotNghiepMapper {
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
                 .noiDung(entity.getNoiDung())
                 .thuTu(entity.getThuTu())
+                .ma(entity.getMa())
+                .ghiChu(entity.getGhiChu())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -32,5 +39,9 @@ public class DieuKienTotNghiepMapper {
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
         entity.setNoiDung(request.getNoiDung());
         entity.setThuTu(request.getThuTu());
+        entity.setMa(request.getMa());
+        entity.setGhiChu(request.getGhiChu());
+
+
     }
 }

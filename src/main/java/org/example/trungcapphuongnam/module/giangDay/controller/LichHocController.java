@@ -26,6 +26,7 @@ public class LichHocController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<LichHocResponse>>> getAll(
+            @RequestParam(required = false) Long lopHocPhanId,
             @RequestParam(required = false) String keywordLop,
             @RequestParam(required = false) String keywordGiaoVien,
             @RequestParam(required = false) String keywordPhong,
@@ -40,6 +41,7 @@ public class LichHocController {
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
                 lichHocService.getAll(
+                        lopHocPhanId,
                         keywordLop,
                         keywordGiaoVien,
                         keywordPhong,

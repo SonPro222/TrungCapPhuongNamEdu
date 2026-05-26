@@ -8,6 +8,7 @@ import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhanChuongTrin
 import org.example.trungcapphuongnam.module.giangDay.mapper.LopHocPhanChuongTrinhMonMapper;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.giangDay.service.LopHocPhanChuongTrinhMonService;
+import org.example.trungcapphuongnam.module.giangDay.service.SaoChepCotDiemTuChuongTrinhMonService;
 import org.example.trungcapphuongnam.module.giangDay.validator.LopHocPhanChuongTrinhMonValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ public class LopHocPhanChuongTrinhMonServiceImpl implements LopHocPhanChuongTrin
     private final LopHocPhanChuongTrinhMonRepository repository;
     private final LopHocPhanChuongTrinhMonMapper mapper;
     private final LopHocPhanChuongTrinhMonValidator validator;
+    private final SaoChepCotDiemTuChuongTrinhMonService saoChepCotDiemTuChuongTrinhMonService;
 
     @Override
     @Transactional(readOnly = true)
@@ -60,8 +62,14 @@ public class LopHocPhanChuongTrinhMonServiceImpl implements LopHocPhanChuongTrin
         validator.validateCreate(request);
 
         LopHocPhanChuongTrinhMon entity = mapper.toEntity(request);
+        LopHocPhanChuongTrinhMon saved = repository.save(entity);
 
-        return mapper.toResponse(repository.save(entity));
+        saoChepCotDiemTuChuongTrinhMonService.saoChep(
+                saved.getLopHocPhanId(),
+                saved.getChuongTrinhMonId()
+        );
+
+        return mapper.toResponse(saved);
     }
 
     @Override
@@ -71,7 +79,14 @@ public class LopHocPhanChuongTrinhMonServiceImpl implements LopHocPhanChuongTrin
         LopHocPhanChuongTrinhMon entity = findEntity(id);
         mapper.updateEntity(entity, request);
 
-        return mapper.toResponse(repository.save(entity));
+        LopHocPhanChuongTrinhMon saved = repository.save(entity);
+
+        saoChepCotDiemTuChuongTrinhMonService.saoChep(
+                saved.getLopHocPhanId(),
+                saved.getChuongTrinhMonId()
+        );
+
+        return mapper.toResponse(saved);
     }
 
     @Override
@@ -81,6 +96,8 @@ public class LopHocPhanChuongTrinhMonServiceImpl implements LopHocPhanChuongTrin
 
     private LopHocPhanChuongTrinhMon findEntity(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new GiangDayNotFoundException("Không tìm thấy bản ghi gắn chương trình môn với lớp học phần id = " + id));
+                .orElseThrow(() -> new GiangDayNotFoundException(
+                        "Không tìm thấy bản ghi gắn chương trình môn với lớp học phần id = " + id
+                ));
     }
 }

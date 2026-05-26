@@ -38,8 +38,23 @@ public class QuyDoiDiemMau {
     private String congThuc;
     @Column(name = "ghi_chu", nullable = true, columnDefinition = "TEXT")
     private String ghiChu;
+    @Column(name = "loai_mau", nullable = true, length = 50)
+    private String loaiMau;
+
+    @Column(name = "ty_le", nullable = true)
+    private BigDecimal tyLe;
+
+    @Column(name = "diem_toi_da", nullable = true)
+    private BigDecimal diemToiDa;
+
+    @Column(name = "thu_tu", nullable = true)
+    private Integer thuTu;
+
+    @Column(name = "bat_buoc", nullable = true)
+    private Boolean batBuoc;
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
     @Column(name = "updated_at", insertable = false, updatable = false)
+
     private LocalDateTime updatedAt;
 }

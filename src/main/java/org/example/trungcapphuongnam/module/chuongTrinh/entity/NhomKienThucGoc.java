@@ -40,4 +40,5 @@ public class NhomKienThucGoc {
 
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
+
 }

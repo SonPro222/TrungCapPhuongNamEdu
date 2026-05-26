@@ -10,10 +10,10 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomKienThuc;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChon;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKy;
+import org.example.trungcapphuongnam.module.daoTao.entity.NganhLoaiChuongTrinh;
 import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyRepository;
-import org.example.trungcapphuongnam.module.daoTao.repository.LoaiChuongTrinhRepository;
-import org.example.trungcapphuongnam.module.daoTao.repository.NganhRepository;
-import org.example.trungcapphuongnam.module.daoTao.repository.TrinhDoDaoTaoRepository;
+import org.example.trungcapphuongnam.module.daoTao.repository.NganhLoaiChuongTrinhRepository;
+import org.example.trungcapphuongnam.module.daoTao.repository.NganhTrinhDoDaoTaoRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
@@ -24,10 +24,10 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class ChuongTrinhNghiepVuValidator {
+
+    private final NganhLoaiChuongTrinhRepository nganhLoaiChuongTrinhRepository;
+    private final NganhTrinhDoDaoTaoRepository nganhTrinhDoDaoTaoRepository;
     private final SyllabusChuongTrinhGocRepository syllabusChuongTrinhGocRepository;
-    private final NganhRepository nganhRepository;
-    private final TrinhDoDaoTaoRepository trinhDoDaoTaoRepository;
-    private final LoaiChuongTrinhRepository loaiChuongTrinhRepository;
     private final KhungKyRepository khungKyRepository;
 
     private final ChuongTrinhRepository chuongTrinhRepository;
@@ -115,16 +115,25 @@ public class ChuongTrinhNghiepVuValidator {
     public void validateChuongTrinh(ChuongTrinhRequest request, Long id) {
         notNull(request, "Dữ liệu chương trình không hợp lệ");
 
-        Long nganhId = requireId(request.getNganhId(), "nganhId");
-        Long trinhDoId = requireId(request.getTrinhDoId(), "trinhDoId");
-        Long loaiChuongTrinhId = requireId(request.getLoaiChuongTrinhId(), "loaiChuongTrinhId");
+        Long nganhLoaiChuongTrinhId = requireId(request.getNganhLoaiChuongTrinhId(), "nganhLoaiChuongTrinhId");
 
         String ma = trimRequired(request.getMaChuongTrinh(), "Mã chương trình");
         trimRequired(request.getTenChuongTrinh(), "Tên chương trình");
 
-        requireExists(nganhRepository, nganhId, "Ngành");
-        requireExists(trinhDoDaoTaoRepository, trinhDoId, "Trình độ đào tạo");
-        requireExists(loaiChuongTrinhRepository, loaiChuongTrinhId, "Loại chương trình");
+        NganhLoaiChuongTrinh nganhLoai = nganhLoaiChuongTrinhRepository.findById(nganhLoaiChuongTrinhId)
+                .orElseThrow(() -> new ResourceNotFoundException("Loại chương trình theo ngành không tồn tại: " + nganhLoaiChuongTrinhId));
+
+        if (request.getTrinhDoId() != null) {
+            Long trinhDoId = request.getTrinhDoId();
+            boolean daGanTrinhDoVaoNganh = nganhTrinhDoDaoTaoRepository.existsByNganhIdAndTrinhDoId(
+                    nganhLoai.getNganhId(),
+                    trinhDoId
+            );
+
+            if (!daGanTrinhDoVaoNganh) {
+                throw new ResourceNotFoundException("Trình độ đào tạo chưa được gán vào ngành này: " + trinhDoId);
+            }
+        }
 
         if (id == null && chuongTrinhRepository.existsByMaChuongTrinh(ma)) {
             throw new DuplicateResourceException("Mã chương trình đã tồn tại: " + ma);

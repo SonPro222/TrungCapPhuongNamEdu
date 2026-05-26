@@ -9,8 +9,8 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 
 public interface LichHocService {
-
     Page<LichHocResponse> getAll(
+            Long lopHocPhanId,
             String keywordLop,
             String keywordGiaoVien,
             String keywordPhong,
@@ -28,4 +28,5 @@ public interface LichHocService {
     LichHocResponse update(Long id, LichHocRequest request);
 
     void delete(Long id);
+
 }

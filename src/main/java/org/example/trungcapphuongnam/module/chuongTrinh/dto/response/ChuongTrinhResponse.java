@@ -11,6 +11,8 @@ public class ChuongTrinhResponse {
 
     private Long id;
 
+    private Long nganhLoaiChuongTrinhId;
+
     private Long nganhId;
 
     private Long trinhDoId;

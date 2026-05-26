@@ -50,7 +50,11 @@ public class LopHocPhanValidator {
         if (request == null) {
             throw new GiangDayException("Dữ liệu lớp học phần không hợp lệ");
         }
+        Integer soBuoiHoc = request.getSoBuoiHoc();
 
+        if (soBuoiHoc == null || soBuoiHoc < 1) {
+            throw new GiangDayException("Số buổi học phải lớn hơn 0");
+        }
         if (request.getLoaiLopHocPhan() == null) {
             throw new GiangDayException("Loại lớp học phần không được để trống");
         }

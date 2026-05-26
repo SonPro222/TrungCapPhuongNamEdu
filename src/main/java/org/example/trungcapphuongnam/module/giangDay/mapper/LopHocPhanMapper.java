@@ -18,6 +18,7 @@ public class LopHocPhanMapper {
                 .maLop(request.getMaLop())
                 .tenLop(request.getTenLop())
                 .soLuongToiDa(request.getSoLuongToiDa())
+                .soBuoiHoc(request.getSoBuoiHoc())
                 .soLuongHienTai(request.getSoLuongHienTai())
                 .ngayBatDau(request.getNgayBatDau())
                 .ngayKetThuc(request.getNgayKetThuc())
@@ -33,6 +34,7 @@ public class LopHocPhanMapper {
                 .monHocId(entity.getMonHocId())
                 .loaiLopHocPhan(entity.getLoaiLopHocPhan())
                 .siSoToiThieu(entity.getSiSoToiThieu())
+                .soBuoiHoc(entity.getSoBuoiHoc())
                 .maLop(entity.getMaLop())
                 .tenLop(entity.getTenLop())
                 .soLuongToiDa(entity.getSoLuongToiDa())
@@ -54,6 +56,7 @@ public class LopHocPhanMapper {
         entity.setMaLop(request.getMaLop());
         entity.setTenLop(request.getTenLop());
         entity.setSoLuongToiDa(request.getSoLuongToiDa());
+        entity.setSoBuoiHoc(request.getSoBuoiHoc());
         entity.setSoLuongHienTai(request.getSoLuongHienTai());
         entity.setNgayBatDau(request.getNgayBatDau());
         entity.setNgayKetThuc(request.getNgayKetThuc());

@@ -13,6 +13,7 @@ public final class DaoTaoPath {
     public static final String LOP_HANH_CHINH = BASE + "/lop-hanh-chinh";
     public static final String NGANH = BASE + "/nganh";
     public static final String TRINH_DO_DAO_TAO = BASE + "/trinh-do-dao-tao";
-
+    public static final String NGANH_TRINH_DO_DAO_TAO = BASE + "/nganh-trinh-do-dao-tao";
+    public static final String NGANH_LOAI_CHUONG_TRINH = BASE + "/nganh-loai-chuong-trinh";
     public static final String ID = "/{id}";
 }

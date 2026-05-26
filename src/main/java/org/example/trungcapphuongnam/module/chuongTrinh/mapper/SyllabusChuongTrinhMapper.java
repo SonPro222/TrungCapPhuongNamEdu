@@ -18,6 +18,16 @@ public class SyllabusChuongTrinhMapper {
                 .yeuCauDaoTao(request.getYeuCauDaoTao())
                 .phuongPhapDaoTao(request.getPhuongPhapDaoTao())
                 .ghiChu(request.getGhiChu())
+                .ma(request.getMa())
+                .ten(request.getTen())
+                .mucTieu(request.getMucTieu())
+                .doiTuongTuyenSinh(request.getDoiTuongTuyenSinh())
+                .thoiGianDaoTao(request.getThoiGianDaoTao())
+                .khoiLuongKienThuc(request.getKhoiLuongKienThuc())
+                .dieuKienTotNghiep(request.getDieuKienTotNghiep())
+                .phuongPhapDanhGia(request.getPhuongPhapDanhGia())
+                .huongDanThucHien(request.getHuongDanThucHien())
+
                 .build();
     }
 
@@ -32,6 +42,17 @@ public class SyllabusChuongTrinhMapper {
                 .yeuCauDaoTao(entity.getYeuCauDaoTao())
                 .phuongPhapDaoTao(entity.getPhuongPhapDaoTao())
                 .ghiChu(entity.getGhiChu())
+                .ma(entity.getMa())
+                .ten(entity.getTen())
+                .mucTieu(entity.getMucTieu())
+                .doiTuongTuyenSinh(entity.getDoiTuongTuyenSinh())
+                .thoiGianDaoTao(entity.getThoiGianDaoTao())
+                .khoiLuongKienThuc(entity.getKhoiLuongKienThuc())
+                .dieuKienTotNghiep(entity.getDieuKienTotNghiep())
+                .phuongPhapDanhGia(entity.getPhuongPhapDanhGia())
+                .huongDanThucHien(entity.getHuongDanThucHien())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -44,5 +65,16 @@ public class SyllabusChuongTrinhMapper {
         entity.setYeuCauDaoTao(request.getYeuCauDaoTao());
         entity.setPhuongPhapDaoTao(request.getPhuongPhapDaoTao());
         entity.setGhiChu(request.getGhiChu());
+        entity.setMa(request.getMa());
+        entity.setTen(request.getTen());
+        entity.setMucTieu(request.getMucTieu());
+        entity.setDoiTuongTuyenSinh(request.getDoiTuongTuyenSinh());
+        entity.setThoiGianDaoTao(request.getThoiGianDaoTao());
+        entity.setKhoiLuongKienThuc(request.getKhoiLuongKienThuc());
+        entity.setDieuKienTotNghiep(request.getDieuKienTotNghiep());
+        entity.setPhuongPhapDanhGia(request.getPhuongPhapDanhGia());
+        entity.setHuongDanThucHien(request.getHuongDanThucHien());
+
+
     }
 }

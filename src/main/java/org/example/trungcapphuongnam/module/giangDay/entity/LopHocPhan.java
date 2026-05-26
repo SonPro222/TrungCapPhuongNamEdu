@@ -42,7 +42,8 @@ public class LopHocPhan {
 
     @Column(name = "so_luong_hien_tai")
     private Integer soLuongHienTai;
-
+    @Column(name = "so_buoi_hoc", nullable = false)
+    private Integer soBuoiHoc;
     @Column(name = "ngay_bat_dau")
     private LocalDate ngayBatDau;
 

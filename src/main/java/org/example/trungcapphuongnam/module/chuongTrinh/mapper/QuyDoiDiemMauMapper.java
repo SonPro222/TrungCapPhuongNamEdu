@@ -17,6 +17,11 @@ public class QuyDoiDiemMauMapper {
         entity.setTen(request.getTen());
         entity.setNguongTu(request.getNguongTu());
         entity.setNguongDen(request.getNguongDen());
+        entity.setLoaiMau(request.getLoaiMau());
+        entity.setTyLe(request.getTyLe());
+        entity.setDiemToiDa(request.getDiemToiDa());
+        entity.setThuTu(request.getThuTu());
+        entity.setBatBuoc(request.getBatBuoc());
         entity.setDiemQuyDoi(request.getDiemQuyDoi());
         entity.setKetQua(request.getKetQua());
         entity.setCongThuc(request.getCongThuc());
@@ -32,6 +37,11 @@ public class QuyDoiDiemMauMapper {
         entity.setTen(request.getTen());
         entity.setNguongTu(request.getNguongTu());
         entity.setNguongDen(request.getNguongDen());
+        entity.setLoaiMau(request.getLoaiMau());
+        entity.setTyLe(request.getTyLe());
+        entity.setDiemToiDa(request.getDiemToiDa());
+        entity.setThuTu(request.getThuTu());
+        entity.setBatBuoc(request.getBatBuoc());
         entity.setDiemQuyDoi(request.getDiemQuyDoi());
         entity.setKetQua(request.getKetQua());
         entity.setCongThuc(request.getCongThuc());
@@ -48,6 +58,11 @@ public class QuyDoiDiemMauMapper {
                 .ten(entity.getTen())
                 .nguongTu(entity.getNguongTu())
                 .nguongDen(entity.getNguongDen())
+                .loaiMau(entity.getLoaiMau())
+                .tyLe(entity.getTyLe())
+                .diemToiDa(entity.getDiemToiDa())
+                .thuTu(entity.getThuTu())
+                .batBuoc(entity.getBatBuoc())
                 .diemQuyDoi(entity.getDiemQuyDoi())
                 .ketQua(entity.getKetQua())
                 .congThuc(entity.getCongThuc())

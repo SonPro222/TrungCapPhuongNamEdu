@@ -17,6 +17,7 @@ public class LopHocPhanRequest {
     private String tenLop;
     private Integer soLuongToiDa;
     private Integer soLuongHienTai;
+    private Integer soBuoiHoc;
     private LocalDate ngayBatDau;
     private LocalDate ngayKetThuc;
     private Long monHocId;

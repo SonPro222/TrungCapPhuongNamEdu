@@ -20,4 +20,10 @@ public class QuyDoiDiemMauRequest {
     private KetQuaDatKhongDat ketQua;
     private String congThuc;
     private String ghiChu;
+    private String loaiMau;
+    private BigDecimal tyLe;
+    private BigDecimal diemToiDa;
+    private Integer thuTu;
+    private Boolean batBuoc;
+
 }

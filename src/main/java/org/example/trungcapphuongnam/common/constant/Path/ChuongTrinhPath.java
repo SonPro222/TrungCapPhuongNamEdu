@@ -37,5 +37,6 @@ public final class ChuongTrinhPath {
     public static final String SYLLABUS_CHUONG_TRINH_GOC = BASE + "/syllabus-chuong-trinh-goc";
     public static final String NHOM_KIEN_THUC_GOC = BASE + "/nhom-kien-thuc-goc";
     public static final String NHOM_TU_CHON_GOC = BASE + "/nhom-tu-chon-goc";
+    public static final String CAU_HINH_DANH_GIA_MAU = BASE + "/cau-hinh-danh-gia-mau";
     public static final String ID = "/{id}";
 }
