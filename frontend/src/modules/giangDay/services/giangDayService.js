@@ -213,6 +213,10 @@ export const giangDayService = {
             ...params
         }))
     },
+    async layLopHocPhanTheoId(id) {
+        const result = await giangDayApi.lopHocPhan.getById(id)
+        return result?.data?.data || result?.data || result
+    },
 
     async taoLopHocPhan(payload) {
         return giangDayApi.lopHocPhan.create(payload)
@@ -292,6 +296,56 @@ export const giangDayService = {
             sortDir: 'asc',
             ...params
         })).content
+    },
+
+
+    async layDanhSachSinhVienTrongLopHocPhan(lopHocPhanId, params = {}) {
+        return layPage(await giangDayApi.sinhVienLopHocPhan.getSinhVienTrongLop(lopHocPhanId, {
+            page: 0,
+            size: 500,
+            ...params
+        })).content
+    },
+
+
+
+    async layTrangDiemChiTiet(params = {}) {
+        return layPage(await giangDayApi.diemChiTiet.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'id',
+            sortDir: 'asc',
+            ...params
+        }))
+    },
+
+    async layTrangKetQuaLopHocPhan(params = {}) {
+        return layPage(await giangDayApi.ketQuaLopHocPhan.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'id',
+            sortDir: 'asc',
+            ...params
+        }))
+    },
+    async layTrangCauHinhDanhGia(params = {}) {
+        return layPage(await giangDayApi.cauHinhDanhGia.getAll({
+            page: 0,
+            size: 1000,
+            sortBy: 'thuTu',
+            sortDir: 'asc',
+            ...params
+        }))
+    },
+
+    async layTrangBaiKiemTra(params = {}) {
+        return layPage(await giangDayApi.baiKiemTra.getAll({
+            page: 0,
+            size: 1000,
+            sortBy: 'id',
+            sortDir: 'asc',
+            ...params
+        }))
     },
 
 }

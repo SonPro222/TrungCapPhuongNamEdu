@@ -1,15 +1,17 @@
 import { ROLES } from '@/core/constants/roles'
 import { requireAuth } from '@/core/guards/authGuard'
 import { requireAdmin } from '@/core/guards/adminGuard'
-import AdminQuanLyGiangDay from './pages/AdminQuanLyGiangDay.vue'
+
 import GiangDayLayout from './layouts/GiangDayLayout.vue'
+import AdminQuanLyGiangDay from './pages/AdminQuanLyGiangDay.vue'
+import AdminChiTietGiangDayLopHocPhan from './pages/AdminChiTietGiangDayLopHocPhan.vue'
+import AdminChiTietBuoiHoc from './pages/AdminChiTietBuoiHoc.vue'
 import AdminGiaoVien from './pages/AdminGiaoVien.vue'
 import AdminPhongHoc from './pages/AdminPhongHoc.vue'
 import AdminCaHoc from './pages/AdminCaHoc.vue'
 import AdminLopHocPhan from './pages/AdminLopHocPhan.vue'
 import AdminPhanCongGiangDay from './pages/AdminPhanCongGiangDay.vue'
 import AdminLichHoc from './pages/AdminLichHoc.vue'
-import AdminDiemDanh from './pages/AdminDiemDanh.vue'
 
 export const giangDayRoutes = [
     {
@@ -23,11 +25,35 @@ export const giangDayRoutes = [
         },
         children: [
             {
+                path: '',
+                redirect: {
+                    name: 'GiangDay.QuanLy'
+                }
+            },
+            {
                 path: 'quan-ly',
                 name: 'GiangDay.QuanLy',
                 component: AdminQuanLyGiangDay,
                 meta: {
                     title: 'Quản lý giảng dạy',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO]
+                }
+            },
+            {
+                path: 'quan-ly/lop-hoc-phan/:id',
+                name: 'GiangDay.ChiTietLopHocPhan',
+                component: AdminChiTietGiangDayLopHocPhan,
+                meta: {
+                    title: 'Danh sách buổi học',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO]
+                }
+            },
+            {
+                path: 'quan-ly/lop-hoc-phan/:lopHocPhanId/buoi-hoc/:lichHocId',
+                name: 'GiangDay.ChiTietBuoiHoc',
+                component: AdminChiTietBuoiHoc,
+                meta: {
+                    title: 'Chi tiết buổi học',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
                 }
             },
@@ -82,15 +108,6 @@ export const giangDayRoutes = [
                 component: AdminLichHoc,
                 meta: {
                     title: 'Quản lý lịch học',
-                    roles: [ROLES.ADMIN, ROLES.DAO_TAO]
-                }
-            },
-            {
-                path: 'diem-danh',
-                name: 'GiangDay.DiemDanh',
-                component: AdminDiemDanh,
-                meta: {
-                    title: 'Quản lý điểm danh',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
                 }
             }

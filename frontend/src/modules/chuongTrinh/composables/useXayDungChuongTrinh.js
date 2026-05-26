@@ -536,10 +536,15 @@ export function useXayDungChuongTrinh() {
     function taoPayloadQuyDoiDiemTuMau(item, chuongTrinhMonId) {
         return {
             chuongTrinhMonId,
+            loaiMau: item.loaiMau || 'COT_DIEM',
             nguongTu: item.nguongTu ?? null,
             nguongDen: item.nguongDen ?? null,
             diemQuyDoi: item.diemQuyDoi ?? null,
             ketQua: item.ketQua || 'dat',
+            tyLe: item.tyLe ?? null,
+            diemToiDa: item.diemToiDa ?? 10,
+            thuTu: item.thuTu ?? null,
+            batBuoc: item.batBuoc !== false,
             congThuc: item.congThuc || '',
             ghiChu: item.ghiChu || item.ten || item.ma || ''
         }

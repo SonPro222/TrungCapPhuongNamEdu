@@ -26,6 +26,10 @@ function createCrudService(api) {
             return await api.create(cleanPayload(payload))
         },
 
+        async luu(payload) {
+            return await api.luu(cleanPayload(payload))
+        },
+
         async update(id, payload) {
             return await api.update(id, cleanPayload(payload))
         },
@@ -40,6 +44,8 @@ export const daoTaoService = {
     nganh: createCrudService(daoTaoApi.nganh),
     trinhDoDaoTao: createCrudService(daoTaoApi.trinhDoDaoTao),
     loaiChuongTrinh: createCrudService(daoTaoApi.loaiChuongTrinh),
+    nganhTrinhDoDaoTao: createCrudService(daoTaoApi.nganhTrinhDoDaoTao),
+    nganhLoaiChuongTrinh: createCrudService(daoTaoApi.nganhLoaiChuongTrinh),
     khungKy: createCrudService(daoTaoApi.khungKy),
     khungKyGoc: createCrudService(daoTaoApi.khungKyGoc)
 }

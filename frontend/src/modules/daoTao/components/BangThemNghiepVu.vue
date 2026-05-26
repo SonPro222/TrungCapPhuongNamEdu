@@ -6,7 +6,7 @@
         <p v-if="description">{{ description }}</p>
       </div>
       <div class="bang-head-actions">
-        <button type="button" class="btn tiny" :disabled="disabled" @click="resetForm">Làm mới form</button>
+        <button v-if="!readOnly" type="button" class="btn tiny" :disabled="disabled" @click="resetForm">Làm mới form</button>
         <button type="button" class="btn tiny toggle-btn" @click="moBang = !moBang">
           {{ moBang ? '⌃ Đóng' : '⌄ Mở' }}
         </button>
@@ -17,129 +17,159 @@
       <div v-if="parentText" class="parent-text">{{ parentText }}</div>
       <div v-if="disabled" class="disabled-text">{{ disabledText || 'Cần tạo và chọn dữ liệu bảng cha trước.' }}</div>
 
-      <form class="bang-form" novalidate @submit.prevent="saveForm">
-      <template v-for="field in visibleFields" :key="field.key">
-        <label class="field" :class="[field.wide ? 'wide' : '', fieldErrors[field.key] ? 'has-error' : '']">
-          <span>{{ field.label }}<em v-if="isFieldRequired(field)">*</em></span>
-
-          <select
-              v-if="field.type === 'select'"
-              v-model="form[field.key]"
-              :required="field.required"
-              :disabled="disabled || field.locked"
-              @change="validateField(field)"
-          >
-            <option value="">-- Chọn --</option>
-            <option
-                v-for="option in getOptions(field)"
-                :key="option[field.valueKey || 'id']"
-                :value="option[field.valueKey || 'id']"
-            >
-              {{ getOptionLabel(option, field) }}
-            </option>
-          </select>
-
-          <textarea
-              v-else-if="field.type === 'textarea'"
-              v-model="form[field.key]"
-              :required="field.required"
-              :disabled="disabled || field.locked"
-              rows="2"
-              @input="validateField(field)"
-          />
-
-          <select
-              v-else-if="field.type === 'boolean'"
-              v-model="form[field.key]"
-              :required="field.required"
-              :disabled="disabled || field.locked"
-              @change="validateField(field)"
-          >
-            <option :value="true">Có</option>
-            <option :value="false">Không</option>
-          </select>
-
-          <input
-              v-else
-              v-model="form[field.key]"
-              :type="field.type || 'text'"
-              :required="field.required"
-              :disabled="disabled || field.locked"
-              :min="field.type === 'number' ? layMin(field) : undefined"
-              :max="field.type === 'number' ? layMax(field) : undefined"
-              :step="field.type === 'number' ? layStep(field) : undefined"
-              @input="validateField(field)"
-          />
-
-          <small v-if="fieldErrors[field.key]" class="field-error">{{ fieldErrors[field.key] }}</small>
+      <div v-if="readonlyInfoFields.length" class="readonly-info-form">
+        <label
+            v-for="field in readonlyInfoFields"
+            :key="field.key"
+            class="field readonly-info-field"
+            :class="field.wide ? 'wide' : ''"
+        >
+          <span>{{ field.label }}</span>
+          <input :value="field.value || '-'" disabled />
         </label>
-      </template>
-
-      <div class="form-actions">
-        <button type="submit" class="btn primary" :disabled="disabled || saving">
-          {{ editingId ? 'Cập nhật' : 'Lưu' }}
-        </button>
-        <button type="button" class="btn" :disabled="disabled" @click="resetForm">Hủy</button>
       </div>
-    </form>
 
-    <div v-if="thongBaoBang" :class="['table-message', loaiThongBaoBang]">{{ thongBaoBang }}</div>
-    <div v-if="canToggleSave" class="save-status">
-      <span>Trạng thái lưu:</span>
-      <b>Đã lưu</b> là đã gắn vào luồng đang chọn, <b>Chưa lưu</b> là chưa gắn. Bấm nút để lưu hoặc bỏ lưu.
-    </div>
-    <div class="table-title">Dữ liệu có sẵn / vừa tạo trong luồng này</div>
-    <div class="table-wrap mini-scroll">
-      <table>
-        <thead>
-        <tr>
-          <th v-if="hienCotTrangThai" class="col-action col-action-wide">Trạng thái</th>
-          <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
-          <th class="col-action">Thao tác</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-if="!hienThiItems.length">
-          <td :colspan="columns.length + (hienCotTrangThai ? 2 : 1)" class="empty-cell">Bảng đang trống. Nhập form phía trên rồi bấm Lưu.</td>
-        </tr>
-        <template v-else>
-          <tr
-              v-for="item in hienThiItems"
-              :key="item.id || item.__localId"
-              :class="{ selected: isSelected(item), related: isRelated(item), viewing: isViewing(item) }"
-          >
-            <td v-if="hienCotTrangThai" class="col-action col-action-wide action-pair status-action-cell">
-              <span :class="['status-badge', layTrangThaiDong(item).className]">{{ layTrangThaiDong(item).label }}</span>
-              <button
-                  v-if="canSelect"
-                  type="button"
-                  :class="['btn tiny choose-btn', { chosen: isSelected(item) }]"
-                  title="Chọn dòng này trong ngữ cảnh hiện tại"
-                  @click="selectItem(item)"
-              >✓</button>
-              <button
-                  v-if="canToggleSave"
-                  type="button"
-                  :class="['btn tiny save-link-btn', { saved: isSaved(item) }]"
-                  :title="isSaved(item) ? 'Bỏ lưu khỏi ngữ cảnh đang chọn' : 'Lưu/gán vào ngữ cảnh đang chọn'"
-                  @click="toggleSaveItem(item)"
+      <form v-if="!readOnly" class="bang-form" novalidate @submit.prevent="saveForm">
+        <template v-for="field in visibleFields" :key="field.key">
+          <label class="field" :class="[field.wide ? 'wide' : '', fieldErrors[field.key] ? 'has-error' : '']">
+            <span>{{ field.label }}<em v-if="isFieldRequired(field)">*</em></span>
+
+            <select
+                v-if="field.type === 'select'"
+                v-model="form[field.key]"
+                :required="field.required"
+                :disabled="disabled || field.locked"
+                @change="validateField(field)"
+            >
+              <option value="">-- Chọn --</option>
+              <option
+                  v-for="option in getOptions(field)"
+                  :key="option[field.valueKey || 'id']"
+                  :value="option[field.valueKey || 'id']"
               >
-                {{ isSaved(item) ? 'Bỏ lưu' : 'Lưu' }}
-              </button>
-            </td>
-            <td v-for="column in columns" :key="column.key" :class="cellClass(column)">
-              {{ displayValue(item, column) }}
-            </td>
-            <td class="col-action actions-cell">
-              <button v-if="canView" type="button" class="btn tiny view-btn" @click="viewItem(item)">{{ viewLabel }}</button>
-              <button type="button" class="btn tiny" @click="editItem(item)">Sửa</button>
-              <button type="button" class="btn tiny danger" @click="deleteItem(item)">Xóa</button>
+                {{ getOptionLabel(option, field) }}
+              </option>
+            </select>
+
+            <textarea
+                v-else-if="field.type === 'textarea'"
+                v-model="form[field.key]"
+                :required="field.required"
+                :disabled="disabled || field.locked"
+                rows="2"
+                @input="validateField(field)"
+            />
+
+            <select
+                v-else-if="field.type === 'boolean'"
+                v-model="form[field.key]"
+                :required="field.required"
+                :disabled="disabled || field.locked"
+                @change="validateField(field)"
+            >
+              <option :value="true">Có</option>
+              <option :value="false">Không</option>
+            </select>
+
+            <input
+                v-else
+                v-model="form[field.key]"
+                :type="field.type || 'text'"
+                :required="field.required"
+                :disabled="disabled || field.locked"
+                :min="field.type === 'number' ? layMin(field) : undefined"
+                :max="field.type === 'number' ? layMax(field) : undefined"
+                :step="field.type === 'number' ? layStep(field) : undefined"
+                @input="validateField(field)"
+            />
+
+            <small v-if="fieldErrors[field.key]" class="field-error">{{ fieldErrors[field.key] }}</small>
+          </label>
+        </template>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary" :disabled="disabled || saving">
+            {{ editingId ? 'Cập nhật' : 'Lưu' }}
+          </button>
+          <button type="button" class="btn" :disabled="disabled" @click="resetForm">Hủy</button>
+        </div>
+      </form>
+
+      <div v-if="thongBaoBang" :class="['table-message', loaiThongBaoBang]">{{ thongBaoBang }}</div>
+
+      <div v-if="canToggleSave" class="save-status">
+        {{ saveStatusText || 'Trạng thái gán: Đã gán là dữ liệu đã được gán vào ngữ cảnh đang chọn. Bấm Gán vào để lưu qua bảng nối.' }}
+      </div>
+
+      <div class="table-title">
+        {{ tableTitle || (readOnly ? 'Dữ liệu đã lưu vào chương trình/version hiện tại' : 'Dữ liệu có sẵn / vừa tạo trong luồng này') }}
+      </div>
+
+      <div class="table-wrap mini-scroll">
+        <table>
+          <thead>
+          <tr>
+            <th v-if="hienCotTrangThai" class="col-action col-action-wide">Trạng thái</th>
+            <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
+            <th v-if="hienCotThaoTac" class="col-action">Thao tác</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-if="!hienThiItems.length">
+            <td :colspan="soCotBang" class="empty-cell">
+              {{ emptyText || (readOnly ? 'Chưa có dữ liệu nào được lưu/gắn vào chương trình hiện tại.' : 'Bảng đang trống. Nhập form phía trên rồi bấm Lưu.') }}
             </td>
           </tr>
-        </template>
-        </tbody>
-      </table>
-    </div>
+
+          <template v-else>
+            <tr
+                v-for="item in hienThiItems"
+                :key="item.id || item.__localId"
+                :class="{ selected: isSelected(item), related: isRelated(item), viewing: isViewing(item), clickable: canToggleSave || canSelect }"
+                @click="clickDong(item)"
+            >
+              <td v-if="hienCotTrangThai" class="col-action col-action-wide action-pair status-action-cell">
+                <span :class="['status-badge', layTrangThaiDong(item).className]">
+                  {{ layTrangThaiDong(item).label }}
+                </span>
+
+                <button
+                    v-if="canSelect"
+                    type="button"
+                    :class="['btn tiny choose-btn', { chosen: isSelected(item) }]"
+                    :title="isSelected(item) ? 'Bỏ chọn dòng này' : 'Tích chọn dữ liệu hàng này'"
+                    @click.stop="selectItem(item)"
+                >
+                  {{ isSelected(item) ? 'Bỏ chọn' : 'Chọn' }}
+                </button>
+
+                <button
+                    v-if="canToggleSave"
+                    type="button"
+                    :class="['btn tiny save-link-btn', { saved: isSaved(item) }]"
+                    :title="isSaved(item) ? toggleSavedTitle : toggleSaveTitle"
+                    @click.stop="toggleSaveItem(item)"
+                >
+                  {{ isSaved(item) ? toggleSavedLabel : toggleSaveLabel }}
+                </button>
+              </td>
+
+              <td v-for="column in columns" :key="column.key" :class="cellClass(column)">
+                {{ displayValue(item, column) }}
+              </td>
+
+              <td v-if="hienCotThaoTac" class="col-action actions-cell">
+                <button v-if="canView" type="button" class="btn tiny view-btn" @click.stop="viewItem(item)">
+                  {{ viewLabel }}
+                </button>
+                <button v-if="!readOnly" type="button" class="btn tiny" @click.stop="editItem(item)">Sửa</button>
+                <button v-if="!readOnly" type="button" class="btn tiny danger" @click.stop="deleteItem(item)">Xóa</button>
+              </td>
+            </tr>
+          </template>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 </template>
@@ -156,6 +186,7 @@ const props = defineProps({
   defaultForm: { type: Object, default: () => ({}) },
   parentValues: { type: Object, default: () => ({}) },
   parentText: { type: String, default: '' },
+  readonlyInfoFields: { type: Array, default: () => [] },
   items: { type: Array, default: () => [] },
   allItems: { type: Array, default: () => [] },
   lookups: { type: Object, default: () => ({}) },
@@ -164,9 +195,19 @@ const props = defineProps({
   selectedIds: { type: Array, default: () => [] },
   savedIds: { type: Array, default: () => [] },
   tableMessage: { type: Object, default: () => ({}) },
+
   canToggleSave: { type: Boolean, default: false },
   canSelect: { type: Boolean, default: true },
   canShowSavedStatus: { type: Boolean, default: false },
+
+  toggleSaveLabel: { type: String, default: 'Gán vào' },
+  toggleSavedLabel: { type: String, default: 'Đã gán' },
+  toggleSaveTitle: { type: String, default: 'Gán dữ liệu hàng này vào ngữ cảnh đang chọn' },
+  toggleSavedTitle: { type: String, default: 'Dữ liệu này đã được gán vào ngữ cảnh đang chọn' },
+  saveStatusText: { type: String, default: '' },
+  statusSavedLabel: { type: String, default: '✓ Đã gán' },
+  statusUnsavedLabel: { type: String, default: '+ Chưa gán' },
+
   canView: { type: Boolean, default: false },
   viewLabel: { type: String, default: 'Xem thêm' },
   viewedId: { type: [Number, String], default: null },
@@ -180,7 +221,10 @@ const props = defineProps({
     validator: (value) => ['xuong-song', 'phu', 'goc-mau'].includes(value)
   },
   disabled: { type: Boolean, default: false },
-  disabledText: { type: String, default: '' }
+  disabledText: { type: String, default: '' },
+  readOnly: { type: Boolean, default: false },
+  tableTitle: { type: String, default: '' },
+  emptyText: { type: String, default: '' }
 })
 
 const emit = defineEmits(['saved', 'deleted', 'select', 'view', 'toggle-save', 'notify'])
@@ -192,7 +236,6 @@ const localMessageType = ref('success')
 const editingId = ref(null)
 const saving = ref(false)
 const moBang = ref(true)
-
 const cachedItems = ref([])
 
 function canGiuDanhSachKhiPropsRong() {
@@ -218,7 +261,9 @@ const hienThiItems = computed(() => {
 const visibleFields = computed(() => props.fields.filter((field) => !field.hidden))
 const thongBaoBang = computed(() => props.tableMessage?.message || localMessage.value)
 const loaiThongBaoBang = computed(() => props.tableMessage?.type || localMessageType.value)
-const hienCotTrangThai = computed(() => props.canSelect || props.canToggleSave || props.canShowSavedStatus)
+const hienCotTrangThai = computed(() => !props.readOnly && (props.canSelect || props.canToggleSave || props.canShowSavedStatus))
+const hienCotThaoTac = computed(() => props.canView || !props.readOnly)
+const soCotBang = computed(() => props.columns.length + (hienCotTrangThai.value ? 1 : 0) + (hienCotThaoTac.value ? 1 : 0))
 
 function baoTinTaiBang(message, type = 'success') {
   localMessage.value = message
@@ -282,6 +327,7 @@ function formatDateTime(value) {
 function cellClass(column) {
   const key = String(column?.key || '').toLowerCase()
   const label = String(column?.label || '').toLowerCase()
+
   return {
     'content-cell': key.includes('noidung') || key.includes('noi_dung') || label.includes('nội dung')
   }
@@ -291,6 +337,7 @@ function displayValue(item, column) {
   if (column.formatter) return column.formatter(item)
 
   const value = item[column.key]
+
   if (value === true) return 'Có'
   if (value === false) return 'Không'
   if (value === null || value === undefined || value === '') return '-'
@@ -550,6 +597,7 @@ function chuanHoaSo(value, field) {
 
 function preparePayload() {
   if (!validateForm()) return null
+
   const allowedKeys = new Set([
     ...Object.keys(props.defaultForm || {}),
     ...Object.keys(props.parentValues || {}),
@@ -607,11 +655,11 @@ function isSaved(item) {
 }
 
 function layTrangThaiDong(item) {
-  if (isSaved(item)) return { label: '✓ Đã lưu', className: 'da-luu' }
+  if (isSaved(item)) return { label: props.statusSavedLabel, className: 'da-luu' }
   if (isSelected(item)) return { label: '● Đang chọn', className: 'dang-chon' }
-  if (props.canToggleSave) return { label: '+ Chưa lưu', className: 'chua-luu' }
+  if (props.canToggleSave) return { label: props.statusUnsavedLabel, className: 'chua-luu' }
   if (props.canSelect) return { label: '+ Chưa chọn', className: 'co-the-chon' }
-  if (props.canShowSavedStatus) return { label: '+ Chưa lưu', className: 'chua-luu' }
+  if (props.canShowSavedStatus) return { label: props.statusUnsavedLabel, className: 'chua-luu' }
   return { label: 'Trạng thái', className: 'co-the-chon' }
 }
 
@@ -654,6 +702,17 @@ function toggleSaveItem(item) {
   emit('toggle-save', item)
 }
 
+function clickDong(item) {
+  if (props.disabled || props.readOnly) return
+
+  if (props.canToggleSave) {
+    toggleSaveItem(item)
+    return
+  }
+
+  if (props.canSelect) selectItem(item)
+}
+
 function layDuLieuLuuTuResponse(response) {
   if (!response) return null
 
@@ -673,7 +732,7 @@ function layDuLieuLuuTuResponse(response) {
 }
 
 async function saveForm() {
-  if (props.disabled) return
+  if (props.disabled || props.readOnly) return
 
   saving.value = true
 
@@ -705,6 +764,8 @@ async function saveForm() {
 }
 
 function editItem(item) {
+  if (props.readOnly) return
+
   editingId.value = item.id
   syncForm({
     ...props.defaultForm,
@@ -714,6 +775,7 @@ function editItem(item) {
 }
 
 async function deleteItem(item) {
+  if (props.readOnly) return
   if (!item?.id) return
   if (!confirm('Xóa dòng dữ liệu này?')) return
 
@@ -760,7 +822,6 @@ async function deleteItem(item) {
   background: #f8fafc;
 }
 
-
 .bang-them-nghiep-vu.bang-goc-mau {
   background: #f5f3ff;
   border-color: #c4b5fd;
@@ -803,7 +864,6 @@ async function deleteItem(item) {
   font-size: 11px;
 }
 
-
 .bang-head-actions {
   display: flex;
   align-items: center;
@@ -830,6 +890,7 @@ async function deleteItem(item) {
   border: 1px solid #bfdbfe;
   background: #eff6ff;
   color: #1d4ed8;
+  white-space: pre-line;
 }
 
 .disabled-text {
@@ -845,7 +906,19 @@ async function deleteItem(item) {
   padding: 10px;
   border-bottom: 1px solid #e5e7eb;
 }
+.readonly-info-form {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 10px 10px 0;
+}
 
+.readonly-info-field input {
+  background: #f3f4f6;
+  color: #374151;
+  cursor: not-allowed;
+  font-weight: 600;
+}
 .field {
   display: flex;
   flex-direction: column;
@@ -953,6 +1026,14 @@ async function deleteItem(item) {
   font-size: 11px;
 }
 
+tr.clickable {
+  cursor: pointer;
+}
+
+tr.clickable:hover {
+  background: #eef2ff;
+}
+
 .table-message {
   margin: 8px 10px 0;
   padding: 7px 9px;
@@ -987,6 +1068,7 @@ async function deleteItem(item) {
   overflow: auto;
   padding-top: 6px;
 }
+
 .bang-them-nghiep-vu.bang-phu .table-wrap {
   max-height: 340px;
 }
@@ -1064,10 +1146,6 @@ tr.selected td:first-child {
   font-size: 11px;
 }
 
-.save-status b {
-  color: #047857;
-}
-
 .btn.save-link-btn.saved {
   border-color: #16a34a;
   background: #dcfce7;
@@ -1099,7 +1177,7 @@ tr.selected td:first-child {
 }
 
 .col-action-wide {
-  width: 190px;
+  width: 280px;
 }
 
 .action-pair {
@@ -1107,7 +1185,6 @@ tr.selected td:first-child {
   align-items: center;
   gap: 4px;
 }
-
 
 .status-action-cell {
   flex-wrap: wrap;
@@ -1177,6 +1254,13 @@ tr.selected td:first-child {
   background: #f3f4f6;
 }
 
+.content-cell {
+  min-width: 420px;
+  max-width: 640px;
+  white-space: normal;
+  line-height: 1.45;
+}
+
 @media (max-width: 1100px) {
   .bang-form {
     grid-template-columns: repeat(3, minmax(120px, 1fr));
@@ -1196,12 +1280,4 @@ tr.selected td:first-child {
     grid-column: auto;
   }
 }
-
-.content-cell {
-  min-width: 420px;
-  max-width: 640px;
-  white-space: normal;
-  line-height: 1.45;
-}
-
 </style>

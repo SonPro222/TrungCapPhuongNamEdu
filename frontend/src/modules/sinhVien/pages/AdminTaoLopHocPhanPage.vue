@@ -66,35 +66,43 @@
           <span>{{ monTrongKy.length }} môn</span>
         </div>
 
-        <table>
-          <thead>
-          <tr>
-            <th>Thứ tự</th>
-            <th>Mã môn CT</th>
-            <th>Tín chỉ</th>
-            <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr
-              v-for="mon in monTrongKy"
-              :key="mon.id"
-              class="clickable-row"
-              :class="{ selected: monDangChon?.id === mon.id }"
-              @click="chonMon(mon)"
-          >
-            <td>{{ mon.thuTu }}</td>
-            <td>{{ mon.maMonTrongCt }}</td>
-            <td>{{ mon.soTinChi }}</td>
-            <td>
-              <button type="button" @click.stop="chonMon(mon)">Chọn</button>
-            </td>
-          </tr>
-          <tr v-if="!monTrongKy.length">
-            <td colspan="4" class="empty">Chưa có môn trong kỳ đã chọn</td>
-          </tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table>
+            <thead>
+            <tr>
+              <th>Thứ tự</th>
+              <th>ID CT môn</th>
+              <th>Mã môn CT</th>
+              <th>Môn học ID</th>
+              <th>Tên môn</th>
+              <th>Tín chỉ</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr
+                v-for="mon in monTrongKy"
+                :key="mon.id"
+                class="clickable-row"
+                :class="{ selected: monDangChon?.id === mon.id }"
+                @click="chonMon(mon)"
+            >
+              <td>{{ mon.thuTu }}</td>
+              <td>{{ mon.id }}</td>
+              <td>{{ mon.maMonTrongCt }}</td>
+              <td>{{ layMonHocId(mon) || '-' }}</td>
+              <td>{{ tenMonHoc(mon) }}</td>
+              <td>{{ mon.soTinChi }}</td>
+              <td>
+                <button type="button" @click.stop="chonMon(mon)">Chọn</button>
+              </td>
+            </tr>
+            <tr v-if="!monTrongKy.length">
+              <td colspan="7" class="empty">Chưa có môn trong kỳ đã chọn</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="panel">
@@ -111,49 +119,76 @@
           <span>{{ lopHocPhanTheoMon.length }}/1 lớp</span>
         </div>
 
-        <table>
-          <thead>
-          <tr>
-            <th>Mã lớp</th>
-            <th>Tên lớp</th>
-            <th>Loại lớp</th>
-            <th>Sĩ số</th>
-            <th>Trạng thái</th>
-            <th>Thao tác</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="lop in lopHocPhanTheoMon" :key="lop.id">
-            <td>{{ lop.maLop }}</td>
-            <td>{{ lop.tenLop }}</td>
-            <td>{{ lop.loaiLopHocPhan || 'CHUYEN_NGANH' }}</td>
-            <td>{{ lop.soLuongHienTai || 0 }}/{{ lop.soLuongToiDa || '-' }}</td>
-            <td>{{ lop.trangThai }}</td>
-            <td>
-              <div class="row-actions">
-                <button type="button" class="secondary" @click="chonSuaLopHocPhan(lop)">
-                  Sửa
-                </button>
-                <button type="button" class="danger" @click="xoaLopHocPhan(lop)">
-                  Xóa
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="!monDangChon">
-            <td colspan="6" class="empty">Chọn môn để xem lớp học phần.</td>
-          </tr>
-          <tr v-else-if="!lopHocPhanTheoMon.length">
-            <td colspan="6" class="empty">Môn này chưa có lớp học phần.</td>
-          </tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="bang-lop-hoc-phan">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>CT môn ID</th>
+              <th>Môn học ID</th>
+              <th>Mã lớp</th>
+              <th>Tên lớp</th>
+              <th>Loại lớp</th>
+              <th>Sĩ số tối thiểu</th>
+              <th>Sĩ số hiện tại</th>
+              <th>Sĩ số tối đa</th>
+              <th>Số buổi học</th>
+              <th>Ngày bắt đầu</th>
+              <th>Ngày kết thúc</th>
+              <th>Trạng thái</th>
+              <th>Ngày tạo</th>
+              <th>Ngày sửa</th>
+              <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="lop in lopHocPhanTheoMon" :key="lop.id">
+              <td>{{ lop.id }}</td>
+              <td>{{ lop.chuongTrinhMonId || '-' }}</td>
+              <td>{{ lop.monHocId || '-' }}</td>
+              <td>{{ lop.maLop }}</td>
+              <td>{{ lop.tenLop }}</td>
+              <td>{{ hienThiLoaiLop(lop.loaiLopHocPhan) }}</td>
+              <td>{{ lop.siSoToiThieu ?? '-' }}</td>
+              <td>{{ lop.soLuongHienTai ?? 0 }}</td>
+              <td>{{ lop.soLuongToiDa ?? '-' }}</td>
+              <td>{{ lop.soBuoiHoc ?? '-' }}</td>
+              <td>{{ lop.ngayBatDau || '-' }}</td>
+              <td>{{ lop.ngayKetThuc || '-' }}</td>
+              <td>{{ hienThiTrangThai(lop.trangThai) }}</td>
+              <td>{{ lop.createdAt || lop.created_at || '-' }}</td>
+              <td>{{ lop.updatedAt || lop.updated_at || '-' }}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" class="secondary" @click="chonSuaLopHocPhan(lop)">
+                    Sửa
+                  </button>
+                  <button type="button" class="danger" @click="xoaLopHocPhan(lop)">
+                    Xóa
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="!monDangChon">
+              <td colspan="16" class="empty">Chọn môn để xem lớp học phần.</td>
+            </tr>
+            <tr v-else-if="!lopHocPhanTheoMon.length">
+              <td colspan="16" class="empty">Môn này chưa có lớp học phần.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
     <section class="panel" v-if="monDangChon && (!daCoLopHocPhanChoMon || idLopHocPhanDangSua)">
       <div class="panel-title">
-        <h2>{{ idLopHocPhanDangSua ? 'Cập nhật lớp học phần' : 'Tạo lớp học phần cho môn đang chọn' }}</h2>
+        <div>
+          <h2>{{ idLopHocPhanDangSua ? 'Cập nhật lớp học phần' : 'Tạo lớp học phần cho môn đang chọn' }}</h2>
+          <p class="panel-subtitle">
+            CT môn ID: {{ monDangChon.id }} / Môn học ID: {{ layMonHocId(monDangChon) || '-' }}
+          </p>
+        </div>
         <span>{{ monDangChon.maMonTrongCt }}</span>
       </div>
 
@@ -184,6 +219,11 @@
         <label>
           Sĩ số tối đa
           <input v-model.number="form.soLuongToiDa" type="number" min="1" />
+        </label>
+
+        <label>
+          Số buổi học
+          <input v-model.number="form.soBuoiHoc" type="number" min="1" />
         </label>
 
         <label>
@@ -218,6 +258,7 @@
         </div>
       </form>
     </section>
+
     <section class="panel" v-else-if="monDangChon && daCoLopHocPhanChoMon">
       <div class="empty">
         Môn này đã có lớp học phần. Một môn chỉ được tạo một lớp học phần.
@@ -261,6 +302,7 @@ const form = reactive({
   tenLop: '',
   siSoToiThieu: 1,
   soLuongToiDa: 40,
+  soBuoiHoc: 1,
   ngayBatDau: '',
   ngayKetThuc: '',
   trangThai: 'dang_mo'
@@ -309,9 +351,11 @@ const lopHocPhanTheoMon = computed(() => {
     return String(lop.chuongTrinhMonId) === String(monDangChon.value.id)
   })
 })
+
 const daCoLopHocPhanChoMon = computed(() => {
   return lopHocPhanTheoMon.value.length > 0
 })
+
 onMounted(async () => {
   await taiDuLieuBanDau()
 })
@@ -378,10 +422,12 @@ async function taoLopHocPhan() {
     baoLoi('Phải chọn môn trong chương trình trước khi tạo lớp học phần')
     return
   }
+
   if (!idLopHocPhanDangSua.value && daCoLopHocPhanChoMon.value) {
     baoLoi('Môn này đã có lớp học phần, không được tạo thêm lớp mới')
     return
   }
+
   if (!form.maLop || !form.tenLop) {
     baoLoi('Phải nhập mã lớp và tên lớp học phần')
     return
@@ -399,6 +445,11 @@ async function taoLopHocPhan() {
 
   if (Number(form.soLuongToiDa) < Number(form.siSoToiThieu)) {
     baoLoi('Sĩ số tối đa phải lớn hơn hoặc bằng sĩ số tối thiểu')
+    return
+  }
+
+  if (Number(form.soBuoiHoc) < 1) {
+    baoLoi('Số buổi học phải lớn hơn 0')
     return
   }
 
@@ -420,11 +471,13 @@ async function taoLopHocPhan() {
       tenLop: form.tenLop,
       siSoToiThieu: Number(form.siSoToiThieu),
       soLuongToiDa: Number(form.soLuongToiDa),
-      soLuongHienTai: 0,
+      soLuongHienTai: idLopHocPhanDangSua.value ? undefined : 0,
+      soBuoiHoc: Number(form.soBuoiHoc),
       ngayBatDau: form.ngayBatDau,
       ngayKetThuc: form.ngayKetThuc,
       trangThai: form.trangThai
     })
+
     if (idLopHocPhanDangSua.value) {
       const response = await sinhVienApi.lopHocPhan.update(idLopHocPhanDangSua.value, payload)
       const lopCapNhat = layMotBanGhi(response)
@@ -442,6 +495,7 @@ async function taoLopHocPhan() {
       baoThanhCong('Đã cập nhật lớp học phần')
       return
     }
+
     const lopMoiResponse = await sinhVienApi.lopHocPhan.create(payload)
     const lopMoi = layMotBanGhi(lopMoiResponse)
 
@@ -478,6 +532,7 @@ async function taoLopHocPhan() {
     dangLuu.value = false
   }
 }
+
 function chonSuaLopHocPhan(lop) {
   idLopHocPhanDangSua.value = lop.id
   form.loaiLopHocPhan = lop.loaiLopHocPhan || 'CHUYEN_NGANH'
@@ -485,6 +540,7 @@ function chonSuaLopHocPhan(lop) {
   form.tenLop = lop.tenLop || ''
   form.siSoToiThieu = Number(lop.siSoToiThieu || 1)
   form.soLuongToiDa = Number(lop.soLuongToiDa || 40)
+  form.soBuoiHoc = Number(lop.soBuoiHoc || 1)
   form.ngayBatDau = lop.ngayBatDau || ''
   form.ngayKetThuc = lop.ngayKetThuc || ''
   form.trangThai = lop.trangThai || 'dang_mo'
@@ -510,6 +566,7 @@ async function xoaLopHocPhan(lop) {
     baoLoi(error?.message || 'Không xóa được lớp học phần')
   }
 }
+
 function resetForm() {
   idLopHocPhanDangSua.value = null
   form.loaiLopHocPhan = 'CHUYEN_NGANH'
@@ -517,10 +574,12 @@ function resetForm() {
   form.tenLop = ''
   form.siSoToiThieu = 1
   form.soLuongToiDa = 40
+  form.soBuoiHoc = 1
   form.ngayBatDau = ''
   form.ngayKetThuc = ''
   form.trangThai = 'dang_mo'
 }
+
 function laLopHocChung(lop) {
   return String(lop?.loaiLopHocPhan || '').toUpperCase() === 'HOC_CHUNG'
 }
@@ -539,6 +598,27 @@ function tenMonHoc(mon) {
       || mon?.monHoc?.tenMon
       || mon?.maMonTrongCt
       || 'Môn học'
+}
+
+function hienThiLoaiLop(value) {
+  const map = {
+    CHUYEN_NGANH: 'Chuyên ngành',
+    HOC_CHUNG: 'Học chung'
+  }
+
+  return map[value] || value || '-'
+}
+
+function hienThiTrangThai(value) {
+  const map = {
+    du_kien: 'Dự kiến',
+    dang_mo: 'Đang mở',
+    dang_hoc: 'Đang học',
+    da_ket_thuc: 'Đã kết thúc',
+    huy: 'Hủy'
+  }
+
+  return map[value] || value || '-'
 }
 
 function layDanhSach(response) {
@@ -571,6 +651,7 @@ function baoLoi(message) {
   thongBaoLoai.value = 'error'
 }
 </script>
+
 <style scoped>
 .sv-lhp-page {
   display: grid;
@@ -618,6 +699,13 @@ function baoLoi(message) {
   font-weight: 700;
 }
 
+.panel-subtitle {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .filter-grid,
 .form-grid {
   display: grid;
@@ -627,7 +715,7 @@ function baoLoi(message) {
 
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(420px, 0.9fr) minmax(0, 1.4fr);
   gap: 18px;
 }
 
@@ -658,9 +746,20 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
+.table-wrap {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.bang-lop-hoc-phan {
+  min-width: 1600px;
 }
 
 th,
@@ -669,6 +768,7 @@ td {
   padding: 10px;
   text-align: left;
   vertical-align: top;
+  white-space: nowrap;
 }
 
 th {
@@ -695,6 +795,11 @@ button {
 button.secondary {
   background: #e2e8f0;
   color: #334155;
+}
+
+button.danger {
+  background: #dc2626;
+  color: #ffffff;
 }
 
 button:disabled {
@@ -732,6 +837,20 @@ button:disabled {
   border: 1px solid #fecaca;
 }
 
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover td {
+  background: #f8fafc;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 1100px) {
   .filter-grid,
   .form-grid,
@@ -742,29 +861,5 @@ button:disabled {
   .span-4 {
     grid-column: span 1;
   }
-}
-
-.panel-subtitle {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
-}
-.clickable-row {
-  cursor: pointer;
-}
-
-.clickable-row:hover td {
-  background: #f8fafc;
-}
-.row-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-button.danger {
-  background: #dc2626;
-  color: #ffffff;
 }
 </style>

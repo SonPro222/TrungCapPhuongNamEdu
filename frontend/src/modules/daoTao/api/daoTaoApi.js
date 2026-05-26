@@ -16,6 +16,10 @@ function createCrudApi(path) {
             return apiClient.post(`${BASE_URL}/${path}`, payload)
         },
 
+        luu(payload) {
+            return apiClient.post(`${BASE_URL}/${path}/luu`, payload)
+        },
+
         update(id, payload) {
             return apiClient.put(`${BASE_URL}/${path}/${id}`, payload)
         },
@@ -30,6 +34,8 @@ export const daoTaoApi = {
     nganh: createCrudApi('nganh'),
     trinhDoDaoTao: createCrudApi('trinh-do-dao-tao'),
     loaiChuongTrinh: createCrudApi('loai-chuong-trinh'),
+    nganhTrinhDoDaoTao: createCrudApi('nganh-trinh-do-dao-tao'),
+    nganhLoaiChuongTrinh: createCrudApi('nganh-loai-chuong-trinh'),
     khungKy: createCrudApi('khung-ky'),
     khungKyGoc: createCrudApi('khung-ky-goc')
 }

@@ -2,10 +2,26 @@
   <section class="giang-day-layout">
     <PageHeader
         title="Quản lý giảng dạy"
-        description="Quản lý giáo viên, phòng học, ca học, lớp học phần, phân công, lịch học và điểm danh."
+        description="Đào tạo quản lý lớp học phần, lịch học, phân công và xem tổng hợp sinh viên, điểm, điểm danh theo từng lớp."
     />
 
     <nav class="giang-day-menu">
+      <RouterLink :to="{ name: 'GiangDay.QuanLy' }">
+        Quản lý giảng dạy
+      </RouterLink>
+
+      <RouterLink :to="{ name: 'GiangDay.LopHocPhan' }">
+        Lớp học phần
+      </RouterLink>
+
+      <RouterLink :to="{ name: 'GiangDay.PhanCong' }">
+        Phân công giảng dạy
+      </RouterLink>
+
+      <RouterLink :to="{ name: 'GiangDay.LichHoc' }">
+        Lịch học
+      </RouterLink>
+
       <RouterLink :to="{ name: 'GiangDay.GiaoVien' }">
         Giáo viên
       </RouterLink>
@@ -16,25 +32,6 @@
 
       <RouterLink :to="{ name: 'GiangDay.CaHoc' }">
         Ca học
-      </RouterLink>
-
-      <RouterLink :to="{ name: 'GiangDay.LopHocPhan' }">
-        Lớp học phần
-      </RouterLink>
-
-      <RouterLink :to="{ name: 'GiangDay.PhanCong' }">
-        Phân công
-      </RouterLink>
-
-      <RouterLink :to="{ name: 'GiangDay.LichHoc' }">
-        Lịch học
-      </RouterLink>
-
-      <RouterLink :to="{ name: 'GiangDay.DiemDanh' }">
-        Điểm danh
-      </RouterLink>
-      <RouterLink :to="{ name: 'GiangDay.QuanLy' }">
-        Quản lý giảng dạy
       </RouterLink>
     </nav>
 

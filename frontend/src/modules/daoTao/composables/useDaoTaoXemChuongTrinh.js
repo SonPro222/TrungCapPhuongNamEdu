@@ -1,64 +1,64 @@
-import { computed, onMounted, reactive, ref } from 'vue'
-import { daoTaoXemChuongTrinhService } from '../services/daoTaoXemChuongTrinhService'
-import { layThongBaoLoi } from '../utils/layThongBaoLoi'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {daoTaoXemChuongTrinhService} from '../services/daoTaoXemChuongTrinhService'
+import {layThongBaoLoi} from '../utils/layThongBaoLoi'
 
 export const luaChonEnum = {
     loaiMucTieu: [
-        { id: 'chung', ten: 'Chung' },
-        { id: 'kien_thuc', ten: 'Kiến thức' },
-        { id: 'ky_nang', ten: 'Kỹ năng' },
-        { id: 'nang_luc_tu_chu_trach_nhiem', ten: 'Năng lực tự chủ trách nhiệm' }
+        {id: 'chung', ten: 'Chung'},
+        {id: 'kien_thuc', ten: 'Kiến thức'},
+        {id: 'ky_nang', ten: 'Kỹ năng'},
+        {id: 'nang_luc_tu_chu_trach_nhiem', ten: 'Năng lực tự chủ trách nhiệm'}
     ],
 
     loaiNangLuc: [
-        { id: 'co_ban', ten: 'Cơ bản' },
-        { id: 'cot_loi', ten: 'Cốt lõi' },
-        { id: 'nang_cao', ten: 'Nâng cao' }
+        {id: 'co_ban', ten: 'Cơ bản'},
+        {id: 'cot_loi', ten: 'Cốt lõi'},
+        {id: 'nang_cao', ten: 'Nâng cao'}
     ],
     loaiNhom: [
-        { id: 'chung', ten: 'Chung' },
-        { id: 'co_so', ten: 'Cơ sở' },
-        { id: 'chuyen_mon', ten: 'Chuyên môn' },
-        { id: 'tu_chon', ten: 'Tự chọn' }
+        {id: 'chung', ten: 'Chung'},
+        {id: 'co_so', ten: 'Cơ sở'},
+        {id: 'chuyen_mon', ten: 'Chuyên môn'},
+        {id: 'tu_chon', ten: 'Tự chọn'}
     ],
     loaiMon: [
-        { id: 'bat_buoc', ten: 'Bắt buộc' },
-        { id: 'tu_chon', ten: 'Tự chọn' }
+        {id: 'bat_buoc', ten: 'Bắt buộc'},
+        {id: 'tu_chon', ten: 'Tự chọn'}
     ],
     loaiHocPhan: [
-        { id: 'mon_hoc', ten: 'Môn học' },
-        { id: 'mo_dun', ten: 'Mô đun' }
+        {id: 'mon_hoc', ten: 'Môn học'},
+        {id: 'mo_dun', ten: 'Mô đun'}
     ],
     loaiPhamViMon: [
-        { id: 'mon_chuyen_nganh', ten: 'Môn chuyên ngành' },
-        { id: 'mon_chung', ten: 'Môn học chung' }
+        {id: 'mon_chuyen_nganh', ten: 'Môn chuyên ngành'},
+        {id: 'mon_chung', ten: 'Môn học chung'}
     ],
     loaiDieuKien: [
-        { id: 'tien_quyet', ten: 'Tiên quyết' },
-        { id: 'song_hanh', ten: 'Song hành' },
-        { id: 'hoc_truoc', ten: 'Học trước' }
+        {id: 'tien_quyet', ten: 'Tiên quyết'},
+        {id: 'song_hanh', ten: 'Song hành'},
+        {id: 'hoc_truoc', ten: 'Học trước'}
     ],
     loaiDieuKienMonHoc: [
-        { id: 'phong_hoc', ten: 'Phòng học' },
-        { id: 'thiet_bi', ten: 'Thiết bị' },
-        { id: 'hoc_lieu', ten: 'Học liệu' },
-        { id: 'dung_cu', ten: 'Dụng cụ' },
-        { id: 'nguyen_vat_lieu', ten: 'Nguyên vật liệu' },
-        { id: 'khac', ten: 'Khác' }
+        {id: 'phong_hoc', ten: 'Phòng học'},
+        {id: 'thiet_bi', ten: 'Thiết bị'},
+        {id: 'hoc_lieu', ten: 'Học liệu'},
+        {id: 'dung_cu', ten: 'Dụng cụ'},
+        {id: 'nguyen_vat_lieu', ten: 'Nguyên vật liệu'},
+        {id: 'khac', ten: 'Khác'}
     ],
     ketQua: [
-        { id: 'dat', ten: 'Đạt' },
-        { id: 'khong_dat', ten: 'Không đạt' }
+        {id: 'dat', ten: 'Đạt'},
+        {id: 'khong_dat', ten: 'Không đạt'}
     ],
     loaiTaiLieu: [
-        { id: 'GIAO_TRINH', ten: 'Giáo trình' },
-        { id: 'TAI_LIEU_THAM_KHAO', ten: 'Tài liệu tham khảo' },
-        { id: 'BAI_GIANG', ten: 'Bài giảng' },
-        { id: 'KHAC', ten: 'Khác' }
+        {id: 'GIAO_TRINH', ten: 'Giáo trình'},
+        {id: 'TAI_LIEU_THAM_KHAO', ten: 'Tài liệu tham khảo'},
+        {id: 'BAI_GIANG', ten: 'Bài giảng'},
+        {id: 'KHAC', ten: 'Khác'}
     ],
     donViDiem: [
-        { id: 'thang_10', ten: 'Thang 10' },
-        { id: 'phan_tram', ten: 'Phần trăm' }
+        {id: 'thang_10', ten: 'Thang 10'},
+        {id: 'phan_tram', ten: 'Phần trăm'}
     ]
 }
 
@@ -67,6 +67,8 @@ const bangLayDuLieuCoSan = [
     'nganh',
     'trinhDoDaoTao',
     'loaiChuongTrinh',
+    'nganhTrinhDoDaoTao',
+    'nganhLoaiChuongTrinh',
     'chuongTrinh',
     'chuongTrinhVersion',
     'khungKy',
@@ -125,7 +127,7 @@ function taoBanDo(list = []) {
 }
 
 function layTen(map, id, keys = ['ten', 'tenMon', 'tenNganh', 'tenChuongTrinh', 'tenVersion']) {
-    const item = map.get(id)
+    const item = map.get(id) || map.get(String(id))
     if (!item) return id || '-'
 
     for (const key of keys) {
@@ -135,10 +137,37 @@ function layTen(map, id, keys = ['ten', 'tenMon', 'tenNganh', 'tenChuongTrinh', 
     return item.ma || item.id || '-'
 }
 
+function layGiaTriTheoKhoa(item, keys = [], fallback = null) {
+    if (!item) return fallback
+
+    for (const key of keys) {
+        if (!key) continue
+        const value = item[key]
+        if (value !== null && value !== undefined && value !== '') return value
+    }
+
+    return fallback
+}
+
+function layDoiTuongLienKet(row, map, idKeys = [], objectKeys = []) {
+    for (const key of objectKeys) {
+        const value = row?.[key]
+        if (value && typeof value === 'object') return value
+    }
+
+    const id = layGiaTriTheoKhoa(row, idKeys, null)
+    if (id !== null && id !== undefined) {
+        return map.get(id) || map.get(String(id)) || {}
+    }
+
+    return {}
+}
+
 function themTenLienKet(duLieu) {
     const nganhMap = taoBanDo(duLieu.nganh)
     const trinhDoMap = taoBanDo(duLieu.trinhDoDaoTao)
     const loaiCtMap = taoBanDo(duLieu.loaiChuongTrinh)
+    const nganhLoaiCtMap = taoBanDo(duLieu.nganhLoaiChuongTrinh)
     const chuongTrinhMap = taoBanDo(duLieu.chuongTrinh)
     const versionMap = taoBanDo(duLieu.chuongTrinhVersion)
     const monHocMap = taoBanDo(duLieu.monHoc)
@@ -162,13 +191,37 @@ function themTenLienKet(duLieu) {
 
     return {
         ...duLieu,
-        chuongTrinh: duLieu.chuongTrinh.map((item) => ({
+        nganhTrinhDoDaoTao: duLieu.nganhTrinhDoDaoTao.map((item) => ({
             ...item,
             tenNganh: layTen(nganhMap, item.nganhId, ['tenNganh']),
-            tenTrinhDo: layTen(trinhDoMap, item.trinhDoId, ['tenTrinhDo']),
-            tenLoaiChuongTrinh: layTen(loaiCtMap, item.loaiChuongTrinhId, ['tenLoai']),
-            tenKhungKyGoc: layTen(khungKyGocMap, item.khungKyGocId, ['maKy', 'tenKy'])
+            maTrinhDo: layTen(trinhDoMap, item.trinhDoId, ['maTrinhDo', 'ma']),
+            tenTrinhDo: layTen(trinhDoMap, item.trinhDoId, ['tenTrinhDo', 'ten']),
+            moTaTrinhDo: layTen(trinhDoMap, item.trinhDoId, ['moTa'])
         })),
+        nganhLoaiChuongTrinh: duLieu.nganhLoaiChuongTrinh.map((item) => ({
+            ...item,
+            tenNganh: layTen(nganhMap, item.nganhId, ['tenNganh']),
+            maLoai: layTen(loaiCtMap, item.loaiChuongTrinhId, ['maLoai', 'ma']),
+            tenLoaiChuongTrinh: layTen(loaiCtMap, item.loaiChuongTrinhId, ['tenLoai', 'ten']),
+            soThang: layTen(loaiCtMap, item.loaiChuongTrinhId, ['soThang']),
+            soKy: layTen(loaiCtMap, item.loaiChuongTrinhId, ['soKy']),
+            moTaLoai: layTen(loaiCtMap, item.loaiChuongTrinhId, ['moTa'])
+        })),
+        chuongTrinh: duLieu.chuongTrinh.map((item) => {
+            const nganhLoai = nganhLoaiCtMap.get(item.nganhLoaiChuongTrinhId) || nganhLoaiCtMap.get(String(item.nganhLoaiChuongTrinhId)) || {}
+            const nganhId = item.nganhId || nganhLoai.nganhId
+            const loaiChuongTrinhId = item.loaiChuongTrinhId || nganhLoai.loaiChuongTrinhId
+
+            return {
+                ...item,
+                nganhId,
+                loaiChuongTrinhId,
+                tenNganh: layTen(nganhMap, nganhId, ['tenNganh']),
+                tenTrinhDo: layTen(trinhDoMap, item.trinhDoId, ['tenTrinhDo']),
+                tenLoaiChuongTrinh: layTen(loaiCtMap, loaiChuongTrinhId, ['tenLoai']),
+                tenKhungKyGoc: layTen(khungKyGocMap, item.khungKyGocId, ['maKy', 'tenKy'])
+            }
+        }),
         chuongTrinhVersion: duLieu.chuongTrinhVersion.map((item) => ({
             ...item,
             tenChuongTrinh: layTen(chuongTrinhMap, item.chuongTrinhId, ['tenChuongTrinh'])
@@ -179,20 +232,60 @@ function themTenLienKet(duLieu) {
             tenLoaiChuongTrinh: layTen(loaiCtMap, item.loaiChuongTrinhId, ['tenLoai']),
             tenKhungKyGoc: layTen(khungKyGocMap, item.khungKyGocId, ['maKy', 'tenKy'])
         })),
-        mucTieuChuongTrinh: duLieu.mucTieuChuongTrinh.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']) })),
-        nangLucDauRa: duLieu.nangLucDauRa.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']) })),
-        viTriViecLam: duLieu.viTriViecLam.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']) })),
-        dieuKienTotNghiep: duLieu.dieuKienTotNghiep.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']) })),
-        chuongTrinhVersionMucTieu: duLieu.chuongTrinhVersionMucTieu.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']), tenMucTieuGoc: layTen(mucTieuGocMap, item.mucTieuGocId, ['ma', 'noiDung']) })),
-        chuongTrinhVersionNangLuc: duLieu.chuongTrinhVersionNangLuc.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']), tenNangLucGoc: layTen(nangLucGocMap, item.nangLucGocId, ['ma', 'noiDung']) })),
-        chuongTrinhVersionViTriViecLam: duLieu.chuongTrinhVersionViTriViecLam.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']), tenViTriGoc: layTen(viTriGocMap, item.viTriGocId, ['ma', 'ten']) })),
-        chuongTrinhVersionDieuKienTotNghiep: duLieu.chuongTrinhVersionDieuKienTotNghiep.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']), tenDieuKienGoc: layTen(dieuKienTotNghiepGocMap, item.dieuKienGocId, ['ma', 'noiDung']) })),
-        syllabusChuongTrinhGoc: duLieu.syllabusChuongTrinhGoc.map((item) => ({ ...item })),
-        syllabusChuongTrinh: duLieu.syllabusChuongTrinh.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']), tenSyllabusChuongTrinhGoc: layTen(syllabusChuongTrinhGocMap, item.syllabusChuongTrinhGocId, ['ma', 'ten']) })),
-        nhomKienThucGoc: duLieu.nhomKienThucGoc.map((item) => ({ ...item })),
-        nhomKienThuc: duLieu.nhomKienThuc.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']), tenNhomKienThucGoc: layTen(nhomKienThucGocMap, item.nhomKienThucGocId, ['ma', 'ten']) })),
-        nhomTuChonGoc: duLieu.nhomTuChonGoc.map((item) => ({ ...item })),
-        nhomTuChon: duLieu.nhomTuChon.map((item) => ({ ...item, tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']), tenNhomTuChonGoc: layTen(nhomTuChonGocMap, item.nhomTuChonGocId, ['ma', 'ten']) })),
+        mucTieuChuongTrinh: duLieu.mucTieuChuongTrinh.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion'])
+        })),
+        nangLucDauRa: duLieu.nangLucDauRa.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion'])
+        })),
+        viTriViecLam: duLieu.viTriViecLam.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion'])
+        })),
+        dieuKienTotNghiep: duLieu.dieuKienTotNghiep.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion'])
+        })),
+        chuongTrinhVersionMucTieu: duLieu.chuongTrinhVersionMucTieu.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
+            tenMucTieuGoc: layTen(mucTieuGocMap, item.mucTieuGocId, ['ma', 'noiDung'])
+        })),
+        chuongTrinhVersionNangLuc: duLieu.chuongTrinhVersionNangLuc.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
+            tenNangLucGoc: layTen(nangLucGocMap, item.nangLucGocId, ['ma', 'noiDung'])
+        })),
+        chuongTrinhVersionViTriViecLam: duLieu.chuongTrinhVersionViTriViecLam.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
+            tenViTriGoc: layTen(viTriGocMap, item.viTriGocId, ['ma', 'ten'])
+        })),
+        chuongTrinhVersionDieuKienTotNghiep: duLieu.chuongTrinhVersionDieuKienTotNghiep.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
+            tenDieuKienGoc: layTen(dieuKienTotNghiepGocMap, item.dieuKienGocId, ['ma', 'noiDung'])
+        })),
+        syllabusChuongTrinhGoc: duLieu.syllabusChuongTrinhGoc.map((item) => ({...item})),
+        syllabusChuongTrinh: duLieu.syllabusChuongTrinh.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
+            tenSyllabusChuongTrinhGoc: layTen(syllabusChuongTrinhGocMap, item.syllabusChuongTrinhGocId, ['ma', 'ten'])
+        })),
+        nhomKienThucGoc: duLieu.nhomKienThucGoc.map((item) => ({...item})),
+        nhomKienThuc: duLieu.nhomKienThuc.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
+            tenNhomKienThucGoc: layTen(nhomKienThucGocMap, item.nhomKienThucGocId, ['ma', 'ten'])
+        })),
+        nhomTuChonGoc: duLieu.nhomTuChonGoc.map((item) => ({...item})),
+        nhomTuChon: duLieu.nhomTuChon.map((item) => ({
+            ...item,
+            tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
+            tenNhomTuChonGoc: layTen(nhomTuChonGocMap, item.nhomTuChonGocId, ['ma', 'ten'])
+        })),
         chuongTrinhMon: duLieu.chuongTrinhMon.map((item) => ({
             ...item,
             tenVersion: layTen(versionMap, item.chuongTrinhVersionId, ['tenVersion']),
@@ -210,33 +303,110 @@ function themTenLienKet(duLieu) {
             tenMon: layTen(chuongTrinhMonMap, item.monId, ['maMonTrongCt', 'tenMon']),
             tenMonDieuKien: layTen(chuongTrinhMonMap, item.monDieuKienId, ['maMonTrongCt', 'tenMon'])
         })),
-        quyDoiDiem: duLieu.quyDoiDiem.map((item) => ({ ...item, tenChuongTrinhMon: layTen(chuongTrinhMonMap, item.chuongTrinhMonId, ['maMonTrongCt', 'tenMon']) })),
-        quyDoiDiemMau: duLieu.quyDoiDiemMau.map((item) => ({ ...item })),
-        chuongTrinhMonQuyDoiDiemMau: duLieu.chuongTrinhMonQuyDoiDiemMau.map((item) => ({
+        quyDoiDiem: duLieu.quyDoiDiem.map((item) => ({
+            ...item,
+            tenChuongTrinhMon: layTen(chuongTrinhMonMap, item.chuongTrinhMonId, ['maMonTrongCt', 'tenMon'])
+        })),
+        quyDoiDiemMau: duLieu.quyDoiDiemMau.map((item) => ({...item})),
+        chuongTrinhMonQuyDoiDiemMau: duLieu.chuongTrinhMonQuyDoiDiemMau.map((item) => {
+            const quyDoiDiemMauId = layGiaTriTheoKhoa(item, ['quyDoiDiemMauId', 'quy_doi_diem_mau_id', 'mauId'], null)
+            const chuongTrinhMonId = layGiaTriTheoKhoa(item, ['chuongTrinhMonId', 'chuong_trinh_mon_id'], null)
+            const mau = layDoiTuongLienKet(
+                item,
+                quyDoiDiemMauMap,
+                ['quyDoiDiemMauId', 'quy_doi_diem_mau_id', 'mauId'],
+                ['quyDoiDiemMau', 'quy_doi_diem_mau', 'mau', 'quyDoiDiemMauDto', 'quyDoiDiemMauDTO']
+            )
+            const maMau = layGiaTriTheoKhoa(mau, ['ma', 'maMau', 'ma_mau'], '')
+            const tenMau = layGiaTriTheoKhoa(mau, ['ten', 'tenMau', 'ten_mau', 'tenCotDiem', 'ten_cot_diem'], maMau || '-')
+
+            return {
+                ...item,
+                quyDoiDiemMauId,
+                chuongTrinhMonId,
+                maQuyDoiDiemMau: maMau,
+                maMau,
+                tenQuyDoiDiemMau: tenMau,
+                tenMau,
+                loaiMau: layGiaTriTheoKhoa(mau, ['loaiMau', 'loai_mau', 'loai'], layGiaTriTheoKhoa(item, ['loaiMau', 'loai_mau', 'loai'], '')),
+                nguongTu: layGiaTriTheoKhoa(mau, ['nguongTu', 'nguong_tu', 'tuDiem', 'tu_diem'], layGiaTriTheoKhoa(item, ['nguongTu', 'nguong_tu', 'tuDiem', 'tu_diem'], null)),
+                nguongDen: layGiaTriTheoKhoa(mau, ['nguongDen', 'nguong_den', 'denDiem', 'den_diem'], layGiaTriTheoKhoa(item, ['nguongDen', 'nguong_den', 'denDiem', 'den_diem'], null)),
+                diemQuyDoi: layGiaTriTheoKhoa(mau, ['diemQuyDoi', 'diem_quy_doi', 'diem', 'diemKetQua', 'diem_ket_qua'], layGiaTriTheoKhoa(item, ['diemQuyDoi', 'diem_quy_doi', 'diem', 'diemKetQua', 'diem_ket_qua'], null)),
+                ketQua: layGiaTriTheoKhoa(mau, ['ketQua', 'ket_qua'], layGiaTriTheoKhoa(item, ['ketQua', 'ket_qua'], '')),
+                tyLe: layGiaTriTheoKhoa(mau, ['tyLe', 'ty_le', 'tiLe', 'ti_le'], layGiaTriTheoKhoa(item, ['tyLe', 'ty_le', 'tiLe', 'ti_le'], null)),
+                diemToiDa: layGiaTriTheoKhoa(mau, ['diemToiDa', 'diem_toi_da'], layGiaTriTheoKhoa(item, ['diemToiDa', 'diem_toi_da'], null)),
+                thuTu: layGiaTriTheoKhoa(mau, ['thuTu', 'thu_tu'], layGiaTriTheoKhoa(item, ['thuTu', 'thu_tu'], null)),
+                batBuoc: layGiaTriTheoKhoa(mau, ['batBuoc', 'bat_buoc'], layGiaTriTheoKhoa(item, ['batBuoc', 'bat_buoc'], null)),
+                congThuc: layGiaTriTheoKhoa(mau, ['congThuc', 'cong_thuc'], layGiaTriTheoKhoa(item, ['congThuc', 'cong_thuc'], '')),
+                ghiChuMau: layGiaTriTheoKhoa(mau, ['ghiChu', 'ghi_chu'], ''),
+                tenChuongTrinhMon: layTen(chuongTrinhMonMap, chuongTrinhMonId, ['maMonTrongCt', 'tenMon'])
+            }
+        }),
+        syllabusMonHoc: duLieu.syllabusMonHoc.map((item) => ({
             ...item,
             tenChuongTrinhMon: layTen(chuongTrinhMonMap, item.chuongTrinhMonId, ['maMonTrongCt', 'tenMon']),
-            tenQuyDoiDiemMau: layTen(quyDoiDiemMauMap, item.quyDoiDiemMauId, ['ten', 'ma'])
+            tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten'])
         })),
-        syllabusMonHoc: duLieu.syllabusMonHoc.map((item) => ({ ...item, tenChuongTrinhMon: layTen(chuongTrinhMonMap, item.chuongTrinhMonId, ['maMonTrongCt', 'tenMon']), tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten']) })),
-        syllabusMonHocGoc: duLieu.syllabusMonHocGoc.map((item) => ({ ...item, tenMonHoc: layTen(monHocMap, item.monHocId, ['maMon', 'tenMon']) })),
-        syllabusMonHocGocChuongBai: duLieu.syllabusMonHocGocChuongBai.map((item) => ({ ...item, tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten']) })),
-        syllabusMonHocGocDieuKien: duLieu.syllabusMonHocGocDieuKien.map((item) => ({ ...item, tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten']), tenDieuKienGoc: layTen(dieuKienMonHocGocMap, item.dieuKienGocId, ['ma', 'noiDung']) })),
-        syllabusMonHocGocTaiLieu: duLieu.syllabusMonHocGocTaiLieu.map((item) => ({ ...item, tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten']), tenTaiLieuGoc: layTen(taiLieuGocMap, item.taiLieuGocId, ['ma', 'ten']) })),
-        dieuKienMonHoc: duLieu.dieuKienMonHoc.map((item) => ({ ...item, tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, ['viTri', 'tinhChat', 'mucTieu']) })),
-        dieuKienMonHocGoc: duLieu.dieuKienMonHocGoc.map((item) => ({ ...item })),
+        syllabusMonHocGoc: duLieu.syllabusMonHocGoc.map((item) => ({
+            ...item,
+            tenMonHoc: layTen(monHocMap, item.monHocId, ['maMon', 'tenMon'])
+        })),
+        syllabusMonHocGocChuongBai: duLieu.syllabusMonHocGocChuongBai.map((item) => ({
+            ...item,
+            tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten'])
+        })),
+        syllabusMonHocGocDieuKien: duLieu.syllabusMonHocGocDieuKien.map((item) => ({
+            ...item,
+            tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten']),
+            tenDieuKienGoc: layTen(dieuKienMonHocGocMap, item.dieuKienGocId, ['ma', 'noiDung'])
+        })),
+        syllabusMonHocGocTaiLieu: duLieu.syllabusMonHocGocTaiLieu.map((item) => ({
+            ...item,
+            tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten']),
+            tenTaiLieuGoc: layTen(taiLieuGocMap, item.taiLieuGocId, ['ma', 'ten'])
+        })),
+        dieuKienMonHoc: duLieu.dieuKienMonHoc.map((item) => ({
+            ...item,
+            tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, [
+                'ten',
+                'tenSyllabusMonHocGoc',
+                'ma',
+                'maSyllabusMonHocGoc',
+                'mucTieu'
+            ])
+        })),
+        dieuKienMonHocGoc: duLieu.dieuKienMonHocGoc.map((item) => ({...item})),
         syllabusMonHocDieuKien: duLieu.syllabusMonHocDieuKien.map((item) => ({
             ...item,
             tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, ['viTri', 'tinhChat', 'mucTieu']),
             tenDieuKienGoc: layTen(dieuKienMonHocGocMap, item.dieuKienGocId, ['ma', 'noiDung'])
         })),
-        taiLieuGoc: duLieu.taiLieuGoc.map((item) => ({ ...item })),
+        taiLieuGoc: duLieu.taiLieuGoc.map((item) => ({...item})),
         syllabusMonHocTaiLieu: duLieu.syllabusMonHocTaiLieu.map((item) => ({
             ...item,
             tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, ['viTri', 'tinhChat', 'mucTieu']),
             tenTaiLieuGoc: layTen(taiLieuGocMap, item.taiLieuGocId, ['ma', 'ten'])
         })),
-        syllabusChuongBai: duLieu.syllabusChuongBai.map((item) => ({ ...item, tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, ['viTri', 'tinhChat', 'mucTieu']) })),
-        syllabusTaiLieu: duLieu.syllabusTaiLieu.map((item) => ({ ...item, tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, ['viTri', 'tinhChat', 'mucTieu']) }))
+        syllabusChuongBai: duLieu.syllabusChuongBai.map((item) => ({
+            ...item,
+            tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, [
+                'ten',
+                'tenSyllabusMonHocGoc',
+                'ma',
+                'maSyllabusMonHocGoc',
+                'mucTieu'
+            ])
+        })),
+        syllabusTaiLieu: duLieu.syllabusTaiLieu.map((item) => ({
+            ...item,
+            tenSyllabusMon: layTen(syllabusMonMap, item.syllabusMonId, [
+                'ten',
+                'tenSyllabusMonHocGoc',
+                'ma',
+                'maSyllabusMonHocGoc',
+                'mucTieu'
+            ])
+        }))
     }
 }
 
@@ -245,6 +415,8 @@ function taoDuLieuRong() {
         nganh: [],
         trinhDoDaoTao: [],
         loaiChuongTrinh: [],
+        nganhTrinhDoDaoTao: [],
+        nganhLoaiChuongTrinh: [],
         chuongTrinh: [],
         chuongTrinhVersion: [],
         khungKy: [],
@@ -294,6 +466,7 @@ function taoSelectedRong() {
         nganh: null,
         trinhDoDaoTao: null,
         loaiChuongTrinh: null,
+        nganhLoaiChuongTrinh: null,
         chuongTrinh: null,
         chuongTrinhVersion: null,
         syllabusChuongTrinhGoc: null,
@@ -317,7 +490,9 @@ function taoSelectedRong() {
         syllabusMonHoc: null,
         syllabusMonHocGoc: null,
         dieuKienMonHocGoc: null,
-        taiLieuGoc: null
+        dieuKienMonHoc: null,
+        taiLieuGoc: null,
+        syllabusTaiLieu: null
     }
 }
 
@@ -346,6 +521,7 @@ function layDuLieuLuu(saved) {
 
     return saved
 }
+
 export function useDaoTaoXemChuongTrinh() {
     const thongBao = ref('')
     const loaiThongBao = ref('success')
@@ -378,7 +554,7 @@ export function useDaoTaoXemChuongTrinh() {
 
     function baoTinBang(key, message, type = 'success') {
         if (key) {
-            tableMessages[key] = { message, type, at: Date.now() }
+            tableMessages[key] = {message, type, at: Date.now()}
             setTimeout(() => {
                 if (tableMessages[key]?.message === message) delete tableMessages[key]
             }, 5000)
@@ -404,11 +580,11 @@ export function useDaoTaoXemChuongTrinh() {
             if (!service?.getAll) continue
 
             try {
-                const result = await service.getAll({ size: 200 })
+                const result = await service.getAll({size: 200})
                 const list = layDanhSachTuKetQua(result)
                 rawData[key] = list
                 if (key === 'quyDoiDiemMau' && list.length) {
-                    khoQuyDoiDiemMauGoc.value = list.map((item) => ({ ...item }))
+                    khoQuyDoiDiemMauGoc.value = list.map((item) => ({...item}))
                 }
             } catch (error) {
                 console.warn(`Không tải được dữ liệu có sẵn của bảng ${key}`, error)
@@ -421,9 +597,10 @@ export function useDaoTaoXemChuongTrinh() {
     })
 
     const selectionChildren = {
-        nganh: ['trinhDoDaoTao', 'loaiChuongTrinh', 'chuongTrinh', 'chuongTrinhVersion', 'khungKy', 'nhomKienThuc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'syllabusMonHoc'],
+        nganh: ['trinhDoDaoTao', 'loaiChuongTrinh', 'nganhLoaiChuongTrinh', 'chuongTrinh', 'chuongTrinhVersion', 'khungKy', 'nhomKienThuc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'syllabusMonHoc'],
         trinhDoDaoTao: ['chuongTrinh', 'chuongTrinhVersion', 'khungKy', 'nhomKienThuc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'syllabusMonHoc'],
-        loaiChuongTrinh: ['chuongTrinh', 'chuongTrinhVersion', 'khungKy', 'nhomKienThuc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'syllabusMonHoc'],
+        loaiChuongTrinh: ['nganhLoaiChuongTrinh', 'chuongTrinh', 'chuongTrinhVersion', 'khungKy', 'nhomKienThuc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'syllabusMonHoc'],
+        nganhLoaiChuongTrinh: ['chuongTrinh', 'chuongTrinhVersion', 'khungKy', 'nhomKienThuc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'syllabusMonHoc'],
         chuongTrinh: ['chuongTrinhVersion', 'khungKy', 'nhomKienThuc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'syllabusMonHoc'],
         chuongTrinhVersion: ['syllabusChuongTrinhGoc', 'syllabusChuongTrinh', 'mucTieuChuongTrinhGoc', 'mucTieuChuongTrinh', 'nangLucDauRaGoc', 'nangLucDauRa', 'viTriViecLamGoc', 'viTriViecLam', 'dieuKienTotNghiepGoc', 'dieuKienTotNghiep', 'khungKyGoc', 'khungKy', 'nhomKienThucGoc', 'nhomKienThuc', 'nhomTuChonGoc', 'nhomTuChon', 'monHoc', 'chuongTrinhMon', 'monTuChon', 'monTienQuyet', 'quyDoiDiemMau', 'quyDoiDiem', 'chuongTrinhMonQuyDoiDiemMau', 'syllabusMonHocGoc', 'syllabusMonHoc'],
         khungKyGoc: ['khungKy', 'chuongTrinhMon'],
@@ -493,8 +670,8 @@ export function useDaoTaoXemChuongTrinh() {
 
         if (key === 'quyDoiDiemMau') {
             const cacheIndex = khoQuyDoiDiemMauGoc.value.findIndex((item) => String(item.id || '') === String(row.id || ''))
-            if (cacheIndex >= 0) khoQuyDoiDiemMauGoc.value.splice(cacheIndex, 1, { ...row })
-            else khoQuyDoiDiemMauGoc.value.push({ ...row })
+            if (cacheIndex >= 0) khoQuyDoiDiemMauGoc.value.splice(cacheIndex, 1, {...row})
+            else khoQuyDoiDiemMauGoc.value.push({...row})
         }
 
         return duLieu.value[key]?.find((item) => String(item.id || '') === String(row.id || '')) || row
@@ -512,12 +689,7 @@ export function useDaoTaoXemChuongTrinh() {
     }
 
     const bangGocGanVersion = {
-        mucTieuChuongTrinhGoc: {
-            joinKey: 'chuongTrinhVersionMucTieu',
-            gocIdKey: 'mucTieuGocId',
-            serviceKey: 'chuongTrinhVersionMucTieu',
-            tenBang: 'Mục tiêu chương trình'
-        },
+
         nangLucDauRaGoc: {
             joinKey: 'chuongTrinhVersionNangLuc',
             gocIdKey: 'nangLucGocId',
@@ -530,15 +702,42 @@ export function useDaoTaoXemChuongTrinh() {
             serviceKey: 'chuongTrinhVersionViTriViecLam',
             tenBang: 'Vị trí việc làm'
         },
-        dieuKienTotNghiepGoc: {
-            joinKey: 'chuongTrinhVersionDieuKienTotNghiep',
-            gocIdKey: 'dieuKienGocId',
-            serviceKey: 'chuongTrinhVersionDieuKienTotNghiep',
-            tenBang: 'Điều kiện tốt nghiệp'
-        }
+
     }
 
     const bangGocTaoApDungVersion = {
+
+        dieuKienTotNghiepGoc: {
+            joinKey: 'dieuKienTotNghiep',
+            gocIdKey: 'ma',
+            matchBy: { rowKey: 'ma', itemKey: 'ma' },
+            serviceKey: 'dieuKienTotNghiep',
+            tenBang: 'Điều kiện tốt nghiệp gốc',
+            buildPayload: (item, chuongTrinhVersionId) => ({
+                chuongTrinhVersionId,
+                ma: item.ma || '',
+                noiDung: item.noiDung || '',
+                thuTu: layThuTuGanTiepTheo('dieuKienTotNghiep', chuongTrinhVersionId),
+                ghiChu: item.ghiChu || ''
+            })
+        },
+
+        mucTieuChuongTrinhGoc: {
+            joinKey: 'mucTieuChuongTrinh',
+            gocIdKey: 'ma',
+            matchBy: {rowKey: 'ma', itemKey: 'ma'},
+            serviceKey: 'mucTieuChuongTrinh',
+            tenBang: 'Mục tiêu chương trình gốc',
+            buildPayload: (item, chuongTrinhVersionId) => ({
+                chuongTrinhVersionId,
+                ma: item.ma || '',
+                loai: item.loai || 'chung',
+                noiDung: item.noiDung || '',
+                thuTu: layThuTuGanTiepTheo('mucTieuChuongTrinh', chuongTrinhVersionId),
+                ghiChu: item.ghiChu || ''
+            })
+        },
+
         syllabusChuongTrinhGoc: {
             joinKey: 'syllabusChuongTrinh',
             gocIdKey: 'syllabusChuongTrinhGocId',
@@ -547,11 +746,22 @@ export function useDaoTaoXemChuongTrinh() {
             buildPayload: (item, chuongTrinhVersionId) => ({
                 chuongTrinhVersionId,
                 syllabusChuongTrinhGocId: item.id,
-                moTaTongQuan: item.mucTieu || item.moTaTongQuan || '',
-                mucDich: item.mucDich || '',
-                yeuCauDaoTao: item.yeuCauDaoTao || item.doiTuongTuyenSinh || '',
+
+                ma: item.ma || '',
+                ten: item.ten || '',
+                mucTieu: item.mucTieu || '',
+                doiTuongTuyenSinh: item.doiTuongTuyenSinh || '',
+                thoiGianDaoTao: item.thoiGianDaoTao || '',
+                khoiLuongKienThuc: item.khoiLuongKienThuc || '',
+                dieuKienTotNghiep: item.dieuKienTotNghiep || '',
                 phuongPhapDaoTao: item.phuongPhapDaoTao || '',
-                ghiChu: item.ghiChu || ''
+                phuongPhapDanhGia: item.phuongPhapDanhGia || '',
+                huongDanThucHien: item.huongDanThucHien || '',
+                ghiChu: item.ghiChu || '',
+
+                moTaTongQuan: item.mucTieu || '',
+                mucDich: item.mucTieu || '',
+                yeuCauDaoTao: item.doiTuongTuyenSinh || ''
             })
         },
         khungKyGoc: {
@@ -584,7 +794,8 @@ export function useDaoTaoXemChuongTrinh() {
                 tongSoGio: item.tongSoGio ?? null,
                 tongGioLyThuyet: item.tongGioLyThuyet ?? null,
                 tongGioThucHanh: item.tongGioThucHanh ?? null,
-                tongGioKiemTra: item.tongGioKiemTra ?? null
+                tongGioKiemTra: item.tongGioKiemTra ?? null,
+                moTa: item.moTa || ''
             })
         },
         nhomTuChonGoc: {
@@ -595,12 +806,14 @@ export function useDaoTaoXemChuongTrinh() {
             buildPayload: (item, chuongTrinhVersionId) => ({
                 chuongTrinhVersionId,
                 nhomTuChonGocId: item.id,
+                ma: item.ma || '',
                 ten: item.ten || '',
                 soMonChon: item.soMonChon ?? null,
                 soTinChiCanDat: item.soTinChiCanDat ?? null,
-                ghiChu: item.ghiChu || item.moTa || ''
+                ghiChu: item.ghiChu || '',
+                moTa: item.moTa || ''
             })
-        }
+        },
     }
 
     const bangMauGanMon = {
@@ -613,7 +826,110 @@ export function useDaoTaoXemChuongTrinh() {
         }
     }
 
+    function timChuongTrinhMonTheoMonHocGoc(item, parentValues = {}) {
+        const chuongTrinhVersionId = parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
+        const khungKyId = parentValues.khungKyId || selected.khungKy?.id
+        const nhomKienThucId = parentValues.nhomKienThucId || selected.nhomKienThuc?.id || null
 
+        return (rawData.chuongTrinhMon || []).find((row) => {
+            const cungVersion = String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || '')
+            const cungMonHoc = String(row.monHocId || row.monId || '') === String(item?.id || '')
+            const cungKhungKy = String(row.khungKyId || '') === String(khungKyId || '')
+            const cungNhomKienThuc = nhomKienThucId
+                ? String(row.nhomKienThucId || '') === String(nhomKienThucId || '')
+                : !row.nhomKienThucId
+
+            return cungVersion && cungMonHoc && cungKhungKy && cungNhomKienThuc
+        }) || null
+    }
+
+    function layThuTuChuongTrinhMonTiepTheo(chuongTrinhVersionId) {
+        const list = rawData.chuongTrinhMon || []
+        const thuTuLonNhat = list
+            .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
+            .map((row) => Number(row.thuTu || 0))
+            .filter((value) => !Number.isNaN(value))
+            .reduce((max, value) => Math.max(max, value), 0)
+
+        return thuTuLonNhat + 1
+    }
+
+    function taoPayloadChuongTrinhMonTuMonHocGoc(item, parentValues = {}) {
+        const chuongTrinhVersionId = parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
+        const khungKyId = parentValues.khungKyId || selected.khungKy?.id
+        const nhomKienThucId = parentValues.nhomKienThucId || selected.nhomKienThuc?.id || null
+
+        return {
+            chuongTrinhVersionId,
+            monHocId: item.id,
+            maMonTrongCt: item.maMon || item.ma || `MON_${item.id}`,
+            khungKyId,
+            nhomKienThucId,
+            loai: 'bat_buoc',
+            loaiHocPhan: 'mon_hoc',
+            loaiPhamVi: 'mon_chuyen_nganh',
+            batBuoc: true,
+            laMonDieuKien: false,
+            thuTu: layThuTuChuongTrinhMonTiepTheo(chuongTrinhVersionId),
+            soTinChi: item.soTinChi ?? null,
+            tongGio: item.tongGio ?? null,
+            gioLyThuyet: item.gioLyThuyet ?? null,
+            gioThucHanh: item.gioThucHanh ?? null,
+            gioKiemTra: item.gioKiemTra ?? null,
+            ghiChu: item.ghiChu || item.moTa || ''
+        }
+    }
+
+    async function toggleGanMonHocGocVaoChuongTrinhMon(item, parentValues = {}) {
+        const chuongTrinhVersionId = parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
+        const khungKyId = parentValues.khungKyId || selected.khungKy?.id
+
+        if (!chuongTrinhVersionId) {
+            baoTinBang('monHoc', 'Cần chọn Version trước khi gắn Môn học gốc vào Chương trình môn.', 'error')
+            return
+        }
+
+        if (!khungKyId) {
+            baoTinBang('monHoc', 'Cần chọn Khung kỳ trước khi gắn Môn học gốc vào Chương trình môn.', 'error')
+            return
+        }
+
+        const serviceChuongTrinhMon = daoTaoXemChuongTrinhService.chuongTrinhMon
+        if (!serviceChuongTrinhMon?.create) {
+            baoTinBang('monHoc', 'Chưa khai báo API tạo chương trình môn.', 'error')
+            return
+        }
+
+        const existing = timChuongTrinhMonTheoMonHocGoc(item, parentValues)
+
+        try {
+            if (existing?.id) {
+                if (!serviceChuongTrinhMon.delete) {
+                    baoTinBang('monHoc', 'Chưa khai báo API xóa chương trình môn để bỏ gắn môn học gốc.', 'error')
+                    return
+                }
+
+                await serviceChuongTrinhMon.delete(existing.id)
+                xoaDongTrongRawData('chuongTrinhMon', existing.id)
+                if (selected.chuongTrinhMon?.id === existing.id) selectEntity('chuongTrinhMon', null)
+                if (selected.monHoc?.id === item.id) selectEntity('monHoc', null)
+                baoTinBang('monHoc', 'Đã bỏ gắn Môn học gốc khỏi Chương trình môn hiện tại.')
+                return
+            }
+
+            const payload = taoPayloadChuongTrinhMonTuMonHocGoc(item, parentValues)
+            const saved = await serviceChuongTrinhMon.create(payload)
+            const row = layDuLieuLuu(saved) || payload
+            const rowDaLuu = capNhatDongTrongRawData('chuongTrinhMon', row)
+
+            selectEntity('monHoc', item)
+            selectEntity('chuongTrinhMon', rowDaLuu)
+            baoTinBang('monHoc', 'Đã gắn Môn học gốc vào Chương trình môn qua chuong_trinh_mon.')
+        } catch (error) {
+            const message = layThongBaoLoi(error, 'Không gắn/bỏ gắn được Môn học gốc vào Chương trình môn.')
+            baoTinBang('monHoc', message, 'error')
+        }
+    }
 
 
     function chuanHoaGiaTriQuyDoi(value) {
@@ -626,10 +942,15 @@ export function useDaoTaoXemChuongTrinh() {
     function taoPayloadQuyDoiDiemTuMau(item, chuongTrinhMonId) {
         return {
             chuongTrinhMonId,
+            loaiMau: item.loaiMau || 'COT_DIEM',
             nguongTu: item.nguongTu ?? null,
             nguongDen: item.nguongDen ?? null,
             diemQuyDoi: item.diemQuyDoi ?? null,
             ketQua: item.ketQua || 'dat',
+            tyLe: item.tyLe ?? null,
+            diemToiDa: item.diemToiDa ?? 10,
+            thuTu: item.thuTu ?? null,
+            batBuoc: item.batBuoc !== false,
             congThuc: item.congThuc || '',
             ghiChu: item.ghiChu || item.ten || item.ma || ''
         }
@@ -637,10 +958,15 @@ export function useDaoTaoXemChuongTrinh() {
 
     function khopQuyDoiDiemTuMau(row, payload, chuongTrinhMonId) {
         return String(row.chuongTrinhMonId || '') === String(chuongTrinhMonId || '')
+            && String(row.loaiMau || 'COT_DIEM') === String(payload.loaiMau || 'COT_DIEM')
             && String(chuanHoaGiaTriQuyDoi(row.nguongTu)) === String(chuanHoaGiaTriQuyDoi(payload.nguongTu))
             && String(chuanHoaGiaTriQuyDoi(row.nguongDen)) === String(chuanHoaGiaTriQuyDoi(payload.nguongDen))
             && String(chuanHoaGiaTriQuyDoi(row.diemQuyDoi)) === String(chuanHoaGiaTriQuyDoi(payload.diemQuyDoi))
             && String(row.ketQua || 'dat') === String(payload.ketQua || 'dat')
+            && String(chuanHoaGiaTriQuyDoi(row.tyLe)) === String(chuanHoaGiaTriQuyDoi(payload.tyLe))
+            && String(chuanHoaGiaTriQuyDoi(row.diemToiDa)) === String(chuanHoaGiaTriQuyDoi(payload.diemToiDa))
+            && String(row.thuTu || '') === String(payload.thuTu || '')
+            && String(row.batBuoc !== false) === String(payload.batBuoc !== false)
             && String(row.congThuc || '') === String(payload.congThuc || '')
     }
 
@@ -655,7 +981,7 @@ export function useDaoTaoXemChuongTrinh() {
     }
 
     async function dayQuyDoiDiemMauXuongQuyDoiDiem(item, chuongTrinhMonId) {
-        if (!item?.id || !chuongTrinhMonId) return { created: false, existed: false }
+        if (!item?.id || !chuongTrinhMonId) return {created: false, existed: false}
 
         const serviceQuyDoiDiem = daoTaoXemChuongTrinhService.quyDoiDiem
         if (!serviceQuyDoiDiem?.create) {
@@ -665,18 +991,18 @@ export function useDaoTaoXemChuongTrinh() {
         const existing = timQuyDoiDiemDaCoTuMau(item, chuongTrinhMonId)
         if (existing?.id) {
             capNhatDongTrongRawData('quyDoiDiem', existing)
-            return { created: false, existed: true, row: existing }
+            return {created: false, existed: true, row: existing}
         }
 
         const payload = taoPayloadQuyDoiDiemTuMau(item, chuongTrinhMonId)
         const saved = await serviceQuyDoiDiem.create(payload)
         const row = layDuLieuLuu(saved) || payload
         capNhatDongTrongRawData('quyDoiDiem', row)
-        return { created: true, existed: false, row }
+        return {created: true, existed: false, row}
     }
 
     async function xoaQuyDoiDiemDaDayTuMau(item, chuongTrinhMonId) {
-        if (!item?.id || !chuongTrinhMonId) return { deleted: 0 }
+        if (!item?.id || !chuongTrinhMonId) return {deleted: 0}
 
         const serviceQuyDoiDiem = daoTaoXemChuongTrinhService.quyDoiDiem
         if (!serviceQuyDoiDiem?.delete) {
@@ -692,7 +1018,7 @@ export function useDaoTaoXemChuongTrinh() {
             deleted += 1
         }
 
-        return { deleted }
+        return {deleted}
     }
 
     const bangGocGanSyllabus = {
@@ -847,14 +1173,17 @@ export function useDaoTaoXemChuongTrinh() {
         if (!config) return null
         return timDongNoiVersion(config, item, chuongTrinhVersionId)
     }
-
     function timDongApDungVersion(key, item, chuongTrinhVersionId) {
         const config = bangGocTaoApDungVersion[key]
         if (!config) return null
+
         const list = rawData[config.joinKey] || []
+        const rowKey = config.matchBy?.rowKey || config.gocIdKey
+        const itemKey = config.matchBy?.itemKey || 'id'
+
         return list.find((row) => {
             return String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || '')
-                && String(row[config.gocIdKey] || '') === String(item?.id || '')
+                && String(row[rowKey] || '') === String(item?.[itemKey] || '')
         })
     }
 
@@ -890,7 +1219,140 @@ export function useDaoTaoXemChuongTrinh() {
 
         return null
     }
+    function timDieuKienMonHocDaCopyTuGoc(item, syllabusMonId) {
+        return (rawData.dieuKienMonHoc || []).find((row) => {
+            return String(row.syllabusMonId || '') === String(syllabusMonId || '')
+                && String(row.ma || '') === String(item?.ma || '')
+        }) || null
+    }
 
+    function taoPayloadDieuKienMonHocTuGoc(item, syllabusMonId) {
+        return {
+            syllabusMonId,
+            ma: item.ma || '',
+            loai: item.loai || 'phong_hoc',
+            noiDung: item.noiDung || '',
+            thuTu: layThuTuGanTheoChaTiepTheo('dieuKienMonHoc', 'syllabusMonId', syllabusMonId),
+            ghiChu: item.ghiChu || ''
+        }
+    }
+
+    function timSyllabusTaiLieuDaCopyTuGoc(item, syllabusMonId) {
+        return (rawData.syllabusTaiLieu || []).find((row) => {
+            return String(row.syllabusMonId || '') === String(syllabusMonId || '')
+                && String(row.ma || '') === String(item?.ma || '')
+        }) || null
+    }
+
+    function taoPayloadSyllabusTaiLieuTuGoc(item, syllabusMonId) {
+        return {
+            syllabusMonId,
+            ma: item.ma || '',
+            ten: item.ten || '',
+            loai: item.loai || 'GIAO_TRINH',
+            tacGia: item.tacGia || '',
+            nhaXuatBan: item.nhaXuatBan || '',
+            namXuatBan: item.namXuatBan ?? null,
+            duongDan: item.duongDan || '',
+            ghiChu: item.ghiChu || ''
+        }
+    }
+    async function toggleCopyDieuKienMonHocGocVaoSyllabus(item, parentValues = {}) {
+        const syllabusMonId = parentValues.syllabusMonId || selected.syllabusMonHoc?.id
+
+        if (!syllabusMonId) {
+            baoTinBang('dieuKienMonHocGoc', 'Cần chọn Syllabus môn học áp dụng trước khi gán điều kiện môn học gốc.', 'error')
+            return
+        }
+
+        const serviceDieuKien = daoTaoXemChuongTrinhService.dieuKienMonHoc
+
+        if (!serviceDieuKien?.create) {
+            baoTinBang('dieuKienMonHocGoc', 'Chưa khai báo API tạo Điều kiện môn học đã lưu vào syllabus.', 'error')
+            return
+        }
+
+        const existing = timDieuKienMonHocDaCopyTuGoc(item, syllabusMonId)
+
+        try {
+            if (existing?.id) {
+                if (!serviceDieuKien.delete) {
+                    baoTinBang('dieuKienMonHocGoc', 'Chưa khai báo API xóa Điều kiện môn học đã lưu vào syllabus.', 'error')
+                    return
+                }
+
+                await serviceDieuKien.delete(existing.id)
+                xoaDongTrongRawData('dieuKienMonHoc', existing.id)
+
+                if (selected.dieuKienMonHoc?.id === existing.id) {
+                    selectEntity('dieuKienMonHoc', null)
+                }
+
+                baoTinBang('dieuKienMonHocGoc', 'Đã bỏ gán điều kiện môn học khỏi syllabus.')
+                return
+            }
+
+            const payload = taoPayloadDieuKienMonHocTuGoc(item, syllabusMonId)
+            const saved = await serviceDieuKien.create(payload)
+            const row = layDuLieuLuu(saved) || payload
+
+            capNhatDongTrongRawData('dieuKienMonHoc', row)
+            selectEntity('dieuKienMonHocGoc', item)
+
+            baoTinBang('dieuKienMonHocGoc', 'Đã copy điều kiện môn học gốc vào Điều kiện môn học đã lưu vào syllabus.')
+        } catch (error) {
+            const message = layThongBaoLoi(error, 'Không gán được điều kiện môn học gốc vào syllabus.')
+            baoTinBang('dieuKienMonHocGoc', message, 'error')
+        }
+    }
+    async function toggleCopyTaiLieuGocVaoSyllabus(item, parentValues = {}) {
+        const syllabusMonId = parentValues.syllabusMonId || selected.syllabusMonHoc?.id
+
+        if (!syllabusMonId) {
+            baoTinBang('taiLieuGoc', 'Cần chọn Syllabus môn học áp dụng trước khi gán tài liệu gốc.', 'error')
+            return
+        }
+
+        const serviceTaiLieu = daoTaoXemChuongTrinhService.syllabusTaiLieu
+
+        if (!serviceTaiLieu?.create) {
+            baoTinBang('taiLieuGoc', 'Chưa khai báo API tạo Tài liệu đã lưu vào syllabus.', 'error')
+            return
+        }
+
+        const existing = timSyllabusTaiLieuDaCopyTuGoc(item, syllabusMonId)
+
+        try {
+            if (existing?.id) {
+                if (!serviceTaiLieu.delete) {
+                    baoTinBang('taiLieuGoc', 'Chưa khai báo API xóa Tài liệu đã lưu vào syllabus.', 'error')
+                    return
+                }
+
+                await serviceTaiLieu.delete(existing.id)
+                xoaDongTrongRawData('syllabusTaiLieu', existing.id)
+
+                if (selected.syllabusTaiLieu?.id === existing.id) {
+                    selectEntity('syllabusTaiLieu', null)
+                }
+
+                baoTinBang('taiLieuGoc', 'Đã bỏ gán tài liệu khỏi syllabus.')
+                return
+            }
+
+            const payload = taoPayloadSyllabusTaiLieuTuGoc(item, syllabusMonId)
+            const saved = await serviceTaiLieu.create(payload)
+            const row = layDuLieuLuu(saved) || payload
+
+            capNhatDongTrongRawData('syllabusTaiLieu', row)
+            selectEntity('taiLieuGoc', item)
+
+            baoTinBang('taiLieuGoc', 'Đã copy tài liệu gốc vào Tài liệu đã lưu vào syllabus.')
+        } catch (error) {
+            const message = layThongBaoLoi(error, 'Không gán được tài liệu gốc vào syllabus.')
+            baoTinBang('taiLieuGoc', message, 'error')
+        }
+    }
     function timDongNoiSyllabusTheoConfig(config, item) {
         if (!config?.syllabusId) return null
         const list = rawData[config.joinKey] || []
@@ -923,6 +1385,19 @@ export function useDaoTaoXemChuongTrinh() {
             return
         }
 
+        if (key === 'monHoc') {
+            await toggleGanMonHocGocVaoChuongTrinhMon(item, parentValues)
+            return
+        }
+        if (key === 'dieuKienMonHocGoc') {
+            await toggleCopyDieuKienMonHocGocVaoSyllabus(item, parentValues)
+            return
+        }
+
+        if (key === 'taiLieuGoc') {
+            await toggleCopyTaiLieuGocVaoSyllabus(item, parentValues)
+            return
+        }
         const configApDungVersion = bangGocTaoApDungVersion[key]
 
         if (configApDungVersion) {
@@ -1039,13 +1514,8 @@ export function useDaoTaoXemChuongTrinh() {
                 if (existing?.id) {
                     await serviceNoi.delete(existing.id)
                     xoaDongTrongRawData(configMau.joinKey, existing.id)
-                    const ketQuaXoaQuyDoi = await xoaQuyDoiDiemDaDayTuMau(item, chuongTrinhMonId)
                     if (selected[key]?.id === item.id) selectEntity(key, null)
-                    if (ketQuaXoaQuyDoi.deleted) {
-                        baoTinBang(key, `Đã bỏ lưu ${configMau.tenBang} và xóa ${ketQuaXoaQuyDoi.deleted} dòng tương ứng khỏi bảng 5.5 Quy đổi điểm.`)
-                    } else {
-                        baoTinBang(key, `Đã bỏ lưu ${configMau.tenBang}. Không tìm thấy dòng Quy đổi điểm tương ứng để xóa.`)
-                    }
+                    baoTinBang(key, `Đã bỏ gắn ${configMau.tenBang} khỏi bảng 5.5 Quy đổi điểm.`)
                     return
                 }
 
@@ -1058,17 +1528,79 @@ export function useDaoTaoXemChuongTrinh() {
                 const saved = await serviceNoi.create(payload)
                 const row = layDuLieuLuu(saved) || payload
                 capNhatDongTrongRawData(configMau.joinKey, row)
-                const ketQuaDayMau = await dayQuyDoiDiemMauXuongQuyDoiDiem(item, chuongTrinhMonId)
                 selectEntity(key, item)
-                if (ketQuaDayMau.created) {
-                    baoTinBang(key, `Đã lưu ${configMau.tenBang} và đẩy dữ liệu mẫu xuống bảng 5.5 Quy đổi điểm.`)
-                } else if (ketQuaDayMau.existed) {
-                    baoTinBang(key, `Đã lưu ${configMau.tenBang}. Bảng 5.5 Quy đổi điểm đã có dòng tương ứng nên không tạo trùng.`)
-                } else {
-                    baoTinBang(key, `Đã lưu ${configMau.tenBang} vào Môn trong chương trình hiện tại.`)
-                }
+                baoTinBang(key, `Đã gắn ${configMau.tenBang} vào bảng 5.5 Quy đổi điểm qua bảng nối.`)
             } catch (error) {
                 const message = layThongBaoLoi(error, `Không lưu/bỏ lưu được ${configMau.tenBang}.`)
+                baoTinBang(key, message, 'error')
+            }
+
+            return
+        }
+
+
+        if (key === 'syllabusMonHocGoc') {
+            const chuongTrinhMonId = selected.chuongTrinhMon?.id || parentValues.chuongTrinhMonId
+            if (!chuongTrinhMonId) {
+                baoTinBang(key, 'Cần chọn Môn trong chương trình trước khi gắn Syllabus môn học gốc.', 'error')
+                return
+            }
+
+            const serviceApDung = daoTaoXemChuongTrinhService.syllabusMonHoc
+            if (!serviceApDung) {
+                baoTinBang(key, 'Chưa khai báo API syllabus_mon_hoc.', 'error')
+                return
+            }
+
+            const existing = (rawData.syllabusMonHoc || []).find((row) => {
+                return String(row.chuongTrinhMonId || '') === String(chuongTrinhMonId || '')
+                    && String(row.syllabusMonHocGocId || '') === String(item.id || '')
+            })
+
+            try {
+                if (existing?.id) {
+                    if (!serviceApDung.delete) {
+                        baoTinBang(key, 'Chưa khai báo API xóa để bỏ gắn Syllabus môn học gốc.', 'error')
+                        return
+                    }
+
+                    await serviceApDung.delete(existing.id)
+                    xoaDongTrongRawData('syllabusMonHoc', existing.id)
+                    if (selected.syllabusMonHoc?.id === existing.id) selectEntity('syllabusMonHoc', null)
+                    if (selected[key]?.id === item.id) selectEntity(key, null)
+                    baoTinBang(key, 'Đã bỏ gắn Syllabus môn học gốc khỏi Môn trong chương trình hiện tại.')
+                    return
+                }
+
+                if (!serviceApDung.create) {
+                    baoTinBang(key, 'Chưa khai báo API tạo syllabus_mon_hoc.', 'error')
+                    return
+                }
+
+                const payload = {
+                    chuongTrinhMonId,
+                    syllabusMonHocGocId: item.id,
+                    viTri: item.viTri || '',
+                    tinhChat: item.tinhChat || '',
+                    mucTieu: item.mucTieu || '',
+                    phuongPhapDanhGia: item.phuongPhapDanhGia || '',
+                    dieuKienHoanThanh: item.dieuKienHoanThanh || '',
+                    huongDan: item.huongDan || '',
+                    diemDatToiThieu: item.diemDatToiThieu ?? null,
+                    donViDiem: item.donViDiem || 'thang_10',
+                    tyLeChuyenCanToiThieu: item.tyLeChuyenCanToiThieu ?? null,
+                    batBuocDuThi: item.batBuocDuThi ?? true,
+                    congThucQuyDoi: item.congThucQuyDoi || ''
+                }
+
+                const saved = await serviceApDung.create(payload)
+                const row = layDuLieuLuu(saved) || payload
+                const rowDaLuu = capNhatDongTrongRawData('syllabusMonHoc', row)
+                selectEntity(key, item)
+                selectEntity('syllabusMonHoc', rowDaLuu)
+                baoTinBang(key, 'Đã gắn Syllabus môn học gốc vào Môn trong chương trình hiện tại qua syllabus_mon_hoc.')
+            } catch (error) {
+                const message = layThongBaoLoi(error, 'Không gắn/bỏ gắn được Syllabus môn học gốc.')
                 baoTinBang(key, message, 'error')
             }
 
@@ -1210,13 +1742,8 @@ export function useDaoTaoXemChuongTrinh() {
                 if (existing?.id) {
                     await serviceNoi.delete(existing.id)
                     xoaDongTrongRawData(configMau.joinKey, existing.id)
-                    const ketQuaXoaQuyDoi = await xoaQuyDoiDiemDaDayTuMau(item, chuongTrinhMonId)
                     if (selected[key]?.id === item.id) selectEntity(key, null)
-                    if (ketQuaXoaQuyDoi.deleted) {
-                        baoTinBang(key, `Đã bỏ lưu ${configMau.tenBang} và xóa ${ketQuaXoaQuyDoi.deleted} dòng tương ứng khỏi bảng 5.5 Quy đổi điểm.`)
-                    } else {
-                        baoTinBang(key, `Đã bỏ lưu ${configMau.tenBang}. Không tìm thấy dòng Quy đổi điểm tương ứng để xóa.`)
-                    }
+                    baoTinBang(key, `Đã bỏ gắn ${configMau.tenBang} khỏi bảng 5.5 Quy đổi điểm.`)
                     return
                 }
 
@@ -1229,17 +1756,79 @@ export function useDaoTaoXemChuongTrinh() {
                 const saved = await serviceNoi.create(payload)
                 const row = layDuLieuLuu(saved) || payload
                 capNhatDongTrongRawData(configMau.joinKey, row)
-                const ketQuaDayMau = await dayQuyDoiDiemMauXuongQuyDoiDiem(item, chuongTrinhMonId)
                 selectEntity(key, item)
-                if (ketQuaDayMau.created) {
-                    baoTinBang(key, `Đã lưu ${configMau.tenBang} và đẩy dữ liệu mẫu xuống bảng 5.5 Quy đổi điểm.`)
-                } else if (ketQuaDayMau.existed) {
-                    baoTinBang(key, `Đã lưu ${configMau.tenBang}. Bảng 5.5 Quy đổi điểm đã có dòng tương ứng nên không tạo trùng.`)
-                } else {
-                    baoTinBang(key, `Đã lưu ${configMau.tenBang} vào Môn trong chương trình hiện tại.`)
-                }
+                baoTinBang(key, `Đã gắn ${configMau.tenBang} vào bảng 5.5 Quy đổi điểm qua bảng nối.`)
             } catch (error) {
                 const message = layThongBaoLoi(error, `Không lưu/bỏ lưu được ${configMau.tenBang}.`)
+                baoTinBang(key, message, 'error')
+            }
+
+            return
+        }
+
+
+        if (key === 'syllabusMonHocGoc') {
+            const chuongTrinhMonId = selected.chuongTrinhMon?.id || parentValues.chuongTrinhMonId
+            if (!chuongTrinhMonId) {
+                baoTinBang(key, 'Cần chọn Môn trong chương trình trước khi gắn Syllabus môn học gốc.', 'error')
+                return
+            }
+
+            const serviceApDung = daoTaoXemChuongTrinhService.syllabusMonHoc
+            if (!serviceApDung) {
+                baoTinBang(key, 'Chưa khai báo API syllabus_mon_hoc.', 'error')
+                return
+            }
+
+            const existing = (rawData.syllabusMonHoc || []).find((row) => {
+                return String(row.chuongTrinhMonId || '') === String(chuongTrinhMonId || '')
+                    && String(row.syllabusMonHocGocId || '') === String(item.id || '')
+            })
+
+            try {
+                if (existing?.id) {
+                    if (!serviceApDung.delete) {
+                        baoTinBang(key, 'Chưa khai báo API xóa để bỏ gắn Syllabus môn học gốc.', 'error')
+                        return
+                    }
+
+                    await serviceApDung.delete(existing.id)
+                    xoaDongTrongRawData('syllabusMonHoc', existing.id)
+                    if (selected.syllabusMonHoc?.id === existing.id) selectEntity('syllabusMonHoc', null)
+                    if (selected[key]?.id === item.id) selectEntity(key, null)
+                    baoTinBang(key, 'Đã bỏ gắn Syllabus môn học gốc khỏi Môn trong chương trình hiện tại.')
+                    return
+                }
+
+                if (!serviceApDung.create) {
+                    baoTinBang(key, 'Chưa khai báo API tạo syllabus_mon_hoc.', 'error')
+                    return
+                }
+
+                const payload = {
+                    chuongTrinhMonId,
+                    syllabusMonHocGocId: item.id,
+                    viTri: item.viTri || '',
+                    tinhChat: item.tinhChat || '',
+                    mucTieu: item.mucTieu || '',
+                    phuongPhapDanhGia: item.phuongPhapDanhGia || '',
+                    dieuKienHoanThanh: item.dieuKienHoanThanh || '',
+                    huongDan: item.huongDan || '',
+                    diemDatToiThieu: item.diemDatToiThieu ?? null,
+                    donViDiem: item.donViDiem || 'thang_10',
+                    tyLeChuyenCanToiThieu: item.tyLeChuyenCanToiThieu ?? null,
+                    batBuocDuThi: item.batBuocDuThi ?? true,
+                    congThucQuyDoi: item.congThucQuyDoi || ''
+                }
+
+                const saved = await serviceApDung.create(payload)
+                const row = layDuLieuLuu(saved) || payload
+                const rowDaLuu = capNhatDongTrongRawData('syllabusMonHoc', row)
+                selectEntity(key, item)
+                selectEntity('syllabusMonHoc', rowDaLuu)
+                baoTinBang(key, 'Đã gắn Syllabus môn học gốc vào Môn trong chương trình hiện tại qua syllabus_mon_hoc.')
+            } catch (error) {
+                const message = layThongBaoLoi(error, 'Không gắn/bỏ gắn được Syllabus môn học gốc.')
                 baoTinBang(key, message, 'error')
             }
 
@@ -1265,7 +1854,7 @@ export function useDaoTaoXemChuongTrinh() {
                 ...item,
                 ...parentValues
             })
-            const row = layDuLieuLuu(saved) || { ...item, ...parentValues }
+            const row = layDuLieuLuu(saved) || {...item, ...parentValues}
             const rowDaCapNhat = capNhatDongTrongRawData(key, row)
             selectEntity(key, rowDaCapNhat)
             baoTin('Đã chọn dữ liệu có sẵn và gắn vào luồng hiện tại.')
@@ -1304,8 +1893,8 @@ export function useDaoTaoXemChuongTrinh() {
 
         if (key === 'quyDoiDiemMau') {
             const cacheIndex = khoQuyDoiDiemMauGoc.value.findIndex((item) => String(item.id || '') === String(row.id || ''))
-            if (cacheIndex >= 0) khoQuyDoiDiemMauGoc.value.splice(cacheIndex, 1, { ...row })
-            else khoQuyDoiDiemMauGoc.value.push({ ...row })
+            if (cacheIndex >= 0) khoQuyDoiDiemMauGoc.value.splice(cacheIndex, 1, {...row})
+            else khoQuyDoiDiemMauGoc.value.push({...row})
         }
 
         selected[key] = duLieu.value[key]?.find((item) => item.id === row.id) || row

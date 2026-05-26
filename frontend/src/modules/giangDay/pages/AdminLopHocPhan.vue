@@ -175,6 +175,11 @@
         </label>
 
         <label>
+          <span>Số buổi học</span>
+          <input v-model.trim="form.soBuoiHoc" type="number" min="1" required />
+        </label>
+
+        <label>
           <span>Ngày bắt đầu</span>
           <input v-model="form.ngayBatDau" type="date" />
         </label>
@@ -267,6 +272,7 @@
           <th>Chương trình môn</th>
           <th>Môn học</th>
           <th>Sĩ số</th>
+          <th>Số buổi</th>
           <th>Thời gian</th>
           <th>Trạng thái</th>
           <th>Ghi chú</th>
@@ -276,11 +282,11 @@
 
         <tbody>
         <tr v-if="dangTai">
-          <td colspan="11">Đang tải dữ liệu...</td>
+          <td colspan="12">Đang tải dữ liệu...</td>
         </tr>
 
         <tr v-else-if="!danhSach.length">
-          <td colspan="11">Không có dữ liệu</td>
+          <td colspan="12">Không có dữ liệu</td>
         </tr>
 
         <tr v-for="item in danhSach" v-else :key="item.id">
@@ -304,6 +310,7 @@
           </td>
 
           <td>{{ item.soLuongHienTai ?? 0 }}/{{ item.soLuongToiDa ?? '-' }}</td>
+          <td>{{ item.soBuoiHoc ?? '-' }}</td>
           <td>{{ item.ngayBatDau || '-' }} → {{ item.ngayKetThuc || '-' }}</td>
           <td>{{ hienThiTrangThai(item.trangThai) }}</td>
           <td>{{ item.ghiChu || '-' }}</td>
@@ -363,6 +370,7 @@ const form = reactive({
   siSoToiThieu: 1,
   soLuongToiDa: 40,
   soLuongHienTai: 0,
+  soBuoiHoc: 1,
   ngayBatDau: '',
   ngayKetThuc: '',
   trangThai: 'du_kien',
@@ -487,6 +495,7 @@ async function capNhatLopHocPhan() {
     siSoToiThieu: Number(form.siSoToiThieu),
     soLuongToiDa: Number(form.soLuongToiDa),
     soLuongHienTai: form.soLuongHienTai === '' ? 0 : Number(form.soLuongHienTai),
+    soBuoiHoc: Number(form.soBuoiHoc),
     ngayBatDau: form.ngayBatDau || null,
     ngayKetThuc: form.ngayKetThuc || null,
     trangThai: form.trangThai,
@@ -513,6 +522,7 @@ function chonSua(item) {
   form.siSoToiThieu = item.siSoToiThieu ?? 1
   form.soLuongToiDa = item.soLuongToiDa ?? 40
   form.soLuongHienTai = item.soLuongHienTai ?? 0
+  form.soBuoiHoc = item.soBuoiHoc ?? 1
   form.ngayBatDau = item.ngayBatDau || ''
   form.ngayKetThuc = item.ngayKetThuc || ''
   form.trangThai = item.trangThai || 'du_kien'
@@ -529,6 +539,7 @@ function resetForm() {
   form.siSoToiThieu = 1
   form.soLuongToiDa = 40
   form.soLuongHienTai = 0
+  form.soBuoiHoc = 1
   form.ngayBatDau = ''
   form.ngayKetThuc = ''
   form.trangThai = 'du_kien'
@@ -661,7 +672,7 @@ input, select, textarea { border: 1px solid var(--color-border); border-radius: 
 .cell-main { display: grid; gap: 4px; }
 .cell-main span { color: #64748b; font-size: 12px; line-height: 1.35; }
 .table-wrap { overflow: auto; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-white); }
-table { width: 100%; border-collapse: collapse; min-width: 1350px; }
+table { width: 100%; border-collapse: collapse; min-width: 1450px; }
 th, td { padding: 10px 12px; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
 th { background: #f8fafc; color: #475569; font-size: 12px; text-transform: uppercase; }
 @media (max-width: 1100px) {

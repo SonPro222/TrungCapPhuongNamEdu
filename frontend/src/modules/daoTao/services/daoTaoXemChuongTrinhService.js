@@ -8,6 +8,9 @@ export const daoTaoXemChuongTrinhService = {
     khungKy: daoTaoService.khungKy,
     khungKyGoc: daoTaoService.khungKyGoc,
 
+    nganhTrinhDoDaoTao: daoTaoService.nganhTrinhDoDaoTao,
+    nganhLoaiChuongTrinh: daoTaoService.nganhLoaiChuongTrinh,
+
     chuongTrinh: chuongTrinhService.chuongTrinh,
     chuongTrinhVersion: chuongTrinhService.chuongTrinhVersion,
     monHoc: chuongTrinhService.monHoc,
