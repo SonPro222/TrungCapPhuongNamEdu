@@ -272,7 +272,12 @@ function baoTinTaiBang(message, type = 'success') {
     if (localMessage.value === message) localMessage.value = ''
   }, 5000)
 }
-
+function emitThongBao(message, type = 'success') {
+  emit('notify', {
+    message,
+    type
+  })
+}
 function buildEmptyForm() {
   return {
     ...props.defaultForm,
@@ -500,7 +505,7 @@ function kiemTraTrungTheoRule(rule, shouldNotify = false) {
 
   const message = rule.message || `${field?.label || fieldKey} đã tồn tại.`
   setFieldError(fieldKey, message)
-  if (shouldNotify) emit('notify', message, 'error')
+  if (shouldNotify) emitThongBao(message, 'error')
   return false
 }
 
@@ -543,7 +548,7 @@ function validateRequiredParents() {
     if (value === '' || value === null || value === undefined) {
       const message = `${label || key} không được để trống.`
       setFieldError(key, message)
-      emit('notify', message, 'error')
+      emitThongBao(message, 'error')
       return false
     }
   }
@@ -560,7 +565,7 @@ function validateForm() {
     const firstError = Object.values(fieldErrors)[0]
     const message = firstError || 'Vui lòng kiểm tra lại các ô đang báo lỗi.'
     baoTinTaiBang(message, 'error')
-    emit('notify', message, 'error')
+    emitThongBao(message, 'error')
   }
 
   return ok
@@ -679,23 +684,23 @@ function selectItem(item) {
   if (props.allowToggleSelect && isDangChonTrucTiep(item)) {
     emit('select', null)
     resetForm()
-    emit('notify', `Đã bỏ chọn dòng trong bảng ${props.title}.`)
+    emitThongBao(`Đã bỏ chọn dòng trong bảng ${props.title}.`, 'success')
     return
   }
 
   emit('select', item)
-  emit('notify', `Đã chọn dòng trong bảng ${props.title}.`)
+  emitThongBao(`Đã chọn dòng trong bảng ${props.title}.`, 'success')
 }
 
 function viewItem(item) {
   if (isViewing(item)) {
     emit('view', null)
-    emit('notify', `Đã bỏ xem dòng trong bảng ${props.title}.`)
+    emitThongBao(`Đã bỏ xem dòng trong bảng ${props.title}.`, 'success')
     return
   }
 
   emit('view', item)
-  emit('notify', `Đang xem dữ liệu con theo dòng trong bảng ${props.title}.`)
+  emitThongBao(`Đang xem dữ liệu con theo dòng trong bảng ${props.title}.`, 'success')
 }
 
 function toggleSaveItem(item) {
@@ -751,13 +756,13 @@ async function saveForm() {
 
     const message = editingId.value ? 'Cập nhật thành công.' : 'Lưu thành công.'
     baoTinTaiBang(message)
-    emit('notify', message)
+    emitThongBao(message, 'success')
     emit('saved', rowDaLuu)
     resetForm()
   } catch (error) {
     const message = layThongBaoLoi(error, 'Lưu dữ liệu thất bại.')
     baoTinTaiBang(message, 'error')
-    emit('notify', message, 'error')
+    emitThongBao(message, 'error')
   } finally {
     saving.value = false
   }
@@ -782,13 +787,13 @@ async function deleteItem(item) {
   try {
     await props.service.delete(item.id)
     baoTinTaiBang('Xóa thành công.')
-    emit('notify', 'Xóa thành công.')
+    emitThongBao('Xóa thành công.', 'success')
     emit('deleted', item)
     resetForm()
   } catch (error) {
     const message = layThongBaoLoi(error, 'Xóa dữ liệu thất bại.')
     baoTinTaiBang(message, 'error')
-    emit('notify', message, 'error')
+    emitThongBao(message, 'error')
   }
 }
 </script>

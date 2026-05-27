@@ -238,7 +238,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { daoTaoApi } from '@/modules/daoTao/api/daoTaoApi'
-import { chuongTrinhApi } from '@/modules/chuongTrinh/api/chuongTrinhApi'
 import { heThongApi } from '../api/heThongApi'
 
 const nganhList = ref([])
@@ -304,8 +303,8 @@ async function taiTatCa() {
       versionResult
     ] = await Promise.all([
       daoTaoApi.nganh.getAll({ page: 0, size: 1000 }),
-      chuongTrinhApi.chuongTrinh.getAll({ page: 0, size: 1000 }),
-      chuongTrinhApi.chuongTrinhVersion.getAll({ page: 0, size: 1000 })
+      daoTaoApi.chuongTrinh.getAll({ page: 0, size: 1000 }),
+      daoTaoApi.chuongTrinhVersion.getAll({ page: 0, size: 1000 })
     ])
 
     nganhList.value = layDanhSach(nganhResult)

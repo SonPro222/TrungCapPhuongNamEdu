@@ -345,7 +345,8 @@ function themTenLienKet(duLieu) {
         syllabusMonHoc: duLieu.syllabusMonHoc.map((item) => ({
             ...item,
             tenChuongTrinhMon: layTen(chuongTrinhMonMap, item.chuongTrinhMonId, ['maMonTrongCt', 'tenMon']),
-            tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma', 'ten'])
+            tenSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ten', 'ma']),
+            maSyllabusMonHocGoc: layTen(syllabusMonHocGocMap, item.syllabusMonHocGocId, ['ma'])
         })),
         syllabusMonHocGoc: duLieu.syllabusMonHocGoc.map((item) => ({
             ...item,
@@ -525,18 +526,13 @@ function layDuLieuLuu(saved) {
 export function useDaoTaoXemChuongTrinh() {
     const thongBao = ref('')
     const loaiThongBao = ref('success')
-    const errorMessage = ref('')
 
     const selected = reactive(taoSelectedRong())
     const viewed = reactive(taoSelectedRong())
     const rawData = reactive(taoDuLieuRong())
     const tableMessages = reactive({})
 
-    // Cache riêng cho kho Quy đổi điểm mẫu gốc.
-    // Lý do: bảng 5.5.1 là dữ liệu gốc dùng chung, không thuộc chuongTrinhMon.
-    // Khi người dùng chọn/lưu 5.2 Chương trình môn, một số nhánh render sẽ đổi bộ lọc cha
-    // theo chuongTrinhMonId. Cache này giúp 5.5.1 luôn còn dữ liệu mẫu gốc đã tải từ API
-    // quy-doi-diem-mau, chỉ trạng thái Đã lưu/Chưa lưu mới phụ thuộc chuongTrinhMonId.
+
     const khoQuyDoiDiemMauGoc = ref([])
 
     const duLieu = computed(() => themTenLienKet(rawData))
@@ -565,8 +561,6 @@ export function useDaoTaoXemChuongTrinh() {
     function baoTin(message, type = 'success') {
         thongBao.value = message
         loaiThongBao.value = type
-        if (type === 'error') errorMessage.value = message
-        if (type !== 'error') errorMessage.value = ''
 
         setTimeout(() => {
             if (thongBao.value === message) thongBao.value = ''
@@ -710,7 +704,7 @@ export function useDaoTaoXemChuongTrinh() {
         dieuKienTotNghiepGoc: {
             joinKey: 'dieuKienTotNghiep',
             gocIdKey: 'ma',
-            matchBy: { rowKey: 'ma', itemKey: 'ma' },
+            matchBy: {rowKey: 'ma', itemKey: 'ma'},
             serviceKey: 'dieuKienTotNghiep',
             tenBang: 'Điều kiện tốt nghiệp gốc',
             buildPayload: (item, chuongTrinhVersionId) => ({
@@ -854,6 +848,18 @@ export function useDaoTaoXemChuongTrinh() {
         return thuTuLonNhat + 1
     }
 
+    function laySoTuNhieuTen(item, keys = [], fallback = null) {
+        for (const key of keys) {
+            const value = item?.[key]
+            if (value !== null && value !== undefined && value !== '') {
+                const numberValue = Number(value)
+                return Number.isNaN(numberValue) ? value : numberValue
+            }
+        }
+
+        return fallback
+    }
+
     function taoPayloadChuongTrinhMonTuMonHocGoc(item, parentValues = {}) {
         const chuongTrinhVersionId = parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
         const khungKyId = parentValues.khungKyId || selected.khungKy?.id
@@ -865,18 +871,22 @@ export function useDaoTaoXemChuongTrinh() {
             maMonTrongCt: item.maMon || item.ma || `MON_${item.id}`,
             khungKyId,
             nhomKienThucId,
-            loai: 'bat_buoc',
-            loaiHocPhan: 'mon_hoc',
-            loaiPhamVi: 'mon_chuyen_nganh',
-            batBuoc: true,
-            laMonDieuKien: false,
+
+            loai: item.loai || 'bat_buoc',
+            loaiHocPhan: item.loaiHocPhan || item.loai_hoc_phan || 'mon_hoc',
+            loaiPhamVi: item.loaiPhamVi || item.loai_pham_vi || 'mon_chuyen_nganh',
+            batBuoc: item.batBuoc ?? item.bat_buoc ?? true,
+            laMonDieuKien: item.laMonDieuKien ?? item.la_mon_dieu_kien ?? false,
+
             thuTu: layThuTuChuongTrinhMonTiepTheo(chuongTrinhVersionId),
-            soTinChi: item.soTinChi ?? null,
-            tongGio: item.tongGio ?? null,
-            gioLyThuyet: item.gioLyThuyet ?? null,
-            gioThucHanh: item.gioThucHanh ?? null,
-            gioKiemTra: item.gioKiemTra ?? null,
-            ghiChu: item.ghiChu || item.moTa || ''
+
+            soTinChi: laySoTuNhieuTen(item, ['soTinChi', 'so_tin_chi', 'tinChi', 'tin_chi']),
+            tongGio: laySoTuNhieuTen(item, ['tongGio', 'tong_gio', 'soGio', 'so_gio', 'tongSoGio', 'tong_so_gio']),
+            gioLyThuyet: laySoTuNhieuTen(item, ['gioLyThuyet', 'gio_ly_thuyet', 'lyThuyet', 'ly_thuyet']),
+            gioThucHanh: laySoTuNhieuTen(item, ['gioThucHanh', 'gio_thuc_hanh', 'thucHanh', 'thuc_hanh']),
+            gioKiemTra: laySoTuNhieuTen(item, ['gioKiemTra', 'gio_kiem_tra', 'kiemTra', 'kiem_tra']),
+
+            ghiChu: item.ghiChu || item.ghi_chu || item.moTa || item.mo_ta || ''
         }
     }
 
@@ -1173,6 +1183,7 @@ export function useDaoTaoXemChuongTrinh() {
         if (!config) return null
         return timDongNoiVersion(config, item, chuongTrinhVersionId)
     }
+
     function timDongApDungVersion(key, item, chuongTrinhVersionId) {
         const config = bangGocTaoApDungVersion[key]
         if (!config) return null
@@ -1219,6 +1230,7 @@ export function useDaoTaoXemChuongTrinh() {
 
         return null
     }
+
     function timDieuKienMonHocDaCopyTuGoc(item, syllabusMonId) {
         return (rawData.dieuKienMonHoc || []).find((row) => {
             return String(row.syllabusMonId || '') === String(syllabusMonId || '')
@@ -1231,7 +1243,10 @@ export function useDaoTaoXemChuongTrinh() {
             syllabusMonId,
             ma: item.ma || '',
             loai: item.loai || 'phong_hoc',
-            noiDung: item.noiDung || '',
+            ten: item.ten || item.noiDung || item.ma || 'Điều kiện môn học',
+            noiDung: item.noiDung || item.ten || item.ma || '',
+            soLuong: item.soLuong ?? null,
+            yeuCau: item.yeuCau || item.noiDung || item.ten || item.ma || '',
             thuTu: layThuTuGanTheoChaTiepTheo('dieuKienMonHoc', 'syllabusMonId', syllabusMonId),
             ghiChu: item.ghiChu || ''
         }
@@ -1257,6 +1272,7 @@ export function useDaoTaoXemChuongTrinh() {
             ghiChu: item.ghiChu || ''
         }
     }
+
     async function toggleCopyDieuKienMonHocGocVaoSyllabus(item, parentValues = {}) {
         const syllabusMonId = parentValues.syllabusMonId || selected.syllabusMonHoc?.id
 
@@ -1305,6 +1321,7 @@ export function useDaoTaoXemChuongTrinh() {
             baoTinBang('dieuKienMonHocGoc', message, 'error')
         }
     }
+
     async function toggleCopyTaiLieuGocVaoSyllabus(item, parentValues = {}) {
         const syllabusMonId = parentValues.syllabusMonId || selected.syllabusMonHoc?.id
 
@@ -1353,6 +1370,7 @@ export function useDaoTaoXemChuongTrinh() {
             baoTinBang('taiLieuGoc', message, 'error')
         }
     }
+
     function timDongNoiSyllabusTheoConfig(config, item) {
         if (!config?.syllabusId) return null
         const list = rawData[config.joinKey] || []
@@ -1580,6 +1598,11 @@ export function useDaoTaoXemChuongTrinh() {
                 const payload = {
                     chuongTrinhMonId,
                     syllabusMonHocGocId: item.id,
+
+                    monHocId: item.monHocId || selected.monHoc?.id || null,
+                    ma: item.ma || '',
+                    ten: item.ten || '',
+
                     viTri: item.viTri || '',
                     tinhChat: item.tinhChat || '',
                     mucTieu: item.mucTieu || '',
@@ -1589,8 +1612,9 @@ export function useDaoTaoXemChuongTrinh() {
                     diemDatToiThieu: item.diemDatToiThieu ?? null,
                     donViDiem: item.donViDiem || 'thang_10',
                     tyLeChuyenCanToiThieu: item.tyLeChuyenCanToiThieu ?? null,
-                    batBuocDuThi: item.batBuocDuThi ?? true,
-                    congThucQuyDoi: item.congThucQuyDoi || ''
+                    batBuocDuThi: item.batBuocDuThi ?? false,
+                    congThucQuyDoi: item.congThucQuyDoi || '',
+                    ghiChu: item.ghiChu || ''
                 }
 
                 const saved = await serviceApDung.create(payload)
@@ -1957,7 +1981,6 @@ export function useDaoTaoXemChuongTrinh() {
     return {
         thongBao,
         loaiThongBao,
-        errorMessage,
         tableMessages,
         selected,
         viewed,

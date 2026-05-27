@@ -1,7 +1,6 @@
 <template>
   <div class="xay-dung-page dao-tao-xem-page">
     <div v-if="thongBao" :class="['notice', loaiThongBao]">{{ thongBao }}</div>
-    <div v-if="errorMessage" class="notice error">{{ errorMessage }}</div>
 
     <nav class="tang-nav mini-scroll">
       <button
@@ -87,7 +86,7 @@
             @toggle-save="luuDongBang(bang, $event)"
             @saved="sauKhiLuu(bang.key, $event)"
             @deleted="sauKhiXoa(bang.key, $event)"
-            @notify="baoTin"
+            @notify="xuLyThongBaoBang(bang, $event)"
         />
 
         <div v-if="tangHienTai === 2 && bang.key === 'trinhDoDaoTao'" class="bang-da-gan-tang-2">
@@ -234,7 +233,6 @@ const router = useRouter()
 const {
   thongBao,
   loaiThongBao,
-  errorMessage,
   tableMessages,
   selected,
   viewed,
@@ -539,11 +537,19 @@ const monTuChonParentText = computed(() => {
 })
 
 const chuongTrinhMonOnlyParent = computed(() => ({
-  chuongTrinhMonId: selected.chuongTrinhMon?.id || null
+  chuongTrinhMonId:
+      selected.chuongTrinhMon?.id ||
+      route.query.chuongTrinhMonId ||
+      route.params.chuongTrinhMonId ||
+      null
 }))
 
 const syllabusMonHocApDungParent = computed(() => ({
-  chuongTrinhMonId: selected.chuongTrinhMon?.id || null,
+  chuongTrinhMonId:
+      selected.chuongTrinhMon?.id ||
+      route.query.chuongTrinhMonId ||
+      route.params.chuongTrinhMonId ||
+      null,
   syllabusMonHocGocId: selected.syllabusMonHocGoc?.id || null
 }))
 
@@ -599,9 +605,12 @@ const chuongTrinhMonViewFilter = computed(() => ({
 }))
 
 const chuongTrinhMonOnlyFilter = computed(() => ({
-  chuongTrinhMonId: dongDangDung('chuongTrinhMon')?.id || null
+  chuongTrinhMonId:
+      dongDangDung('chuongTrinhMon')?.id ||
+      route.query.chuongTrinhMonId ||
+      route.params.chuongTrinhMonId ||
+      null
 }))
-
 const syllabusMonFilter = computed(() => ({
   syllabusMonId: dongDangDung('syllabusMonHoc')?.id || null
 }))
@@ -850,6 +859,7 @@ const nhanNutXemTheoBang = {
   chuongTrinhVersion: 'Xem chi tiết version',
   monHoc: 'Xem syllabus gốc',
   chuongTrinhMon: 'Xem syllabus áp dụng',
+  syllabusMonHoc: 'Xem chi tiết syllabus',
   nhomKienThuc: 'Xem môn trong nhóm',
   nhomTuChon: 'Xem môn tự chọn'
 }
@@ -1038,17 +1048,22 @@ function xemDongBang(bang, item) {
     return
   }
   if (bang.key === 'syllabusMonHoc') {
+    const chuongTrinhMonId = item.chuongTrinhMonId || selected.chuongTrinhMon?.id
+    const chuongTrinhMon = timDongTheoId('chuongTrinhMon', chuongTrinhMonId) || selected.chuongTrinhMon
+
     router.push({
       name: 'DaoTao.XemChuongTrinh.SyllabusApDung',
-      params: {
+      params: taoParamsTangSau({
         nganhId: selected.nganh?.id,
         chuongTrinhId: selected.chuongTrinh?.id,
         versionId: selected.chuongTrinhVersion?.id,
-        chuongTrinhMonId: item.chuongTrinhMonId || selected.chuongTrinhMon?.id
-      },
-      query: {
-        syllabusMonId: item.id
-      }
+        chuongTrinhMonId
+      }),
+      query: taoParamsTangSau({
+        syllabusMonId: item.id,
+        khungKyId: selected.khungKy?.id || chuongTrinhMon?.khungKyId,
+        nhomKienThucId: selected.nhomKienThuc?.id || chuongTrinhMon?.nhomKienThucId
+      })
     })
     return
   }
@@ -1116,7 +1131,17 @@ function datThongBaoBang(key, message, type = 'success') {
     }
   }, 5000)
 }
+function xuLyThongBaoBang(bang, payload) {
+  const message = typeof payload === 'string'
+      ? payload
+      : payload?.message || payload?.text || 'Có lỗi khi thao tác dữ liệu.'
 
+  const type = typeof payload === 'object'
+      ? payload?.type || 'success'
+      : 'success'
+
+  datThongBaoBang(bang.key, message, type === 'error' ? 'error' : 'success')
+}
 async function ganTrinhDoVaoNganh(item) {
   if (!item?.id) {
     datThongBaoBang('trinhDoDaoTao', 'Không tìm thấy trình độ đào tạo để gán vào ngành.', 'error')
@@ -1632,8 +1657,22 @@ function napLuaChonTheoRoute() {
   const monHoc = timDongTheoId('monHoc', route.params.monHocId)
   if (monHoc && String(selected.monHoc?.id || '') !== String(monHoc.id)) selectEntity('monHoc', monHoc)
 
-  const chuongTrinhMon = timDongTheoId('chuongTrinhMon', route.params.chuongTrinhMonId)
+  const chuongTrinhMon = timDongTheoId(
+      'chuongTrinhMon',
+      route.params.chuongTrinhMonId || route.query.chuongTrinhMonId
+  )
+
   if (chuongTrinhMon && String(selected.chuongTrinhMon?.id || '') !== String(chuongTrinhMon.id)) {
+    const khungKyCuaMon = timDongTheoId('khungKy', chuongTrinhMon.khungKyId)
+    if (khungKyCuaMon && String(selected.khungKy?.id || '') !== String(khungKyCuaMon.id)) {
+      selectEntity('khungKy', khungKyCuaMon)
+    }
+
+    const nhomKienThucCuaMon = timDongTheoId('nhomKienThuc', chuongTrinhMon.nhomKienThucId)
+    if (nhomKienThucCuaMon && String(selected.nhomKienThuc?.id || '') !== String(nhomKienThucCuaMon.id)) {
+      selectEntity('nhomKienThuc', nhomKienThucCuaMon)
+    }
+
     selectEntity('chuongTrinhMon', chuongTrinhMon)
     chonMonHocTheoChuongTrinhMon(chuongTrinhMon)
   }
@@ -1661,7 +1700,17 @@ function napLuaChonTheoRoute() {
 }
 
 watch(
-    () => [route.fullPath, duLieu.value.nganh.length, duLieu.value.chuongTrinh.length, duLieu.value.chuongTrinhVersion.length, duLieu.value.monHoc.length, duLieu.value.chuongTrinhMon.length],
+    () => [
+      route.fullPath,
+      duLieu.value.nganh.length,
+      duLieu.value.chuongTrinh.length,
+      duLieu.value.chuongTrinhVersion.length,
+      duLieu.value.khungKy.length,
+      duLieu.value.nhomKienThuc.length,
+      duLieu.value.monHoc.length,
+      duLieu.value.chuongTrinhMon.length,
+      duLieu.value.syllabusMonHoc.length
+    ],
     () => napLuaChonTheoRoute(),
     {immediate: true}
 )
@@ -1760,6 +1809,9 @@ function veTang(soTang) {
         chuongTrinhId: selected.chuongTrinh.id,
         versionId: selected.chuongTrinhVersion.id,
         monHocId
+      }),
+      query: taoParamsTangSau({
+        chuongTrinhMonId: selected.chuongTrinhMon?.id || null
       })
     })
     return
@@ -1773,6 +1825,11 @@ function veTang(soTang) {
         chuongTrinhId: selected.chuongTrinh.id,
         versionId: selected.chuongTrinhVersion.id,
         chuongTrinhMonId: selected.chuongTrinhMon?.id || null
+      }),
+      query: taoParamsTangSau({
+        syllabusMonId: selected.syllabusMonHoc?.id || null,
+        khungKyId: selected.khungKy?.id || selected.chuongTrinhMon?.khungKyId || null,
+        nhomKienThucId: selected.nhomKienThuc?.id || selected.chuongTrinhMon?.nhomKienThucId || null
       })
     })
   }
@@ -2151,8 +2208,8 @@ const groups = computed(() => {
           parentText: viTriHienTaiText.value,
           canView: true,
           viewLabel: 'Chi tiết',
-          readOnly: true,
-          canSelect: false,
+          readOnly: false,
+          canSelect: true,
           canToggleSave: false,
           title: 'Môn đã lưu vào nhóm kiến thức của kỳ',
           description: 'Chỉ hiển thị các môn học đã được gắn vào Version/Kỳ/Nhóm kiến thức hiện tại qua chuong_trinh_mon.',
@@ -2188,11 +2245,11 @@ const groups = computed(() => {
           parentValues: chuongTrinhMonOnlyParent.value,
           filterValues: chuongTrinhMonOnlyFilter.value,
           parentText: chuongTrinhMonOnlyParentText.value,
-          readOnly: true,
+          readOnly: false,
           canSelect: true,
           canToggleSave: false,
           canView: true,
-          viewLabel: 'Xem tài liệu / chương bài',
+          viewLabel: 'Xem chi tiết syllabus',
           title: 'Syllabus đã gán vào môn trong chương trình',
           description: 'Chỉ hiển thị syllabus môn học đã được tạo từ syllabus gốc cho môn trong chương trình đang chọn.',
           tableTitle: 'Syllabus áp dụng của môn trong chương trình',
@@ -3253,9 +3310,17 @@ const configs = {
       {key: 'tenKy', label: 'Kỳ'},
       {key: 'tenNhomKienThuc', label: 'Nhóm KT'},
       {key: 'loai', label: 'Loại'},
+      {key: 'loaiHocPhan', label: 'Loại học phần'},
       {key: 'loaiPhamVi', label: 'Phạm vi'},
-      {key: 'soTinChi', label: 'TC'},
-      {key: 'tongGio', label: 'Giờ'}
+      {key: 'batBuoc', label: 'Bắt buộc'},
+      {key: 'laMonDieuKien', label: 'Môn điều kiện'},
+      {key: 'thuTu', label: 'Thứ tự'},
+      {key: 'soTinChi', label: 'Số tín chỉ'},
+      {key: 'tongGio', label: 'Tổng giờ'},
+      {key: 'gioLyThuyet', label: 'Giờ lý thuyết'},
+      {key: 'gioThucHanh', label: 'Giờ thực hành'},
+      {key: 'gioKiemTra', label: 'Giờ kiểm tra'},
+      {key: 'ghiChu', label: 'Ghi chú'}
     ]
   },
   monTuChon: {
@@ -3604,7 +3669,8 @@ const configs = {
     ]
   },
   syllabusMonHoc: {
-    title: 'Syllabus môn học',
+    title: 'Syllabus môn học đã gán vào môn trong chương trình',
+    description: 'Bảng syllabus môn học áp dụng cho môn trong chương trình.',
     defaultForm: {
       chuongTrinhMonId: null,
       syllabusMonHocGocId: null,
@@ -3617,36 +3683,57 @@ const configs = {
       diemDatToiThieu: null,
       donViDiem: 'thang_10',
       tyLeChuyenCanToiThieu: null,
-      batBuocDuThi: true,
-      congThucQuyDoi: ''
+      batBuocDuThi: false,
+      congThucQuyDoi: '',
+      ghiChu: ''
     },
     fields: [
-      {key: 'viTri', label: 'Vị trí', type: 'textarea', wide: true},
-      {key: 'tinhChat', label: 'Tính chất', type: 'textarea', wide: true},
-      {key: 'mucTieu', label: 'Mục tiêu', type: 'textarea', wide: true},
-      {key: 'phuongPhapDanhGia', label: 'Phương pháp đánh giá', type: 'textarea', wide: true},
-      {key: 'dieuKienHoanThanh', label: 'Điều kiện hoàn thành', type: 'textarea', wide: true},
       {
-        key: 'diemDatToiThieu',
-        label: 'Điểm đạt tối thiểu',
-        type: 'number',
-        max: 10,
-        step: 0.01,
-        maxBy: {donViDiem: {thang_10: 10, phan_tram: 100}}
+        key: 'chuongTrinhMonId',
+        label: 'Môn trong chương trình',
+        type: 'select',
+        lookup: 'chuongTrinhMon',
+        labelKey: ['maMonTrongCt', 'tenMon'],
+        locked: true
       },
-      {key: 'donViDiem', label: 'Đơn vị điểm', type: 'select', lookup: 'donViDiem'},
-      {key: 'tyLeChuyenCanToiThieu', label: 'Tỷ lệ chuyên cần tối thiểu', type: 'number', max: 999.99, step: 0.01},
-      {key: 'batBuocDuThi', label: 'Bắt buộc dự thi', type: 'boolean'},
-      {key: 'congThucQuyDoi', label: 'Công thức quy đổi'},
-      {key: 'huongDan', label: 'Hướng dẫn', type: 'textarea', wide: true}
+      {
+        key: 'syllabusMonHocGocId',
+        label: 'Syllabus môn học gốc',
+        type: 'select',
+        lookup: 'syllabusMonHocGoc',
+        labelKey: ['ma', 'ten'],
+        locked: true
+      },
+      { key: 'viTri', label: 'Vị trí', type: 'textarea', wide: true },
+      { key: 'tinhChat', label: 'Tính chất', type: 'textarea', wide: true },
+      { key: 'mucTieu', label: 'Mục tiêu', type: 'textarea', wide: true },
+      { key: 'phuongPhapDanhGia', label: 'Phương pháp đánh giá', type: 'textarea', wide: true },
+      { key: 'dieuKienHoanThanh', label: 'Điều kiện hoàn thành', type: 'textarea', wide: true },
+      { key: 'huongDan', label: 'Hướng dẫn', type: 'textarea', wide: true },
+      { key: 'diemDatToiThieu', label: 'Điểm đạt tối thiểu', type: 'number', step: 0.01 },
+      { key: 'donViDiem', label: 'Đơn vị điểm', type: 'select', lookup: 'donViDiem' },
+      { key: 'tyLeChuyenCanToiThieu', label: 'Tỷ lệ chuyên cần tối thiểu', type: 'number', step: 0.01 },
+      { key: 'batBuocDuThi', label: 'Bắt buộc dự thi', type: 'boolean' },
+      { key: 'congThucQuyDoi', label: 'Công thức quy đổi', type: 'textarea', wide: true },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
     ],
     columns: [
-      {key: 'tenChuongTrinhMon', label: 'Môn CT'},
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
-      {key: 'viTri', label: 'Vị trí'},
-      {key: 'tinhChat', label: 'Tính chất'},
-      {key: 'diemDatToiThieu', label: 'Điểm đạt'},
-      {key: 'donViDiem', label: 'Đơn vị điểm'}
+      { key: 'tenChuongTrinhMon', label: 'Môn trong CT' },
+      { key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc' },
+      { key: 'viTri', label: 'Vị trí' },
+      { key: 'tinhChat', label: 'Tính chất' },
+      { key: 'mucTieu', label: 'Mục tiêu' },
+      { key: 'phuongPhapDanhGia', label: 'Phương pháp đánh giá' },
+      { key: 'dieuKienHoanThanh', label: 'Điều kiện hoàn thành' },
+      { key: 'huongDan', label: 'Hướng dẫn' },
+      { key: 'diemDatToiThieu', label: 'Điểm đạt tối thiểu' },
+      { key: 'donViDiem', label: 'Đơn vị điểm' },
+      { key: 'tyLeChuyenCanToiThieu', label: 'Tỷ lệ chuyên cần tối thiểu' },
+      { key: 'batBuocDuThi', label: 'Bắt buộc dự thi' },
+      { key: 'congThucQuyDoi', label: 'Công thức quy đổi' },
+      { key: 'ghiChu', label: 'Ghi chú' },
+      { key: 'createdAt', label: 'Ngày tạo' },
+      { key: 'updatedAt', label: 'Ngày cập nhật' }
     ]
   },
   dieuKienMonHoc: {
@@ -3654,25 +3741,38 @@ const configs = {
     description: 'Điều kiện thực hiện môn học đã lưu riêng cho syllabus áp dụng.',
     defaultForm: {
       syllabusMonId: null,
-      ma: '',
       loai: 'phong_hoc',
+      ten: '',
       noiDung: '',
+      soLuong: null,
+      yeuCau: '',
       thuTu: null,
       ghiChu: ''
     },
     fields: [
-      { key: 'syllabusMonId', label: 'Syllabus môn', type: 'select', lookup: 'syllabusMonHoc', labelKey: ['tenSyllabusMonHocGoc', 'ma', 'mucTieu'], locked: true },
-      { key: 'ma', label: 'Mã điều kiện gốc' },
+      {
+        key: 'syllabusMonId',
+        label: 'Syllabus môn',
+        type: 'select',
+        lookup: 'syllabusMonHoc',
+        labelKey: ['ten', 'tenSyllabusMonHocGoc', 'ma'],
+        locked: true
+      },
       { key: 'loai', label: 'Loại điều kiện', type: 'select', lookup: 'loaiDieuKienMonHoc', required: true },
+      { key: 'ten', label: 'Tên điều kiện', required: true },
       { key: 'noiDung', label: 'Nội dung', type: 'textarea', required: true, wide: true },
+      { key: 'soLuong', label: 'Số lượng', type: 'number', step: 1 },
+      { key: 'yeuCau', label: 'Yêu cầu', type: 'textarea', wide: true },
       { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 },
       { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
     ],
     columns: [
       { key: 'tenSyllabusMon', label: 'Syllabus môn' },
-      { key: 'ma', label: 'Mã điều kiện gốc' },
-      { key: 'loai', label: 'Loại điều kiện' },
+      { key: 'loai', label: 'Loại' },
+      { key: 'ten', label: 'Tên điều kiện' },
       { key: 'noiDung', label: 'Nội dung' },
+      { key: 'soLuong', label: 'Số lượng' },
+      { key: 'yeuCau', label: 'Yêu cầu' },
       { key: 'thuTu', label: 'Thứ tự' },
       { key: 'ghiChu', label: 'Ghi chú' },
       { key: 'createdAt', label: 'Ngày tạo' },
@@ -3749,39 +3849,53 @@ const configs = {
     description: 'Nội dung chi tiết từng chương/bài trong syllabus môn học áp dụng.',
     defaultForm: {
       syllabusMonId: null,
+      maChuong: '',
       ten: '',
+      mucTieu: '',
+      noiDung: '',
       tongGio: null,
       gioLyThuyet: null,
       gioThucHanh: null,
       gioKiemTra: null,
-      noiDung: '',
-      mucTieu: '',
-      thuTu: null
+      thuTu: null,
+      ghiChu: ''
     },
     fields: [
-      { key: 'syllabusMonId', label: 'Syllabus môn', type: 'select', lookup: 'syllabusMonHoc', labelKey: ['tenSyllabusMonHocGoc', 'ma', 'mucTieu'], locked: true },
+      {
+        key: 'syllabusMonId',
+        label: 'Syllabus môn',
+        type: 'select',
+        lookup: 'syllabusMonHoc',
+        labelKey: ['ten', 'tenSyllabusMonHocGoc', 'ma'],
+        locked: true
+      },
+      { key: 'maChuong', label: 'Mã chương', required: true },
       { key: 'ten', label: 'Tên chương/bài', required: true },
+      { key: 'mucTieu', label: 'Mục tiêu', type: 'textarea', wide: true },
+      { key: 'noiDung', label: 'Nội dung', type: 'textarea', wide: true },
       { key: 'tongGio', label: 'Tổng giờ', type: 'number', step: 0.1 },
       { key: 'gioLyThuyet', label: 'Giờ lý thuyết', type: 'number', step: 0.1 },
       { key: 'gioThucHanh', label: 'Giờ thực hành', type: 'number', step: 0.1 },
       { key: 'gioKiemTra', label: 'Giờ kiểm tra', type: 'number', step: 0.1 },
-      { key: 'noiDung', label: 'Nội dung', type: 'textarea', wide: true },
-      { key: 'mucTieu', label: 'Mục tiêu', type: 'textarea', wide: true },
-      { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 }
+      { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 },
+      { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
     ],
     columns: [
       { key: 'tenSyllabusMon', label: 'Syllabus môn' },
+      { key: 'maChuong', label: 'Mã chương' },
       { key: 'ten', label: 'Tên chương/bài' },
+      { key: 'mucTieu', label: 'Mục tiêu' },
+      { key: 'noiDung', label: 'Nội dung' },
       { key: 'tongGio', label: 'Tổng giờ' },
       { key: 'gioLyThuyet', label: 'Giờ lý thuyết' },
       { key: 'gioThucHanh', label: 'Giờ thực hành' },
       { key: 'gioKiemTra', label: 'Giờ kiểm tra' },
-      { key: 'noiDung', label: 'Nội dung' },
-      { key: 'mucTieu', label: 'Mục tiêu' },
-      { key: 'thuTu', label: 'Thứ tự' }
+      { key: 'thuTu', label: 'Thứ tự' },
+      { key: 'ghiChu', label: 'Ghi chú' },
+      { key: 'createdAt', label: 'Ngày tạo' },
+      { key: 'updatedAt', label: 'Ngày cập nhật' }
     ]
   },
-
   taiLieuGoc: {
     title: 'Tài liệu gốc / mẫu',
     description: 'Kho tài liệu gốc dùng chung cho syllabus môn học.',
@@ -3873,28 +3987,41 @@ const configs = {
       nhaXuatBan: '',
       namXuatBan: null,
       duongDan: '',
+      batBuoc: false,
+      thuTu: null,
       ghiChu: ''
     },
     fields: [
-      { key: 'syllabusMonId', label: 'Syllabus môn', type: 'select', lookup: 'syllabusMonHoc', labelKey: ['tenSyllabusMonHocGoc', 'ma', 'mucTieu'], locked: true },
-      { key: 'ma', label: 'Mã tài liệu gốc' },
+      {
+        key: 'syllabusMonId',
+        label: 'Syllabus môn',
+        type: 'select',
+        lookup: 'syllabusMonHoc',
+        labelKey: ['ten', 'tenSyllabusMonHocGoc', 'ma'],
+        locked: true
+      },
+      { key: 'ma', label: 'Mã tài liệu', required: true },
       { key: 'ten', label: 'Tên tài liệu', required: true },
       { key: 'loai', label: 'Loại tài liệu', type: 'select', lookup: 'loaiTaiLieu' },
       { key: 'tacGia', label: 'Tác giả' },
       { key: 'nhaXuatBan', label: 'Nhà xuất bản' },
       { key: 'namXuatBan', label: 'Năm xuất bản', type: 'number' },
       { key: 'duongDan', label: 'Đường dẫn' },
+      { key: 'batBuoc', label: 'Bắt buộc', type: 'boolean' },
+      { key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1 },
       { key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true }
     ],
     columns: [
       { key: 'tenSyllabusMon', label: 'Syllabus môn' },
-      { key: 'ma', label: 'Mã tài liệu gốc' },
+      { key: 'ma', label: 'Mã tài liệu' },
       { key: 'ten', label: 'Tên tài liệu' },
       { key: 'loai', label: 'Loại' },
       { key: 'tacGia', label: 'Tác giả' },
       { key: 'nhaXuatBan', label: 'Nhà xuất bản' },
       { key: 'namXuatBan', label: 'Năm xuất bản' },
       { key: 'duongDan', label: 'Đường dẫn' },
+      { key: 'batBuoc', label: 'Bắt buộc' },
+      { key: 'thuTu', label: 'Thứ tự' },
       { key: 'ghiChu', label: 'Ghi chú' },
       { key: 'createdAt', label: 'Ngày tạo' },
       { key: 'updatedAt', label: 'Ngày cập nhật' }
@@ -4404,5 +4531,43 @@ const configs = {
   .continue-panel .secondary-action {
     min-width: 0;
   }
+}
+.notice {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.notice.success {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.notice.error {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.table-message {
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.table-message.success {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.table-message.error {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
 }
 </style>

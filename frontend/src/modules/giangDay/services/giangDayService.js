@@ -1,6 +1,5 @@
 import { giangDayApi } from '../api/giangDayApi'
 import { daoTaoApi } from '@/modules/daoTao/api/daoTaoApi'
-import { chuongTrinhApi } from '@/modules/chuongTrinh/api/chuongTrinhApi'
 
 function layPage(result) {
     const data = result?.data?.data || result?.data || result
@@ -240,7 +239,7 @@ export const giangDayService = {
     },
 
     async layDanhSachChuongTrinh(params = {}) {
-        return layPage(await chuongTrinhApi.chuongTrinh.getAll({
+        return layPage(await daoTaoApi.chuongTrinh.getAll({
             page: 0,
             size: 200,
             sortBy: 'id',
@@ -250,7 +249,7 @@ export const giangDayService = {
     },
 
     async layDanhSachChuongTrinhVersion(params = {}) {
-        return layPage(await chuongTrinhApi.chuongTrinhVersion.getAll({
+        return layPage(await daoTaoApi.chuongTrinhVersion.getAll({
             page: 0,
             size: 200,
             sortBy: 'id',
@@ -260,7 +259,7 @@ export const giangDayService = {
     },
 
     async layDanhSachChuongTrinhMon(params = {}) {
-        return layPage(await chuongTrinhApi.chuongTrinhMon.getAll({
+        return layPage(await daoTaoApi.chuongTrinhMon.getAll({
             page: 0,
             size: 200,
             sortBy: 'id',
@@ -270,7 +269,7 @@ export const giangDayService = {
     },
 
     async layDanhSachMonHoc(params = {}) {
-        return layPage(await chuongTrinhApi.monHoc.getAll({
+        return layPage(await daoTaoApi.monHoc.getAll({
             page: 0,
             size: 200,
             sortBy: 'id',
