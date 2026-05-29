@@ -13,9 +13,6 @@ import org.example.trungcapphuongnam.module.lms.enums.TrangThaiBaiTapLop;
 @Builder
 public class BaiTapLopRequest {
 
-    @NotNull
-
-    private Long dotGiaoBaiOnlineId;
 
     @NotNull
 
@@ -25,17 +22,16 @@ public class BaiTapLopRequest {
 
     private Long lopHocPhanId;
 
-    @NotNull
-
-    private Long cauHinhDanhGiaId;
-
-    @NotNull
-
-    private Long nguoiGiaoTaiKhoanId;
 
     @NotNull
 
     private LocalDateTime thoiGianMo;
+
+    private Long dotGiaoBaiOnlineId;
+
+    private Long cauHinhDanhGiaId;
+
+    private Long nguoiGiaoTaiKhoanId;
 
     @NotNull
 

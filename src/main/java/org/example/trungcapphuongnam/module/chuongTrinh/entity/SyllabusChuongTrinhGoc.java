@@ -28,7 +28,8 @@ public class SyllabusChuongTrinhGoc {
 
     @Column(name = "ten", nullable = false, length = 255)
     private String ten;
-
+    @Column(name = "duong_dan", columnDefinition = "TEXT")
+    private String duongDan;
     @Column(name = "muc_tieu", columnDefinition = "TEXT")
     private String mucTieu;
 

@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomTuChonR
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChon;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.NhomTuChonMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.NhomTuChonRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomTuChonService;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;

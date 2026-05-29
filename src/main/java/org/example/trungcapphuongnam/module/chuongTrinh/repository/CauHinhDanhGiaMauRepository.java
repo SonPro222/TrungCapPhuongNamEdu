@@ -10,6 +10,14 @@ public interface CauHinhDanhGiaMauRepository extends JpaRepository<CauHinhDanhGi
 
     List<CauHinhDanhGiaMau> findByChuongTrinhMonIdOrderByThuTuAscIdAsc(Long chuongTrinhMonId);
 
+    boolean existsByTenCotDiem(String tenCotDiem);
+
+    boolean existsByTenCotDiemAndIdNot(String tenCotDiem, Long id);
+
+    boolean existsByThuTu(Integer thuTu);
+
+    boolean existsByThuTuAndIdNot(Integer thuTu, Long id);
+
     boolean existsByChuongTrinhMonIdAndTenCotDiem(Long chuongTrinhMonId, String tenCotDiem);
 
     boolean existsByChuongTrinhMonIdAndTenCotDiemAndIdNot(Long chuongTrinhMonId, String tenCotDiem, Long id);
@@ -17,4 +25,5 @@ public interface CauHinhDanhGiaMauRepository extends JpaRepository<CauHinhDanhGi
     boolean existsByChuongTrinhMonIdAndThuTu(Long chuongTrinhMonId, Integer thuTu);
 
     boolean existsByChuongTrinhMonIdAndThuTuAndIdNot(Long chuongTrinhMonId, Integer thuTu, Long id);
+    List<CauHinhDanhGiaMau> findByChuongTrinhMonIdIsNullOrderByThuTuAscIdAsc();
 }

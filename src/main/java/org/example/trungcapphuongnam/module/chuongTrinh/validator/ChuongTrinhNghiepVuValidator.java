@@ -549,6 +549,7 @@ public class ChuongTrinhNghiepVuValidator {
 
         requireExists(chuongTrinhMonRepository, chuongTrinhMonId, "Môn trong chương trình");
         validateNguongDiem(request.getNguongTu(), request.getNguongDen(), request.getDiemQuyDoi());
+        validateTenCotDiemVaTongTyLeQuyDoiDiem(request, id);
 
         if (request.getNguongTu() != null
                 && request.getNguongDen() != null
@@ -556,7 +557,41 @@ public class ChuongTrinhNghiepVuValidator {
             throw new DuplicateResourceException("Khoảng ngưỡng quy đổi điểm bị chồng lấn với dòng đã có của môn này");
         }
     }
+    private void validateTenCotDiemVaTongTyLeQuyDoiDiem(QuyDoiDiemRequest request, Long id) {
+        Long chuongTrinhMonId = request.getChuongTrinhMonId();
 
+        String tenCotDiem = null;
+        if (request.getTen() != null && !request.getTen().trim().isEmpty()) {
+            tenCotDiem = request.getTen().trim();
+        } else if (request.getGhiChu() != null && !request.getGhiChu().trim().isEmpty()) {
+            tenCotDiem = request.getGhiChu().trim();
+        }
+
+        if (tenCotDiem == null) {
+            throw new BadRequestException("Tên cột điểm mẫu không được để trống");
+        }
+
+        if (quyDoiDiemRepository.existsTenCotDiemTrongMon(chuongTrinhMonId, tenCotDiem, id)) {
+            throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong Quy đổi điểm đã lưu cho môn trong chương trình: " + tenCotDiem);
+        }
+
+        BigDecimal tyLe = request.getTyLe() == null ? BigDecimal.ZERO : request.getTyLe();
+
+        if (tyLe.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BadRequestException("Tỷ lệ % không được âm");
+        }
+
+        if (tyLe.compareTo(new BigDecimal("100")) > 0) {
+            throw new BadRequestException("Tỷ lệ % không được lớn hơn 100%");
+        }
+
+        BigDecimal tongTyLeCu = quyDoiDiemRepository.tongTyLeTrongMonKhongTinhDongHienTai(chuongTrinhMonId, id);
+        BigDecimal tongTyLeMoi = tongTyLeCu.add(tyLe);
+
+        if (tongTyLeMoi.compareTo(new BigDecimal("100")) > 0) {
+            throw new BadRequestException("Tổng tỷ lệ % của Quy đổi điểm đã lưu cho môn trong chương trình không được vượt quá 100%. Hiện tại sau khi lưu sẽ là " + tongTyLeMoi.stripTrailingZeros().toPlainString() + "%");
+        }
+    }
     public void validateSyllabusMonHoc(SyllabusMonHocRequest request, Long id) {
         notNull(request, "Dữ liệu syllabus môn học không hợp lệ");
 

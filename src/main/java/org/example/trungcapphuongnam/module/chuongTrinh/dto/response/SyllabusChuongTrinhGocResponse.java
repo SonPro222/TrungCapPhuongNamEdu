@@ -16,7 +16,7 @@ public class SyllabusChuongTrinhGocResponse {
     private String ma;
 
     private String ten;
-
+    private String duongDan;
     private String mucTieu;
 
 

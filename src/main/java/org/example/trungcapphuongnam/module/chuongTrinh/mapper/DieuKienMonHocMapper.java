@@ -11,6 +11,9 @@ public class DieuKienMonHocMapper {
         if (request == null) return null;
         return DieuKienMonHoc.builder()
                 .syllabusMonId(request.getSyllabusMonId())
+                .ten(request.getTen())
+                .soLuong(request.getSoLuong())
+                .yeuCau(request.getYeuCau())
                 .loai(request.getLoai())
                 .noiDung(request.getNoiDung())
                 .thuTu(request.getThuTu())
@@ -25,6 +28,9 @@ public class DieuKienMonHocMapper {
         return DieuKienMonHocResponse.builder()
                 .id(entity.getId())
                 .syllabusMonId(entity.getSyllabusMonId())
+                .ten(entity.getTen())
+                .soLuong(entity.getSoLuong())
+                .yeuCau(entity.getYeuCau())
                 .loai(entity.getLoai())
                 .noiDung(entity.getNoiDung())
                 .thuTu(entity.getThuTu())
@@ -38,6 +44,9 @@ public class DieuKienMonHocMapper {
     public void updateEntity(DieuKienMonHoc entity, DieuKienMonHocRequest request) {
         if (entity == null || request == null) return;
         entity.setSyllabusMonId(request.getSyllabusMonId());
+        entity.setTen(request.getTen());
+        entity.setSoLuong(request.getSoLuong());
+        entity.setYeuCau(request.getYeuCau());
         entity.setLoai(request.getLoai());
         entity.setNoiDung(request.getNoiDung());
         entity.setThuTu(request.getThuTu());

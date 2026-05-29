@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.MonTienQuye
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MonTienQuyet;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.MonTienQuyetMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.MonTienQuyetRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.MonTienQuyetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

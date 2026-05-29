@@ -12,7 +12,9 @@ public class SyllabusTaiLieuRequest {
 
     @NotNull(message = "syllabus_mon_id không được để trống")
     private Long syllabusMonId;
+    private Boolean batBuoc;
 
+    private Integer thuTu;
     @NotBlank(message = "ten không được để trống")
     private String ten;
 
@@ -30,8 +32,5 @@ public class SyllabusTaiLieuRequest {
 
     private String duongDan;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
 }

@@ -29,7 +29,6 @@ public class LichSuBaiTapLopRequest {
 
     private JsonNode duLieuMoi;
 
-    @NotBlank
 
     private String lyDo;
 

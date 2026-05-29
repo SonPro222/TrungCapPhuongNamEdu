@@ -16,6 +16,8 @@ import org.example.trungcapphuongnam.module.diem.mapper.BaiKiemTraMapper;
 import org.example.trungcapphuongnam.module.diem.repository.BaiKiemTraRepository;
 import org.example.trungcapphuongnam.module.diem.service.BaiKiemTraService;
 import org.springframework.data.domain.Page;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,15 @@ public class BaiKiemTraServiceImpl implements BaiKiemTraService {
     @Transactional(readOnly = true)
     public BaiKiemTraResponse findById(Long id) {
         return mapper.toResponse(getEntity(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BaiKiemTraResponse> findByLopHocPhanId(Long lopHocPhanId) {
+        return repository.findByLopHocPhanId(lopHocPhanId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

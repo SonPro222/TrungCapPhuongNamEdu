@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMon
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocService;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;

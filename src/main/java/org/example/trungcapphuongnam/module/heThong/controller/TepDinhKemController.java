@@ -18,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -104,6 +106,54 @@ public class TepDinhKemController {
     @DeleteMapping("/{id}")
     public ApiResponse<TepDinhKemResponse> deleteMem(@PathVariable Long id) {
         return ApiResponse.ok(service.deleteMem(id));
+    }
+    @GetMapping("/{id}/preview")
+    public ResponseEntity<Resource> preview(@PathVariable Long id) {
+        TepDinhKemResponse tep = service.getById(id);
+        Resource resource = service.preview(id);
+
+        String fileName = URLEncoder.encode(tep.getTenGoc(), StandardCharsets.UTF_8)
+                .replace("+", "%20");
+
+        String contentType = layContentTypePreview(tep);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename*=UTF-8''" + fileName)
+                .body(resource);
+    }
+
+    private String layContentTypePreview(TepDinhKemResponse tep) {
+        String extension = tep.getExtension() == null
+                ? ""
+                : tep.getExtension().replace(".", "").toLowerCase(Locale.ROOT);
+
+        if (laFileOffice(extension)) {
+            return MediaType.APPLICATION_PDF_VALUE;
+        }
+
+        if (tep.getContentType() != null && !tep.getContentType().isBlank()) {
+            return tep.getContentType();
+        }
+
+        if ("pdf".equals(extension)) {
+            return MediaType.APPLICATION_PDF_VALUE;
+        }
+
+        if ("txt".equals(extension) || "csv".equals(extension)) {
+            return MediaType.TEXT_PLAIN_VALUE;
+        }
+
+        return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+    }
+
+    private boolean laFileOffice(String extension) {
+        return extension.equals("doc")
+                || extension.equals("docx")
+                || extension.equals("xls")
+                || extension.equals("xlsx")
+                || extension.equals("ppt")
+                || extension.equals("pptx");
     }
 
 }

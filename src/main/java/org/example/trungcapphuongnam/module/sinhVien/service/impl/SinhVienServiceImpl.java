@@ -272,6 +272,7 @@ public class SinhVienServiceImpl implements SinhVienService {
                 .module("sinh_vien")
                 .nghiepVu(nghiepVu)
                 .doiTuongId(sinhVien.getId())
+                .sinhVienId(sinhVien.getId())
                 .nguoiGuiLoai(LoaiNguoiGui.NHAN_VIEN)
                 .nguoiGuiId(0L)
                 .nguoiGuiTen(sinhVien.getHoTen())

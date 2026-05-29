@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusTai
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusTaiLieu;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusTaiLieuMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusTaiLieuRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusTaiLieuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

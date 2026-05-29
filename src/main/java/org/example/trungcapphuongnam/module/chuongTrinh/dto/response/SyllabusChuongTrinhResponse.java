@@ -14,7 +14,7 @@ public class SyllabusChuongTrinhResponse {
 
     private Long chuongTrinhVersionId;
     private Long syllabusChuongTrinhGocId;
-
+    private String duongDan;
     private String moTaTongQuan;
 
     private String mucDich;

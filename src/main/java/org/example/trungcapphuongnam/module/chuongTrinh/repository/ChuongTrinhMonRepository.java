@@ -22,10 +22,9 @@ public interface ChuongTrinhMonRepository extends JpaRepository<ChuongTrinhMon, 
             Long khungKyId,
             Pageable pageable
     );
-    boolean existsByChuongTrinhVersionIdAndMaMonTrongCt(Long chuongTrinhVersionId, String maMonTrongCt);
+    boolean existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCt(Long chuongTrinhVersionId, Long khungKyId, String maMonTrongCt);
 
-    boolean existsByChuongTrinhVersionIdAndMaMonTrongCtAndIdNot(Long chuongTrinhVersionId, String maMonTrongCt, Long id);
-
+    boolean existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCtAndIdNot(Long chuongTrinhVersionId, Long khungKyId, String maMonTrongCt, Long id);
     boolean existsByChuongTrinhVersionIdAndKhungKyIdAndMonHocId(Long chuongTrinhVersionId, Long khungKyId, Long monHocId);
 
     boolean existsByChuongTrinhVersionIdAndKhungKyIdAndMonHocIdAndIdNot(Long chuongTrinhVersionId, Long khungKyId, Long monHocId, Long id);
@@ -37,4 +36,8 @@ public interface ChuongTrinhMonRepository extends JpaRepository<ChuongTrinhMon, 
     Page<ChuongTrinhMon> findByNhomKienThucId(Long nhomKienThucId, Pageable pageable);
     List<ChuongTrinhMon> findByMonHocId(Long monHocId);
     List<ChuongTrinhMon> findByChuongTrinhVersionId(Long chuongTrinhVersionId);
+
+    boolean existsByChuongTrinhVersionIdAndMonHocId(Long chuongTrinhVersionId, Long monHocId);
+
+    boolean existsByChuongTrinhVersionIdAndMonHocIdAndIdNot(Long chuongTrinhVersionId, Long monHocId, Long id);
 }

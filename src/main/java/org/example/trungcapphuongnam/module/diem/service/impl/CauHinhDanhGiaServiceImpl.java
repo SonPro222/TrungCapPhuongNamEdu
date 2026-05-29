@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +38,15 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
     @Transactional(readOnly = true)
     public CauHinhDanhGiaResponse findById(Long id) {
         return mapper.toResponse(getEntity(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CauHinhDanhGiaResponse> findByLopHocPhanId(Long lopHocPhanId) {
+        return repository.findByLopHocPhanIdOrderByThuTuAsc(lopHocPhanId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

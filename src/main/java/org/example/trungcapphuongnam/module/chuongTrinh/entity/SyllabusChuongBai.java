@@ -20,7 +20,8 @@ public class SyllabusChuongBai {
 
     @Column(name = "syllabus_mon_id")
     private Long syllabusMonId;
-
+    @Column(name = "ma_chuong")
+    private String maChuong;
     @Column(name = "ten")
     private String ten;
 

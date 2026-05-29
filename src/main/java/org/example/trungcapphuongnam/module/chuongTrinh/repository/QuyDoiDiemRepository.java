@@ -1,5 +1,5 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.repository;
-
+import java.util.List;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -29,6 +29,30 @@ public interface QuyDoiDiemRepository extends JpaRepository<QuyDoiDiem, Long>, J
             @Param("chuongTrinhMonId") Long chuongTrinhMonId,
             @Param("nguongTu") BigDecimal nguongTu,
             @Param("nguongDen") BigDecimal nguongDen,
+            @Param("id") Long id
+    );
+    List<QuyDoiDiem> findByChuongTrinhMonIdOrderByThuTuAscIdAsc(Long chuongTrinhMonId);
+    @Query("""
+        select count(q) > 0
+        from QuyDoiDiem q
+        where q.chuongTrinhMonId = :chuongTrinhMonId
+          and (:id is null or q.id <> :id)
+          and lower(trim(coalesce(q.ten, q.ghiChu, ''))) = lower(trim(:tenCotDiem))
+        """)
+    boolean existsTenCotDiemTrongMon(
+            @Param("chuongTrinhMonId") Long chuongTrinhMonId,
+            @Param("tenCotDiem") String tenCotDiem,
+            @Param("id") Long id
+    );
+
+    @Query("""
+        select coalesce(sum(q.tyLe), 0)
+        from QuyDoiDiem q
+        where q.chuongTrinhMonId = :chuongTrinhMonId
+          and (:id is null or q.id <> :id)
+        """)
+    BigDecimal tongTyLeTrongMonKhongTinhDongHienTai(
+            @Param("chuongTrinhMonId") Long chuongTrinhMonId,
             @Param("id") Long id
     );
 

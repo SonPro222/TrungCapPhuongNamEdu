@@ -26,7 +26,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
+import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -35,7 +36,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             ResourceNotFoundException.class,
             HeThongNotFoundException.class,
-            SinhVienNotFoundException.class
+            SinhVienNotFoundException.class,
+            GiangDayNotFoundException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleNotFound(RuntimeException ex) {
         log.warn("NOT_FOUND type={} message={}", ex.getClass().getSimpleName(), ex.getMessage());
@@ -50,6 +52,7 @@ public class GlobalExceptionHandler {
             DuplicateResourceException.class,
             HeThongException.class,
             SinhVienException.class,
+            GiangDayException.class,
             IllegalArgumentException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(RuntimeException ex) {

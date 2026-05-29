@@ -16,21 +16,19 @@ public class DotGiaoBaiOnlineRequest {
 
     private Long baiTapOnlineId;
 
-    @NotNull
 
-    private Long nguoiGiaoTaiKhoanId;
 
     private NguonGiao nguonGiao;
 
     private PhamViGiaoBai phamVi;
 
-    @NotNull
+
+    private Long nguoiGiaoTaiKhoanId;
 
     private Long nganhId;
 
-    @NotNull
-
     private Long chuongTrinhVersionId;
+
 
     private String ghiChu;
 

@@ -13,7 +13,7 @@ public class SyllabusChuongBaiResponse {
     private Long id;
 
     private Long syllabusMonId;
-
+    private String maChuong;
     private String ten;
 
     private BigDecimal tongGio;

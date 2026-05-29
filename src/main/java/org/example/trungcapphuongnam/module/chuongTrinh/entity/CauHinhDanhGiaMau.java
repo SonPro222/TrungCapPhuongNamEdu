@@ -19,7 +19,7 @@ public class CauHinhDanhGiaMau {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "chuong_trinh_mon_id", nullable = false)
+    @Column(name = "chuong_trinh_mon_id")
     private Long chuongTrinhMonId;
 
     @Column(name = "ten_cot_diem", nullable = false)

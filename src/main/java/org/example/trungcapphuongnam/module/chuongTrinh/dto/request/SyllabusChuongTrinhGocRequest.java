@@ -14,7 +14,7 @@ public class SyllabusChuongTrinhGocRequest {
     private String ten;
 
     private String mucTieu;
-
+    private String duongDan;
     private String doiTuongTuyenSinh;
 
     private String thoiGianDaoTao;

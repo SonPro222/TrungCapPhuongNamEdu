@@ -68,7 +68,68 @@ public class TepDinhKem {
 
     @Column(name = "mo_ta", columnDefinition = "TEXT")
     private String moTa;
+    @Column(name = "nganh_id")
+    private Long nganhId;
 
+    @Column(name = "chuong_trinh_id")
+    private Long chuongTrinhId;
+
+    @Column(name = "chuong_trinh_version_id")
+    private Long chuongTrinhVersionId;
+
+    @Column(name = "nam_hoc_id")
+    private Long namHocId;
+
+    @Column(name = "hoc_ky_id")
+    private Long hocKyId;
+
+    @Column(name = "lop_hanh_chinh_id")
+    private Long lopHanhChinhId;
+
+    @Column(name = "lop_hoc_phan_id")
+    private Long lopHocPhanId;
+
+    @Column(name = "mon_hoc_id")
+    private Long monHocId;
+
+    @Column(name = "chuong_trinh_mon_id")
+    private Long chuongTrinhMonId;
+
+    @Column(name = "giang_vien_id")
+    private Long giangVienId;
+
+    @Column(name = "sinh_vien_id")
+    private Long sinhVienId;
+
+    @Column(name = "bai_hoc_id")
+    private Long baiHocId;
+
+    @Column(name = "bai_tap_id")
+    private Long baiTapId;
+
+    @Column(name = "lab_id")
+    private Long labId;
+
+    @Column(name = "bai_nop_id")
+    private Long baiNopId;
+
+    @Column(name = "lan_nop")
+    private Integer lanNop;
+
+    @Column(name = "syllabus_chuong_trinh_id")
+    private Long syllabusChuongTrinhId;
+
+    @Column(name = "syllabus_mon_hoc_id")
+    private Long syllabusMonHocId;
+
+    @Column(name = "tai_lieu_goc_id")
+    private Long taiLieuGocId;
+
+    @Column(name = "tang_nghiep_vu", length = 150)
+    private String tangNghiepVu;
+
+    @Column(name = "duong_dan_nghiep_vu", length = 1500)
+    private String duongDanNghiepVu;
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 30)
     private TrangThaiTepDinhKem trangThai;

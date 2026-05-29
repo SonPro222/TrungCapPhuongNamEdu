@@ -8,7 +8,7 @@ import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhanChuongTrin
 import org.example.trungcapphuongnam.module.giangDay.mapper.LopHocPhanChuongTrinhMonMapper;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.giangDay.service.LopHocPhanChuongTrinhMonService;
-import org.example.trungcapphuongnam.module.giangDay.service.SaoChepCotDiemTuChuongTrinhMonService;
+import org.example.trungcapphuongnam.module.giangDay.service.SaoChepCauHinhDanhGiaService;
 import org.example.trungcapphuongnam.module.giangDay.validator.LopHocPhanChuongTrinhMonValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,7 @@ public class LopHocPhanChuongTrinhMonServiceImpl implements LopHocPhanChuongTrin
     private final LopHocPhanChuongTrinhMonRepository repository;
     private final LopHocPhanChuongTrinhMonMapper mapper;
     private final LopHocPhanChuongTrinhMonValidator validator;
-    private final SaoChepCotDiemTuChuongTrinhMonService saoChepCotDiemTuChuongTrinhMonService;
+    private final SaoChepCauHinhDanhGiaService saoChepCauHinhDanhGiaService;
 
     @Override
     @Transactional(readOnly = true)
@@ -64,7 +64,7 @@ public class LopHocPhanChuongTrinhMonServiceImpl implements LopHocPhanChuongTrin
         LopHocPhanChuongTrinhMon entity = mapper.toEntity(request);
         LopHocPhanChuongTrinhMon saved = repository.save(entity);
 
-        saoChepCotDiemTuChuongTrinhMonService.saoChep(
+        saoChepCauHinhDanhGiaService.saoChepTuChuongTrinhMonSangLopHocPhan(
                 saved.getLopHocPhanId(),
                 saved.getChuongTrinhMonId()
         );
@@ -81,7 +81,7 @@ public class LopHocPhanChuongTrinhMonServiceImpl implements LopHocPhanChuongTrin
 
         LopHocPhanChuongTrinhMon saved = repository.save(entity);
 
-        saoChepCotDiemTuChuongTrinhMonService.saoChep(
+        saoChepCauHinhDanhGiaService.saoChepTuChuongTrinhMonSangLopHocPhan(
                 saved.getLopHocPhanId(),
                 saved.getChuongTrinhMonId()
         );

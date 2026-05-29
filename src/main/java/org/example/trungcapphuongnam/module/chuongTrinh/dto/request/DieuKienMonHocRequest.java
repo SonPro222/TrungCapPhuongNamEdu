@@ -12,7 +12,12 @@ public class DieuKienMonHocRequest {
 
     @NotNull(message = "syllabus_mon_id không được để trống")
     private Long syllabusMonId;
+    @NotBlank(message = "ten không được để trống")
+    private String ten;
 
+    private Integer soLuong;
+
+    private String yeuCau;
     @NotBlank(message = "loai không được để trống")
     private String loai;
 
@@ -25,8 +30,6 @@ public class DieuKienMonHocRequest {
 
     private String ghiChu;
 
-    private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
 
 }

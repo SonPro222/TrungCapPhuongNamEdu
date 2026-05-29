@@ -2,18 +2,14 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.exception.BadRequestException;
-import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocDieuKienRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocDieuKienResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocDieuKien;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocDieuKienMapper;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.DieuKienMonHocGocRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocDieuKienRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocDieuKienService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

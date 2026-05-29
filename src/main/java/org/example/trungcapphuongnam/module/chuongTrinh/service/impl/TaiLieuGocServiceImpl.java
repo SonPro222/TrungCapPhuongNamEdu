@@ -2,8 +2,6 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.exception.BadRequestException;
-import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.TaiLieuGocRequest;
@@ -11,15 +9,13 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.TaiLieuGocR
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.TaiLieuGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.TaiLieuGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.TaiLieuGocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.TaiLieuGocService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor

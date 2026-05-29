@@ -16,6 +16,7 @@ public class SyllabusChuongTrinhGocMapper {
         return SyllabusChuongTrinhGoc.builder()
                 .ma(request.getMa())
                 .ten(request.getTen())
+
                 .mucTieu(request.getMucTieu())
                 .doiTuongTuyenSinh(request.getDoiTuongTuyenSinh())
                 .thoiGianDaoTao(request.getThoiGianDaoTao())
@@ -25,6 +26,7 @@ public class SyllabusChuongTrinhGocMapper {
                 .phuongPhapDanhGia(request.getPhuongPhapDanhGia())
                 .huongDanThucHien(request.getHuongDanThucHien())
                 .ghiChu(request.getGhiChu())
+                .duongDan(request.getDuongDan())
                 .build();
     }
 
@@ -44,6 +46,7 @@ public class SyllabusChuongTrinhGocMapper {
         entity.setPhuongPhapDanhGia(request.getPhuongPhapDanhGia());
         entity.setHuongDanThucHien(request.getHuongDanThucHien());
         entity.setGhiChu(request.getGhiChu());
+        entity.setDuongDan(request.getDuongDan());
     }
 
     public SyllabusChuongTrinhGocResponse toResponse(SyllabusChuongTrinhGoc entity) {
@@ -64,6 +67,7 @@ public class SyllabusChuongTrinhGocMapper {
                 .phuongPhapDanhGia(entity.getPhuongPhapDanhGia())
                 .huongDanThucHien(entity.getHuongDanThucHien())
                 .ghiChu(entity.getGhiChu())
+                .duongDan(entity.getDuongDan())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();

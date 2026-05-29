@@ -16,11 +16,9 @@ public class LichSuDayDiemLmsRequest {
 
     private Long ketQuaBaiTapLopId;
 
-    @NotNull
 
     private Long diemChiTietId;
 
-    @NotNull
 
     private Long nguoiThucHienId;
 

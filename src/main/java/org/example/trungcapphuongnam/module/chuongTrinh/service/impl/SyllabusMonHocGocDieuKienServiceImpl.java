@@ -8,7 +8,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMon
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocGocDieuKien;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocGocDieuKienMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocDieuKienRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocGocDieuKienService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

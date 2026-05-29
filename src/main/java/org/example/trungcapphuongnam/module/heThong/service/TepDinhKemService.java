@@ -25,4 +25,5 @@ public interface TepDinhKemService {
     Resource download(Long id);
 
     TepDinhKemResponse deleteMem(Long id);
+    Resource preview(Long id);
 }

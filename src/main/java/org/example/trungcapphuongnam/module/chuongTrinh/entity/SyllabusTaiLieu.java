@@ -20,7 +20,11 @@ public class SyllabusTaiLieu {
 
     @Column(name = "syllabus_mon_id")
     private Long syllabusMonId;
+    @Column(name = "bat_buoc")
+    private Boolean batBuoc;
 
+    @Column(name = "thu_tu")
+    private Integer thuTu;
     @Column(name = "ten")
     private String ten;
 

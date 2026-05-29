@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @Builder
 public class CauHinhDanhGiaMauRequest {
 
-    @NotNull(message = "chuongTrinhMonId không được để trống")
     private Long chuongTrinhMonId;
 
     @NotBlank(message = "tenCotDiem không được để trống")

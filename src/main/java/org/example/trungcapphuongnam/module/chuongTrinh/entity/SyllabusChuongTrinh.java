@@ -22,6 +22,8 @@ public class SyllabusChuongTrinh {
     private Long chuongTrinhVersionId;
     @Column(name = "syllabus_chuong_trinh_goc_id")
     private Long syllabusChuongTrinhGocId;
+    @Column(name = "duong_dan", columnDefinition = "TEXT")
+    private String duongDan;
     @Column(name = "mo_ta_tong_quan")
     private String moTaTongQuan;
 

@@ -36,10 +36,6 @@ public class SyllabusMonHocRequest {
 
     private String congThucQuyDoi;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
     private Long monHocId;
 
     private String ma;

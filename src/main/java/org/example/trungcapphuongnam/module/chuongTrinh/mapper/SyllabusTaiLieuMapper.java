@@ -12,6 +12,8 @@ public class SyllabusTaiLieuMapper {
         if (request == null) return null;
         return SyllabusTaiLieu.builder()
                 .syllabusMonId(request.getSyllabusMonId())
+                .batBuoc(request.getBatBuoc())
+                .thuTu(request.getThuTu())
                 .ten(request.getTen())
                 .tacGia(request.getTacGia())
                 .namXuatBan(request.getNamXuatBan())
@@ -29,6 +31,8 @@ public class SyllabusTaiLieuMapper {
         return SyllabusTaiLieuResponse.builder()
                 .id(entity.getId())
                 .syllabusMonId(entity.getSyllabusMonId())
+                .batBuoc(entity.getBatBuoc())
+                .thuTu(entity.getThuTu())
                 .ten(entity.getTen())
                 .tacGia(entity.getTacGia())
                 .namXuatBan(entity.getNamXuatBan())
@@ -45,6 +49,8 @@ public class SyllabusTaiLieuMapper {
     public void updateEntity(SyllabusTaiLieu entity, SyllabusTaiLieuRequest request) {
         if (entity == null || request == null) return;
         entity.setSyllabusMonId(request.getSyllabusMonId());
+        entity.setBatBuoc(request.getBatBuoc());
+        entity.setThuTu(request.getThuTu());
         entity.setTen(request.getTen());
         entity.setTacGia(request.getTacGia());
         entity.setNamXuatBan(request.getNamXuatBan());

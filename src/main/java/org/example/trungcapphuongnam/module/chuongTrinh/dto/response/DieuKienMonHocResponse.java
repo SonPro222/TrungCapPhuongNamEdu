@@ -13,7 +13,11 @@ public class DieuKienMonHocResponse {
     private Long id;
 
     private Long syllabusMonId;
+    private String ten;
 
+    private Integer soLuong;
+
+    private String yeuCau;
     private String loai;
 
     private String noiDung;

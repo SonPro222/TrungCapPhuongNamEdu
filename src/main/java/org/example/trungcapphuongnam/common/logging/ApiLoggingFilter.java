@@ -38,14 +38,23 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
+        String method = request.getMethod();
 
         if (SKIP_PATHS.stream().anyMatch(uri::startsWith)) {
             return true;
         }
 
         String contentType = request.getContentType();
+        if (contentType != null && contentType.toLowerCase().startsWith("multipart/")) {
+            return true;
+        }
 
-        return contentType != null && contentType.toLowerCase().startsWith("multipart/");
+        // Bỏ log GET thông thường; chỉ giữ GET cho dữ liệu nhạy cảm (điểm, học phí)
+        if ("GET".equalsIgnoreCase(method)) {
+            return !uri.contains("/diem") && !uri.contains("/hoc-phi");
+        }
+
+        return false;
     }
 
     @Override

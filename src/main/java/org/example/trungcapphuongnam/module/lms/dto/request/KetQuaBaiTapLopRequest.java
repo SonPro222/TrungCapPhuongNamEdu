@@ -22,7 +22,6 @@ public class KetQuaBaiTapLopRequest {
 
     private Long sinhVienId;
 
-    @NotNull
 
     private Long lanLamDuocChonId;
 
@@ -42,7 +41,6 @@ public class KetQuaBaiTapLopRequest {
 
     private TrangThaiKetQuaBaiTap trangThai;
 
-    @NotNull
 
     private Long diemChiTietId;
 
@@ -52,13 +50,10 @@ public class KetQuaBaiTapLopRequest {
 
     private LocalDateTime ngayChot;
 
-    @NotNull
 
     private Long nguoiChotId;
 
     private LocalDateTime ngayDaySangDiem;
-
-    @NotNull
 
     private Long nguoiDaySangDiemId;
 

@@ -29,7 +29,8 @@ public class TepDinhKemValidator {
 
     @Value("${app.upload.max-other-size:10485760}")
     private long maxOtherSize;
-
+    @Value("${app.upload.sinh-vien.max-file-size:33554432}")
+    private long maxSinhVienFileSize;
     private static final Set<String> IMAGE_EXTENSIONS = Set.of(
             ".jpg", ".jpeg", ".png", ".webp"
     );
@@ -62,6 +63,7 @@ public class TepDinhKemValidator {
         }
 
         LoaiNoiDungTep loaiNoiDung = phanLoaiNoiDung(file.getContentType(), extension);
+        validateDungLuongTheoNguoiGui(file, request);
         validateDungLuongTheoLoai(file, loaiNoiDung);
         validateLoaiFileChoPhep(extension, loaiNoiDung);
 
@@ -215,5 +217,21 @@ public class TepDinhKemValidator {
     }
 
     public record ThongTinTep(String tenGoc, String extension, LoaiNoiDungTep loaiNoiDung) {
+    }
+    private void validateDungLuongTheoNguoiGui(MultipartFile file, TepDinhKemRequest request) {
+        if (request.getNguoiGuiLoai() == null) {
+            return;
+        }
+
+        String module = request.getModule() == null ? "" : request.getModule().trim().toLowerCase(Locale.ROOT);
+
+        boolean laSinhVien = request.getNguoiGuiLoai().name().equals("SINH_VIEN")
+                || module.equals("sinh-vien")
+                || module.equals("sinh_vien")
+                || module.equals("sinhvien");
+
+        if (laSinhVien && file.getSize() > maxSinhVienFileSize) {
+            throw new HeThongException("Sinh viên chỉ được tải lên tối đa " + formatDungLuong(maxSinhVienFileSize) + " cho mỗi file. Nếu bài lớn hơn, hãy chia thành nhiều file nhỏ.");
+        }
     }
 }

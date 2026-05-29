@@ -12,6 +12,7 @@ public class SyllabusChuongBaiMapper {
         if (request == null) return null;
         return SyllabusChuongBai.builder()
                 .syllabusMonId(request.getSyllabusMonId())
+                .maChuong(request.getMaChuong())
                 .ten(request.getTen())
                 .tongGio(request.getTongGio())
                 .gioLyThuyet(request.getGioLyThuyet())
@@ -31,6 +32,7 @@ public class SyllabusChuongBaiMapper {
         return SyllabusChuongBaiResponse.builder()
                 .id(entity.getId())
                 .syllabusMonId(entity.getSyllabusMonId())
+                .maChuong(entity.getMaChuong())
                 .ten(entity.getTen())
                 .tongGio(entity.getTongGio())
                 .gioLyThuyet(entity.getGioLyThuyet())
@@ -49,6 +51,7 @@ public class SyllabusChuongBaiMapper {
     public void updateEntity(SyllabusChuongBai entity, SyllabusChuongBaiRequest request) {
         if (entity == null || request == null) return;
         entity.setSyllabusMonId(request.getSyllabusMonId());
+        entity.setMaChuong(request.getMaChuong());
         entity.setTen(request.getTen());
         entity.setTongGio(request.getTongGio());
         entity.setGioLyThuyet(request.getGioLyThuyet());

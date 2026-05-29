@@ -52,7 +52,23 @@ public class NhatKyHeThongFilter extends OncePerRequestFilter {
             return true;
         }
 
+        // Bỏ audit các GET thông thường (xem, load, search, page, list)
+        // Chỉ giữ lại GET cho dữ liệu nhạy cảm: bảng điểm, học phí/tài chính
+        if ("GET".equalsIgnoreCase(method)) {
+            return !laDuLieuNhayCamGet(uri);
+        }
+
         return false;
+    }
+
+    /**
+     * Các GET endpoint nhạy cảm cần audit:
+     * - /api/diem/**     : bảng điểm sinh viên
+     * - /api/hoc-phi/**  : thông tin tài chính, học phí
+     */
+    private boolean laDuLieuNhayCamGet(String uri) {
+        return uri.contains("/diem")
+                || uri.contains("/hoc-phi");
     }
 
     @Override
@@ -86,7 +102,7 @@ public class NhatKyHeThongFilter extends OncePerRequestFilter {
             String tenTaiKhoan = layGiaTri(thongTin.getTenTaiKhoan(), taiKhoanEmail);
             String module = xacDinhModule(uri);
             String chucNang = xacDinhChucNang(uri);
-            String hanhDong = xacDinhHanhDong(method);
+            String hanhDong = xacDinhHanhDong(method, uri);
             String ketQua = loi == null && response.getStatus() < 400 ? "THANH_CONG" : "THAT_BAI";
             String duongDan = layDuongDanDayDu(request);
             Long banGhiId = layBanGhiIdTuUri(uri);
@@ -203,10 +219,26 @@ public class NhatKyHeThongFilter extends OncePerRequestFilter {
     }
 
     private String xacDinhHanhDong(String method) {
-        if ("GET".equalsIgnoreCase(method)) return "XEM";
-        if ("POST".equalsIgnoreCase(method)) return "TAO_MOI";
-        if ("PUT".equalsIgnoreCase(method)) return "CAP_NHAT";
-        if ("PATCH".equalsIgnoreCase(method)) return "CAP_NHAT";
+        return xacDinhHanhDong(method, null);
+    }
+
+    private String xacDinhHanhDong(String method, String uri) {
+        // Ưu tiên detect hành động đặc biệt từ URI trước
+        if (uri != null) {
+            if (uri.contains("/mo-khoa"))    return "MO_KHOA";
+            if (uri.contains("/khoa"))       return "KHOA";
+            if (uri.contains("/duyet"))      return "DUYET";
+            if (uri.contains("/phan-quyen")) return "PHAN_QUYEN";
+            if (uri.contains("/cap-tai-khoan")) return "PHAN_QUYEN";
+            if (uri.contains("/import"))     return "IMPORT";
+            if (uri.contains("/export"))     return "EXPORT";
+        }
+
+        // Fallback theo HTTP method
+        if ("GET".equalsIgnoreCase(method))    return "XEM";
+        if ("POST".equalsIgnoreCase(method))   return "TAO_MOI";
+        if ("PUT".equalsIgnoreCase(method))    return "CAP_NHAT";
+        if ("PATCH".equalsIgnoreCase(method))  return "CAP_NHAT";
         if ("DELETE".equalsIgnoreCase(method)) return "XOA";
         return method == null ? "KHAC" : method.toUpperCase();
     }

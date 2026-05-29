@@ -48,6 +48,47 @@ public class TepDinhKemResponse {
     private String nguoiGuiTen;
 
     private String moTa;
+    private Long nganhId;
+
+    private Long chuongTrinhId;
+
+    private Long chuongTrinhVersionId;
+
+    private Long namHocId;
+
+    private Long hocKyId;
+
+    private Long lopHanhChinhId;
+
+    private Long lopHocPhanId;
+
+    private Long monHocId;
+
+    private Long chuongTrinhMonId;
+
+    private Long giangVienId;
+
+    private Long sinhVienId;
+
+    private Long baiHocId;
+
+    private Long baiTapId;
+
+    private Long labId;
+
+    private Long baiNopId;
+
+    private Integer lanNop;
+
+    private Long syllabusChuongTrinhId;
+
+    private Long syllabusMonHocId;
+
+    private Long taiLieuGocId;
+
+    private String tangNghiepVu;
+
+    private String duongDanNghiepVu;
 
     private TrangThaiTepDinhKem trangThai;
 

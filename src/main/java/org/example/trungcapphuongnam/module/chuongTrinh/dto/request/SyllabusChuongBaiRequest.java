@@ -13,7 +13,7 @@ public class SyllabusChuongBaiRequest {
 
     @NotNull(message = "syllabus_mon_id không được để trống")
     private Long syllabusMonId;
-
+    private String maChuong;
     @NotBlank(message = "ten không được để trống")
     private String ten;
 
@@ -35,8 +35,5 @@ public class SyllabusChuongBaiRequest {
 
     private String ghiChu;
 
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
 }

@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienMon
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.DieuKienMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.DieuKienMonHocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.DieuKienMonHocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.DieuKienMonHocService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

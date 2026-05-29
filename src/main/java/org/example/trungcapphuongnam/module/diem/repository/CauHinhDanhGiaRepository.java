@@ -4,9 +4,14 @@ import org.example.trungcapphuongnam.module.diem.entity.CauHinhDanhGia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CauHinhDanhGiaRepository extends JpaRepository<CauHinhDanhGia, Long> {
 
     boolean existsByLopHocPhanIdAndTenCotDiem(Long lopHocPhanId, String tenCotDiem);
     boolean existsByLopHocPhanIdAndTenCotDiemAndIdNot(Long lopHocPhanId, String tenCotDiem, Long id);
+
+    /** Lấy toàn bộ cột điểm của lớp học phần, sắp theo thuTu tăng dần. */
+    List<CauHinhDanhGia> findByLopHocPhanIdOrderByThuTuAsc(Long lopHocPhanId);
 }

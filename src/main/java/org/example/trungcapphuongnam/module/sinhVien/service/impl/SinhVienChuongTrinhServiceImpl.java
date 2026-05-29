@@ -16,6 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -35,6 +38,15 @@ public class SinhVienChuongTrinhServiceImpl implements SinhVienChuongTrinhServic
     @Transactional(readOnly = true)
     public SinhVienChuongTrinhResponse findById(Long id) {
         return mapper.toResponse(getById(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SinhVienChuongTrinhResponse> findBySinhVienId(Long sinhVienId) {
+        return repository.findBySinhVienId(sinhVienId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

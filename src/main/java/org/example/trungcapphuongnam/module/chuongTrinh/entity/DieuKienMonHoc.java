@@ -35,7 +35,14 @@ public class DieuKienMonHoc {
 
     @Column(name = "ghi_chu")
     private String ghiChu;
+    @Column(name = "ten")
+    private String ten;
 
+    @Column(name = "so_luong")
+    private Integer soLuong;
+
+    @Column(name = "yeu_cau")
+    private String yeuCau;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

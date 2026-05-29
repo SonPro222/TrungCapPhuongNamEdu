@@ -1,25 +1,20 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.exception.BadRequestException;
-import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocGocMapper;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.MonHocRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocGocService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor

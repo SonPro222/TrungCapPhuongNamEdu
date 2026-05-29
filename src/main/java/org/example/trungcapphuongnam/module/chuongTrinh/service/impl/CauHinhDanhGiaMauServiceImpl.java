@@ -11,7 +11,6 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.CauHinhDanh
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.CauHinhDanhGiaMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.CauHinhDanhGiaMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.CauHinhDanhGiaMauRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.CauHinhDanhGiaMauService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +28,6 @@ import java.util.List;
 public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
 
     private final CauHinhDanhGiaMauRepository repository;
-    private final ChuongTrinhMonRepository chuongTrinhMonRepository;
     private final CauHinhDanhGiaMauMapper mapper;
 
     @Override
@@ -47,15 +45,25 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
 
     @Override
     public CauHinhDanhGiaMauResponse create(CauHinhDanhGiaMauRequest request) {
-        validate(request, null);
+        validate(request);
 
-        if (repository.existsByChuongTrinhMonIdAndTenCotDiem(request.getChuongTrinhMonId(), request.getTenCotDiem())) {
-            throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong chương trình môn này");
-        }
+        if (request.getChuongTrinhMonId() == null) {
+            if (repository.existsByTenCotDiem(request.getTenCotDiem())) {
+                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại");
+            }
 
-        if (request.getThuTu() != null &&
-                repository.existsByChuongTrinhMonIdAndThuTu(request.getChuongTrinhMonId(), request.getThuTu())) {
-            throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại trong chương trình môn này");
+            if (request.getThuTu() != null && repository.existsByThuTu(request.getThuTu())) {
+                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại");
+            }
+        } else {
+            if (repository.existsByChuongTrinhMonIdAndTenCotDiem(request.getChuongTrinhMonId(), request.getTenCotDiem())) {
+                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong chương trình môn này");
+            }
+
+            if (request.getThuTu() != null &&
+                    repository.existsByChuongTrinhMonIdAndThuTu(request.getChuongTrinhMonId(), request.getThuTu())) {
+                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại trong chương trình môn này");
+            }
         }
 
         CauHinhDanhGiaMau entity = mapper.toEntity(request);
@@ -65,15 +73,25 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
     @Override
     public CauHinhDanhGiaMauResponse update(Long id, CauHinhDanhGiaMauRequest request) {
         CauHinhDanhGiaMau entity = getEntity(id);
-        validate(request, id);
+        validate(request);
 
-        if (repository.existsByChuongTrinhMonIdAndTenCotDiemAndIdNot(request.getChuongTrinhMonId(), request.getTenCotDiem(), id)) {
-            throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong chương trình môn này");
-        }
+        if (request.getChuongTrinhMonId() == null) {
+            if (repository.existsByTenCotDiemAndIdNot(request.getTenCotDiem(), id)) {
+                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại");
+            }
 
-        if (request.getThuTu() != null &&
-                repository.existsByChuongTrinhMonIdAndThuTuAndIdNot(request.getChuongTrinhMonId(), request.getThuTu(), id)) {
-            throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại trong chương trình môn này");
+            if (request.getThuTu() != null && repository.existsByThuTuAndIdNot(request.getThuTu(), id)) {
+                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại");
+            }
+        } else {
+            if (repository.existsByChuongTrinhMonIdAndTenCotDiemAndIdNot(request.getChuongTrinhMonId(), request.getTenCotDiem(), id)) {
+                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong chương trình môn này");
+            }
+
+            if (request.getThuTu() != null &&
+                    repository.existsByChuongTrinhMonIdAndThuTuAndIdNot(request.getChuongTrinhMonId(), request.getThuTu(), id)) {
+                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại trong chương trình môn này");
+            }
         }
 
         mapper.updateEntity(entity, request);
@@ -94,14 +112,9 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cấu hình đánh giá mẫu không tồn tại: " + id));
     }
 
-    private void validate(CauHinhDanhGiaMauRequest request, Long idDangSua) {
+    private void validate(CauHinhDanhGiaMauRequest request) {
         request.setTenCotDiem(TextUtil.trimRequired(request.getTenCotDiem()));
         request.setLoaiDiem(TextUtil.trimToNull(request.getLoaiDiem()));
-
-        if (request.getChuongTrinhMonId() == null ||
-                !chuongTrinhMonRepository.existsById(request.getChuongTrinhMonId())) {
-            throw new BadRequestException("Chương trình môn không tồn tại");
-        }
 
         if (request.getTyLe() == null ||
                 request.getTyLe().compareTo(BigDecimal.ZERO) < 0 ||
@@ -111,17 +124,6 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
 
         if (request.getDiemToiDa() != null && request.getDiemToiDa().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BadRequestException("Điểm tối đa phải lớn hơn 0");
-        }
-
-        BigDecimal tongTyLe = repository.findByChuongTrinhMonIdOrderByThuTuAscIdAsc(request.getChuongTrinhMonId())
-                .stream()
-                .filter(item -> idDangSua == null || !item.getId().equals(idDangSua))
-                .map(CauHinhDanhGiaMau::getTyLe)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .add(request.getTyLe());
-
-        if (tongTyLe.compareTo(new BigDecimal("100")) > 0) {
-            throw new BadRequestException("Tổng tỷ lệ cột điểm mẫu không được vượt quá 100%");
         }
     }
 

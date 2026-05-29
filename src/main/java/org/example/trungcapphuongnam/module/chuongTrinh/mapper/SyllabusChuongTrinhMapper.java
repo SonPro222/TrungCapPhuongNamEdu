@@ -27,7 +27,7 @@ public class SyllabusChuongTrinhMapper {
                 .dieuKienTotNghiep(request.getDieuKienTotNghiep())
                 .phuongPhapDanhGia(request.getPhuongPhapDanhGia())
                 .huongDanThucHien(request.getHuongDanThucHien())
-
+                .duongDan(request.getDuongDan())
                 .build();
     }
 
@@ -51,6 +51,7 @@ public class SyllabusChuongTrinhMapper {
                 .dieuKienTotNghiep(entity.getDieuKienTotNghiep())
                 .phuongPhapDanhGia(entity.getPhuongPhapDanhGia())
                 .huongDanThucHien(entity.getHuongDanThucHien())
+                .duongDan(entity.getDuongDan())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -74,7 +75,7 @@ public class SyllabusChuongTrinhMapper {
         entity.setDieuKienTotNghiep(request.getDieuKienTotNghiep());
         entity.setPhuongPhapDanhGia(request.getPhuongPhapDanhGia());
         entity.setHuongDanThucHien(request.getHuongDanThucHien());
-
+        entity.setDuongDan(request.getDuongDan());
 
     }
 }

@@ -8,7 +8,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomTuChonG
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChonGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.NhomTuChonGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.NhomTuChonGocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomTuChonGocService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;

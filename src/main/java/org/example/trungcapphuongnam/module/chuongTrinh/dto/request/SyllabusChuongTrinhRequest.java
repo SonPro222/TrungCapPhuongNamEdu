@@ -14,7 +14,7 @@ public class SyllabusChuongTrinhRequest {
     private Long chuongTrinhVersionId;
     private Long syllabusChuongTrinhGocId;
     private String moTaTongQuan;
-
+    private String duongDan;
     private String mucDich;
 
     private String yeuCauDaoTao;

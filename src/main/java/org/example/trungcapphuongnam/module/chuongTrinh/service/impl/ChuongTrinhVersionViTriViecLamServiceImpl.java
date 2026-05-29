@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

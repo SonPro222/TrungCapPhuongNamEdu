@@ -13,7 +13,9 @@ public class SyllabusTaiLieuResponse {
     private Long id;
 
     private Long syllabusMonId;
+    private Boolean batBuoc;
 
+    private Integer thuTu;
     private String ten;
 
     private String tacGia;
