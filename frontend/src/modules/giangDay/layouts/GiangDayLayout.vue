@@ -2,20 +2,12 @@
   <section class="giang-day-layout">
     <PageHeader
         title="Quản lý giảng dạy"
-        description="Đào tạo quản lý lớp học phần, lịch học, phân công và xem tổng hợp sinh viên, điểm, điểm danh theo từng lớp."
+        description="Đào tạo quản lý lớp học phần theo flow Ngành → Chương trình → Version → Kỳ, sau đó phân công giảng viên, xếp lịch học và theo dõi buổi học."
     />
 
     <nav class="giang-day-menu">
-      <RouterLink :to="{ name: 'GiangDay.QuanLy' }">
-        Quản lý giảng dạy
-      </RouterLink>
-
       <RouterLink :to="{ name: 'GiangDay.LopHocPhan' }">
         Lớp học phần
-      </RouterLink>
-
-      <RouterLink :to="{ name: 'GiangDay.PhanCong' }">
-        Phân công giảng dạy
       </RouterLink>
 
       <RouterLink :to="{ name: 'GiangDay.LichHoc' }">

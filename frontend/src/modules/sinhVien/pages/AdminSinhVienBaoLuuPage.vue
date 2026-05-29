@@ -150,7 +150,7 @@
           </select>
         </label>
 
-        <button type="button" @click="taiDanhSachBaoLuu">
+        <button type="button" class="btn-tai-lai" @click="taiDanhSachBaoLuu">
           Tải lại
         </button>
       </div>
@@ -707,280 +707,607 @@ function baoLoi(message) {
 </script>
 
 <style scoped>
-.sv-bl-page {
-  display: grid;
-  gap: 18px;
+.sv-page,
+.sv-bl-page,
+.sv-lhp-page,
+.sv-page *,
+.sv-bl-page *,
+.sv-lhp-page * {
+  font-family: inherit;
+  letter-spacing: normal;
 }
 
+.sv-page,
+.sv-bl-page,
+.sv-lhp-page {
+  display: grid;
+  gap: 14px;
+}
+
+.sv-header,
+.sv-card,
+.sv-filter-card,
+.sv-account-box,
 .page-title,
 .panel {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
 }
 
+.sv-header {
+  background: linear-gradient(135deg, #f8fafc, #eff6ff);
+  border-color: #bfdbfe;
+}
+
+.sv-header h1,
 .page-title h2,
-.panel-title h2 {
+.sv-card-title h2,
+.panel-title h2,
+.sv-card h2,
+.modal-header h2,
+.sv-modal-header h2 {
   margin: 0;
   color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: normal;
 }
 
-.page-title p {
-  margin: 6px 0 0;
+.sv-header p,
+.page-title p,
+.sv-card-title p,
+.panel-title p,
+.panel-subtitle,
+.sv-card p,
+.modal-header p,
+.sv-modal-header p {
+  margin: 5px 0 0;
   color: #64748b;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: normal;
 }
 
+.sv-eyebrow {
+  margin: 0 0 4px;
+  color: #1d4ed8 !important;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.sv-card-title,
 .panel-title {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
-  align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .panel-title span {
   color: #64748b;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
 }
 
+.sv-grid,
 .form-grid,
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 10px;
 }
 
-.filter-grid {
-  grid-template-columns: 1fr 240px auto;
+.sv-grid.two,
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sv-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sv-grid.four,
+.filter-grid,
+.bao-luu-filter {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sv-filter-card {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr auto;
+  gap: 10px;
   align-items: end;
-  margin-bottom: 14px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.35fr);
+  gap: 14px;
 }
 
 .span-2 {
   grid-column: span 2;
 }
 
+.span-3 {
+  grid-column: span 3;
+}
+
+.span-4 {
+  grid-column: span 4;
+}
+
 label {
   display: grid;
-  gap: 7px;
-  font-weight: 700;
+  gap: 5px;
   color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
 input,
 select,
 textarea {
+  width: 100%;
+  min-height: 38px;
   border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  min-height: 42px;
-  padding: 9px 12px;
-  outline: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #ffffff;
+  color: #0f172a;
   font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: normal;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 textarea {
+  min-height: 76px;
   resize: vertical;
 }
 
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.sv-actions,
 .actions,
-.row-actions {
+.form-actions,
+.row-actions,
+.sv-row-actions,
+.sv-modal-actions {
   display: flex;
-  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.actions {
-  justify-content: flex-end;
-}
-
-button {
+button,
+.sv-action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
   border: 0;
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   background: #1d4ed8;
   color: #ffffff;
+  font-size: 14px;
   font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1;
+  text-decoration: none;
   cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease, background 0.12s ease;
+}
+
+button:hover,
+.sv-action-link:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 button.secondary {
-  background: #64748b;
+  background: #e2e8f0;
+  color: #334155;
 }
 
 button.danger {
   background: #dc2626;
+  color: #ffffff;
 }
 
 button.small {
-  padding: 7px 10px;
+  min-height: 30px;
+  padding: 6px 9px;
   font-size: 13px;
 }
 
-button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+button.selected {
+  background: #047857;
+  color: #ffffff;
 }
 
+.sv-action-link {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.sv-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sv-tabs button {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.sv-tabs button.active {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.sv-message,
 .message {
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-weight: 700;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: normal;
 }
 
+.sv-message.success,
 .message.success {
   background: #ecfdf5;
   color: #047857;
   border: 1px solid #a7f3d0;
 }
 
+.sv-message.error,
 .message.error {
   background: #fef2f2;
   color: #b91c1c;
   border: 1px solid #fecaca;
 }
 
-.table-wrap {
-  overflow-x: auto;
+.sv-account-box {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #fffbeb;
+  border-color: #fbbf24;
+  color: #78350f;
 }
 
+.sv-class-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sv-class-summary div,
+.sv-flow-item,
+.sv-selected,
+.sinh-vien-da-chon {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.sv-class-summary span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.sv-class-summary strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sv-flow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sv-flow-item {
+  display: grid;
+  gap: 5px;
+}
+
+.sv-flow-item.active {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.sv-list-filter {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.sv-table-wrap,
+.table-wrap {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.sv-table,
 table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 13px;
+}
+
+.bang-lop-hoc-phan {
+  min-width: 1500px;
 }
 
 th,
-td {
+td,
+.sv-table th,
+.sv-table td {
   border-bottom: 1px solid #e2e8f0;
-  padding: 10px;
+  padding: 8px 10px;
   text-align: left;
   vertical-align: top;
 }
 
-th {
+th,
+.sv-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   background: #f8fafc;
-  color: #64748b;
-  font-size: 12px;
-  text-transform: uppercase;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+
+td,
+.sv-table td {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+td.diem,
+td.cot-diem,
+td[data-label*='Điểm'],
+td[data-label*='điểm'],
+.sv-table td.diem,
+.sv-table td.cot-diem,
+.sv-table td[data-label*='Điểm'],
+.sv-table td[data-label*='điểm'] {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+tbody tr:hover td,
+.clickable-row:hover td {
+  background: #f8fafc;
+}
+
+tr.selected td,
+.sv-table tr.selected td {
+  background: #eff6ff;
+}
+
+.clickable-row {
+  cursor: pointer;
 }
 
 .empty {
   text-align: center;
   color: #64748b;
-  padding: 20px;
+  padding: 18px;
+  font-weight: 600;
 }
 
+.sv-avatar {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.sv-status,
 .status {
   display: inline-flex;
+  align-items: center;
   border-radius: 999px;
-  padding: 5px 10px;
-  font-weight: 700;
-  font-size: 13px;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: normal;
+  white-space: nowrap;
 }
 
-.status.dang_bao_luu {
-  background: #fffbeb;
-  color: #b45309;
-}
-
+.sv-status.done,
 .status.da_di_hoc_lai {
   background: #ecfdf5;
   color: #047857;
 }
 
+.sv-status.partial,
+.status.dang_bao_luu {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.sv-status.pending,
 .status.da_huy {
   background: #fef2f2;
   color: #b91c1c;
 }
 
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(15, 23, 42, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.modal {
-  width: min(900px, 100%);
-  max-height: calc(100vh - 48px);
-  overflow: auto;
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.35);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.modal-header h2 {
-  margin: 0 0 6px;
-}
-
-.modal-header p {
-  margin: 0;
-  color: #64748b;
-}
-
-.modal-close {
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  padding: 0;
-  background: #e2e8f0;
-  color: #0f172a;
-  font-size: 24px;
-  line-height: 1;
-}
-
-@media (max-width: 900px) {
-  .form-grid,
-  .filter-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .span-2 {
-    grid-column: span 1;
-  }
-}
 .tim-sinh-vien-box {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) auto;
-  gap: 12px;
+  gap: 10px;
   align-items: end;
 }
 
 .sinh-vien-da-chon {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  border: 1px solid #bfdbfe;
+  border-color: #bfdbfe;
   background: #eff6ff;
   color: #1e3a8a;
-  border-radius: 12px;
-  padding: 12px;
 }
 
-.bao-luu-filter {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.modal-overlay,
+.sv-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
 }
 
-.bao-luu-filter button {
+.modal,
+.sv-modal {
+  width: min(900px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border-radius: 16px;
+  padding: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.32);
+}
+
+.modal-header,
+.sv-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.modal-close,
+.sv-modal-close {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  border-radius: 999px;
+  padding: 0;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+}
+.btn-tai-lai {
+  width: auto;
+  min-width: 84px;
+  min-height: 34px;
   align-self: end;
+  justify-self: end;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 9px;
+}
+@media (max-width: 1200px) {
+  .sv-filter-card,
+  .sv-grid.four,
+  .filter-grid,
+  .form-grid,
+  .bao-luu-filter,
+  .content-grid,
+  .sv-class-summary,
+  .sv-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2,
+  .span-3,
+  .span-4 {
+    grid-column: span 1;
+  }
 }
 
-@media (max-width: 900px) {
-  .tim-sinh-vien-box,
-  .bao-luu-filter {
+@media (max-width: 700px) {
+  .sv-header,
+  .sv-card,
+  .sv-filter-card,
+  .sv-account-box,
+  .page-title,
+  .panel {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .sv-card-title,
+  .panel-title {
+    display: grid;
+  }
+
+  .sv-actions,
+  .actions,
+  .form-actions,
+  .row-actions,
+  .sv-row-actions,
+  .sv-modal-actions {
+    justify-content: stretch;
+  }
+
+  button,
+  .sv-action-link {
+    width: 100%;
+  }
+
+  .tim-sinh-vien-box {
     grid-template-columns: 1fr;
   }
 }

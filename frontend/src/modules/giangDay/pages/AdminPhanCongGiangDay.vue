@@ -6,9 +6,15 @@
         <p>Gắn giáo viên vào lớp học phần theo vai trò giảng dạy. Lọc theo mã/tên lớp và mã/tên giáo viên.</p>
       </div>
 
-      <button type="button" class="btn" @click="taiDuLieu">
-        Tải lại
-      </button>
+      <div class="head-actions">
+        <button v-if="coFlowLopHocPhan" type="button" class="btn" @click="quayLaiLopHocPhan">
+          Quay lại lớp học phần
+        </button>
+
+        <button type="button" class="btn" @click="taiDuLieu">
+          Tải lại
+        </button>
+      </div>
     </header>
 
     <section class="filter-card">
@@ -220,7 +226,11 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { giangDayService } from '../services/giangDayService'
+
+const route = useRoute()
+const router = useRouter()
 
 const danhSach = ref([])
 const dangTai = ref(false)
@@ -246,6 +256,10 @@ const form = reactive({
   vaiTro: 'giang_vien_chinh'
 })
 
+const coFlowLopHocPhan = computed(() => {
+  return Boolean(route.query.nganhId && route.query.chuongTrinhId && route.query.versionId && route.query.khungKyId)
+})
+
 const moTaLopTrongForm = computed(() => {
   if (!form.lopHocPhanId) return 'Nhập ID lớp học phần'
 
@@ -265,6 +279,10 @@ const moTaGiaoVienTrongForm = computed(() => {
 })
 
 onMounted(() => {
+  if (route.query.lopHocPhanId) {
+    form.lopHocPhanId = route.query.lopHocPhanId
+  }
+
   taiDuLieu()
 })
 
@@ -360,6 +378,18 @@ function xoaLoc() {
   taiDuLieu()
 }
 
+function quayLaiLopHocPhan() {
+  router.push({
+    name: 'GiangDay.LopHocPhanTheoKy',
+    params: {
+      nganhId: route.query.nganhId,
+      chuongTrinhId: route.query.chuongTrinhId,
+      versionId: route.query.versionId,
+      khungKyId: route.query.khungKyId
+    }
+  })
+}
+
 function doiTrang(page) {
   if (page < 0) return
   if (tongTrang.value && page >= tongTrang.value) return
@@ -383,6 +413,7 @@ function hienThiVaiTro(value) {
 <style scoped>
 .page { display: flex; flex-direction: column; gap: 16px; }
 .page-head { display: flex; justify-content: space-between; gap: 16px; }
+.head-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .page-head h1 { margin: 0; }
 .page-head p { margin: 6px 0 0; color: #64748b; }
 .filter-card, .form-card { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-white); }

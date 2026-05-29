@@ -434,27 +434,26 @@ const tabs = [
   },
   {
     key: 'nhanVien',
-    label: 'Nhân viên',
-    moTa: 'Quản lý nhân viên liên kết với tài khoản.',
+    label: 'Nhân sự đào tạo',
+    moTa: 'Tạo hồ sơ nhân sự đào tạo và tự cấp tài khoản DAO_TAO bằng Gmail.',
     api: heThongApi.nhanVien,
     page: true,
     roles: [ROLES.ADMIN],
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'taiKhoanId', label: 'Tài khoản ID' },
-      { key: 'maNhanVien', label: 'Mã nhân viên' },
+      { key: 'maNhanVien', label: 'Mã nhân sự' },
       { key: 'hoTen', label: 'Họ tên' },
-      { key: 'email', label: 'Email' },
+      { key: 'email', label: 'Gmail đăng nhập' },
       { key: 'soDienThoai', label: 'SĐT' },
       { key: 'phongBan', label: 'Phòng ban' },
       { key: 'chucVu', label: 'Chức vụ' },
       { key: 'trangThai', label: 'Trạng thái' }
     ],
     fields: [
-      { name: 'taiKhoanId', label: 'Tài khoản ID', type: 'number' },
-      { name: 'maNhanVien', label: 'Mã nhân viên', type: 'text' },
+      { name: 'maNhanVien', label: 'Mã nhân sự', type: 'text' },
       { name: 'hoTen', label: 'Họ tên', type: 'text' },
-      { name: 'email', label: 'Email', type: 'text' },
+      { name: 'email', label: 'Gmail đăng nhập', type: 'text' },
       { name: 'soDienThoai', label: 'SĐT', type: 'text' },
       { name: 'phongBan', label: 'Phòng ban', type: 'text' },
       { name: 'chucVu', label: 'Chức vụ', type: 'text' },
@@ -704,7 +703,12 @@ function layDanhSach(result) {
 
   return []
 }
-
+function layMatKhauTam(response) {
+  return response?.data?.matKhauTam
+      || response?.data?.data?.matKhauTam
+      || response?.matKhauTam
+      || ''
+}
 async function luuDuLieu() {
   if (!tabHienTai.value || !duocSuaTab.value) {
     return
@@ -717,11 +721,23 @@ async function luuDuLieu() {
     const payload = taoPayload()
 
     if (idDangSua.value) {
-      await tabHienTai.value.api.update(idDangSua.value, payload)
-      thongBao.value = 'Cập nhật thành công'
+      const response = await tabHienTai.value.api.update(idDangSua.value, payload)
+      const matKhauTam = layMatKhauTam(response)
+
+      thongBao.value = matKhauTam
+          ? `Cập nhật thành công. Mật khẩu tạm: ${matKhauTam}`
+          : 'Cập nhật thành công'
     } else {
-      await tabHienTai.value.api.create(payload)
-      thongBao.value = 'Thêm mới thành công'
+      const response = await tabHienTai.value.api.create(payload)
+      const matKhauTam = layMatKhauTam(response)
+
+      if (tabDangChon.value === 'nhanVien') {
+        thongBao.value = matKhauTam
+            ? `Thêm nhân sự đào tạo thành công. Mật khẩu tạm: ${matKhauTam}`
+            : 'Thêm nhân sự đào tạo thành công'
+      } else {
+        thongBao.value = 'Thêm mới thành công'
+      }
     }
 
     resetForm()

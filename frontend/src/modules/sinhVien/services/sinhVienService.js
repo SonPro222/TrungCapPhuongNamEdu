@@ -65,7 +65,10 @@ export const sinhVienService = {
         if (!id) return ''
         return sinhVienApi.tepDinhKem.downloadUrl(id)
     },
-
+    layUrlXemTep(id) {
+        if (!id) return ''
+        return sinhVienApi.tepDinhKem.previewUrl(id)
+    },
     async uploadTepSinhVien(file, sinhVienId, nghiepVu, moTa, nguoiGuiTen) {
         if (!file || !sinhVienId) return null
         return sinhVienApi.tepDinhKem.upload(file, {
@@ -155,3 +158,101 @@ export const sinhVienService = {
         return sinhVienApi.baoLuu.huy(id)
     },
 }
+// ── CÁC PHƯƠNG THỨC MỚI CHO DANH SÁCH & CHI TIẾT SINH VIÊN ──────────────────
+
+Object.assign(sinhVienService, {
+
+    // Tải toàn bộ sinh viên (không lọc) để hiển thị danh sách toàn trường
+    async layTatCaSinhVien() {
+        return layNoiDungPage(await sinhVienApi.sinhVien.getAll({ page: 0, size: 1000 }))
+    },
+
+    // Lấy sinh viên theo ID (trả object, không phải array)
+    async laySinhVienTheoId(id) {
+        const res = await sinhVienApi.sinhVien.getById(id)
+        return res?.data?.data ?? res?.data ?? res
+    },
+
+    // Lấy danh sách SinhVienChuongTrinh theo sinhVienId
+    // Endpoint: GET /api/sinh-vien/chuong-trinh?sinhVienId=X&page=0&size=50
+    async laySinhVienChuongTrinhTheoSinhVienId(sinhVienId) {
+        if (!sinhVienId) return []
+        return layNoiDungPage(
+            await sinhVienApi.sinhVienChuongTrinh.getAll({ sinhVienId, page: 0, size: 50 })
+        )
+    },
+
+    // Lấy các lớp học phần của một sinh viên
+    // Endpoint: GET /api/giang-day/sinh-vien-lop-hoc-phan?sinhVienId=X&page=0&size=200
+    async laySinhVienLopHocPhanTheoSinhVien(sinhVienId) {
+        if (!sinhVienId) return []
+        return layNoiDungPage(
+            await sinhVienApi.sinhVienLopHocPhan.getAll({ sinhVienId, page: 0, size: 200 })
+        )
+    },
+
+    // Lấy kết quả điểm của một sinh viên
+    // Endpoint: GET /api/diem/ket-qua-lop-hoc-phan?sinhVienId=X&page=0&size=200
+    async layKetQuaLopHocPhanTheoSinhVien(sinhVienId) {
+        if (!sinhVienId) return []
+        return layNoiDungPage(
+            await sinhVienApi.ketQuaLopHocPhan.getAll({ sinhVienId, page: 0, size: 200 })
+        )
+    },
+
+    // Lấy lịch học theo lớp học phần
+    // Endpoint: GET /api/giang-day/lich-hoc?lopHocPhanId=X&page=0&size=200
+    async layLichHocTheoLop(lopHocPhanId) {
+        if (!lopHocPhanId) return []
+        return layNoiDungPage(
+            await sinhVienApi.lichHoc.getAll({ lopHocPhanId, page: 0, size: 200, sortBy: 'ngayHoc', sortDir: 'asc' })
+        )
+    },
+})
+
+// ── CHI TIẾT ĐIỂM + ĐIỂM DANH ────────────────────────────────────────────────
+Object.assign(sinhVienService, {
+
+    // Cấu hình cột điểm của lớp học phần
+    // GET /api/diem/cau-hinh-danh-gia?lopHocPhanId=X&page=0&size=50
+    async layCauHinhDanhGiaTheoLop(lopHocPhanId) {
+        if (!lopHocPhanId) return []
+        return layNoiDungPage(
+            await sinhVienApi.cauHinhDanhGia.getAll({ lopHocPhanId, page: 0, size: 50 })
+        )
+    },
+
+    // Bài kiểm tra của lớp học phần
+    // GET /api/diem/bai-kiem-tra?lopHocPhanId=X&page=0&size=50
+    async layBaiKiemTraTheoLop(lopHocPhanId) {
+        if (!lopHocPhanId) return []
+        return layNoiDungPage(
+            await sinhVienApi.baiKiemTra.getAll({ lopHocPhanId, page: 0, size: 50 })
+        )
+    },
+
+    // Điểm chi tiết từng cột của sinh viên trong lớp
+    // GET /api/diem/diem-chi-tiet?sinhVienId=X&lopHocPhanId=X&page=0&size=100
+    async layDiemChiTietTheoSVvaLop(sinhVienId, lopHocPhanId) {
+        if (!sinhVienId || !lopHocPhanId) return []
+        return layNoiDungPage(
+            await sinhVienApi.diemChiTiet.getAll({ sinhVienId, lopHocPhanId, page: 0, size: 100 })
+        )
+    },
+
+    // Điểm danh của sinh viên trong lớp
+    // GET /api/giang-day/diem-danh?sinhVienId=X&lopHocPhanId=X&page=0&size=200
+    async layDiemDanhTheoSVvaLop(sinhVienId, lopHocPhanId) {
+        if (!sinhVienId || !lopHocPhanId) return []
+        return layNoiDungPage(
+            await sinhVienApi.diemDanh.getAll({
+                sinhVienId,
+                lopHocPhanId,
+                page: 0,
+                size: 200,
+                sortBy: 'id',
+                sortDir: 'asc'
+            })
+        )
+    },
+})

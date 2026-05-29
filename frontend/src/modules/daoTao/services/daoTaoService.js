@@ -108,6 +108,7 @@ export const daoTaoService = {
     quyDoiDiem: createCrudService(daoTaoApi.quyDoiDiem),
     quyDoiDiemMau: createCrudService(daoTaoApi.quyDoiDiemMau),
     chuongTrinhMonQuyDoiDiemMau: createCrudService(daoTaoApi.chuongTrinhMonQuyDoiDiemMau),
+    cauHinhDanhGiaMau: createCrudService(daoTaoApi.cauHinhDanhGiaMau),
 
     mucTieuChuongTrinh: createCrudService(daoTaoApi.mucTieuChuongTrinh),
     nangLucDauRa: createCrudService(daoTaoApi.nangLucDauRa),

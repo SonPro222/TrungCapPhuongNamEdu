@@ -7,11 +7,12 @@
 
       <nav class="admin-nav">
         <RouterLink to="/admin">Dashboard</RouterLink>
-        <RouterLink to="/admin/dao-tao">Đào tạo</RouterLink>
-        <RouterLink to="/admin/sinh-vien">Sinh viên</RouterLink>
-        <RouterLink to="/admin/giang-day">Giảng dạy</RouterLink>
-        <RouterLink to="/admin/he-thong">Hệ thống</RouterLink>
-
+        <RouterLink to="/admin/dao-tao/xem-chuong-trinh">Quản lý đào tạo</RouterLink>
+        <RouterLink to="/admin/sinh-vien">Quản lý sinh viên</RouterLink>
+        <RouterLink to="/admin/giang-day/lop-hoc-phan">
+         Quản lý giảng dạy
+        </RouterLink>
+        <RouterLink to="/admin/he-thong/tai-khoan">Quản lý Hệ thống</RouterLink>
       </nav>
 
       <div class="admin-auth">
@@ -26,16 +27,16 @@
     </header>
 
     <main class="admin-main">
-      <RouterView />
+      <RouterView/>
     </main>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { ENV } from '../core/config/env'
-import { authService } from '../core/services/authService'
+import {computed} from 'vue'
+import {useRouter} from 'vue-router'
+import {ENV} from '../core/config/env'
+import {authService} from '../core/services/authService'
 
 const router = useRouter()
 

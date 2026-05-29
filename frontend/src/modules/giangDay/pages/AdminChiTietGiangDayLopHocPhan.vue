@@ -200,7 +200,25 @@ async function taiDuLieu() {
 }
 
 function quayLai() {
-  router.push({ name: 'GiangDay.QuanLy' })
+  const nganhId = route.query.nganhId
+  const chuongTrinhId = route.query.chuongTrinhId
+  const versionId = route.query.versionId
+  const khungKyId = route.query.khungKyId
+
+  if (nganhId && chuongTrinhId && versionId && khungKyId) {
+    router.push({
+      name: 'GiangDay.LopHocPhanTheoKy',
+      params: {
+        nganhId,
+        chuongTrinhId,
+        versionId,
+        khungKyId
+      }
+    })
+    return
+  }
+
+  router.push({ name: 'GiangDay.LopHocPhan' })
 }
 
 function xemBuoiHoc(buoi) {

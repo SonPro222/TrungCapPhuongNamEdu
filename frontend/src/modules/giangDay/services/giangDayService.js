@@ -41,6 +41,11 @@ export const giangDayService = {
         }))
     },
 
+    async layGiaoVienTheoId(id) {
+        const result = await giangDayApi.giaoVien.getById(id)
+        return result?.data?.data || result?.data || result
+    },
+
     async taoGiaoVien(payload) {
         return giangDayApi.giaoVien.create(payload)
     },

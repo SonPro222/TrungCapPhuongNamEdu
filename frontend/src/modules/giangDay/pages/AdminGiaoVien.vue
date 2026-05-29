@@ -2,13 +2,19 @@
   <section class="page">
     <header class="page-head">
       <div>
-        <h1>Quản lý giáo viên</h1>
-        <p>Quản lý hồ sơ giáo viên, tài khoản liên kết và trạng thái giảng dạy.</p>
+        <h1>Danh sách giáo viên</h1>
+        <p>Quản lý danh sách giáo viên. Bấm Xem để mở hồ sơ và theo dõi các lớp giáo viên đang được phân công.</p>
       </div>
 
-      <button type="button" class="btn" @click="taiDuLieu">
-        Tải lại
-      </button>
+      <div class="head-actions">
+        <button type="button" class="btn primary" @click="batDauThemMoi">
+          Thêm giáo viên
+        </button>
+
+        <button type="button" class="btn" @click="taiDuLieu">
+          Tải lại
+        </button>
+      </div>
     </header>
 
     <section class="filter-card">
@@ -63,8 +69,14 @@
       </div>
     </section>
 
-    <section class="form-card">
-      <h2>{{ form.id ? 'Cập nhật giáo viên' : 'Thêm giáo viên' }}</h2>
+    <section v-if="hienForm" class="form-card">
+      <div class="form-head">
+        <h2>{{ form.id ? 'Cập nhật giáo viên' : 'Thêm giáo viên' }}</h2>
+
+        <button type="button" class="btn" @click="dongForm">
+          Đóng
+        </button>
+      </div>
 
       <form class="form-grid" @submit.prevent="luuGiaoVien">
         <label>
@@ -97,8 +109,12 @@
         </label>
 
         <label>
-          <span>Tài khoản ID</span>
-          <input v-model.trim="form.taiKhoanId" type="number" />
+          <span>Tài khoản đăng nhập</span>
+          <input
+              :value="form.taiKhoanId ? `Đã cấp tài khoản ID ${form.taiKhoanId}` : 'Sẽ tự cấp khi thêm mới'"
+              type="text"
+              disabled
+          />
         </label>
 
         <label class="field-full">
@@ -199,6 +215,10 @@
           <td>{{ item.taiKhoanId || '-' }}</td>
           <td>
             <div class="row-actions">
+              <button type="button" class="btn small" @click="xemHoSo(item)">
+                Xem
+              </button>
+
               <button type="button" class="btn small" @click="chonSua(item)">
                 Sửa
               </button>
@@ -217,7 +237,10 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { giangDayService } from '../services/giangDayService'
+
+const router = useRouter()
 
 const danhSach = ref([])
 const dangTai = ref(false)
@@ -226,6 +249,7 @@ const thongBao = ref('')
 const trangHienTai = ref(0)
 const tongTrang = ref(0)
 const tongBanGhi = ref(0)
+const hienForm = ref(false)
 const kichThuocTrang = 100
 
 const boLoc = reactive({
@@ -286,8 +310,7 @@ async function luuGiaoVien() {
     email: form.email,
     soDienThoai: form.soDienThoai || null,
     chuyenMon: form.chuyenMon || null,
-    trangThai: form.trangThai,
-    taiKhoanId: form.taiKhoanId === '' ? null : Number(form.taiKhoanId)
+    trangThai: form.trangThai
   }
 
   try {
@@ -295,15 +318,30 @@ async function luuGiaoVien() {
       await giangDayService.capNhatGiaoVien(form.id, payload)
       thongBao.value = 'Cập nhật giáo viên thành công'
     } else {
-      await giangDayService.taoGiaoVien(payload)
-      thongBao.value = 'Thêm giáo viên thành công'
+      const response = await giangDayService.taoGiaoVien(payload)
+      const matKhauTam = response?.data?.matKhauTam || response?.matKhauTam
+
+      thongBao.value = matKhauTam
+          ? `Thêm giáo viên thành công. Mật khẩu tạm: ${matKhauTam}`
+          : 'Thêm giáo viên thành công'
     }
 
     resetForm()
+    hienForm.value = false
     await taiDuLieu()
   } catch (error) {
     loi.value = error?.message || 'Lưu giáo viên thất bại'
   }
+}
+
+function batDauThemMoi() {
+  resetForm()
+  hienForm.value = true
+}
+
+function dongForm() {
+  resetForm()
+  hienForm.value = false
 }
 
 function chonSua(item) {
@@ -315,6 +353,17 @@ function chonSua(item) {
   form.chuyenMon = item.chuyenMon || ''
   form.trangThai = item.trangThai || 'dang_day'
   form.taiKhoanId = item.taiKhoanId || ''
+  hienForm.value = true
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function xemHoSo(item) {
+  router.push({
+    name: 'GiangDay.ChiTietGiaoVien',
+    params: {
+      id: item.id
+    }
+  })
 }
 
 async function xoaGiaoVien(item) {
@@ -378,19 +427,28 @@ function hienThiTrangThai(value) {
   gap: 16px;
 }
 
-.page-head {
+.page-head,
+.form-head {
   display: flex;
   justify-content: space-between;
   gap: 16px;
+  align-items: flex-start;
 }
 
-.page-head h1 {
+.page-head h1,
+.form-head h2 {
   margin: 0;
 }
 
 .page-head p {
   margin: 6px 0 0;
   color: #64748b;
+}
+
+.head-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .filter-card,
@@ -415,6 +473,7 @@ function hienThiTrangThai(value) {
   display: grid;
   grid-template-columns: repeat(3, minmax(160px, 1fr));
   gap: 12px;
+  margin-top: 12px;
 }
 
 label {
@@ -455,6 +514,10 @@ textarea {
 
 .form-actions {
   grid-column: 1 / -1;
+}
+
+.row-actions {
+  flex-wrap: wrap;
 }
 
 .pagination-bar {
@@ -518,23 +581,18 @@ textarea {
   border: 1px solid var(--color-border);
   background: var(--color-white);
   border-radius: var(--radius);
-  padding: 14px;
-  display: grid;
-  gap: 6px;
+  padding: 12px;
 }
 
 .summary-grid span {
+  display: block;
   color: #64748b;
-  font-weight: 700;
   font-size: 13px;
-}
-
-.summary-grid strong {
-  font-size: 22px;
+  margin-bottom: 6px;
 }
 
 .table-wrap {
-  overflow: auto;
+  overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-white);
@@ -543,7 +601,6 @@ textarea {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1100px;
 }
 
 th,
@@ -551,25 +608,12 @@ td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--color-border);
   text-align: left;
-  vertical-align: top;
+  white-space: nowrap;
 }
 
 th {
   background: #f8fafc;
-  color: #475569;
   font-size: 12px;
   text-transform: uppercase;
-}
-
-@media (max-width: 1100px) {
-  .filter-card,
-  .form-grid,
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .filter-actions {
-    align-items: stretch;
-  }
 }
 </style>

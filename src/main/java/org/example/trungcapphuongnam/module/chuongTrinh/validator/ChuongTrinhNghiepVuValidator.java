@@ -1,4 +1,4 @@
-package org.example.trungcapphuongnam.module.chuongTrinh.service;
+package org.example.trungcapphuongnam.module.chuongTrinh.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
@@ -333,20 +333,20 @@ public class ChuongTrinhNghiepVuValidator {
                 "Tổng giờ môn trong kỳ"
         );
 
-        if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndMaMonTrongCt(versionId, maMonTrongCt)) {
-            throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong version: " + maMonTrongCt);
+        if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCt(versionId, khungKyId, maMonTrongCt)) {
+            throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong kỳ này: " + maMonTrongCt);
         }
 
-        if (id != null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndMaMonTrongCtAndIdNot(versionId, maMonTrongCt, id)) {
-            throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong version: " + maMonTrongCt);
+        if (id != null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCtAndIdNot(versionId, khungKyId, maMonTrongCt, id)) {
+            throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong kỳ này: " + maMonTrongCt);
         }
 
-        if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMonHocId(versionId, khungKyId, monHocId)) {
-            throw new DuplicateResourceException("Môn học này đã được thêm vào kỳ đang chọn");
+        if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndMonHocId(versionId, monHocId)) {
+            throw new DuplicateResourceException("Môn học này đã được thêm vào version hiện tại rồi");
         }
 
-        if (id != null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMonHocIdAndIdNot(versionId, khungKyId, monHocId, id)) {
-            throw new DuplicateResourceException("Môn học này đã được thêm vào kỳ đang chọn");
+        if (id != null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndMonHocIdAndIdNot(versionId, monHocId, id)) {
+            throw new DuplicateResourceException("Môn học này đã được thêm vào version hiện tại rồi");
         }
 
         if (request.getThuTu() != null) {

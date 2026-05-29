@@ -52,6 +52,7 @@ export const daoTaoApi = {
     quyDoiDiem: createCrudApi(CHUONG_TRINH_URL, 'quy-doi-diem'),
     quyDoiDiemMau: createCrudApi(CHUONG_TRINH_URL, 'quy-doi-diem-mau'),
     chuongTrinhMonQuyDoiDiemMau: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-mon-quy-doi-diem-mau'),
+    cauHinhDanhGiaMau: createCrudApi(CHUONG_TRINH_URL, 'cau-hinh-danh-gia-mau'),
 
     mucTieuChuongTrinh: createCrudApi(CHUONG_TRINH_URL, 'muc-tieu-chuong-trinh'),
     nangLucDauRa: createCrudApi(CHUONG_TRINH_URL, 'nang-luc-dau-ra'),
