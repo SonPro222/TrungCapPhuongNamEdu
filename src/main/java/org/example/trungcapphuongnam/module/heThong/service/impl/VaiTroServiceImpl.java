@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.heThong.dto.request.VaiTroRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.VaiTroResponse;
 import org.example.trungcapphuongnam.module.heThong.entity.VaiTro;
-import org.example.trungcapphuongnam.module.heThong.exception.HeThongNotFoundException;
+import org.example.trungcapphuongnam.module.heThong.HeThongNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.mapper.VaiTroMapper;
 import org.example.trungcapphuongnam.module.heThong.repository.VaiTroRepository;
 import org.example.trungcapphuongnam.module.heThong.service.VaiTroService;
@@ -24,8 +24,9 @@ public class VaiTroServiceImpl implements VaiTroService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<VaiTroResponse> getAll() { return vaiTroRepository.findAll().stream().map(vaiTroMapper::toResponse).toList(); }
-
+    public List<VaiTroResponse> getAll() {
+        return search(null, PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "id"))).getContent();
+    }
     @Override
     @Transactional(readOnly = true)
     public Page<VaiTroResponse> search(String keyword, Pageable pageable) {

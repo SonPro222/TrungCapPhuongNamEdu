@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.LoaiBaiOnline;
-import org.example.trungcapphuongnam.common.enums.Lms.NguonTao;
-import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiBaiTapOnline;
+import org.example.trungcapphuongnam.module.lms.enums.LoaiBaiOnline;
+import org.example.trungcapphuongnam.module.lms.enums.NguonTao;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiBaiTapOnline;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

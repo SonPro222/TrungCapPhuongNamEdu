@@ -2,8 +2,8 @@ package org.example.trungcapphuongnam.module.lms.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.NguonGiao;
-import org.example.trungcapphuongnam.common.enums.Lms.PhamViGiaoBai;
+import org.example.trungcapphuongnam.module.lms.enums.NguonGiao;
+import org.example.trungcapphuongnam.module.lms.enums.PhamViGiaoBai;
 
 @Getter
 @Setter
@@ -16,21 +16,19 @@ public class DotGiaoBaiOnlineRequest {
 
     private Long baiTapOnlineId;
 
-    @NotNull
 
-    private Long nguoiGiaoTaiKhoanId;
 
     private NguonGiao nguonGiao;
 
     private PhamViGiaoBai phamVi;
 
-    @NotNull
+
+    private Long nguoiGiaoTaiKhoanId;
 
     private Long nganhId;
 
-    @NotNull
-
     private Long chuongTrinhVersionId;
+
 
     private String ghiChu;
 

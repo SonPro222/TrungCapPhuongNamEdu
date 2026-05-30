@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
 import lombok.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -24,5 +25,23 @@ public class QuyDoiDiemRequest {
     private String congThuc;
 
     private String ghiChu;
+
+    private String ma;
+
+    private String ten;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    private String loaiMau;
+
+    private BigDecimal tyLe;
+
+    private BigDecimal diemToiDa;
+
+    private Integer thuTu;
+
+    private Boolean batBuoc;
 
 }

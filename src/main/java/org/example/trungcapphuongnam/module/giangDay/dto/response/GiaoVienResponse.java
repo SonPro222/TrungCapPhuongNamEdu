@@ -1,11 +1,9 @@
 package org.example.trungcapphuongnam.module.giangDay.dto.response;
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.TrangThaiGiaoVien;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiGiaoVien;
 
-import java.time.*;
-import java.math.BigDecimal;
-
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -21,6 +19,10 @@ public class GiaoVienResponse {
     private String chuyenMon;
     private TrangThaiGiaoVien trangThai;
     private Long taiKhoanId;
+
+    // Chỉ trả về khi tạo mới/cấp lại tài khoản, không lưu DB
+    private String matKhauTam;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

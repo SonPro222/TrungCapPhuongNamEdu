@@ -9,6 +9,14 @@ import java.util.Optional;
 
 @Repository
 public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Long>, JpaSpecificationExecutor<TaiKhoan> {
+
     Optional<TaiKhoan> findByEmail(String email);
+
+    Optional<TaiKhoan> findByEmailIgnoreCase(String email);
+
     boolean existsByEmail(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 }

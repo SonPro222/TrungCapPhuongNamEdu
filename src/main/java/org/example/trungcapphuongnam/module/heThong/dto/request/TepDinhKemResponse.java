@@ -1,0 +1,58 @@
+package org.example.trungcapphuongnam.module.heThong.dto.request;
+
+
+import lombok.*;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiNguoiGui;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiNoiDungTep;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiTepDinhKem;
+
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TepDinhKemResponse {
+
+    private Long id;
+
+    private String tenGoc;
+
+    private String tenLuu;
+
+    private String duongDanTuongDoi;
+
+    private String duongDanTaiVe;
+
+    private String duongDanCongKhai;
+
+    private LoaiNoiDungTep loaiNoiDung;
+
+    private String contentType;
+
+    private String extension;
+
+    private Long dungLuong;
+
+    private String module;
+
+    private String nghiepVu;
+
+    private Long doiTuongId;
+
+    private LoaiNguoiGui nguoiGuiLoai;
+
+    private Long nguoiGuiId;
+
+    private String nguoiGuiTen;
+
+    private String moTa;
+
+    private TrangThaiTepDinhKem trangThai;
+
+    private LocalDateTime ngayTao;
+
+    private LocalDateTime ngayCapNhat;
+}

@@ -26,7 +26,7 @@ public class ChuongTrinhMonResponse {
     private String loai;
 
     private String loaiHocPhan;
-
+    private String loaiPhamVi;
     private Boolean batBuoc;
 
     private Boolean laMonDieuKien;

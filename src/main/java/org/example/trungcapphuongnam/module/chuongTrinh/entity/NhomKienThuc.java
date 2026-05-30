@@ -3,6 +3,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,7 +20,8 @@ public class NhomKienThuc {
 
     @Column(name = "chuong_trinh_version_id")
     private Long chuongTrinhVersionId;
-
+    @Column(name = "nhom_kien_thuc_goc_id")
+    private Long nhomKienThucGocId;
     @Column(name = "ma")
     private String ma;
 
@@ -46,5 +48,31 @@ public class NhomKienThuc {
 
     @Column(name = "tong_gio_kiem_tra")
     private BigDecimal tongGioKiemTra;
+
+    @Column(name = "mo_ta")
+    private String moTa;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+
+        if (this.updatedAt == null) {
+            this.updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

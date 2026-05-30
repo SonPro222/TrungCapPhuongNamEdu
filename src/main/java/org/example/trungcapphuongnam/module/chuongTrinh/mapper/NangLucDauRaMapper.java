@@ -15,6 +15,8 @@ public class NangLucDauRaMapper {
                 .noiDung(request.getNoiDung())
                 .loai(request.getLoai())
                 .thuTu(request.getThuTu())
+                .ghiChu(request.getGhiChu())
+
                 .build();
     }
 
@@ -27,6 +29,9 @@ public class NangLucDauRaMapper {
                 .noiDung(entity.getNoiDung())
                 .loai(entity.getLoai())
                 .thuTu(entity.getThuTu())
+                .ghiChu(entity.getGhiChu())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -37,5 +42,8 @@ public class NangLucDauRaMapper {
         entity.setNoiDung(request.getNoiDung());
         entity.setLoai(request.getLoai());
         entity.setThuTu(request.getThuTu());
+        entity.setGhiChu(request.getGhiChu());
+
+
     }
 }

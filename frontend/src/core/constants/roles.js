@@ -8,8 +8,8 @@ export const ROLES = {
 
 export const ROLE_HOME_PATH = {
     ADMIN: '/admin',
-    DAO_TAO: '/admin/dao-tao',
+    DAO_TAO: '/admin/dao-tao/xem-chuong-trinh',
     SINH_VIEN: '/admin/sinh-vien',
-    GIAO_VIEN: '/admin/giang-day',
+    GIAO_VIEN: '/admin/giang-day/quan-ly',
     KE_TOAN: '/admin/hoc-phi'
 }

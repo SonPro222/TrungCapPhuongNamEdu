@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.diem.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiDiem;
+import org.example.trungcapphuongnam.module.diem.enums.TrangThaiDiem;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
@@ -34,7 +34,36 @@ public class DiemChiTietServiceImpl implements DiemChiTietService {
     public Page<DiemChiTietResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DiemChiTietResponse> findTheoBoLoc(
+            Long sinhVienId,
+            Long lopHocPhanId,
+            Long baiKiemTraId,
+            Pageable pageable
+    ) {
+        if (sinhVienId != null && lopHocPhanId != null) {
+            return repository.findBySinhVienIdAndLopHocPhanId(sinhVienId, lopHocPhanId, pageable)
+                    .map(mapper::toResponse);
+        }
 
+        if (sinhVienId != null) {
+            return repository.findBySinhVienId(sinhVienId, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        if (lopHocPhanId != null) {
+            return repository.findByLopHocPhanId(lopHocPhanId, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        if (baiKiemTraId != null) {
+            return repository.findByBaiKiemTraId(baiKiemTraId, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        return findAll(pageable);
+    }
     @Override
     @Transactional(readOnly = true)
     public DiemChiTietResponse findById(Long id) {

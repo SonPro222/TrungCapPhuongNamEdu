@@ -6,8 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface NhomKienThucService {
-    Page<NhomKienThucResponse> findAll(Pageable pageable);
-    Page<NhomKienThucResponse> findAllByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable);
+    Page<NhomKienThucResponse> findAll(
+            Long chuongTrinhVersionId,
+            Long nhomKienThucGocId,
+            String loaiNhom,
+            String keyword,
+            Pageable pageable
+    );
     NhomKienThucResponse findById(Long id);
     NhomKienThucResponse create(NhomKienThucRequest request);
     NhomKienThucResponse update(Long id, NhomKienThucRequest request);

@@ -36,4 +36,27 @@ public class NhatKyDangNhap {
 
     @Column(name = "ly_do_that_bai", columnDefinition = "TEXT")
     private String lyDoThatBai;
+    @Column(name = "email_nhap", length = 255)
+    private String emailNhap;
+
+    @Column(name = "tai_khoan_email", length = 255)
+    private String taiKhoanEmail;
+
+    @Column(name = "ten_tai_khoan", length = 255)
+    private String tenTaiKhoan;
+
+    @Column(name = "loai_tai_khoan", length = 50)
+    private String loaiTaiKhoan;
+
+    @Column(name = "doi_tuong_loai", length = 50)
+    private String doiTuongLoai;
+
+    @Column(name = "doi_tuong_id")
+    private Long doiTuongId;
+
+    @Column(name = "doi_tuong_ten", length = 255)
+    private String doiTuongTen;
+
+    @Column(name = "phuong_thuc", length = 50)
+    private String phuongThuc;
 }

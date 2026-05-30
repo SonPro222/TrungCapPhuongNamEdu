@@ -20,8 +20,13 @@ public class DieuKienMonHocController {
     private final DieuKienMonHocService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<DieuKienMonHocResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<DieuKienMonHocResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long syllabusMonId,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusMonId, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

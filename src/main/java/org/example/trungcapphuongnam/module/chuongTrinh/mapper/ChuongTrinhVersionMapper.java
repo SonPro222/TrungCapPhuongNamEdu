@@ -26,8 +26,7 @@ public class ChuongTrinhVersionMapper {
                 .tongGioThucHanh(request.getTongGioThucHanh())
                 .tongGioKiemTra(request.getTongGioKiemTra())
                 .laHienHanh(request.getLaHienHanh())
-                .createdAt(request.getCreatedAt())
-                .updatedAt(request.getUpdatedAt())
+
                 .build();
     }
 
@@ -74,7 +73,6 @@ public class ChuongTrinhVersionMapper {
         entity.setTongGioThucHanh(request.getTongGioThucHanh());
         entity.setTongGioKiemTra(request.getTongGioKiemTra());
         entity.setLaHienHanh(request.getLaHienHanh());
-        entity.setCreatedAt(request.getCreatedAt());
-        entity.setUpdatedAt(request.getUpdatedAt());
+
     }
 }

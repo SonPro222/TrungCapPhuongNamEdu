@@ -23,7 +23,8 @@ public class ChuongTrinhMon {
 
     @Column(name = "mon_hoc_id")
     private Long monHocId;
-
+    @Column(name = "loai_pham_vi")
+    private String loaiPhamVi;
     @Column(name = "ma_mon_trong_ct")
     private String maMonTrongCt;
 
@@ -71,5 +72,22 @@ public class ChuongTrinhMon {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+
+        if (this.updatedAt == null) {
+            this.updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

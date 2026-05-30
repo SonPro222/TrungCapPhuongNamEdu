@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface DieuKienTotNghiepService {
-    Page<DieuKienTotNghiepResponse> findAll(Pageable pageable);
+    Page<DieuKienTotNghiepResponse> findAll(Long chuongTrinhVersionId, String keyword, Pageable pageable);
     DieuKienTotNghiepResponse findById(Long id);
     DieuKienTotNghiepResponse create(DieuKienTotNghiepRequest request);
     DieuKienTotNghiepResponse update(Long id, DieuKienTotNghiepRequest request);

@@ -20,8 +20,12 @@ public class DieuKienTotNghiepController {
     private final DieuKienTotNghiepService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<DieuKienTotNghiepResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<DieuKienTotNghiepResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

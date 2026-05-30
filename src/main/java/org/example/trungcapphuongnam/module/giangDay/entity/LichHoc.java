@@ -2,10 +2,9 @@ package org.example.trungcapphuongnam.module.giangDay.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.TrangThaiLichHoc;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLichHoc;
 
 import java.time.*;
-import java.math.BigDecimal;
 
 @Getter
 @Setter

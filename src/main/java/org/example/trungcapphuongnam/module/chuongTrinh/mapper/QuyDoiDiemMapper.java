@@ -15,9 +15,19 @@ public class QuyDoiDiemMapper {
                 .nguongTu(request.getNguongTu())
                 .nguongDen(request.getNguongDen())
                 .diemQuyDoi(request.getDiemQuyDoi())
+
+
                 .ketQua(request.getKetQua())
                 .congThuc(request.getCongThuc())
                 .ghiChu(request.getGhiChu())
+                .ma(request.getMa())
+                .ten(request.getTen())
+
+                .loaiMau(request.getLoaiMau())
+                .tyLe(request.getTyLe())
+                .diemToiDa(request.getDiemToiDa())
+                .thuTu(request.getThuTu())
+                .batBuoc(request.getBatBuoc())
                 .build();
     }
 
@@ -32,6 +42,15 @@ public class QuyDoiDiemMapper {
                 .ketQua(entity.getKetQua())
                 .congThuc(entity.getCongThuc())
                 .ghiChu(entity.getGhiChu())
+                .ma(entity.getMa())
+                .ten(entity.getTen())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .loaiMau(entity.getLoaiMau())
+                .tyLe(entity.getTyLe())
+                .diemToiDa(entity.getDiemToiDa())
+                .thuTu(entity.getThuTu())
+                .batBuoc(entity.getBatBuoc())
                 .build();
     }
 
@@ -44,5 +63,14 @@ public class QuyDoiDiemMapper {
         entity.setKetQua(request.getKetQua());
         entity.setCongThuc(request.getCongThuc());
         entity.setGhiChu(request.getGhiChu());
+        entity.setMa(request.getMa());
+        entity.setTen(request.getTen());
+
+        entity.setLoaiMau(request.getLoaiMau());
+        entity.setTyLe(request.getTyLe());
+        entity.setDiemToiDa(request.getDiemToiDa());
+        entity.setThuTu(request.getThuTu());
+        entity.setBatBuoc(request.getBatBuoc());
+
     }
 }

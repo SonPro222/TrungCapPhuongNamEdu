@@ -3,6 +3,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -37,5 +38,32 @@ public class QuyDoiDiem {
 
     @Column(name = "ghi_chu")
     private String ghiChu;
+
+    @Column(name = "ma")
+    private String ma;
+
+    @Column(name = "ten")
+    private String ten;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "loai_mau")
+    private String loaiMau;
+
+    @Column(name = "ty_le")
+    private BigDecimal tyLe;
+
+    @Column(name = "diem_toi_da")
+    private BigDecimal diemToiDa;
+
+    @Column(name = "thu_tu")
+    private Integer thuTu;
+
+    @Column(name = "bat_buoc")
+    private Boolean batBuoc;
 
 }

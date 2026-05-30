@@ -3,16 +3,18 @@ package org.example.trungcapphuongnam.module.heThong.service.impl;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.heThong.HeThongNotFoundException;
+import org.example.trungcapphuongnam.module.heThong.dto.request.DoiMatKhauTaiKhoanRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.request.TaiKhoanRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.TaiKhoanResponse;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoanVaiTro;
 import org.example.trungcapphuongnam.module.heThong.entity.VaiTro;
-import org.example.trungcapphuongnam.module.heThong.exception.HeThongNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.mapper.TaiKhoanMapper;
 import org.example.trungcapphuongnam.module.heThong.repository.TaiKhoanRepository;
 import org.example.trungcapphuongnam.module.heThong.repository.VaiTroRepository;
 import org.example.trungcapphuongnam.module.heThong.service.TaiKhoanService;
+import org.example.trungcapphuongnam.module.heThong.validator.TaiKhoanValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,15 +25,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class TaiKhoanServiceImpl implements TaiKhoanService {
+
     private final TaiKhoanRepository taiKhoanRepository;
     private final VaiTroRepository vaiTroRepository;
     private final TaiKhoanMapper taiKhoanMapper;
     private final PasswordEncoder passwordEncoder;
+    private final TaiKhoanValidator taiKhoanValidator;
 
     @Override
     @Transactional(readOnly = true)
@@ -43,16 +48,20 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     @Transactional(readOnly = true)
     public Page<TaiKhoanResponse> search(String keyword, String loaiTaiKhoan, String trangThai, String vaiTro, Pageable pageable) {
         Specification<TaiKhoan> spec = Specification.where(null);
+
         if (keyword != null && !keyword.isBlank()) {
             String value = "%" + keyword.trim().toLowerCase() + "%";
             spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("email")), value));
         }
+
         if (loaiTaiKhoan != null && !loaiTaiKhoan.isBlank()) {
             spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("loaiTaiKhoan").as(String.class)), loaiTaiKhoan.trim().toLowerCase()));
         }
+
         if (trangThai != null && !trangThai.isBlank()) {
             spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("trangThai").as(String.class)), trangThai.trim().toLowerCase()));
         }
+
         if (vaiTro != null && !vaiTro.isBlank()) {
             String value = "%" + vaiTro.trim().toLowerCase() + "%";
             spec = spec.and((root, query, cb) -> {
@@ -65,6 +74,7 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
                 );
             });
         }
+
         return taiKhoanRepository.findAll(spec, pageable).map(taiKhoanMapper::toResponse);
     }
 
@@ -75,27 +85,54 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public TaiKhoanResponse getByEmail(String email) {
+        taiKhoanValidator.validateTimTaiKhoanTheoEmail(email);
+        return taiKhoanMapper.toResponse(findByEmailOrThrow(email));
+    }
+
+    @Override
     public TaiKhoanResponse create(TaiKhoanRequest request) {
-        validateRequest(request, true);
-        String email = request.getEmail().trim().toLowerCase();
-        if (taiKhoanRepository.existsByEmail(email)) throw new RuntimeException("Email đã tồn tại");
+        taiKhoanValidator.validateCreate(request);
+
         TaiKhoan entity = taiKhoanMapper.toEntity(request);
-        entity.setEmail(email);
+        entity.setEmail(chuanHoaEmail(request.getEmail()));
         entity.setMatKhauHash(passwordEncoder.encode(request.getMatKhau()));
-        ganVaiTro(entity, request.getRoles());
+        capNhatVaiTro(entity, request.getRoles());
+
         return taiKhoanMapper.toResponse(taiKhoanRepository.save(entity));
     }
 
     @Override
     public TaiKhoanResponse update(Long id, TaiKhoanRequest request) {
-        validateRequest(request, false);
+        taiKhoanValidator.validateUpdate(id, request);
+
         TaiKhoan entity = findByIdOrThrow(id);
-        String email = request.getEmail().trim().toLowerCase();
-        taiKhoanRepository.findByEmail(email).filter(existing -> !existing.getId().equals(id)).ifPresent(existing -> { throw new RuntimeException("Email đã tồn tại"); });
         taiKhoanMapper.updateEntity(entity, request);
-        entity.setEmail(email);
-        if (request.getMatKhau() != null && !request.getMatKhau().isBlank()) entity.setMatKhauHash(passwordEncoder.encode(request.getMatKhau()));
-        ganVaiTro(entity, request.getRoles());
+        entity.setEmail(chuanHoaEmail(request.getEmail()));
+
+        capNhatVaiTro(entity, request.getRoles());
+
+        return taiKhoanMapper.toResponse(taiKhoanRepository.save(entity));
+    }
+
+    @Override
+    public TaiKhoanResponse doiMatKhauQuanTri(Long id, DoiMatKhauTaiKhoanRequest request) {
+        taiKhoanValidator.validateDoiMatKhauTaiKhoan(request);
+
+        TaiKhoan entity = findByIdOrThrow(id);
+        entity.setMatKhauHash(passwordEncoder.encode(request.getMatKhauMoi()));
+
+        return taiKhoanMapper.toResponse(taiKhoanRepository.save(entity));
+    }
+
+    @Override
+    public TaiKhoanResponse doiMatKhauTheoGmail(String email, DoiMatKhauTaiKhoanRequest request) {
+        taiKhoanValidator.validateDoiMatKhauTaiKhoanTheoGmail(email, request);
+
+        TaiKhoan entity = findByEmailOrThrow(email);
+        entity.setMatKhauHash(passwordEncoder.encode(request.getMatKhauMoi()));
+
         return taiKhoanMapper.toResponse(taiKhoanRepository.save(entity));
     }
 
@@ -105,27 +142,58 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     }
 
     private TaiKhoan findByIdOrThrow(Long id) {
-        return taiKhoanRepository.findById(id).orElseThrow(() -> new HeThongNotFoundException("Không tìm thấy tài khoản với id = " + id));
+        return taiKhoanRepository.findById(id)
+                .orElseThrow(() -> new HeThongNotFoundException("Không tìm thấy tài khoản với id = " + id));
     }
 
-    private void validateRequest(TaiKhoanRequest request, boolean createMode) {
-        if (request == null) throw new RuntimeException("Dữ liệu tài khoản không hợp lệ");
-        if (request.getEmail() == null || request.getEmail().isBlank()) throw new RuntimeException("Email không được để trống");
-        if (createMode && (request.getMatKhau() == null || request.getMatKhau().isBlank())) throw new RuntimeException("Mật khẩu không được để trống");
-        if (request.getLoaiTaiKhoan() == null || request.getLoaiTaiKhoan().isBlank()) throw new RuntimeException("Loại tài khoản không được để trống");
-        if (request.getRoles() == null || request.getRoles().isEmpty()) throw new RuntimeException("Tài khoản phải có ít nhất một vai trò");
+    private TaiKhoan findByEmailOrThrow(String email) {
+        return taiKhoanRepository.findByEmailIgnoreCase(chuanHoaEmail(email))
+                .orElseThrow(() -> new HeThongNotFoundException("Không tìm thấy tài khoản với Gmail: " + email));
     }
 
-    private void ganVaiTro(TaiKhoan taiKhoan, List<String> roleCodes) {
-        taiKhoan.getTaiKhoanVaiTros().clear();
-        if (roleCodes == null || roleCodes.isEmpty()) return;
-        Set<String> uniqueRoleCodes = new LinkedHashSet<>(roleCodes.stream().filter(role -> role != null && !role.isBlank()).map(role -> role.trim().toUpperCase()).toList());
-        for (String roleCode : uniqueRoleCodes) {
-            VaiTro vaiTro = vaiTroRepository.findByMaVaiTro(roleCode).orElseThrow(() -> new HeThongNotFoundException("Không tìm thấy vai trò: " + roleCode));
+    private void capNhatVaiTro(TaiKhoan taiKhoan, List<String> roleCodes) {
+        Set<String> roleCodesMoi = chuanHoaRoleCodes(roleCodes);
+
+        taiKhoan.getTaiKhoanVaiTros().removeIf(taiKhoanVaiTro -> {
+            String maVaiTro = taiKhoanVaiTro.getVaiTro() == null ? null : taiKhoanVaiTro.getVaiTro().getMaVaiTro();
+            return maVaiTro == null || !roleCodesMoi.contains(maVaiTro.trim().toUpperCase());
+        });
+
+        Set<String> roleCodesDangCo = taiKhoan.getTaiKhoanVaiTros()
+                .stream()
+                .filter(taiKhoanVaiTro -> taiKhoanVaiTro.getVaiTro() != null)
+                .map(taiKhoanVaiTro -> taiKhoanVaiTro.getVaiTro().getMaVaiTro())
+                .filter(maVaiTro -> maVaiTro != null && !maVaiTro.isBlank())
+                .map(maVaiTro -> maVaiTro.trim().toUpperCase())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (String roleCode : roleCodesMoi) {
+            if (roleCodesDangCo.contains(roleCode)) {
+                continue;
+            }
+
+            VaiTro vaiTro = vaiTroRepository.findByMaVaiTro(roleCode)
+                    .orElseThrow(() -> new HeThongNotFoundException("Không tìm thấy vai trò: " + roleCode));
+
             TaiKhoanVaiTro taiKhoanVaiTro = new TaiKhoanVaiTro();
             taiKhoanVaiTro.setTaiKhoan(taiKhoan);
             taiKhoanVaiTro.setVaiTro(vaiTro);
             taiKhoan.getTaiKhoanVaiTros().add(taiKhoanVaiTro);
         }
+    }
+
+    private Set<String> chuanHoaRoleCodes(List<String> roleCodes) {
+        if (roleCodes == null) {
+            return new LinkedHashSet<>();
+        }
+
+        return roleCodes.stream()
+                .filter(role -> role != null && !role.isBlank())
+                .map(role -> role.trim().toUpperCase())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private String chuanHoaEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
     }
 }

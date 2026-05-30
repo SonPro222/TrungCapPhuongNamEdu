@@ -1,5 +1,6 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 import lombok.*;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -12,7 +13,8 @@ public class SyllabusChuongTrinhResponse {
     private Long id;
 
     private Long chuongTrinhVersionId;
-
+    private Long syllabusChuongTrinhGocId;
+    private String duongDan;
     private String moTaTongQuan;
 
     private String mucDich;
@@ -22,5 +24,27 @@ public class SyllabusChuongTrinhResponse {
     private String phuongPhapDaoTao;
 
     private String ghiChu;
+
+    private String ma;
+
+    private String ten;
+
+    private String mucTieu;
+
+    private String doiTuongTuyenSinh;
+
+    private String thoiGianDaoTao;
+
+    private String khoiLuongKienThuc;
+
+    private String dieuKienTotNghiep;
+
+    private String phuongPhapDanhGia;
+
+    private String huongDanThucHien;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

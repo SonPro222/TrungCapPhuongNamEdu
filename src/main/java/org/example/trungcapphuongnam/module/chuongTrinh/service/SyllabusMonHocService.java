@@ -6,8 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SyllabusMonHocService {
-    Page<SyllabusMonHocResponse> findAll(Pageable pageable);
-    Page<SyllabusMonHocResponse> findAllByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable);
+    Page<SyllabusMonHocResponse> findAll(
+            Long chuongTrinhMonId,
+            Long syllabusMonHocGocId,
+            Boolean batBuocDuThi,
+            String keyword,
+            Pageable pageable
+    );
     SyllabusMonHocResponse findById(Long id);
     SyllabusMonHocResponse create(SyllabusMonHocRequest request);
     SyllabusMonHocResponse update(Long id, SyllabusMonHocRequest request);

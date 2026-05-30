@@ -11,15 +11,12 @@ public class ChuongTrinhMapper {
     public ChuongTrinh toEntity(ChuongTrinhRequest request) {
         if (request == null) return null;
         return ChuongTrinh.builder()
-                .nganhId(request.getNganhId())
+                .nganhLoaiChuongTrinhId(request.getNganhLoaiChuongTrinhId())
                 .trinhDoId(request.getTrinhDoId())
-                .loaiChuongTrinhId(request.getLoaiChuongTrinhId())
                 .maChuongTrinh(request.getMaChuongTrinh())
                 .tenChuongTrinh(request.getTenChuongTrinh())
                 .doiTuongTuyenSinh(request.getDoiTuongTuyenSinh())
                 .thoiGianDaoTao(request.getThoiGianDaoTao())
-                .createdAt(request.getCreatedAt())
-                .updatedAt(request.getUpdatedAt())
                 .build();
     }
 
@@ -27,6 +24,7 @@ public class ChuongTrinhMapper {
         if (entity == null) return null;
         return ChuongTrinhResponse.builder()
                 .id(entity.getId())
+                .nganhLoaiChuongTrinhId(entity.getNganhLoaiChuongTrinhId())
                 .nganhId(entity.getNganhId())
                 .trinhDoId(entity.getTrinhDoId())
                 .loaiChuongTrinhId(entity.getLoaiChuongTrinhId())
@@ -41,14 +39,11 @@ public class ChuongTrinhMapper {
 
     public void updateEntity(ChuongTrinh entity, ChuongTrinhRequest request) {
         if (entity == null || request == null) return;
-        entity.setNganhId(request.getNganhId());
+        entity.setNganhLoaiChuongTrinhId(request.getNganhLoaiChuongTrinhId());
         entity.setTrinhDoId(request.getTrinhDoId());
-        entity.setLoaiChuongTrinhId(request.getLoaiChuongTrinhId());
         entity.setMaChuongTrinh(request.getMaChuongTrinh());
         entity.setTenChuongTrinh(request.getTenChuongTrinh());
         entity.setDoiTuongTuyenSinh(request.getDoiTuongTuyenSinh());
         entity.setThoiGianDaoTao(request.getThoiGianDaoTao());
-        entity.setCreatedAt(request.getCreatedAt());
-        entity.setUpdatedAt(request.getUpdatedAt());
     }
 }

@@ -13,7 +13,7 @@ public class SyllabusMonHocRequest {
 
     @NotNull(message = "chuong_trinh_mon_id không được để trống")
     private Long chuongTrinhMonId;
-
+    private Long syllabusMonHocGocId;
     private String viTri;
 
     private String tinhChat;
@@ -36,8 +36,12 @@ public class SyllabusMonHocRequest {
 
     private String congThucQuyDoi;
 
-    private LocalDateTime createdAt;
+    private Long monHocId;
 
-    private LocalDateTime updatedAt;
+    private String ma;
+
+    private String ten;
+
+    private String ghiChu;
 
 }

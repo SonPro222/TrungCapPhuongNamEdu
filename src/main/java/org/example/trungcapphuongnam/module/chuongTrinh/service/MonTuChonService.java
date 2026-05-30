@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface MonTuChonService {
-    Page<MonTuChonResponse> findAll(Pageable pageable);
+    Page<MonTuChonResponse> findAll(Long nhomId, Long chuongTrinhMonId, Pageable pageable);
     MonTuChonResponse findById(Long id);
     MonTuChonResponse create(MonTuChonRequest request);
     MonTuChonResponse update(Long id, MonTuChonRequest request);

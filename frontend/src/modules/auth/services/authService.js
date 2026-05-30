@@ -1,49 +1,101 @@
-import authApi from '@/modules/auth/api/authApi.js';
-import tokenService from '@/core/services/tokenService.js';
-import { normalizeRole } from '@/utils/permission.js';
+import { tokenService } from './tokenService'
+import { ROLES } from '../constants/roles'
 
-const pick = (source, keys) => keys.map((key) => source?.[key]).find(Boolean);
+function normalizeRole(role) {
+    if (!role) return ''
 
-export const normalizeAuthPayload = (payload = {}) => {
-  const data = payload?.data ?? payload?.result ?? payload;
-  const accessToken = pick(data, ['accessToken', 'token', 'jwt', 'access_token']);
-  const refreshToken = pick(data, ['refreshToken', 'refresh_token']);
-  const user = data?.user ?? data?.account ?? data?.taiKhoan ?? data;
-  const roleValue = pick(user, ['role', 'vaiTro', 'roleName', 'authority']) || pick(data, ['role', 'vaiTro']);
+    if (typeof role === 'string') {
+        return role.replace('ROLE_', '').toUpperCase()
+    }
 
-  return {
-    raw: data,
-    user,
-    accessToken,
-    refreshToken,
-    role: normalizeRole(Array.isArray(roleValue) ? roleValue[0] : roleValue),
-  };
-};
+    if (typeof role === 'object') {
+        const value =
+            role.maVaiTro ||
+            role.tenVaiTro ||
+            role.name ||
+            role.role ||
+            role.authority ||
+            role.loaiTaiKhoan ||
+            role.code ||
+            role.ma ||
+            role.ten ||
+            ''
+
+        return String(value).replace('ROLE_', '').toUpperCase()
+    }
+
+    return String(role).replace('ROLE_', '').toUpperCase()
+}
+
+function layRoleTuUser(user) {
+    if (!user) return []
+
+    const rawRoles = [
+        ...(Array.isArray(user.roles) ? user.roles : []),
+        ...(Array.isArray(user.authorities) ? user.authorities : []),
+        ...(Array.isArray(user.quyen) ? user.quyen : []),
+        ...(Array.isArray(user.vaiTroList) ? user.vaiTroList : []),
+        ...(Array.isArray(user.danhSachVaiTro) ? user.danhSachVaiTro : [])
+    ]
+
+    if (user.role) rawRoles.push(user.role)
+    if (user.vaiTro) rawRoles.push(user.vaiTro)
+    if (user.loaiTaiKhoan) rawRoles.push(user.loaiTaiKhoan)
+    if (user.roleName) rawRoles.push(user.roleName)
+    if (user.authority) rawRoles.push(user.authority)
+    if (user.maVaiTro) rawRoles.push(user.maVaiTro)
+    if (user.tenVaiTro) rawRoles.push(user.tenVaiTro)
+
+    return rawRoles
+        .map(normalizeRole)
+        .filter(Boolean)
+}
 
 export const authService = {
-  async login(credentials) {
-    const payload = await authApi.login(credentials);
-    const auth = normalizeAuthPayload(payload);
-    if (auth.accessToken) tokenService.setAccessToken(auth.accessToken);
-    if (auth.refreshToken) tokenService.setRefreshToken(auth.refreshToken);
-    if (auth.role) tokenService.setRole(auth.role);
-    if (auth.user) localStorage.setItem('user', JSON.stringify(auth.user));
-    return auth;
-  },
-  async register(payload) {
-    return authApi.register(payload);
-  },
-  async logout() {
-    await authApi.logout();
-    tokenService.clear();
-  },
-  getCurrentUser() {
-    try {
-      return JSON.parse(localStorage.getItem('user') || 'null');
-    } catch {
-      return null;
-    }
-  },
-};
+    logout() {
+        tokenService.clearAuth()
+    },
 
-export default authService;
+    getCurrentUser() {
+        return tokenService.getUser()
+    },
+
+    isLoggedIn() {
+        const token = tokenService.getToken()
+
+        if (!token) return false
+
+        if (tokenService.isTokenExpired()) {
+            tokenService.clearAuth()
+            return false
+        }
+
+        return true
+    },
+
+    getRoles() {
+        const user = tokenService.getUser()
+        return layRoleTuUser(user)
+    },
+
+    hasRole(role) {
+        const roles = this.getRoles()
+        const targetRole = normalizeRole(role)
+
+        if (roles.includes(ROLES.ADMIN)) {
+            return true
+        }
+
+        return roles.includes(targetRole)
+    },
+
+    hasAnyRole(requiredRoles = []) {
+        if (!requiredRoles.length) return true
+
+        if (this.hasRole(ROLES.ADMIN)) {
+            return true
+        }
+
+        return requiredRoles.some((role) => this.hasRole(role))
+    }
+}

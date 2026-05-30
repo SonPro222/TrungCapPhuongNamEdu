@@ -1,9 +1,9 @@
 package org.example.trungcapphuongnam.module.heThong.dto.response;
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.TrangThaiNhanVien;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiNhanVien;
 
-import java.time.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,6 +20,10 @@ public class NhanVienResponse {
     private String phongBan;
     private String chucVu;
     private TrangThaiNhanVien trangThai;
+
+    // Chỉ trả về khi tạo mới/cấp lại tài khoản, không lưu DB
+    private String matKhauTam;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

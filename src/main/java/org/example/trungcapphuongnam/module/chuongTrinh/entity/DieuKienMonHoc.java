@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -28,5 +29,41 @@ public class DieuKienMonHoc {
 
     @Column(name = "thu_tu")
     private Integer thuTu;
+
+    @Column(name = "ma")
+    private String ma;
+
+    @Column(name = "ghi_chu")
+    private String ghiChu;
+    @Column(name = "ten")
+    private String ten;
+
+    @Column(name = "so_luong")
+    private Integer soLuong;
+
+    @Column(name = "yeu_cau")
+    private String yeuCau;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+
+        if (this.updatedAt == null) {
+            this.updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

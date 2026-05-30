@@ -1,0 +1,27 @@
+package org.example.trungcapphuongnam.module.daoTao.dto;
+
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class KhungKyGocRequest {
+
+    @NotBlank(message = "maKy không được để trống")
+    private String maKy;
+
+    @NotBlank(message = "tenKy không được để trống")
+    private String tenKy;
+
+    @NotNull(message = "thuTu không được để trống")
+    @Positive(message = "thuTu phải lớn hơn 0")
+    private Integer thuTu;
+
+    private String moTa;
+}

@@ -1,6 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -12,7 +13,7 @@ public class SyllabusChuongBaiResponse {
     private Long id;
 
     private Long syllabusMonId;
-
+    private String maChuong;
     private String ten;
 
     private BigDecimal tongGio;
@@ -28,5 +29,13 @@ public class SyllabusChuongBaiResponse {
     private String mucTieu;
 
     private Integer thuTu;
+
+    private Long syllabusMonHocGocId;
+
+    private String ghiChu;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

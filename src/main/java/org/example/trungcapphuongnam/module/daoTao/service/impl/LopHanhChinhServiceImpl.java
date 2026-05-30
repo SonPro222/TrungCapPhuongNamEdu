@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.daoTao.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.enums.TrangThaiLopHanhChinh;
+import org.example.trungcapphuongnam.module.daoTao.enums.TrangThaiLopHanhChinh;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
@@ -35,7 +35,43 @@ public class LopHanhChinhServiceImpl implements LopHanhChinhService {
     public Page<LopHanhChinhResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LopHanhChinhResponse> findAllByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhVersionId(
+                chuongTrinhVersionId,
+                pageable
+        ).map(mapper::toResponse);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LopHanhChinhResponse> findAllByKhoaDaoTaoId(
+            Long khoaDaoTaoId,
+            Pageable pageable
+    ) {
+        return repository.findByKhoaDaoTaoId(
+                khoaDaoTaoId,
+                pageable
+        ).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LopHanhChinhResponse> findAllByChuongTrinhVersionIdAndKhoaDaoTaoId(
+            Long chuongTrinhVersionId,
+            Long khoaDaoTaoId,
+            Pageable pageable
+    ) {
+        return repository.findByChuongTrinhVersionIdAndKhoaDaoTaoId(
+                chuongTrinhVersionId,
+                khoaDaoTaoId,
+                pageable
+        ).map(mapper::toResponse);
+    }
     @Override
     @Transactional(readOnly = true)
     public LopHanhChinhResponse findById(Long id) {

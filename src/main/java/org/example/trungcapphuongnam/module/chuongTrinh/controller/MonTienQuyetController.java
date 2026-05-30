@@ -20,8 +20,14 @@ public class MonTienQuyetController {
     private final MonTienQuyetService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MonTienQuyetResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<MonTienQuyetResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long monId,
+            @RequestParam(required = false) Long monDieuKienId,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(monId, monDieuKienId, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

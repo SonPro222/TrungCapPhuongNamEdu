@@ -3,7 +3,6 @@ package org.example.trungcapphuongnam.module.heThong.mapper;
 import org.example.trungcapphuongnam.module.heThong.dto.request.NhanVienRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.NhanVienResponse;
 import org.example.trungcapphuongnam.module.heThong.entity.NhanVien;
-import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,19 +34,12 @@ public class NhanVienMapper {
         }
 
         NhanVien entity = new NhanVien();
-
-        if (request.getTaiKhoanId() != null) {
-            TaiKhoan taiKhoan = new TaiKhoan();
-            taiKhoan.setId(request.getTaiKhoanId());
-            entity.setTaiKhoan(taiKhoan);
-        }
-
-        entity.setMaNhanVien(request.getMaNhanVien());
-        entity.setHoTen(request.getHoTen());
-        entity.setEmail(request.getEmail());
-        entity.setSoDienThoai(request.getSoDienThoai());
-        entity.setPhongBan(request.getPhongBan());
-        entity.setChucVu(request.getChucVu());
+        entity.setMaNhanVien(chuanHoa(request.getMaNhanVien()));
+        entity.setHoTen(chuanHoa(request.getHoTen()));
+        entity.setEmail(chuanHoaEmail(request.getEmail()));
+        entity.setSoDienThoai(chuanHoa(request.getSoDienThoai()));
+        entity.setPhongBan(chuanHoa(request.getPhongBan()));
+        entity.setChucVu(chuanHoa(request.getChucVu()));
         entity.setTrangThai(request.getTrangThai());
 
         return entity;
@@ -58,20 +50,20 @@ public class NhanVienMapper {
             return;
         }
 
-        if (request.getTaiKhoanId() != null) {
-            TaiKhoan taiKhoan = new TaiKhoan();
-            taiKhoan.setId(request.getTaiKhoanId());
-            entity.setTaiKhoan(taiKhoan);
-        } else {
-            entity.setTaiKhoan(null);
-        }
-
-        entity.setMaNhanVien(request.getMaNhanVien());
-        entity.setHoTen(request.getHoTen());
-        entity.setEmail(request.getEmail());
-        entity.setSoDienThoai(request.getSoDienThoai());
-        entity.setPhongBan(request.getPhongBan());
-        entity.setChucVu(request.getChucVu());
+        entity.setMaNhanVien(chuanHoa(request.getMaNhanVien()));
+        entity.setHoTen(chuanHoa(request.getHoTen()));
+        entity.setEmail(chuanHoaEmail(request.getEmail()));
+        entity.setSoDienThoai(chuanHoa(request.getSoDienThoai()));
+        entity.setPhongBan(chuanHoa(request.getPhongBan()));
+        entity.setChucVu(chuanHoa(request.getChucVu()));
         entity.setTrangThai(request.getTrangThai());
+    }
+
+    private String chuanHoa(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    private String chuanHoaEmail(String value) {
+        return value == null ? null : value.trim().toLowerCase();
     }
 }

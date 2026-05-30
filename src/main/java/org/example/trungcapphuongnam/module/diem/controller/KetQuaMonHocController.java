@@ -20,8 +20,15 @@ public class KetQuaMonHocController {
     private final KetQuaMonHocService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<KetQuaMonHocResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<KetQuaMonHocResponse>>> findAll(
+            @RequestParam(required = false) Long sinhVienId,
+            @RequestParam(required = false) Long chuongTrinhMonId,
+            @RequestParam(required = false) Long lopHocPhanId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findTheoBoLoc(sinhVienId, chuongTrinhMonId, lopHocPhanId, pageable)
+        ));
     }
 
     @GetMapping(DiemPath.ID)

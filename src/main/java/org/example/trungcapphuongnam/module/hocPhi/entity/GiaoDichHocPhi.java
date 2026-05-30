@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.hocPhi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.PhuongThucGiaoDichHocPhi;
+import org.example.trungcapphuongnam.module.hocPhi.enums.PhuongThucGiaoDichHocPhi;
 
 
 import java.math.BigDecimal;

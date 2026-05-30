@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.hocPhi.repository;
 
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiHocPhi;
+import org.example.trungcapphuongnam.module.hocPhi.enums.TrangThaiHocPhi;
 import org.example.trungcapphuongnam.module.hocPhi.entity.HocPhi;
 import org.springframework.data.jpa.repository.JpaRepository;
 

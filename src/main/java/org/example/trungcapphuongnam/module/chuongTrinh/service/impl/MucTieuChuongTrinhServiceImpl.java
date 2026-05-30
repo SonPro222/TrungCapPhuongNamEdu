@@ -6,25 +6,33 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.MucTieuChuo
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MucTieuChuongTrinh;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.MucTieuChuongTrinhMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.MucTieuChuongTrinhRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.MucTieuChuongTrinhService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class MucTieuChuongTrinhServiceImpl implements MucTieuChuongTrinhService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final MucTieuChuongTrinhRepository repository;
     private final MucTieuChuongTrinhMapper mapper;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MucTieuChuongTrinhResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<MucTieuChuongTrinhResponse> findAll(Long chuongTrinhVersionId, String loai, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<MucTieuChuongTrinh>empty()
+                    .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
+                    .and(LocJpa.like("loai", loai))
+                    .and(LocJpa.keyword(keyword, "loai", "noiDung")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -38,6 +46,7 @@ public class MucTieuChuongTrinhServiceImpl implements MucTieuChuongTrinhService 
     @Override
     public MucTieuChuongTrinhResponse create(MucTieuChuongTrinhRequest request) {
         MucTieuChuongTrinh entity = mapper.toEntity(request);
+        validator.validateMucTieuChuongTrinh(request, null);
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -45,6 +54,7 @@ public class MucTieuChuongTrinhServiceImpl implements MucTieuChuongTrinhService 
     public MucTieuChuongTrinhResponse update(Long id, MucTieuChuongTrinhRequest request) {
         MucTieuChuongTrinh entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("MucTieuChuongTrinh không tồn tại: " + id));
+        validator.validateMucTieuChuongTrinh(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

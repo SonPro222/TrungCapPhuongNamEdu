@@ -12,6 +12,7 @@ public class SyllabusChuongBaiMapper {
         if (request == null) return null;
         return SyllabusChuongBai.builder()
                 .syllabusMonId(request.getSyllabusMonId())
+                .maChuong(request.getMaChuong())
                 .ten(request.getTen())
                 .tongGio(request.getTongGio())
                 .gioLyThuyet(request.getGioLyThuyet())
@@ -20,6 +21,9 @@ public class SyllabusChuongBaiMapper {
                 .noiDung(request.getNoiDung())
                 .mucTieu(request.getMucTieu())
                 .thuTu(request.getThuTu())
+                .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
+                .ghiChu(request.getGhiChu())
+
                 .build();
     }
 
@@ -28,6 +32,7 @@ public class SyllabusChuongBaiMapper {
         return SyllabusChuongBaiResponse.builder()
                 .id(entity.getId())
                 .syllabusMonId(entity.getSyllabusMonId())
+                .maChuong(entity.getMaChuong())
                 .ten(entity.getTen())
                 .tongGio(entity.getTongGio())
                 .gioLyThuyet(entity.getGioLyThuyet())
@@ -36,12 +41,17 @@ public class SyllabusChuongBaiMapper {
                 .noiDung(entity.getNoiDung())
                 .mucTieu(entity.getMucTieu())
                 .thuTu(entity.getThuTu())
+                .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
+                .ghiChu(entity.getGhiChu())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
     public void updateEntity(SyllabusChuongBai entity, SyllabusChuongBaiRequest request) {
         if (entity == null || request == null) return;
         entity.setSyllabusMonId(request.getSyllabusMonId());
+        entity.setMaChuong(request.getMaChuong());
         entity.setTen(request.getTen());
         entity.setTongGio(request.getTongGio());
         entity.setGioLyThuyet(request.getGioLyThuyet());
@@ -50,5 +60,9 @@ public class SyllabusChuongBaiMapper {
         entity.setNoiDung(request.getNoiDung());
         entity.setMucTieu(request.getMucTieu());
         entity.setThuTu(request.getThuTu());
+        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
+        entity.setGhiChu(request.getGhiChu());
+
+
     }
 }

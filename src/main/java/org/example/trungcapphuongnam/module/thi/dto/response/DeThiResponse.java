@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.thi.dto.response;
 
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Thi.DeThiTrangThai;
+import org.example.trungcapphuongnam.module.thi.enums.DeThiTrangThai;
 
 @Getter
 @Setter

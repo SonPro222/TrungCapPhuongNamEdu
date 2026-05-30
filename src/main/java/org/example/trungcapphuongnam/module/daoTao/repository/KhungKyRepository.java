@@ -1,13 +1,51 @@
 package org.example.trungcapphuongnam.module.daoTao.repository;
 
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+
 @Repository
 public interface KhungKyRepository extends JpaRepository<KhungKy, Long> {
-    boolean existsByLoaiChuongTrinhIdAndMaKy(Long loaiChuongTrinhId, String maKy);
-    boolean existsByLoaiChuongTrinhIdAndMaKyAndIdNot(Long loaiChuongTrinhId, String maKy, Long id);
-    boolean existsByLoaiChuongTrinhIdAndThuTu(Long loaiChuongTrinhId, Integer thuTu);
-    boolean existsByLoaiChuongTrinhIdAndThuTuAndIdNot(Long loaiChuongTrinhId, Integer thuTu, Long id);
+
+    Page<KhungKy> findByChuongTrinhVersionId(
+            Long chuongTrinhVersionId,
+            Pageable pageable
+    );
+
+    boolean existsByChuongTrinhVersionIdAndMaKy(
+            Long chuongTrinhVersionId,
+            String maKy
+    );
+
+    boolean existsByChuongTrinhVersionIdAndMaKyAndIdNot(
+            Long chuongTrinhVersionId,
+            String maKy,
+            Long id
+    );
+
+    boolean existsByChuongTrinhVersionIdAndThuTu(
+            Long chuongTrinhVersionId,
+            Integer thuTu
+    );
+
+    boolean existsByChuongTrinhVersionIdAndThuTuAndIdNot(
+            Long chuongTrinhVersionId,
+            Integer thuTu,
+            Long id
+    );
+    boolean existsByChuongTrinhVersionIdAndKhungKyGocId(
+            Long chuongTrinhVersionId,
+            Long khungKyGocId
+    );
+
+    boolean existsByChuongTrinhVersionIdAndKhungKyGocIdAndIdNot(
+            Long chuongTrinhVersionId,
+            Long khungKyGocId,
+            Long id
+    );
+
+    Page<KhungKy> findByKhungKyGocId(Long khungKyGocId, Pageable pageable);
 }

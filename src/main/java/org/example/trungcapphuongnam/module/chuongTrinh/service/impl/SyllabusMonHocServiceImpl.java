@@ -6,33 +6,54 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMon
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocService;
 import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
 
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
     private final SyllabusMonHocRepository repository;
     private final SyllabusMonHocMapper mapper;
+    private final ChuongTrinhNghiepVuValidator validator;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<SyllabusMonHocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<SyllabusMonHocResponse> findAll(
+            Long chuongTrinhMonId,
+            Long syllabusMonHocGocId,
+            Boolean batBuocDuThi,
+            String keyword,
+            Pageable pageable
+    ) {
+        return repository.findAll(
+                LocJpa.<SyllabusMonHoc>empty()
+                        .and(LocJpa.eq("chuongTrinhMonId", chuongTrinhMonId))
+                        .and(LocJpa.eq("syllabusMonHocGocId", syllabusMonHocGocId))
+                        .and(LocJpa.eq("batBuocDuThi", batBuocDuThi))
+                        .and(LocJpa.keyword(
+                                keyword,
+                                "viTri",
+                                "tinhChat",
+                                "mucTieu",
+                                "phuongPhapDanhGia",
+                                "dieuKienHoanThanh",
+                                "huongDan",
+                                "donViDiem",
+                                "congThucQuyDoi"
+                        )),
+                pageable
+        ).map(mapper::toResponse);
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<SyllabusMonHocResponse> findAllByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable) {
-        return repository.findByChuongTrinhMonId(chuongTrinhMonId, pageable).map(mapper::toResponse);
-    }
-
     @Override
     @Transactional(readOnly = true)
     public SyllabusMonHocResponse findById(Long id) {
@@ -43,14 +64,18 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
 
     @Override
     public SyllabusMonHocResponse create(SyllabusMonHocRequest request) {
+        validator.validateSyllabusMonHoc(request, null);
+
         SyllabusMonHoc entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
-
     @Override
     public SyllabusMonHocResponse update(Long id, SyllabusMonHocRequest request) {
+        validator.validateSyllabusMonHoc(request, id);
+
         SyllabusMonHoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SyllabusMonHoc không tồn tại: " + id));
+
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -60,6 +85,7 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("SyllabusMonHoc không tồn tại: " + id);
         }
-        repository.deleteById(id);
+
+        xoaChuongTrinhCascadeService.xoaTheoSyllabusMonHocId(id);
     }
 }

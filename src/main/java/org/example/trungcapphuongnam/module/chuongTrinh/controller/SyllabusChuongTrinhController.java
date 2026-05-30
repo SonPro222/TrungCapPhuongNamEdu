@@ -20,8 +20,15 @@ public class SyllabusChuongTrinhController {
     private final SyllabusChuongTrinhService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SyllabusChuongTrinhResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<SyllabusChuongTrinhResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) Long syllabusChuongTrinhGocId,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAll(chuongTrinhVersionId, syllabusChuongTrinhGocId, keyword, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

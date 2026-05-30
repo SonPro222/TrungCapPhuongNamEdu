@@ -6,10 +6,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ChuongTrinhService {
-    Page<ChuongTrinhResponse> findAll(Pageable pageable);
-    Page<ChuongTrinhResponse> findAllByNganhId(Long nganhId, Pageable pageable);
+    Page<ChuongTrinhResponse> findAll(
+            Long nganhLoaiChuongTrinhId,
+            Long nganhId,
+            Long trinhDoId,
+            Long loaiChuongTrinhId,
+            String keyword,
+            Pageable pageable
+    );
+
     ChuongTrinhResponse findById(Long id);
+
     ChuongTrinhResponse create(ChuongTrinhRequest request);
+
     ChuongTrinhResponse update(Long id, ChuongTrinhRequest request);
+
     void delete(Long id);
 }

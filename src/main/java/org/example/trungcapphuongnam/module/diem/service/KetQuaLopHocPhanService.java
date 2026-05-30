@@ -7,8 +7,18 @@ import org.springframework.data.domain.Pageable;
 
 public interface KetQuaLopHocPhanService {
     Page<KetQuaLopHocPhanResponse> findAll(Pageable pageable);
+
+    Page<KetQuaLopHocPhanResponse> findTheoBoLoc(
+            Long sinhVienId,
+            Long lopHocPhanId,
+            Pageable pageable
+    );
+
     KetQuaLopHocPhanResponse findById(Long id);
+
     KetQuaLopHocPhanResponse create(KetQuaLopHocPhanRequest request);
+
     KetQuaLopHocPhanResponse update(Long id, KetQuaLopHocPhanRequest request);
+
     void delete(Long id);
 }

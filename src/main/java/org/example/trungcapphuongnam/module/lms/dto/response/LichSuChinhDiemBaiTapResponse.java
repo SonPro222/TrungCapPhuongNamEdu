@@ -1,10 +1,9 @@
 package org.example.trungcapphuongnam.module.lms.dto.response;
 
-import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.VaiTroThucHienLms;
+import org.example.trungcapphuongnam.module.lms.enums.VaiTroThucHienLms;
 
 @Getter
 @Setter

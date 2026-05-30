@@ -1,20 +1,20 @@
 package org.example.trungcapphuongnam.config.security;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.example.trungcapphuongnam.common.constant.RoleConstant;
+
 import org.example.trungcapphuongnam.config.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -53,28 +53,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-
                 .csrf(csrf -> csrf.disable())
-
                 .formLogin(form -> form.disable())
-
                 .httpBasic(httpBasic -> httpBasic.disable())
-
                 .logout(logout -> logout.disable())
-
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
-
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
-
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, SecurityUrls.URL_ALL).permitAll()
-
-                        .requestMatchers(SecurityUrls.PUBLIC_URLS).permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, SecurityUrls.URL_ALL).permitAll()
+                                .requestMatchers(SecurityUrls.PUBLIC_URLS).permitAll()
 
 //                        .requestMatchers(SecurityUrls.AUTHENTICATED_URLS).authenticated()
 //
@@ -90,10 +82,8 @@ public class SecurityConfig {
 //                        .requestMatchers(SecurityUrls.ACADEMIC_OFFICE_URLS)
 //                        .hasRole(RoleConstant.DAO_TAO)
 
-
-                        .anyRequest().permitAll()
+                                .anyRequest().permitAll()
                 )
-
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint
                                 .baseUri(SecurityUrls.OAUTH2_AUTHORIZATION_BASE_URI)
@@ -109,9 +99,7 @@ public class SecurityConfig {
                                 response.sendRedirect(frontendUrl + SecurityUrls.OAUTH2_FAILURE_REDIRECT)
                         )
                 )
-
                 .authenticationProvider(authenticationProvider())
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -132,8 +120,42 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return bcrypt.encode(rawPassword);
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                if (rawPassword == null || encodedPassword == null || encodedPassword.isBlank()) {
+                    return false;
+                }
+
+                String raw = rawPassword.toString();
+
+                if (encodedPassword.startsWith("{bcrypt}")) {
+                    return bcrypt.matches(raw, encodedPassword.substring("{bcrypt}".length()));
+                }
+
+                if (encodedPassword.startsWith("$2a$")
+                        || encodedPassword.startsWith("$2b$")
+                        || encodedPassword.startsWith("$2y$")) {
+                    return bcrypt.matches(raw, encodedPassword);
+                }
+
+                return encodedPassword.equals(raw);
+            }
+
+            @Override
+            public boolean upgradeEncoding(String encodedPassword) {
+                return false;
+            }
+        };
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

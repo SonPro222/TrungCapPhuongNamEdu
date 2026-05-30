@@ -13,7 +13,7 @@ public class SyllabusMonHocResponse {
     private Long id;
 
     private Long chuongTrinhMonId;
-
+    private Long syllabusMonHocGocId;
     private String viTri;
 
     private String tinhChat;
@@ -39,5 +39,13 @@ public class SyllabusMonHocResponse {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private Long monHocId;
+
+    private String ma;
+
+    private String ten;
+
+    private String ghiChu;
 
 }

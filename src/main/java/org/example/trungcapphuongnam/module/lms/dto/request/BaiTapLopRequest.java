@@ -3,8 +3,8 @@ package org.example.trungcapphuongnam.module.lms.dto.request;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.CachTinhDiem;
-import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiBaiTapLop;
+import org.example.trungcapphuongnam.module.lms.enums.CachTinhDiem;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiBaiTapLop;
 
 @Getter
 @Setter
@@ -13,9 +13,6 @@ import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiBaiTapLop;
 @Builder
 public class BaiTapLopRequest {
 
-    @NotNull
-
-    private Long dotGiaoBaiOnlineId;
 
     @NotNull
 
@@ -25,17 +22,16 @@ public class BaiTapLopRequest {
 
     private Long lopHocPhanId;
 
-    @NotNull
-
-    private Long cauHinhDanhGiaId;
-
-    @NotNull
-
-    private Long nguoiGiaoTaiKhoanId;
 
     @NotNull
 
     private LocalDateTime thoiGianMo;
+
+    private Long dotGiaoBaiOnlineId;
+
+    private Long cauHinhDanhGiaId;
+
+    private Long nguoiGiaoTaiKhoanId;
 
     @NotNull
 

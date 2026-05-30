@@ -30,7 +30,7 @@ public class ChuongTrinhMonRequest {
 
     @NotBlank(message = "loai_hoc_phan không được để trống")
     private String loaiHocPhan;
-
+    private String loaiPhamVi;
     private Boolean batBuoc;
 
     private Boolean laMonDieuKien;

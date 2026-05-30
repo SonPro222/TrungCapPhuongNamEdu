@@ -28,6 +28,10 @@
       {{ loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
     </button>
 
+    <RouterLink class="forgot-link" to="/auth/doi-mat-khau-sinh-vien">
+      Sinh viên quên mật khẩu / đổi mật khẩu bằng OTP
+    </RouterLink>
+
     <div class="login-divider">hoặc</div>
 
     <GoogleLoginButton />
@@ -36,6 +40,7 @@
 
 <script setup>
 import { reactive } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import GoogleLoginButton from '../components/GoogleLoginButton.vue'
 
@@ -57,3 +62,14 @@ function handleLogin() {
   })
 }
 </script>
+
+<style scoped>
+.forgot-link {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 700;
+}
+</style>
