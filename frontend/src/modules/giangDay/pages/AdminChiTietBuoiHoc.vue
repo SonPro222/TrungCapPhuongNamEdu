@@ -320,7 +320,8 @@ function quayLaiDanhSachBuoi() {
     name: 'GiangDay.ChiTietLopHocPhan',
     params: {
       id: lopHocPhanId.value
-    }
+    },
+    query: route.query
   })
 }
 

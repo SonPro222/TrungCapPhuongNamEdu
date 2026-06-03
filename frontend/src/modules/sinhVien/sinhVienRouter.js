@@ -7,6 +7,7 @@ import AdminSinhVienFlowPage from './pages/AdminSinhVienFlowPage.vue'
 import AdminSinhVienBaoLuuPage from './pages/AdminSinhVienBaoLuuPage.vue'
 import AdminSinhVienDanhSachPage from './pages/AdminSinhVienDanhSachPage.vue'
 import AdminSinhVienChiTietPage from './pages/AdminSinhVienChiTietPage.vue'
+import AdminSinhVienChiTietDiemPage from './pages/AdminSinhVienChiTietDiemPage.vue'
 
 export const sinhVienRoutes = [
     {
@@ -43,6 +44,33 @@ export const sinhVienRoutes = [
                 component: AdminSinhVienDanhSachPage,
                 meta: {
                     title: 'Danh sách sinh viên toàn trường',
+                    roles: [ROLES.ADMIN]
+                }
+            },
+            {
+                path: 'danh-sach',
+                name: 'AdminSinhVienDanhSach',
+                component: AdminSinhVienDanhSachPage,
+                meta: {
+                    title: 'Danh sách sinh viên toàn trường',
+                    roles: [ROLES.ADMIN]
+                }
+            },
+            {
+                path: 'danh-sach/:id/mon-hoc/:lopHocPhanId/chi-tiet-diem',
+                name: 'AdminSinhVienChiTietDiem',
+                component: AdminSinhVienChiTietDiemPage,
+                meta: {
+                    title: 'Chi tiết điểm sinh viên',
+                    roles: [ROLES.ADMIN]
+                }
+            },
+            {
+                path: 'danh-sach/:id',
+                name: 'AdminSinhVienChiTiet',
+                component: AdminSinhVienChiTietPage,
+                meta: {
+                    title: 'Chi tiết hồ sơ sinh viên',
                     roles: [ROLES.ADMIN]
                 }
             },

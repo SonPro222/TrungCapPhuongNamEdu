@@ -43,6 +43,98 @@ export const xemChuongTrinhService = {
     return layItems(await daoTaoXemChuongTrinhService.nganh.getAll({ size: 200 }))
   },
 
+  // Alias theo tên hàm trong spec màn xem chung
+  async layDanhSachNganhXemChuongTrinh() {
+    return this.layDanhSachNganh()
+  },
+
+  // Lấy môn trong kỳ (không cần nhóm kiến thức) theo version + kỳ
+  async layMonTheoKy(versionId, khungKyId) {
+    const items = layItems(
+      await daoTaoXemChuongTrinhService.chuongTrinhMon.getAll({
+        size: 200,
+        chuongTrinhVersionId: versionId,
+        versionId,
+        khungKyId
+      })
+    )
+    return items.filter(
+      item =>
+        String(item.chuongTrinhVersionId || item.versionId || '') === String(versionId || '') &&
+        String(item.khungKyId || '') === String(khungKyId || '')
+    )
+  },
+
+  // Chi tiết một môn cho màn xem chung: môn học + syllabus áp dụng + chương bài + tài liệu + điều kiện + tiên quyết
+  async layChiTietMonXemChuongTrinh(chuongTrinhMonId) {
+    const { chuongTrinhMon, monHoc } = await this.layMonHocTheoChuongTrinhMon(chuongTrinhMonId)
+
+    const danhSachSyllabus = await this.laySyllabusTheoChuongTrinhMon(chuongTrinhMonId)
+    const syllabus = danhSachSyllabus[0] || null
+    const syllabusMonId = syllabus?.id || null
+
+    const monTienQuyet = layItems(
+      await daoTaoXemChuongTrinhService.monTienQuyet.getAll({
+        size: 200,
+        monId: chuongTrinhMonId,
+        chuongTrinhMonId
+      })
+    )
+
+    let chuongBai = []
+    let taiLieuTrucTiep = []
+    let taiLieuNoiMap = []
+    let dieuKien = []
+
+    if (syllabusMonId) {
+      const [chuongBaiRes, taiLieuData, dieuKienTrucTiep, syllabusDieuKien, dieuKienGoc] =
+        await Promise.all([
+          daoTaoXemChuongTrinhService.syllabusChuongBai.getAll({ size: 200, syllabusMonId }),
+          this.layTaiLieuTheoSyllabusMon(syllabusMonId),
+          daoTaoXemChuongTrinhService.dieuKienMonHoc.getAll({ size: 200, syllabusMonId }),
+          daoTaoXemChuongTrinhService.syllabusMonHocDieuKien.getAll({ size: 200, syllabusMonId }),
+          daoTaoXemChuongTrinhService.dieuKienMonHocGoc.getAll({ size: 200 })
+        ])
+
+      chuongBai = layItems(chuongBaiRes)
+      taiLieuTrucTiep = taiLieuData.syllabusTaiLieu
+
+      const goc = taiLieuData.taiLieuGoc
+      taiLieuNoiMap = taiLieuData.syllabusMonHocTaiLieu.map(item => {
+        const g = goc.find(x => String(x.id || '') === String(item.taiLieuGocId || '')) || {}
+        return {
+          ...item,
+          tenTaiLieuGoc: item.tenTaiLieuGoc || g.ten || g.tenTaiLieuGoc || g.tenFile,
+          loaiTaiLieu: item.loaiTaiLieu || g.loaiTaiLieu,
+          duongDan: item.duongDan || g.duongDan
+        }
+      })
+
+      const dkTrucTiep = layItems(dieuKienTrucTiep)
+      const dkGoc = layItems(dieuKienGoc)
+      const dkNoi = layItems(syllabusDieuKien).map(item => {
+        const g = dkGoc.find(x => String(x.id || '') === String(item.dieuKienMonHocGocId || '')) || {}
+        return {
+          ...item,
+          tenDieuKienGoc: item.tenDieuKienGoc || g.ten || g.tenDieuKien || g.noiDung,
+          noiDung: item.noiDung || g.noiDung
+        }
+      })
+      dieuKien = [...dkTrucTiep, ...dkNoi]
+    }
+
+    return {
+      chuongTrinhMon,
+      monHoc,
+      syllabus,
+      chuongBai,
+      taiLieuTrucTiep,
+      taiLieuNoiMap,
+      dieuKien,
+      monTienQuyet
+    }
+  },
+
   async layNganhById(nganhId) {
     if (!nganhId) return null
     return layMotDong(await daoTaoXemChuongTrinhService.nganh.getById(nganhId))

@@ -707,14 +707,16 @@ function baoLoi(message) {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap');
 .sv-page,
 .sv-bl-page,
 .sv-lhp-page,
 .sv-page *,
 .sv-bl-page *,
 .sv-lhp-page * {
-  font-family: inherit;
+  font-family: 'Roboto', Arial, sans-serif;
   letter-spacing: normal;
+  box-sizing: border-box;
 }
 
 .sv-page,

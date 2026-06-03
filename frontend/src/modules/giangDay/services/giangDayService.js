@@ -100,6 +100,50 @@ export const giangDayService = {
     async xoaCaHoc(id) {
         return giangDayApi.caHoc.delete(id)
     },
+
+    async layTrangGiaoVienKhaDung(params = {}) {
+        return layPage(await giangDayApi.giaoVienKhaDung.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'id',
+            sortDir: 'desc',
+            ...params
+        }))
+    },
+
+    async taoGiaoVienKhaDung(payload) {
+        return giangDayApi.giaoVienKhaDung.create(payload)
+    },
+
+    async capNhatGiaoVienKhaDung(id, payload) {
+        return giangDayApi.giaoVienKhaDung.update(id, payload)
+    },
+
+    async xoaGiaoVienKhaDung(id) {
+        return giangDayApi.giaoVienKhaDung.delete(id)
+    },
+
+    async layTrangNgayNghi(params = {}) {
+        return layPage(await giangDayApi.ngayNghi.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'ngay',
+            sortDir: 'asc',
+            ...params
+        }))
+    },
+
+    async taoNgayNghi(payload) {
+        return giangDayApi.ngayNghi.create(payload)
+    },
+
+    async capNhatNgayNghi(id, payload) {
+        return giangDayApi.ngayNghi.update(id, payload)
+    },
+
+    async xoaNgayNghi(id) {
+        return giangDayApi.ngayNghi.delete(id)
+    },
     async layTrangPhanCongGiangDay(params = {}) {
         return layPage(await giangDayApi.phanCongGiangDay.getAll({
             page: 0,
@@ -163,6 +207,26 @@ export const giangDayService = {
 
     async xoaLichHoc(id) {
         return giangDayApi.lichHoc.delete(id)
+    },
+
+    async previewSinhLich(lopHocPhanId, payload) {
+        const result = await giangDayApi.dieuPhoi.previewSinhLich(lopHocPhanId, payload)
+        return result?.data?.data || result?.data || result
+    },
+
+    async taoLichTuDong(lopHocPhanId, payload) {
+        const result = await giangDayApi.dieuPhoi.taoLichTuDong(lopHocPhanId, payload)
+        return result?.data?.data || result?.data || result
+    },
+
+    async goiYLichHoc(lopHocPhanId, payload) {
+        const result = await giangDayApi.dieuPhoi.goiYLichHoc(lopHocPhanId, payload)
+        return result?.data?.data || result?.data || result
+    },
+
+    async xepLichHangLoat(lopHocPhanId, payload) {
+        const result = await giangDayApi.dieuPhoi.xepLichHangLoat(lopHocPhanId, payload)
+        return result?.data?.data || result?.data || result
     },
 
     async layTrangDiemDanh(params = {}) {
@@ -350,6 +414,45 @@ export const giangDayService = {
             sortDir: 'asc',
             ...params
         }))
+    },
+    async layDanhSachLopHocPhan(params = {}) {
+        return layPage(await giangDayApi.lopHocPhan.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'id',
+            sortDir: 'desc',
+            ...params
+        })).content
+    },
+
+    async layDanhSachGiaoVien(params = {}) {
+        return layPage(await giangDayApi.giaoVien.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'id',
+            sortDir: 'desc',
+            ...params
+        })).content
+    },
+
+    async layDanhSachPhongHoc(params = {}) {
+        return layPage(await giangDayApi.phongHoc.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'id',
+            sortDir: 'desc',
+            ...params
+        })).content
+    },
+
+    async layDanhSachCaHoc(params = {}) {
+        return layPage(await giangDayApi.caHoc.getAll({
+            page: 0,
+            size: 500,
+            sortBy: 'id',
+            sortDir: 'asc',
+            ...params
+        })).content
     },
 
 }

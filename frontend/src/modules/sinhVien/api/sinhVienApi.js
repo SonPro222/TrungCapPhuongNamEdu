@@ -6,6 +6,7 @@ const CHUONG_TRINH_URL = '/chuongTrinh'
 const GIANG_DAY_URL    = '/giang-day'
 const HE_THONG_URL     = '/he-thong'
 const DIEM_URL         = '/diem'
+const EXPORT_URL       = '/export'
 
 function createCrudApi(baseUrl, path) {
     return {
@@ -51,32 +52,58 @@ export const sinhVienApi = {
         getAll(params = {}) {
             return apiClient.get(SINH_VIEN_URL, { params })
         },
+
         getTheoNganhChuongTrinhVersion(params = {}) {
             return apiClient.get(`${SINH_VIEN_URL}/loc/theo-nganh-chuong-trinh-version`, { params })
         },
+
         getById(id) {
             return apiClient.get(`${SINH_VIEN_URL}/${id}`)
         },
+
         tiepNhan(payload) {
             return apiClient.post(`${SINH_VIEN_URL}/tiep-nhan`, payload)
         },
+
         tiepNhanCoFile(payload, files = {}) {
             const formData = new FormData()
             formData.append('data', new Blob([JSON.stringify(payload)], { type: 'application/json' }))
+
             if (files.anhChanDung) formData.append('anhChanDung', files.anhChanDung)
             if (files.cccdTruoc)   formData.append('cccdTruoc',   files.cccdTruoc)
             if (files.cccdSau)     formData.append('cccdSau',     files.cccdSau)
             if (files.bangCap)     formData.append('bangCap',     files.bangCap)
-            ;(files.giayToKhac || []).forEach(file => { if (file) formData.append('giayToKhac', file) })
+
+            ;(files.giayToKhac || []).forEach(file => {
+                if (file) formData.append('giayToKhac', file)
+            })
+
             return apiClient.post(`${SINH_VIEN_URL}/tiep-nhan-co-file`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
         },
+
         update(id, payload) {
             return apiClient.put(`${SINH_VIEN_URL}/${id}`, payload)
         },
+
         delete(id) {
             return apiClient.delete(`${SINH_VIEN_URL}/${id}`)
+        },
+
+        // GET /api/export/excel/sinh-vien-toan-truong
+        exportExcelToanTruong() {
+            return apiClient.get(`${EXPORT_URL}/excel/sinh-vien-toan-truong`, {
+                responseType: 'blob'
+            })
+        },
+
+        // GET /api/export/excel/sinh-vien-theo-nganh-version
+        exportExcelTheoNganhVersion(params = {}) {
+            return apiClient.get(`${EXPORT_URL}/excel/sinh-vien-theo-nganh-version`, {
+                params,
+                responseType: 'blob'
+            })
         }
     },
 
@@ -85,9 +112,11 @@ export const sinhVienApi = {
 
     baoLuu: {
         ...createCrudApi(SINH_VIEN_URL, 'bao-luu'),
+
         diHocLai(id, payload) {
             return apiClient.put(`${SINH_VIEN_URL}/bao-luu/${id}/di-hoc-lai`, payload)
         },
+
         huy(id) {
             return apiClient.put(`${SINH_VIEN_URL}/bao-luu/${id}/huy`)
         }
@@ -98,6 +127,7 @@ export const sinhVienApi = {
 
     lopHocPhanChuongTrinhMon: {
         ...createCrudApi(GIANG_DAY_URL, 'lop-hoc-phan-chuong-trinh-mon'),
+
         getTheoLopHocPhan(lopHocPhanId) {
             return apiClient.get(`${GIANG_DAY_URL}/lop-hoc-phan-chuong-trinh-mon/theo-lop-hoc-phan/${lopHocPhanId}`)
         }
@@ -105,12 +135,15 @@ export const sinhVienApi = {
 
     sinhVienLopHocPhan: {
         ...createCrudApi(GIANG_DAY_URL, 'sinh-vien-lop-hoc-phan'),
+
         getTheoLopHocPhan(lopHocPhanId) {
             return apiClient.get(`${GIANG_DAY_URL}/sinh-vien-lop-hoc-phan/theo-lop-hoc-phan/${lopHocPhanId}`)
         },
+
         getSinhVienTrongLop(lopHocPhanId) {
             return apiClient.get(`${GIANG_DAY_URL}/sinh-vien-lop-hoc-phan/lop-hoc-phan/${lopHocPhanId}/sinh-vien`)
         },
+
         getSinhVienChuaVaoLop(lopHocPhanId, chuongTrinhVersionId) {
             return apiClient.get(
                 `${GIANG_DAY_URL}/sinh-vien-lop-hoc-phan/lop-hoc-phan/${lopHocPhanId}/sinh-vien-chua-vao-lop`,
@@ -148,7 +181,7 @@ export const sinhVienApi = {
         }
     },
 
-    // GET /api/diem/cau-hinh-danh-gia?lopHocPhanId=X  (cột điểm của lớp)
+    // GET /api/diem/cau-hinh-danh-gia?lopHocPhanId=X
     cauHinhDanhGia: {
         getAll(params = {}) {
             return apiClient.get(`${DIEM_URL}/cau-hinh-danh-gia`, { params })
@@ -167,22 +200,27 @@ export const sinhVienApi = {
         getByDoiTuong(params = {}) {
             return apiClient.get(`${HE_THONG_URL}/tep-dinh-kem/doi-tuong`, { params })
         },
+
         upload(file, data) {
             const formData = new FormData()
             formData.append('file', file)
             formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }))
+
             return apiClient.post(`${HE_THONG_URL}/tep-dinh-kem/upload`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
         },
+
         downloadUrl(id) {
             return `${apiClient.defaults.baseURL}${HE_THONG_URL}/tep-dinh-kem/${id}/download`
         },
+
         previewUrl(id) {
             return `${apiClient.defaults.baseURL}${HE_THONG_URL}/tep-dinh-kem/${id}/preview`
         },
+
         delete(id) {
             return apiClient.delete(`${HE_THONG_URL}/tep-dinh-kem/${id}`)
         }
-    },
+    }
 }
