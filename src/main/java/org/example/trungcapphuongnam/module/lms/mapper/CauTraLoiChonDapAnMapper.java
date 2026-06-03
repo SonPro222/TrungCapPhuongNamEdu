@@ -12,7 +12,7 @@ public final class CauTraLoiChonDapAnMapper {
         return CauTraLoiChonDapAnResponse.builder()
             .id(entity.getId())
             .cauTraLoiId(entity.getCauTraLoiId())
-            .dapAnId(entity.getDapAnId())
+            .lanLamBaiDapAnId(entity.getLanLamBaiDapAnId())
             .createdAt(entity.getCreatedAt())
             .build();
     }
@@ -21,13 +21,13 @@ public final class CauTraLoiChonDapAnMapper {
         if (request == null) return null;
         return CauTraLoiChonDapAn.builder()
             .cauTraLoiId(request.getCauTraLoiId())
-            .dapAnId(request.getDapAnId())
+            .lanLamBaiDapAnId(request.getLanLamBaiDapAnId())
             .build();
     }
 
     public static void updateEntity(CauTraLoiChonDapAn entity, CauTraLoiChonDapAnRequest request) {
         if (entity == null || request == null) return;
         entity.setCauTraLoiId(request.getCauTraLoiId());
-        entity.setDapAnId(request.getDapAnId());
+        entity.setLanLamBaiDapAnId(request.getLanLamBaiDapAnId());
     }
 }

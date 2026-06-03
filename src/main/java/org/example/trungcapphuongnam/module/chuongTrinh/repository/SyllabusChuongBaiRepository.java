@@ -7,9 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
+
 @Repository
 public interface SyllabusChuongBaiRepository extends JpaRepository<SyllabusChuongBai, Long>, JpaSpecificationExecutor<SyllabusChuongBai> {
     Page<SyllabusChuongBai> findBySyllabusMonId(Long syllabusMonId, Pageable pageable);
+
+    List<SyllabusChuongBai> findBySyllabusMonIdOrderByThuTuAsc(Long syllabusMonId);
 
 
     void deleteBySyllabusMonId(Long syllabusMonId);

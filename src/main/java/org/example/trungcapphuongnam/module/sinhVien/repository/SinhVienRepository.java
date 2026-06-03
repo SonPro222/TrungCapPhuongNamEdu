@@ -1,5 +1,6 @@
 package org.example.trungcapphuongnam.module.sinhVien.repository;
 
+import org.example.trungcapphuongnam.module.sinhVien.dto.response.SinhVienTheoNganhVersionExportResponse;
 import org.example.trungcapphuongnam.module.sinhVien.entity.SinhVien;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,4 +66,6 @@ public interface SinhVienRepository extends JpaRepository<SinhVien, Long> {
             @Param("trangThaiLopHocPhan") Collection<TrangThaiSinhVienLopHocPhan> trangThaiLopHocPhan,
             Pageable pageable
     );
+
+
 }

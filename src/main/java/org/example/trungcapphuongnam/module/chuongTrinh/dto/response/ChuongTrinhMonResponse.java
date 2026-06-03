@@ -16,7 +16,8 @@ public class ChuongTrinhMonResponse {
     private Long chuongTrinhVersionId;
 
     private Long monHocId;
-
+    private String maMonHoc;
+    private String tenMonHoc;
     private String maMonTrongCt;
 
     private Long khungKyId;

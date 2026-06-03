@@ -84,7 +84,7 @@ public class LopHocPhanController {
 
     private PageRequest taoPageRequest(int page, int size, String sortBy, String sortDir) {
         int pageSafe = Math.max(page, 0);
-        int sizeSafe = Math.min(Math.max(size, 1), 100);
+        int sizeSafe = Math.min(Math.max(size, 1), 1000);
 
         String sortField = switch (sortBy) {
             case "maLop", "tenLop", "loaiLopHocPhan", "soLuongToiDa", "soLuongHienTai",

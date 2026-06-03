@@ -9,13 +9,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CauTraLoiChonDapAnRequest {
-
     @NotNull
-
     private Long cauTraLoiId;
 
     @NotNull
-
-    private Long dapAnId;
-
+    private Long lanLamBaiDapAnId;
 }

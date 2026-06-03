@@ -7,9 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.Optional;
+
 @Repository
 public interface SyllabusMonHocRepository extends JpaRepository<SyllabusMonHoc, Long>, JpaSpecificationExecutor<SyllabusMonHoc> {
     Page<SyllabusMonHoc> findByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable);
+
+    Optional<SyllabusMonHoc> findFirstByChuongTrinhMonId(Long chuongTrinhMonId);
     boolean existsByChuongTrinhMonId(Long chuongTrinhMonId);
 
     boolean existsByChuongTrinhMonIdAndIdNot(Long chuongTrinhMonId, Long id);

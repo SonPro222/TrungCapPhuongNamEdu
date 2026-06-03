@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
 @Setter
@@ -18,14 +17,13 @@ public class CauTraLoiChonDapAn {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cau_tra_loi_id")
+    @Column(name = "cau_tra_loi_id", nullable = false)
     private Long cauTraLoiId;
 
-    @Column(name = "dap_an_id")
-    private Long dapAnId;
+    @Column(name = "lan_lam_bai_dap_an_id", nullable = false)
+    private Long lanLamBaiDapAnId;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
 }

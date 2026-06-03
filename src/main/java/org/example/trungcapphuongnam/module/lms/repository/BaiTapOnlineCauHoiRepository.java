@@ -8,7 +8,7 @@ import java.util.List;
 public interface BaiTapOnlineCauHoiRepository extends JpaRepository<BaiTapOnlineCauHoi, Long> {
     List<BaiTapOnlineCauHoi> findByBaiTapOnlineIdOrderByThuTuAsc(Long baiTapOnlineId);
 
-    boolean existsByBaiTapOnlineIdAndCauHoiId(Long baiTapOnlineId, Long cauHoiId);
+    boolean existsByBaiTapOnlineIdAndCauHoiVersionId(Long baiTapOnlineId, Long cauHoiVersionId);
 
-    void deleteByBaiTapOnlineIdAndCauHoiId(Long baiTapOnlineId, Long cauHoiId);
+    void deleteByBaiTapOnlineIdAndCauHoiVersionId(Long baiTapOnlineId, Long cauHoiVersionId);
 }

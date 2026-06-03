@@ -13,19 +13,14 @@ import org.example.trungcapphuongnam.module.lms.enums.TrangThaiBaiTapOnline;
 @AllArgsConstructor
 @Builder
 public class BaiTapOnlineRequest {
-
     @NotNull
-
     private Long chuongTrinhMonId;
-
-    @NotNull
 
     private Long nguoiTaoTaiKhoanId;
 
     private NguonTao nguonTao;
 
     @NotBlank
-
     private String tieuDe;
 
     private String moTa;
@@ -33,9 +28,19 @@ public class BaiTapOnlineRequest {
     private LoaiBaiOnline loaiBai;
 
     @DecimalMin(value = "0")
-
     private BigDecimal tongDiem;
 
     private TrangThaiBaiTapOnline trangThai;
 
+    private Boolean tronCauHoi;
+
+    private Boolean tronDapAn;
+
+    private Boolean sinhDeTuDong;
+
+    private Boolean hienDapAnSauKhiNop;
+
+    private Boolean hienGiaiThichSauKhiNop;
+
+    private Long maTranDeId;
 }
