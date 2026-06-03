@@ -34,6 +34,26 @@ export const giangDayApi = {
     lopHocPhan: createCrudApi('lop-hoc-phan'),
     lopHocPhanChuongTrinhMon: createCrudApi('lop-hoc-phan-chuong-trinh-mon'),
     phanCongGiangDay: createCrudApi('phan-cong-giang-day'),
+    giaoVienKhaDung: createCrudApi('giao-vien-kha-dung'),
+    ngayNghi: createCrudApi('ngay-nghi'),
+
+    dieuPhoi: {
+        previewSinhLich(lopHocPhanId, payload) {
+            return apiClient.post(`${BASE_URL}/lop-hoc-phan/${lopHocPhanId}/dieu-phoi/lich-hoc/preview`, payload)
+        },
+
+        taoLichTuDong(lopHocPhanId, payload) {
+            return apiClient.post(`${BASE_URL}/lop-hoc-phan/${lopHocPhanId}/dieu-phoi/lich-hoc/tao-tu-dong`, payload)
+        },
+
+        goiYLichHoc(lopHocPhanId, payload) {
+            return apiClient.post(`${BASE_URL}/lop-hoc-phan/${lopHocPhanId}/dieu-phoi/lich-hoc/goi-y`, payload)
+        },
+
+        xepLichHangLoat(lopHocPhanId, payload) {
+            return apiClient.post(`${BASE_URL}/lop-hoc-phan/${lopHocPhanId}/dieu-phoi/lich-hoc/xep-hang-loat`, payload)
+        }
+    },
 
     sinhVienLopHocPhan: {
         ...createCrudApi('sinh-vien-lop-hoc-phan'),

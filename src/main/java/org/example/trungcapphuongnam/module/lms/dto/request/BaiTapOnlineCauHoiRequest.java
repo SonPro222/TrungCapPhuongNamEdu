@@ -10,21 +10,18 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class BaiTapOnlineCauHoiRequest {
-
     @NotNull
-
     private Long baiTapOnlineId;
 
     @NotNull
-
-    private Long cauHoiId;
+    private Long cauHoiVersionId;
 
     @DecimalMin(value = "0")
-
     private BigDecimal diem;
 
+    @NotNull
+    @Min(1)
     private Integer thuTu;
 
     private Boolean batBuoc;
-
 }

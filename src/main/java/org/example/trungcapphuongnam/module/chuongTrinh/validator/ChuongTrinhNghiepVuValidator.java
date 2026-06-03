@@ -293,7 +293,8 @@ public class ChuongTrinhNghiepVuValidator {
 
         Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
         Long monHocId = requireId(request.getMonHocId(), "monHocId");
-        Long khungKyId = requireId(request.getKhungKyId(), "khungKyId");
+        // khungKyId cho phép null: copy môn vào version trước, gán kỳ sau.
+        Long khungKyId = request.getKhungKyId();
 
         String maMonTrongCt = trimRequired(request.getMaMonTrongCt(), "Mã môn trong chương trình");
         trimRequired(request.getLoai(), "Loại môn trong chương trình");
@@ -302,11 +303,13 @@ public class ChuongTrinhNghiepVuValidator {
         requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
         requireExists(monHocRepository, monHocId, "Môn học");
 
-        KhungKy khungKy = khungKyRepository.findById(khungKyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Khung kỳ không tồn tại: " + khungKyId));
+        if (khungKyId != null) {
+            KhungKy khungKy = khungKyRepository.findById(khungKyId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Khung kỳ không tồn tại: " + khungKyId));
 
-        if (!versionId.equals(khungKy.getChuongTrinhVersionId())) {
-            throw new BadRequestException("Khung kỳ không thuộc đúng phiên bản chương trình đang chọn");
+            if (!versionId.equals(khungKy.getChuongTrinhVersionId())) {
+                throw new BadRequestException("Khung kỳ không thuộc đúng phiên bản chương trình đang chọn");
+            }
         }
 
         if (request.getNhomKienThucId() != null) {
@@ -333,12 +336,14 @@ public class ChuongTrinhNghiepVuValidator {
                 "Tổng giờ môn trong kỳ"
         );
 
-        if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCt(versionId, khungKyId, maMonTrongCt)) {
-            throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong kỳ này: " + maMonTrongCt);
-        }
+        if (khungKyId != null) {
+            if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCt(versionId, khungKyId, maMonTrongCt)) {
+                throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong kỳ này: " + maMonTrongCt);
+            }
 
-        if (id != null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCtAndIdNot(versionId, khungKyId, maMonTrongCt, id)) {
-            throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong kỳ này: " + maMonTrongCt);
+            if (id != null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndMaMonTrongCtAndIdNot(versionId, khungKyId, maMonTrongCt, id)) {
+                throw new DuplicateResourceException("Mã môn trong chương trình đã tồn tại trong kỳ này: " + maMonTrongCt);
+            }
         }
 
         if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndMonHocId(versionId, monHocId)) {
@@ -349,7 +354,7 @@ public class ChuongTrinhNghiepVuValidator {
             throw new DuplicateResourceException("Môn học này đã được thêm vào version hiện tại rồi");
         }
 
-        if (request.getThuTu() != null) {
+        if (khungKyId != null && request.getThuTu() != null) {
             if (id == null && chuongTrinhMonRepository.existsByChuongTrinhVersionIdAndKhungKyIdAndThuTu(versionId, khungKyId, request.getThuTu())) {
                 throw new DuplicateResourceException("Thứ tự môn đã tồn tại trong kỳ đang chọn: " + request.getThuTu());
             }

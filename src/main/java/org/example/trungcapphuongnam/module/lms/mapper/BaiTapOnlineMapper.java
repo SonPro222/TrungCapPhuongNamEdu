@@ -19,6 +19,12 @@ public final class BaiTapOnlineMapper {
             .loaiBai(entity.getLoaiBai())
             .tongDiem(entity.getTongDiem())
             .trangThai(entity.getTrangThai())
+            .tronCauHoi(entity.getTronCauHoi())
+            .tronDapAn(entity.getTronDapAn())
+            .sinhDeTuDong(entity.getSinhDeTuDong())
+            .hienDapAnSauKhiNop(entity.getHienDapAnSauKhiNop())
+            .hienGiaiThichSauKhiNop(entity.getHienGiaiThichSauKhiNop())
+            .maTranDeId(entity.getMaTranDeId())
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
             .build();
@@ -35,6 +41,12 @@ public final class BaiTapOnlineMapper {
             .loaiBai(request.getLoaiBai())
             .tongDiem(request.getTongDiem())
             .trangThai(request.getTrangThai())
+            .tronCauHoi(request.getTronCauHoi())
+            .tronDapAn(request.getTronDapAn())
+            .sinhDeTuDong(request.getSinhDeTuDong())
+            .hienDapAnSauKhiNop(request.getHienDapAnSauKhiNop())
+            .hienGiaiThichSauKhiNop(request.getHienGiaiThichSauKhiNop())
+            .maTranDeId(request.getMaTranDeId())
             .build();
     }
 
@@ -48,5 +60,11 @@ public final class BaiTapOnlineMapper {
         entity.setLoaiBai(request.getLoaiBai());
         entity.setTongDiem(request.getTongDiem());
         entity.setTrangThai(request.getTrangThai());
+        entity.setTronCauHoi(request.getTronCauHoi());
+        entity.setTronDapAn(request.getTronDapAn());
+        entity.setSinhDeTuDong(request.getSinhDeTuDong());
+        entity.setHienDapAnSauKhiNop(request.getHienDapAnSauKhiNop());
+        entity.setHienGiaiThichSauKhiNop(request.getHienGiaiThichSauKhiNop());
+        entity.setMaTranDeId(request.getMaTranDeId());
     }
 }

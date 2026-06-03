@@ -21,6 +21,7 @@ public class ChuongTrinhMonRequest {
     @NotBlank(message = "ma_mon_trong_ct không được để trống")
     private String maMonTrongCt;
 
+    // Cho phép null: copy môn gốc vào version trước, gán kỳ sau (nghiệp vụ tái sử dụng).
     private Long khungKyId;
 
     private Long nhomKienThucId;

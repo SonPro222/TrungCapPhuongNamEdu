@@ -10,23 +10,17 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CauTraLoiSinhVienRequest {
-
     @NotNull
-
     private Long lanLamBaiId;
 
     @NotNull
-
-    private Long cauHoiId;
+    private Long lanLamBaiCauHoiId;
 
     private String noiDungTraLoi;
 
     @DecimalMin(value = "0")
-
     private BigDecimal diem;
 
     private Boolean laDung;
-
     private String nhanXet;
-
 }

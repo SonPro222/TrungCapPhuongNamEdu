@@ -62,7 +62,7 @@
             <option value="">— Tất cả —</option>
             <option value="dang_hoc">Đang học</option>
             <option value="bao_luu">Bảo lưu</option>
-            <option value="thoi_hoc">Thôi học</option>
+            <option value="nghi_hoc">Nghỉ học</option>
             <option value="tot_nghiep">Tốt nghiệp</option>
           </select>
         </label>
@@ -89,7 +89,18 @@
     <div class="dsv-table-card">
       <div class="dsv-table-header">
         <h2 class="dsv-table-title">Danh sách sinh viên toàn trường</h2>
+
         <div class="dsv-header-right">
+          <button
+              class="dsv-btn-export"
+              type="button"
+              :disabled="dangTai || dangXuatExcel"
+              @click="xuatExcelToanTruong"
+          >
+            <span v-if="dangXuatExcel" class="dsv-dot-spin"></span>
+            {{ dangXuatExcel ? 'Đang xuất...' : 'Xuất danh sách' }}
+          </button>
+
           <span v-if="dangTai" class="dsv-skeleton-badge"></span>
           <span v-else class="dsv-badge">{{ svHienThi.length }} sinh viên</span>
         </div>
@@ -248,8 +259,8 @@ const locTen           = ref('')
 const locTrangThai     = ref('')
 
 const dangTai = ref(false)
+const dangXuatExcel = ref(false)
 const loiTai  = ref('')
-
 // ─── LOOKUP MAPS ──────────────────────────────────────────────────────────────
 // version → chuongTrinh → nganh
 const versionToCT  = computed(() => {
@@ -376,14 +387,14 @@ function avatarColor(name) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
 }
 function trangThaiLabel(tt) {
-  const map = { dang_hoc: 'Đang học', bao_luu: 'Bảo lưu', thoi_hoc: 'Thôi học', tot_nghiep: 'Tốt nghiệp' }
+  const map = { dang_hoc: 'Đang học', bao_luu: 'Bảo lưu', nghi_hoc: 'Nghỉ học', tot_nghiep: 'Tốt nghiệp' }
   return map[tt] || tt || '—'
 }
 function trangThaiClass(tt) {
   return {
     'tt-dang-hoc':  tt === 'dang_hoc',
     'tt-bao-luu':   tt === 'bao_luu',
-    'tt-thoi-hoc':  tt === 'thoi_hoc',
+    'tt-thoi-hoc':  tt === 'nghi_hoc',
     'tt-tot-nghiep':tt === 'tot_nghiep',
   }
 }
@@ -395,7 +406,29 @@ function datLaiLoc() {
   locNganhId.value = ''; locChuongTrinhId.value = ''; locVersionId.value = ''
   locMaSV.value = ''; locTen.value = ''; locTrangThai.value = ''
 }
+async function xuatExcelToanTruong() {
+  dangXuatExcel.value = true
+  loiTai.value = ''
 
+  try {
+    await sinhVienService.xuatExcelSinhVienTheoNganhVersion({
+      nganhId: locNganhId.value || undefined,
+      chuongTrinhId: locChuongTrinhId.value || undefined,
+      chuongTrinhVersionId: locVersionId.value || undefined,
+      maSinhVien: locMaSV.value || undefined,
+      hoTen: locTen.value || undefined,
+      trangThai: locTrangThai.value || undefined,
+    })
+  } catch (e) {
+    loiTai.value = 'Lỗi xuất Excel: ' + (
+        e?.response?.data?.message ||
+        e?.message ||
+        'Không xác định'
+    )
+  } finally {
+    dangXuatExcel.value = false
+  }
+}
 // ─── MOUNTED ──────────────────────────────────────────────────────────────────
 onMounted(async () => {
   dangTai.value = true
@@ -422,6 +455,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap');
+.dsv-page,
+.dsv-page * {
+  font-family: 'Roboto', Arial, sans-serif;
+  letter-spacing: normal;
+  box-sizing: border-box;
+}
+
 .dsv-page { display: flex; flex-direction: column; gap: 14px; }
 
 /* ── FILTER CARD ── */
@@ -495,7 +536,11 @@ onMounted(async () => {
   padding: 14px 20px; border-bottom: 1px solid #f1f5f9;
 }
 .dsv-table-title { font-size: 14px; font-weight: 700; color: #0f172a; margin: 0; }
-.dsv-header-right { display: flex; align-items: center; }
+.dsv-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .dsv-badge {
   display: inline-flex; align-items: center;
   height: 22px; padding: 0 10px;
@@ -546,7 +591,7 @@ onMounted(async () => {
 .dsv-masv-chip {
   display: inline-block; padding: 2px 8px;
   background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px;
-  font-family: 'Courier New', monospace; font-size: 12px;
+  font-family: 'Roboto', Arial, sans-serif; font-size: 12px;
   font-weight: 600; color: #334155;
 }
 .dsv-name-cell { display: flex; align-items: center; gap: 9px; }
@@ -619,5 +664,35 @@ onMounted(async () => {
 @media (max-width: 700px) {
   .dsv-filter-grid { grid-template-columns: 1fr 1fr; }
   .col-email, .col-ver { display: none; }
+}
+.dsv-btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #16a34a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .14s, opacity .14s, transform .12s;
+}
+
+.dsv-btn-export:hover {
+  background: #15803d;
+}
+
+.dsv-btn-export:active {
+  transform: translateY(1px);
+}
+
+.dsv-btn-export:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>

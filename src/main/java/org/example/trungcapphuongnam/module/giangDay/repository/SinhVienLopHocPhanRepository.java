@@ -53,6 +53,8 @@ public interface SinhVienLopHocPhanRepository extends JpaRepository<SinhVienLopH
             Pageable pageable
     );
 
+    long countByLopHocPhanId(Long lopHocPhanId);
+
     long countByLopHocPhanIdAndTrangThaiIn(
             Long lopHocPhanId,
             Collection<TrangThaiSinhVienLopHocPhan> trangThais

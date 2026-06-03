@@ -17,7 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "ngan_hang_cau_hoi")
+@Table(name = "ngan_hang_cau_hoi_legacy")
 public class NganHangCauHoi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

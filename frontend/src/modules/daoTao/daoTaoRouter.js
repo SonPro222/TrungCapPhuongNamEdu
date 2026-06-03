@@ -4,7 +4,8 @@ import {requireAdmin} from '@/core/guards/adminGuard'
 import DaoTaoLayout from './layouts/DaoTaoLayout.vue'
 import DaoTaoXemChuongTrinhPage from './pages/DaoTaoXemChuongTrinhPage.vue'
 import DaoTaoXemTepSyllabusMonPage from './pages/DaoTaoXemTepSyllabusMonPage.vue'
-
+import DaoTaoNhomKienThucMon from '@/modules/daoTao/pages/DaoTaoNhomKienThucMon.vue'
+import DaoTaoMonHocGoc from './pages/DaoTaoMonHocGoc.vue'
 export const daoTaoRoutes = [
     {
         path: 'dao-tao',
@@ -79,7 +80,25 @@ export const daoTaoRoutes = [
                 name: 'DaoTao.XemChuongTrinh.SyllabusApDung',
                 component: DaoTaoXemChuongTrinhPage,
                 meta: {title: 'Đào tạo xem - Syllabus môn áp dụng', roles: [ROLES.ADMIN, ROLES.DAO_TAO]}
-            }
+            },
+            {
+                path: 'nhom-kien-thuc-mon',
+                name: 'DaoTao.NhomKienThucMon',
+                component: DaoTaoNhomKienThucMon,
+                meta: {
+                    title: 'Đào tạo - Nhóm kiến thức và môn',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO]
+                }
+            },
+            {
+                path: 'mon-hoc-goc',
+                name: 'DaoTao.MonHocGoc',
+                component: DaoTaoMonHocGoc,
+                meta: {
+                    title: 'Đào tạo - Môn gốc',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO]
+                }
+            },
 
         ]
 

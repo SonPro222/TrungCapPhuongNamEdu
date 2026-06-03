@@ -3,11 +3,7 @@ import { requireAuth } from '@/core/guards/authGuard'
 import { requireAdmin } from '@/core/guards/adminGuard'
 
 import GiangDayLayout from './layouts/GiangDayLayout.vue'
-import AdminGiangDayChonNganh from './pages/AdminGiangDayChonNganh.vue'
-import AdminGiangDayChonChuongTrinh from './pages/AdminGiangDayChonChuongTrinh.vue'
-import AdminGiangDayChonVersion from './pages/AdminGiangDayChonVersion.vue'
-import AdminGiangDayChonKy from './pages/AdminGiangDayChonKy.vue'
-import AdminGiangDayLopHocPhanTheoKy from './pages/AdminGiangDayLopHocPhanTheoKy.vue'
+import AdminGiangDayQuanLyLopHocPhan from './pages/AdminGiangDayQuanLyLopHocPhan.vue'
 import AdminChiTietGiangDayLopHocPhan from './pages/AdminChiTietGiangDayLopHocPhan.vue'
 import AdminChiTietBuoiHoc from './pages/AdminChiTietBuoiHoc.vue'
 import AdminGiaoVien from './pages/AdminGiaoVien.vue'
@@ -16,6 +12,20 @@ import AdminPhongHoc from './pages/AdminPhongHoc.vue'
 import AdminCaHoc from './pages/AdminCaHoc.vue'
 import AdminPhanCongGiangDay from './pages/AdminPhanCongGiangDay.vue'
 import AdminLichHoc from './pages/AdminLichHoc.vue'
+import AdminMaTranLichHoc from './pages/AdminMaTranLichHoc.vue'
+import AdminRangBuocLichHoc from './pages/AdminRangBuocLichHoc.vue'
+import AdminXepLichHangLoat from './pages/AdminXepLichHangLoat.vue'
+
+function taoQueryFlow(params = {}) {
+    const query = {}
+
+    if (params.nganhId) query.nganhId = params.nganhId
+    if (params.chuongTrinhId) query.chuongTrinhId = params.chuongTrinhId
+    if (params.versionId) query.versionId = params.versionId
+    if (params.khungKyId) query.khungKyId = params.khungKyId
+
+    return query
+}
 
 export const giangDayRoutes = [
     {
@@ -37,54 +47,50 @@ export const giangDayRoutes = [
             {
                 path: 'lop-hoc-phan',
                 name: 'GiangDay.LopHocPhan',
-                component: AdminGiangDayChonNganh,
+                component: AdminGiangDayQuanLyLopHocPhan,
                 meta: {
-                    title: 'Chọn ngành',
+                    title: 'Quản lý lớp học phần',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
                 }
             },
             {
                 path: 'lop-hoc-phan/nganh/:nganhId/chuong-trinh',
                 name: 'GiangDay.ChonChuongTrinh',
-                component: AdminGiangDayChonChuongTrinh,
-                meta: {
-                    title: 'Chọn chương trình',
-                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
-                }
+                redirect: (to) => ({
+                    name: 'GiangDay.LopHocPhan',
+                    query: taoQueryFlow(to.params)
+                })
             },
             {
                 path: 'lop-hoc-phan/nganh/:nganhId/chuong-trinh/:chuongTrinhId/version',
                 name: 'GiangDay.ChonVersion',
-                component: AdminGiangDayChonVersion,
-                meta: {
-                    title: 'Chọn version chương trình',
-                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
-                }
+                redirect: (to) => ({
+                    name: 'GiangDay.LopHocPhan',
+                    query: taoQueryFlow(to.params)
+                })
             },
             {
                 path: 'lop-hoc-phan/nganh/:nganhId/chuong-trinh/:chuongTrinhId/version/:versionId/ky',
                 name: 'GiangDay.ChonKy',
-                component: AdminGiangDayChonKy,
-                meta: {
-                    title: 'Chọn kỳ',
-                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
-                }
+                redirect: (to) => ({
+                    name: 'GiangDay.LopHocPhan',
+                    query: taoQueryFlow(to.params)
+                })
             },
             {
                 path: 'lop-hoc-phan/nganh/:nganhId/chuong-trinh/:chuongTrinhId/version/:versionId/ky/:khungKyId',
                 name: 'GiangDay.LopHocPhanTheoKy',
-                component: AdminGiangDayLopHocPhanTheoKy,
-                meta: {
-                    title: 'Lớp học phần theo kỳ',
-                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
-                }
+                redirect: (to) => ({
+                    name: 'GiangDay.LopHocPhan',
+                    query: taoQueryFlow(to.params)
+                })
             },
             {
                 path: 'lop-hoc-phan/:id/buoi-hoc',
                 name: 'GiangDay.ChiTietLopHocPhan',
                 component: AdminChiTietGiangDayLopHocPhan,
                 meta: {
-                    title: 'Danh sách buổi học',
+                    title: 'Điều phối giảng dạy',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
                 }
             },
@@ -148,6 +154,33 @@ export const giangDayRoutes = [
                 component: AdminLichHoc,
                 meta: {
                     title: 'Quản lý lịch học',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
+                }
+            },
+            {
+                path: 'ma-tran-lich-hoc',
+                name: 'GiangDay.MaTranLichHoc',
+                component: AdminMaTranLichHoc,
+                meta: {
+                    title: 'Ma trận lịch học',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
+                }
+            },
+            {
+                path: 'rang-buoc-lich-hoc',
+                name: 'GiangDay.RangBuocLichHoc',
+                component: AdminRangBuocLichHoc,
+                meta: {
+                    title: 'Ràng buộc xếp lịch',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
+                }
+            },
+            {
+                path: 'xep-lich-hang-loat',
+                name: 'GiangDay.XepLichHangLoat',
+                component: AdminXepLichHangLoat,
+                meta: {
+                    title: 'Xếp lịch hàng loạt',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
                 }
             }

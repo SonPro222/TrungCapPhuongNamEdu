@@ -7,11 +7,15 @@ import org.example.trungcapphuongnam.module.giangDay.entity.GiaoVien;
 import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiGiaoVien;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiSinhVienLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.PhanCongGiangDayRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.SinhVienLopHocPhanRepository;
 import org.springframework.stereotype.Component;
+import org.example.trungcapphuongnam.module.giangDay.enums.VaiTroGiangDay;
 
+import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class PhanCongGiangDayValidator {
@@ -19,6 +23,7 @@ public class PhanCongGiangDayValidator {
     private final PhanCongGiangDayRepository repository;
     private final LopHocPhanRepository lopHocPhanRepository;
     private final GiaoVienRepository giaoVienRepository;
+    private final SinhVienLopHocPhanRepository sinhVienLopHocPhanRepository;
 
     public void validateCreate(PhanCongGiangDayRequest request) {
         validateCommon(request);
@@ -29,6 +34,13 @@ public class PhanCongGiangDayValidator {
                 request.getVaiTro()
         )) {
             throw new GiangDayException("Giáo viên đã được phân công vai trò này trong lớp học phần");
+        }
+        if (request.getVaiTro() == VaiTroGiangDay.giang_vien_chinh
+                && repository.existsByLopHocPhanIdAndVaiTro(
+                request.getLopHocPhanId(),
+                VaiTroGiangDay.giang_vien_chinh
+        )) {
+            throw new GiangDayException("Lớp học phần đã có giảng viên chính");
         }
     }
 
@@ -51,6 +63,15 @@ public class PhanCongGiangDayValidator {
         )) {
             throw new GiangDayException("Giáo viên đã được phân công vai trò này trong lớp học phần");
         }
+        if (request.getVaiTro() == VaiTroGiangDay.giang_vien_chinh
+                && repository.existsByLopHocPhanIdAndVaiTroAndIdNot(
+                request.getLopHocPhanId(),
+                VaiTroGiangDay.giang_vien_chinh,
+                id
+        )) {
+            throw new GiangDayException("Lớp học phần đã có giảng viên chính");
+        }
+
     }
 
     private void validateCommon(PhanCongGiangDayRequest request) {
@@ -82,6 +103,18 @@ public class PhanCongGiangDayValidator {
 
         if (lopHocPhan.getTrangThai() == TrangThaiLopHocPhan.da_ket_thuc) {
             throw new GiangDayException("Lớp học phần đã kết thúc, không được phân công giảng dạy");
+        }
+
+        long soSinhVien = sinhVienLopHocPhanRepository.countByLopHocPhanIdAndTrangThaiIn(
+                lopHocPhan.getId(),
+                List.of(
+                        TrangThaiSinhVienLopHocPhan.da_dang_ky,
+                        TrangThaiSinhVienLopHocPhan.dang_hoc,
+                        TrangThaiSinhVienLopHocPhan.hoc_lai
+                )
+        );
+        if (soSinhVien < 1) {
+            throw new GiangDayException("Lớp học phần chưa có sinh viên đang học, chưa thể phân công giảng dạy");
         }
 
         if (giaoVien.getTrangThai() != TrangThaiGiaoVien.dang_day) {

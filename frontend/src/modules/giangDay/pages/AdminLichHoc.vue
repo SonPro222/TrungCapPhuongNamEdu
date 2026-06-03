@@ -55,7 +55,8 @@
         <select v-model="boLoc.trangThai" @change="locDuLieu">
           <option value="">Tất cả</option>
           <option value="du_kien">Dự kiến</option>
-          <option value="da_hoc">Đã học</option>
+          <option value="da_day">Đã dạy</option>
+          <option value="day_bu">Dạy bù</option>
           <option value="nghi">Nghỉ</option>
           <option value="doi_lich">Đổi lịch</option>
         </select>
@@ -103,27 +104,69 @@
 
       <form class="form-grid" @submit.prevent="luuLichHoc">
         <label>
-          <span>Lớp học phần ID</span>
-          <input v-model.trim="form.lopHocPhanId" type="number" required />
-          <small>{{ moTaLopTrongForm }}</small>
+          <span>Lớp học phần</span>
+          <select v-model="form.lopHocPhanId" required>
+            <option value="">-- Chọn lớp học phần --</option>
+            <option
+                v-for="lop in danhSachLopHocPhan"
+                :key="lop.id"
+                :value="lop.id"
+            >
+              {{ lop.maLop || ('LHP' + lop.id) }} - {{ lop.tenLop || 'Chưa có tên' }}
+              | Sĩ số: {{ lop.soLuongHienTai || 0 }}/{{ lop.soLuongToiDa || 0 }}
+              | Buổi: {{ lop.soBuoiHoc || 0 }}
+            </option>
+          </select>
+          <small>Phòng không gắn vào lớp, phòng gắn theo từng buổi lịch học.</small>
         </label>
 
         <label>
-          <span>Giáo viên ID</span>
-          <input v-model.trim="form.giaoVienId" type="number" />
-          <small>{{ moTaGiaoVienTrongForm }}</small>
+          <span>Giáo viên</span>
+          <select v-model="form.giaoVienId">
+            <option value="">-- Chọn giáo viên --</option>
+            <option
+                v-for="gv in danhSachGiaoVienDangDay"
+                :key="gv.id"
+                :value="gv.id"
+            >
+              {{ gv.maGiaoVien || ('GV' + gv.id) }} - {{ gv.hoTen || 'Chưa có tên' }}
+              | {{ gv.chuyenMon || 'Chưa có chuyên môn' }}
+            </option>
+          </select>
+          <small>BE sẽ chặn nếu giáo viên bị trùng ngày + ca.</small>
         </label>
 
         <label>
-          <span>Phòng học ID</span>
-          <input v-model.trim="form.phongHocId" type="number" />
-          <small>{{ moTaPhongTrongForm }}</small>
+          <span>Phòng học</span>
+          <select v-model="form.phongHocId">
+            <option value="">-- Chọn phòng học --</option>
+            <option
+                v-for="phong in danhSachPhongDangDungPhuHop"
+                :key="phong.id"
+                :value="phong.id"
+            >
+              {{ phong.maPhong || ('P' + phong.id) }} - {{ phong.tenPhong || 'Chưa có tên' }}
+              | {{ hienThiLoaiPhong(phong.loaiPhong) }}
+              | Sức chứa: {{ phong.sucChua || 0 }}
+            </option>
+          </select>
+          <small>BE sẽ chặn nếu phòng bị trùng ngày + ca.</small>
         </label>
 
         <label>
-          <span>Ca học ID</span>
-          <input v-model.trim="form.caHocId" type="number" />
-          <small>{{ moTaCaTrongForm }}</small>
+          <span>Ca học</span>
+          <select v-model="form.caHocId">
+            <option value="">-- Chọn ca học --</option>
+            <option
+                v-for="ca in danhSachCaHoc"
+                :key="ca.id"
+                :value="ca.id"
+            >
+              {{ ca.maCa || ('CA' + ca.id) }} - {{ ca.tenCa || 'Chưa có tên' }}
+              | {{ ca.gioBatDau || '?' }} - {{ ca.gioKetThuc || '?' }}
+            </option>
+          </select>
+          <small>Ngày + ca là cơ sở để kiểm tra trùng phòng, trùng giáo viên.</small>
         </label>
 
         <label>
@@ -251,6 +294,10 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { giangDayService } from '../services/giangDayService'
 
 const danhSach = ref([])
+const danhSachLopHocPhan = ref([])
+const danhSachGiaoVien = ref([])
+const danhSachPhongHoc = ref([])
+const danhSachCaHoc = ref([])
 const dangTai = ref(false)
 const loi = ref('')
 const thongBao = ref('')
@@ -310,8 +357,39 @@ const moTaCaTrongForm = computed(() => {
   if (!item) return 'Ca không nằm trong trang hiện tại'
   return `${item.maCa || '-'} - ${item.tenCa || '-'} ${hienThiGioCa(item)}`
 })
+async function taiDuLieuNen() {
+  try {
+    const [lopHocPhan, giaoVien, phongHoc, caHoc] = await Promise.all([
+      giangDayService.layDanhSachLopHocPhan(),
+      giangDayService.layDanhSachGiaoVien(),
+      giangDayService.layDanhSachPhongHoc(),
+      giangDayService.layDanhSachCaHoc()
+    ])
 
-onMounted(() => taiDuLieu())
+    danhSachLopHocPhan.value = lopHocPhan
+    danhSachGiaoVien.value = giaoVien
+    danhSachPhongHoc.value = phongHoc
+    danhSachCaHoc.value = caHoc
+  } catch (error) {
+    loi.value = error?.message || 'Không tải được dữ liệu nền cho lịch học'
+  }
+}
+function hienThiLoaiPhong(value) {
+  const map = {
+    ly_thuyet: 'Lý thuyết',
+    thuc_hanh: 'Thực hành',
+    phong_may: 'Phòng máy',
+    phong_thi: 'Phòng thi',
+    xuong: 'Xưởng',
+    khac: 'Khác'
+  }
+
+  return map[value] || value || '-'
+}
+onMounted(async () => {
+  await taiDuLieuNen()
+  await taiDuLieu()
+})
 
 async function taiDuLieu() {
   dangTai.value = true
@@ -438,13 +516,31 @@ function doiTrang(page) {
 function hienThiTrangThai(value) {
   const map = {
     du_kien: 'Dự kiến',
-    da_hoc: 'Đã học',
+    da_day: 'Đã dạy',
     nghi: 'Nghỉ',
+    day_bu: 'Dạy bù',
     doi_lich: 'Đổi lịch'
   }
+
   return map[value] || value || '-'
 }
+const lopHocPhanDangChon = computed(() => {
+  return danhSachLopHocPhan.value.find((lop) => String(lop.id) === String(form.lopHocPhanId))
+})
 
+const danhSachGiaoVienDangDay = computed(() => {
+  return danhSachGiaoVien.value.filter((gv) => gv.trangThai === 'dang_day')
+})
+
+const danhSachPhongDangDungPhuHop = computed(() => {
+  const lop = lopHocPhanDangChon.value
+  const siSoCanChua = Number(lop?.soLuongHienTai || lop?.soLuongToiDa || 0)
+
+  return danhSachPhongHoc.value
+      .filter((phong) => phong.trangThai === 'dang_su_dung')
+      .filter((phong) => Number(phong.sucChua || 0) >= siSoCanChua)
+      .sort((a, b) => Number(a.sucChua || 0) - Number(b.sucChua || 0))
+})
 function hienThiGioCa(item) {
   if (!item?.gioBatDau && !item?.gioKetThuc) return ''
   return `${item.gioBatDau || '?'} - ${item.gioKetThuc || '?'}`

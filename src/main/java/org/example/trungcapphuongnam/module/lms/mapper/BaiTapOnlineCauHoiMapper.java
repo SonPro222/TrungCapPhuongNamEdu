@@ -12,7 +12,7 @@ public final class BaiTapOnlineCauHoiMapper {
         return BaiTapOnlineCauHoiResponse.builder()
             .id(entity.getId())
             .baiTapOnlineId(entity.getBaiTapOnlineId())
-            .cauHoiId(entity.getCauHoiId())
+            .cauHoiVersionId(entity.getCauHoiVersionId())
             .diem(entity.getDiem())
             .thuTu(entity.getThuTu())
             .batBuoc(entity.getBatBuoc())
@@ -24,7 +24,7 @@ public final class BaiTapOnlineCauHoiMapper {
         if (request == null) return null;
         return BaiTapOnlineCauHoi.builder()
             .baiTapOnlineId(request.getBaiTapOnlineId())
-            .cauHoiId(request.getCauHoiId())
+            .cauHoiVersionId(request.getCauHoiVersionId())
             .diem(request.getDiem())
             .thuTu(request.getThuTu())
             .batBuoc(request.getBatBuoc())
@@ -34,7 +34,7 @@ public final class BaiTapOnlineCauHoiMapper {
     public static void updateEntity(BaiTapOnlineCauHoi entity, BaiTapOnlineCauHoiRequest request) {
         if (entity == null || request == null) return;
         entity.setBaiTapOnlineId(request.getBaiTapOnlineId());
-        entity.setCauHoiId(request.getCauHoiId());
+        entity.setCauHoiVersionId(request.getCauHoiVersionId());
         entity.setDiem(request.getDiem());
         entity.setThuTu(request.getThuTu());
         entity.setBatBuoc(request.getBatBuoc());

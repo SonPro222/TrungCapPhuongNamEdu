@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface KetQuaBaiTapLopRepository extends JpaRepository<KetQuaBaiTapLop, Long> {
@@ -13,4 +14,7 @@ public interface KetQuaBaiTapLopRepository extends JpaRepository<KetQuaBaiTapLop
     Page<KetQuaBaiTapLop> findByBaiTapLopId(Long baiTapLopId, Pageable pageable);
 
     Page<KetQuaBaiTapLop> findBySinhVienId(Long sinhVienId, Pageable pageable);
+
+
+    List<KetQuaBaiTapLop> findAllByBaiTapLopId(Long baiTapLopId);
 }

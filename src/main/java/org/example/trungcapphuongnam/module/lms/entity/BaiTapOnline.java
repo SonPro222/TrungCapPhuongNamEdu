@@ -22,7 +22,7 @@ public class BaiTapOnline {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "chuong_trinh_mon_id")
+    @Column(name = "chuong_trinh_mon_id", nullable = false)
     private Long chuongTrinhMonId;
 
     @Column(name = "nguoi_tao_tai_khoan_id")
@@ -32,10 +32,10 @@ public class BaiTapOnline {
     @Column(name = "nguon_tao")
     private NguonTao nguonTao;
 
-    @Column(name = "tieu_de")
+    @Column(name = "tieu_de", nullable = false)
     private String tieuDe;
 
-    @Column(name = "mo_ta")
+    @Column(name = "mo_ta", columnDefinition = "TEXT")
     private String moTa;
 
     @Enumerated(EnumType.STRING)
@@ -49,6 +49,24 @@ public class BaiTapOnline {
     @Column(name = "trang_thai")
     private TrangThaiBaiTapOnline trangThai;
 
+    @Column(name = "tron_cau_hoi")
+    private Boolean tronCauHoi;
+
+    @Column(name = "tron_dap_an")
+    private Boolean tronDapAn;
+
+    @Column(name = "sinh_de_tu_dong")
+    private Boolean sinhDeTuDong;
+
+    @Column(name = "hien_dap_an_sau_khi_nop")
+    private Boolean hienDapAnSauKhiNop;
+
+    @Column(name = "hien_giai_thich_sau_khi_nop")
+    private Boolean hienGiaiThichSauKhiNop;
+
+    @Column(name = "ma_tran_de_id")
+    private Long maTranDeId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -56,5 +74,4 @@ public class BaiTapOnline {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 }
