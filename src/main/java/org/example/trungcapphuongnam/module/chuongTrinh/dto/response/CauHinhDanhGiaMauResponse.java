@@ -13,14 +13,30 @@ import java.time.LocalDateTime;
 public class CauHinhDanhGiaMauResponse {
 
     private Long id;
+
+    private Long syllabusMonHocGocId;
+
+    /** Deprecated: luôn null ở flow mới. */
     private Long chuongTrinhMonId;
+
+    /** Deprecated: luôn null ở flow mới. */
+    private Long syllabusMonHocId;
+
     private String tenCotDiem;
+
     private String loaiDiem;
+
     private BigDecimal tyLe;
+
     private BigDecimal diemToiDa;
+
     private Integer thuTu;
+
     private Boolean batBuoc;
+
     private String ghiChu;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 }

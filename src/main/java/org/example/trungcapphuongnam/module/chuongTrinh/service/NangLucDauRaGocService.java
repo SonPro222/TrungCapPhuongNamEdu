@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NangLucDauRa
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NangLucDauRaGocResponse;
 
 public interface NangLucDauRaGocService {
-    Page<NangLucDauRaGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable);
+    Page<NangLucDauRaGocResponse> findAll(Long chuongTrinhId, String ma, String loai, String keyword, Pageable pageable);
     NangLucDauRaGocResponse findById(Long id);
 
     NangLucDauRaGocResponse create(NangLucDauRaGocRequest request);

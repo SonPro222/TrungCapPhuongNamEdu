@@ -41,6 +41,7 @@ export const daoTaoXemChuongTrinhService = {
     quyDoiDiemMau: daoTaoService.quyDoiDiemMau,
     chuongTrinhMonQuyDoiDiemMau: daoTaoService.chuongTrinhMonQuyDoiDiemMau,
     cauHinhDanhGiaMau: daoTaoService.cauHinhDanhGiaMau,
+    cauHinhDanhGia: daoTaoService.cauHinhDanhGia,
     syllabusMonHoc: daoTaoService.syllabusMonHoc,
     syllabusMonHocGoc: daoTaoService.syllabusMonHocGoc,
     syllabusMonHocGocChuongBai: daoTaoService.syllabusMonHocGocChuongBai,

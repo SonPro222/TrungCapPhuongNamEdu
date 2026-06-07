@@ -38,15 +38,15 @@ public class ChuongTrinhMonRequest {
 
     private Integer thuTu;
 
-    private BigDecimal soTinChi;
-
-    private BigDecimal tongGio;
-
-    private BigDecimal gioLyThuyet;
-
-    private BigDecimal gioThucHanh;
-
-    private BigDecimal gioKiemTra;
+//    private BigDecimal soTinChi;
+//
+//    private BigDecimal tongGio;
+//
+//    private BigDecimal gioLyThuyet;
+//
+//    private BigDecimal gioThucHanh;
+//
+//    private BigDecimal gioKiemTra;
 
     private String ghiChu;
 

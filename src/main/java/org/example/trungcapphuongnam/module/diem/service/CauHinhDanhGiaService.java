@@ -9,12 +9,18 @@ import java.util.List;
 
 public interface CauHinhDanhGiaService {
     Page<CauHinhDanhGiaResponse> findAll(Pageable pageable);
+
     CauHinhDanhGiaResponse findById(Long id);
 
-    /** Trả toàn bộ cột điểm của lớp học phần, sắp theo thuTu. */
+    /** Trả toàn bộ cột điểm của syllabus môn học, sắp theo thuTu. */
+    List<CauHinhDanhGiaResponse> findBySyllabusMonHocId(Long syllabusMonHocId);
+
+    /** Tương thích màn hình lớp học phần: lớp chỉ tham chiếu cột điểm qua syllabus môn. */
     List<CauHinhDanhGiaResponse> findByLopHocPhanId(Long lopHocPhanId);
 
     CauHinhDanhGiaResponse create(CauHinhDanhGiaRequest request);
+
     CauHinhDanhGiaResponse update(Long id, CauHinhDanhGiaRequest request);
+
     void delete(Long id);
 }

@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLam
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamGocResponse;
 
 public interface ViTriViecLamGocService {
-    Page<ViTriViecLamGocResponse> findAll(String ma, String keyword, Pageable pageable);
+    Page<ViTriViecLamGocResponse> findAll(Long chuongTrinhId, String ma, String keyword, Pageable pageable);
     ViTriViecLamGocResponse findById(Long id);
 
     ViTriViecLamGocResponse create(ViTriViecLamGocRequest request);

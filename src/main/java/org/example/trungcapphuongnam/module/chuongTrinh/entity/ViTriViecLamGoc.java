@@ -17,6 +17,8 @@ public class ViTriViecLamGoc {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "chuong_trinh_id", nullable = false)
+    private Long chuongTrinhId;
 
     @Column(name = "ma", nullable = true, length = 50)
     private String ma;

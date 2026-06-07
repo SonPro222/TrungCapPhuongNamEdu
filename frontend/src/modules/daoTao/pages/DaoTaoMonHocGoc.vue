@@ -314,10 +314,12 @@ async function xoaMonHoc(mon) {
 
 .luoi-chinh {
   display: grid;
-  grid-template-columns: minmax(320px, 0.75fr) minmax(520px, 1.25fr);
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
-
 .tieu-de-the {
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
@@ -332,9 +334,13 @@ async function xoaMonHoc(mon) {
 }
 
 .form-mon {
-  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  grid-template-columns: 220px minmax(320px, 1fr);
+  align-items: start;
 }
 
+.form-mon .cot-rong {
+  grid-column: 1 / -1;
+}
 .form-mon label,
 .bo-loc label {
   display: grid;

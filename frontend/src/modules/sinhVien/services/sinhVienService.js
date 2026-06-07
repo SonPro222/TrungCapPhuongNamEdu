@@ -157,6 +157,10 @@ export const sinhVienService = {
         return layNoiDungPage(await sinhVienApi.chuongTrinhMon.getAll(PAGE_KHUNG))
     },
 
+    async laySyllabusMonHoc(params = {}) {
+        return layNoiDungPage(await sinhVienApi.syllabusMonHoc.getAll({ ...PAGE_DU_LIEU_LON, ...params }))
+    },
+
     async dangKyLopHocPhan(payload) {
         return sinhVienApi.sinhVienLopHocPhan.create(payload)
     },

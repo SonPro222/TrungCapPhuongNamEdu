@@ -20,24 +20,34 @@ public class QuyDoiDiemMau {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "syllabus_mon_hoc_goc_id")
+    private Long syllabusMonHocGocId;
 
     @Column(name = "ma", nullable = true, length = 50)
     private String ma;
+
     @Column(name = "ten", nullable = false, length = 255)
     private String ten;
+
     @Column(name = "nguong_tu", nullable = true)
     private BigDecimal nguongTu;
+
     @Column(name = "nguong_den", nullable = true)
     private BigDecimal nguongDen;
+
     @Column(name = "diem_quy_doi", nullable = true)
     private BigDecimal diemQuyDoi;
+
     @Convert(converter = KetQuaDatKhongDatConverter.class)
     @Column(name = "ket_qua", nullable = true, length = 50)
     private KetQuaDatKhongDat ketQua;
+
     @Column(name = "cong_thuc", nullable = true, columnDefinition = "TEXT")
     private String congThuc;
+
     @Column(name = "ghi_chu", nullable = true, columnDefinition = "TEXT")
     private String ghiChu;
+
     @Column(name = "loai_mau", nullable = true, length = 50)
     private String loaiMau;
 
@@ -52,9 +62,10 @@ public class QuyDoiDiemMau {
 
     @Column(name = "bat_buoc", nullable = true)
     private Boolean batBuoc;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
-    @Column(name = "updated_at", insertable = false, updatable = false)
 
+    @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 }

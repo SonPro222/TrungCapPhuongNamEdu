@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ChuongTrinhVersionViTriViecLamRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ChuongTrinhVersionViTriViecLamResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLamGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersionViTriViecLam;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ChuongTrinhVersionViTriViecLamMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
@@ -24,6 +25,28 @@ public class ChuongTrinhVersionViTriViecLamServiceImpl implements ChuongTrinhVer
     private final ChuongTrinhVersionViTriViecLamMapper mapper;
     private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
     private final ViTriViecLamGocRepository viTriViecLamGocRepository;
+
+    private boolean rong(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private void dienThongTinViTriTuGocNeuCan(ChuongTrinhVersionViTriViecLam entity, ViTriViecLamGoc goc) {
+        if (entity == null || goc == null) {
+            return;
+        }
+        if (rong(entity.getMa())) {
+            entity.setMa(goc.getMa());
+        }
+        if (rong(entity.getTen())) {
+            entity.setTen(goc.getTen());
+        }
+        if (rong(entity.getMoTa())) {
+            entity.setMoTa(goc.getMoTa());
+        }
+        if (rong(entity.getGhiChu())) {
+            entity.setGhiChu(goc.getGhiChu());
+        }
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -50,14 +73,14 @@ public class ChuongTrinhVersionViTriViecLamServiceImpl implements ChuongTrinhVer
         if (!chuongTrinhVersionRepository.existsById(request.getChuongTrinhVersionId())) {
             throw new ResourceNotFoundException("Version chương trình không tồn tại: " + request.getChuongTrinhVersionId());
         }
-        if (!viTriViecLamGocRepository.existsById(request.getViTriGocId())) {
-            throw new ResourceNotFoundException("Vị trí việc làm gốc không tồn tại: " + request.getViTriGocId());
-        }
+        ViTriViecLamGoc viTriGoc = viTriViecLamGocRepository.findById(request.getViTriGocId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vị trí việc làm gốc không tồn tại: " + request.getViTriGocId()));
         if (request.getChuongTrinhVersionId() != null && request.getViTriGocId() != null && repository.existsByChuongTrinhVersionIdAndViTriGocId(request.getChuongTrinhVersionId(), request.getViTriGocId())) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được tạo trùng.");
         }
         validator.validateChuongTrinhVersionViTriViecLam(request, null);
         ChuongTrinhVersionViTriViecLam entity = mapper.toEntity(request);
+        dienThongTinViTriTuGocNeuCan(entity, viTriGoc);
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -68,14 +91,14 @@ public class ChuongTrinhVersionViTriViecLamServiceImpl implements ChuongTrinhVer
         if (!chuongTrinhVersionRepository.existsById(request.getChuongTrinhVersionId())) {
             throw new ResourceNotFoundException("Version chương trình không tồn tại: " + request.getChuongTrinhVersionId());
         }
-        if (!viTriViecLamGocRepository.existsById(request.getViTriGocId())) {
-            throw new ResourceNotFoundException("Vị trí việc làm gốc không tồn tại: " + request.getViTriGocId());
-        }
+        ViTriViecLamGoc viTriGoc = viTriViecLamGocRepository.findById(request.getViTriGocId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vị trí việc làm gốc không tồn tại: " + request.getViTriGocId()));
         if (request.getChuongTrinhVersionId() != null && request.getViTriGocId() != null && repository.existsByChuongTrinhVersionIdAndViTriGocIdAndIdNot(request.getChuongTrinhVersionId(), request.getViTriGocId(), id)) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được cập nhật trùng.");
         }
         validator.validateChuongTrinhVersionViTriViecLam(request, id);
         mapper.updateEntity(entity, request);
+        dienThongTinViTriTuGocNeuCan(entity, viTriGoc);
         return mapper.toResponse(repository.save(entity));
     }
 

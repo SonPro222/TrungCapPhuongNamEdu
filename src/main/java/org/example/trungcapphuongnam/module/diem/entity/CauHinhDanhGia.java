@@ -19,8 +19,8 @@ public class CauHinhDanhGia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "lop_hoc_phan_id", nullable = false)
-    private Long lopHocPhanId;
+    @Column(name = "syllabus_mon_hoc_id", nullable = false)
+    private Long syllabusMonHocId;
 
     @Column(name = "ten_cot_diem", nullable = false)
     private String tenCotDiem;
@@ -37,6 +37,12 @@ public class CauHinhDanhGia {
     @Column(name = "thu_tu")
     private Integer thuTu;
 
+    @Column(name = "bat_buoc")
+    private Boolean batBuoc;
+
+    @Column(name = "ghi_chu", columnDefinition = "TEXT")
+    private String ghiChu;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -49,10 +55,13 @@ public class CauHinhDanhGia {
         createdAt = now;
         updatedAt = now;
         if (diemToiDa == null) diemToiDa = BigDecimal.TEN;
+        if (batBuoc == null) batBuoc = true;
     }
 
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
+        if (diemToiDa == null) diemToiDa = BigDecimal.TEN;
+        if (batBuoc == null) batBuoc = true;
     }
 }

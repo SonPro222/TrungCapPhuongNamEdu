@@ -31,13 +31,21 @@ public class SyllabusMonHocGoc {
 
     @Column(name = "ma", nullable = false, length = 100)
     private String ma;
-
+    @Column(name = "so_tin_chi", precision = 6, scale = 1)
+    private BigDecimal soTinChi;
     @Column(name = "ten", nullable = false, length = 255)
     private String ten;
 
     @Column(name = "vi_tri", columnDefinition = "TEXT")
     private String viTri;
+    @Column(name = "so_buoi_hoc", nullable = false)
+    private Integer soBuoiHoc;
 
+    @Column(name = "so_tiet_moi_buoi", nullable = false, precision = 4, scale = 1)
+    private BigDecimal soTietMoiBuoi;
+
+    @Column(name = "so_phut_mot_tiet", nullable = false)
+    private Integer soPhutMotTiet;
     @Column(name = "tinh_chat", columnDefinition = "TEXT")
     private String tinhChat;
 

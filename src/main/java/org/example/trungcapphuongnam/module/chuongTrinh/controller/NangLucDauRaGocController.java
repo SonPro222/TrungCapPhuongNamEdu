@@ -20,11 +20,12 @@ public class NangLucDauRaGocController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<NangLucDauRaGocResponse>>> findAll(
             Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhId,
             @RequestParam(required = false) String ma,
             @RequestParam(required = false) String loai,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(ma, loai, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhId, ma, loai, keyword, pageable)));
     }
 
     @GetMapping("/{id}")

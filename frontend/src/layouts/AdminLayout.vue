@@ -11,7 +11,11 @@
         <RouterLink to="/admin/giang-day/lop-hoc-phan">Quản lý giảng dạy</RouterLink>
         <RouterLink to="/admin/he-thong/tai-khoan">Quản lý Hệ thống</RouterLink>
         <RouterLink to="/admin/xem-chuong-trinh-dao-tao">Xem chương trình đào tạo</RouterLink>
+<!--        <RouterLink to="/dao-tao/chuong-trinh/tong-quan">Xem tổng quan CTĐT</RouterLink>-->
         <RouterLink to="/admin/lms/tong-quan">LMS</RouterLink>
+        <RouterLink to="/chuong-trinh/tong-quan">
+          Xem tổng quan CTĐT
+        </RouterLink>
       </nav>
 
       <div class="admin-auth">

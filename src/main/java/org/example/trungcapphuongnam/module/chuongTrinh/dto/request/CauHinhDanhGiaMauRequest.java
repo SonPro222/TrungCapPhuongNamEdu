@@ -12,7 +12,14 @@ import java.math.BigDecimal;
 @Builder
 public class CauHinhDanhGiaMauRequest {
 
+    @NotNull(message = "syllabusMonHocGocId không được để trống")
+    private Long syllabusMonHocGocId;
+
+    /** Deprecated: giữ để không vỡ payload cũ, không dùng trong nghiệp vụ mới. */
     private Long chuongTrinhMonId;
+
+    /** Deprecated: cấu hình đánh giá mẫu thuộc syllabus gốc, không thuộc syllabus áp dụng. */
+    private Long syllabusMonHocId;
 
     @NotBlank(message = "tenCotDiem không được để trống")
     private String tenCotDiem;

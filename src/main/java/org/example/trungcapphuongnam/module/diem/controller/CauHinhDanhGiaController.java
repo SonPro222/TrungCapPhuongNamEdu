@@ -23,19 +23,25 @@ public class CauHinhDanhGiaController {
     private final CauHinhDanhGiaService service;
 
     /**
-     * GET /api/diem/cau-hinh-danh-gia
-     * Nếu có ?lopHocPhanId=X → trả cột điểm của lớp đó (dùng cho trang chi tiết SV).
-     * Không có → trả toàn bộ (phân trang).
+     * Flow mới: ?syllabusMonHocId=X.
+     * Flow cũ tương thích: ?lopHocPhanId=X -> BE resolve lớp -> chương trình môn -> syllabus môn.
      */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CauHinhDanhGiaResponse>>> findAll(
+            @RequestParam(required = false) Long syllabusMonHocId,
             @RequestParam(required = false) Long lopHocPhanId,
             Pageable pageable
     ) {
+        if (syllabusMonHocId != null) {
+            List<CauHinhDanhGiaResponse> list = service.findBySyllabusMonHocId(syllabusMonHocId);
+            return ResponseEntity.ok(ApiResponse.ok(new PageImpl<>(list, pageable, list.size())));
+        }
+
         if (lopHocPhanId != null) {
             List<CauHinhDanhGiaResponse> list = service.findByLopHocPhanId(lopHocPhanId);
             return ResponseEntity.ok(ApiResponse.ok(new PageImpl<>(list, pageable, list.size())));
         }
+
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
     }
 

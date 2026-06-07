@@ -1,5 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
+
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -14,6 +16,8 @@ public class QuyDoiDiemResponse {
 
     private Long chuongTrinhMonId;
 
+    private Long syllabusMonHocId;
+
     private BigDecimal nguongTu;
 
     private BigDecimal nguongDen;
@@ -25,7 +29,6 @@ public class QuyDoiDiemResponse {
     private String congThuc;
 
     private String ghiChu;
-
 
     private String ma;
 
@@ -44,5 +47,4 @@ public class QuyDoiDiemResponse {
     private Integer thuTu;
 
     private Boolean batBuoc;
-
 }

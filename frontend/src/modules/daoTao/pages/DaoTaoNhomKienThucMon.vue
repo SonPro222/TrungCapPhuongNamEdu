@@ -186,30 +186,6 @@
               <input v-model="formNhom.thuTu" type="number" min="0">
             </label>
 
-            <label>
-              <span>Tổng tín chỉ</span>
-              <input v-model="formNhom.tongTinChi" type="number" min="0" step="0.1">
-            </label>
-
-            <label>
-              <span>Tổng số giờ</span>
-              <input v-model="formNhom.tongSoGio" type="number" min="0" step="0.1">
-            </label>
-
-            <label>
-              <span>Giờ lý thuyết</span>
-              <input v-model="formNhom.tongGioLyThuyet" type="number" min="0" step="0.1">
-            </label>
-
-            <label>
-              <span>Giờ thực hành</span>
-              <input v-model="formNhom.tongGioThucHanh" type="number" min="0" step="0.1">
-            </label>
-
-            <label>
-              <span>Giờ kiểm tra</span>
-              <input v-model="formNhom.tongGioKiemTra" type="number" min="0" step="0.1">
-            </label>
 
             <label>
               <span>Nhóm gốc</span>
@@ -439,11 +415,6 @@ const formNhom = reactive({
   ten: '',
   loaiNhom: 'chung',
   thuTu: '',
-  tongTinChi: '',
-  tongSoGio: '',
-  tongGioLyThuyet: '',
-  tongGioThucHanh: '',
-  tongGioKiemTra: '',
   nhomKienThucGocId: '',
   moTa: ''
 })
@@ -646,11 +617,6 @@ function taoPayloadCopyMonGocVaoVersion(monHoc) {
     laMonDieuKien: false,
 
     thuTu: null,
-    soTinChi: null,
-    tongGio: null,
-    gioLyThuyet: null,
-    gioThucHanh: null,
-    gioKiemTra: null,
     ghiChu: ''
   }
 }
@@ -697,11 +663,6 @@ function taoPayloadNhomKienThuc() {
     ten: formNhom.ten,
     loaiNhom: formNhom.loaiNhom,
     thuTu: giaTriSo(formNhom.thuTu),
-    tongTinChi: giaTriSo(formNhom.tongTinChi),
-    tongSoGio: giaTriSo(formNhom.tongSoGio),
-    tongGioLyThuyet: giaTriSo(formNhom.tongGioLyThuyet),
-    tongGioThucHanh: giaTriSo(formNhom.tongGioThucHanh),
-    tongGioKiemTra: giaTriSo(formNhom.tongGioKiemTra),
     moTa: formNhom.moTa || ''
   }
 }
@@ -712,11 +673,6 @@ function resetFormNhom() {
   formNhom.ten = ''
   formNhom.loaiNhom = 'chung'
   formNhom.thuTu = ''
-  formNhom.tongTinChi = ''
-  formNhom.tongSoGio = ''
-  formNhom.tongGioLyThuyet = ''
-  formNhom.tongGioThucHanh = ''
-  formNhom.tongGioKiemTra = ''
   formNhom.nhomKienThucGocId = ''
   formNhom.moTa = ''
 }
@@ -727,11 +683,6 @@ function suaNhomKienThuc(nhom) {
   formNhom.ten = nhom.ten || ''
   formNhom.loaiNhom = nhom.loaiNhom || 'chung'
   formNhom.thuTu = nhom.thuTu ?? ''
-  formNhom.tongTinChi = nhom.tongTinChi ?? ''
-  formNhom.tongSoGio = nhom.tongSoGio ?? ''
-  formNhom.tongGioLyThuyet = nhom.tongGioLyThuyet ?? ''
-  formNhom.tongGioThucHanh = nhom.tongGioThucHanh ?? ''
-  formNhom.tongGioKiemTra = nhom.tongGioKiemTra ?? ''
   formNhom.nhomKienThucGocId = nhom.nhomKienThucGocId || ''
   formNhom.moTa = nhom.moTa || ''
 }
@@ -820,11 +771,6 @@ function taoPayloadCapNhatChuongTrinhMon(mon, duLieuCapNhat = {}) {
     laMonDieuKien: mon.laMonDieuKien === true,
 
     thuTu: mon.thuTu ?? null,
-    soTinChi: mon.soTinChi ?? null,
-    tongGio: mon.tongGio ?? null,
-    gioLyThuyet: mon.gioLyThuyet ?? null,
-    gioThucHanh: mon.gioThucHanh ?? null,
-    gioKiemTra: mon.gioKiemTra ?? null,
     ghiChu: mon.ghiChu || ''
   }
 }

@@ -1,16 +1,16 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.controller;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.common.constant.Path.ChuongTrinhPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.QuyDoiDiemRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.QuyDoiDiemResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.QuyDoiDiemService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.example.trungcapphuongnam.common.constant.Path.ChuongTrinhPath;
 
 @RestController
 @RequestMapping(ChuongTrinhPath.QUY_DOI_DIEM)
@@ -23,10 +23,13 @@ public class QuyDoiDiemController {
     public ResponseEntity<ApiResponse<Page<QuyDoiDiemResponse>>> findAll(
             Pageable pageable,
             @RequestParam(required = false) Long chuongTrinhMonId,
+            @RequestParam(required = false) Long syllabusMonHocId,
             @RequestParam(required = false) String ketQua,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhMonId, ketQua, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAll(chuongTrinhMonId, syllabusMonHocId, ketQua, keyword, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)
@@ -40,7 +43,10 @@ public class QuyDoiDiemController {
     }
 
     @PutMapping(ChuongTrinhPath.ID)
-    public ResponseEntity<ApiResponse<QuyDoiDiemResponse>> update(@PathVariable Long id, @Valid @RequestBody QuyDoiDiemRequest request) {
+    public ResponseEntity<ApiResponse<QuyDoiDiemResponse>> update(
+            @PathVariable Long id,
+            @Valid @RequestBody QuyDoiDiemRequest request
+    ) {
         return ResponseEntity.ok(ApiResponse.ok(service.update(id, request)));
     }
 

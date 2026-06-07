@@ -727,7 +727,16 @@
           </label>
 
           <label>Số buổi học
-            <input v-model.number="formLHP.soBuoiHoc" type="number" min="1" required/>
+            <input
+                :value="soBuoiHocTuSyllabusDangChon"
+                type="number"
+                readonly
+                disabled
+                placeholder="Tự lấy từ syllabus"
+            />
+            <small class="sv-field-hint">
+              Tự lấy từ syllabus môn học đã lưu vào version.
+            </small>
           </label>
 
           <label>Ngày bắt đầu
@@ -777,6 +786,7 @@
               <th>Tên lớp</th>
               <th>Loại</th>
               <th>Sĩ số</th>
+              <th>Số buổi</th>
               <th>Ngày bắt đầu</th>
               <th>Ngày kết thúc</th>
               <th>Trạng thái</th>
@@ -793,6 +803,7 @@
               <td>{{ lhp.tenLopHocPhan || lhp.tenLop }}</td>
               <td>{{ layLoaiCuaLHP(lhp) }}</td>
               <td>{{ laySiSoHienTaiLHP(lhp) }} / {{ lhp.soLuongToiDa || lhp.siSoToiDa || 0 }}</td>
+              <td>{{ lhp.soBuoiHoc || '—' }}</td>
               <td>{{ dinhDangNgay(lhp.ngayBatDau) }}</td>
               <td>{{ dinhDangNgay(lhp.ngayKetThuc) }}</td>
               <td>{{ lhp.trangThai }}</td>
@@ -831,7 +842,7 @@
               </td>
             </tr>
             <tr v-if="!danhSachLHPTheoVersion.length">
-              <td colspan="12" class="empty">Chưa có lớp học phần theo version này.</td>
+              <td colspan="13" class="empty">Chưa có lớp học phần theo version này.</td>
             </tr>
             </tbody>
           </table>
@@ -945,12 +956,14 @@ const danhSachChuongTrinh = ref([])
 const danhSachVersion = ref([])
 const danhSachKhungKy = ref([])
 const danhSachChuongTrinhMon = ref([])
+const danhSachSyllabusMonHoc = ref([])
 
 // Dữ liệu theo context
 const danhSachLHC = ref([])
 const danhSachSVTrongLop = ref([])
 const danhSachSVChuongTrinh = ref([])
 const danhSachLHP = ref([])
+const danhSachLHPChuongTrinhMon = ref([])
 const svDaPhanBoIds = ref(new Set())
 const siSoTheoLopHocPhan = ref({})
 // Context đang chọn
@@ -1153,6 +1166,28 @@ const chuongTrinhMonTheoKhungKyDangChon = computed(() => {
   )
 })
 
+const syllabusMonHocDangChon = computed(() => {
+  if (!formLHP.chuongTrinhMonId) return null
+
+  return danhSachSyllabusMonHoc.value.find(syllabus =>
+      String(syllabus.chuongTrinhMonId) === String(formLHP.chuongTrinhMonId)
+  ) || null
+})
+
+const soBuoiHocTuSyllabusDangChon = computed(() =>
+    syllabusMonHocDangChon.value?.soBuoiHoc || ''
+)
+
+function laySoBuoiHocTuSyllabus(chuongTrinhMonId) {
+  if (!chuongTrinhMonId) return null
+
+  const syllabus = danhSachSyllabusMonHoc.value.find(item =>
+      String(item.chuongTrinhMonId) === String(chuongTrinhMonId)
+  )
+
+  return syllabus?.soBuoiHoc || null
+}
+
 
 const khungKyTheoVersion = computed(() =>
     !versionDangChon.value ? [] :
@@ -1168,10 +1203,19 @@ const danhSachLHPTheoVersion = computed(() => {
           .map(mon => String(mon.id))
   )
 
+  const lopHocPhanIdsHocChungTrongVersion = new Set(
+      danhSachLHPChuongTrinhMon.value
+          .filter(item => chuongTrinhMonIdsTrongVersion.has(String(item.chuongTrinhMonId)))
+          .map(item => String(item.lopHocPhanId))
+  )
+
   const kw = tuKhoaLHP.value.trim().toLowerCase()
 
   return danhSachLHP.value
-      .filter(lhp => chuongTrinhMonIdsTrongVersion.has(String(lhp.chuongTrinhMonId)))
+      .filter(lhp =>
+          chuongTrinhMonIdsTrongVersion.has(String(lhp.chuongTrinhMonId))
+          || lopHocPhanIdsHocChungTrongVersion.has(String(lhp.id))
+      )
       .filter(lhp => {
         if (!kw) return true
 
@@ -1276,15 +1320,20 @@ async function khoiPhucTrangThaiFlow() {
     versionDangChon.value = danhSachVersion.value.find(x => String(x.id) === String(state.versionId)) || null
 
     if (versionDangChon.value) {
-      const [lhc, lhp, svCT] = await Promise.all([
+      const [lhc, lhp, svCT, lhpCTM] = await Promise.all([
         sinhVienService.layLopHanhChinhTheoVersion(versionDangChon.value.id),
         sinhVienService.layLopHocPhan(),
-        sinhVienService.laySinhVienChuongTrinh({chuongTrinhVersionId: versionDangChon.value.id})
+        sinhVienService.laySinhVienChuongTrinh({chuongTrinhVersionId: versionDangChon.value.id}),
+        sinhVienService.layLopHocPhanChuongTrinhMon()
       ])
 
       danhSachLHC.value = lhc
       danhSachLHP.value = lhp
       danhSachSVChuongTrinh.value = svCT
+      danhSachLHPChuongTrinhMon.value = lhpCTM
+
+      const syllabus = await sinhVienService.laySyllabusMonHoc()
+      danhSachSyllabusMonHoc.value = layDanhSachTuResponse(syllabus)
 
       await taiSiSoLopHocPhanTheoVersion()
 
@@ -1463,15 +1512,20 @@ async function chonVersion(v) {
   xoaThongBao()
 
   try {
-    const [lhc, lhp, svCT] = await Promise.all([
+    const [lhc, lhp, svCT, lhpCTM] = await Promise.all([
       sinhVienService.layLopHanhChinhTheoVersion(v.id),
       sinhVienService.layLopHocPhan(),
-      sinhVienService.laySinhVienChuongTrinh({chuongTrinhVersionId: v.id})
+      sinhVienService.laySinhVienChuongTrinh({chuongTrinhVersionId: v.id}),
+      sinhVienService.layLopHocPhanChuongTrinhMon()
     ])
 
     danhSachLHC.value = lhc
     danhSachLHP.value = lhp
     danhSachSVChuongTrinh.value = svCT
+    danhSachLHPChuongTrinhMon.value = lhpCTM
+
+    const syllabus = await sinhVienService.laySyllabusMonHoc()
+    danhSachSyllabusMonHoc.value = layDanhSachTuResponse(syllabus)
 
     await taiSiSoLopHocPhanTheoVersion()
   } catch (e) {
@@ -1498,7 +1552,17 @@ async function chonLHCNhanhLHP(lop) {
   xoaThongBao()
 
   try {
-    danhSachLHP.value = await sinhVienService.layLopHocPhan()
+    const [lhp, lhpCTM] = await Promise.all([
+      sinhVienService.layLopHocPhan(),
+      sinhVienService.layLopHocPhanChuongTrinhMon()
+    ])
+
+    danhSachLHP.value = lhp
+    danhSachLHPChuongTrinhMon.value = lhpCTM
+
+    const syllabus = await sinhVienService.laySyllabusMonHoc()
+    danhSachSyllabusMonHoc.value = layDanhSachTuResponse(syllabus)
+
     await taiSiSoLopHocPhanTheoVersion()
   } catch (e) {
     baoLoi(e.message)
@@ -1708,9 +1772,23 @@ function layKhungKyIdCuaChuongTrinhMon(mon) {
       || null
 }
 
+function layChuongTrinhMonIdCuaLHP(lhp) {
+  if (lhp?.chuongTrinhMonId) {
+    return lhp.chuongTrinhMonId
+  }
+
+  const gan = danhSachLHPChuongTrinhMon.value.find(item =>
+      String(item.lopHocPhanId) === String(lhp?.id)
+  )
+
+  return gan?.chuongTrinhMonId || null
+}
+
 function layChuongTrinhMonCuaLHP(lhp) {
+  const chuongTrinhMonId = layChuongTrinhMonIdCuaLHP(lhp)
+
   return danhSachChuongTrinhMon.value.find(mon =>
-      String(mon.id) === String(lhp?.chuongTrinhMonId)
+      String(mon.id) === String(chuongTrinhMonId)
   ) || null
 }
 
@@ -1826,6 +1904,12 @@ async function luuLopHocPhan() {
     baoLoi('Phải chọn môn trong kỳ trước khi mở lớp học phần')
     return
   }
+  const soBuoiHocSyllabus = laySoBuoiHocTuSyllabus(formLHP.chuongTrinhMonId)
+
+  if (!soBuoiHocSyllabus) {
+    baoLoi('Môn này chưa có syllabus đã lưu vào version hoặc syllabus chưa có số buổi học')
+    return
+  }
 
   dangLuu.value = true
   try {
@@ -1837,8 +1921,8 @@ async function luuLopHocPhan() {
       tenLop: formLHP.tenLop,
       siSoToiThieu: Number(formLHP.siSoToiThieu || 1),
       soLuongToiDa: Number(formLHP.soLuongToiDa || 40),
-      soLuongHienTai: 0,
-      soBuoiHoc: Number(formLHP.soBuoiHoc || 1),
+      soLuongHienTai: idLHPSua.value ? undefined : 0,
+      soBuoiHoc: Number(soBuoiHocSyllabus),
       ngayBatDau: formLHP.ngayBatDau,
       ngayKetThuc: formLHP.ngayKetThuc
     })
@@ -1846,11 +1930,13 @@ async function luuLopHocPhan() {
     baoThanhCong(idLHPSua.value ? 'Đã cập nhật lớp học phần' : 'Đã mở lớp học phần')
     resetFormLHP()
     danhSachLHP.value = await sinhVienService.layLopHocPhan()
+    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
     await taiSiSoLopHocPhanTheoVersion()
   } catch (e) {
     baoLoi(e.message)
     try {
       danhSachLHP.value = await sinhVienService.layLopHocPhan()
+      danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
       await taiSiSoLopHocPhanTheoVersion()
     } catch (_) {
     }
@@ -1875,7 +1961,7 @@ function suaLopHocPhan(lhp) {
     tenLop: lhp.tenLop || lhp.tenLopHocPhan || '',
     siSoToiThieu: lhp.siSoToiThieu || 1,
     soLuongToiDa: lhp.soLuongToiDa || lhp.siSoToiDa || 40,
-    soBuoiHoc: lhp.soBuoiHoc || 1,
+    soBuoiHoc: lhp.soBuoiHoc || laySoBuoiHocTuSyllabus(lhp.chuongTrinhMonId) || '',
     ngayBatDau: lhp.ngayBatDau || '',
     ngayKetThuc: lhp.ngayKetThuc || ''
   })
@@ -1886,6 +1972,7 @@ async function xoaLopHocPhan(lhp) {
   try {
     await sinhVienService.xoaLopHocPhan(lhp.id);
     danhSachLHP.value = await sinhVienService.layLopHocPhan();
+    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
     baoThanhCong('Đã xóa')
   } catch (e) {
     baoLoi(e.message)
@@ -1963,6 +2050,7 @@ async function phanBoSinhVien() {
     }
 
     danhSachLHP.value = await sinhVienService.layLopHocPhan()
+    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
     await taiSiSoLopHocPhanTheoVersion()
 
     const lopHocPhanMoi = danhSachLHP.value.find(lhp =>
@@ -2142,7 +2230,7 @@ function taoFormLHPMacDinh() {
     tenLop: '',
     siSoToiThieu: 1,
     soLuongToiDa: 40,
-    soBuoiHoc: 1,
+    soBuoiHoc: '',
     ngayBatDau: '',
     ngayKetThuc: ''
   }
@@ -3273,37 +3361,45 @@ button.small,
   white-space: nowrap;
 }
 
-/* Ngày bắt đầu */
+/* Số buổi */
 .sv-lhp-table th:nth-child(9),
 .sv-lhp-table td:nth-child(9) {
-  width: 92px;
+  width: 70px;
+  text-align: center;
   white-space: nowrap;
 }
 
-/* Ngày kết thúc */
+/* Ngày bắt đầu */
 .sv-lhp-table th:nth-child(10),
 .sv-lhp-table td:nth-child(10) {
   width: 92px;
   white-space: nowrap;
 }
 
-/* Trạng thái */
+/* Ngày kết thúc */
 .sv-lhp-table th:nth-child(11),
 .sv-lhp-table td:nth-child(11) {
+  width: 92px;
+  white-space: nowrap;
+}
+
+/* Trạng thái */
+.sv-lhp-table th:nth-child(12),
+.sv-lhp-table td:nth-child(12) {
   width: 82px;
   white-space: nowrap;
 }
 
 /* Thao tác */
-.sv-lhp-table th:nth-child(12),
-.sv-lhp-table td:nth-child(12) {
+.sv-lhp-table th:nth-child(13),
+.sv-lhp-table td:nth-child(13) {
   width: 130px;
   min-width: 130px;
   max-width: 130px;
   overflow: visible;
 }
 
-.sv-lhp-table td:nth-child(12) .sv-row-actions {
+.sv-lhp-table td:nth-child(13) .sv-row-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
@@ -3311,9 +3407,9 @@ button.small,
   justify-content: flex-start;
 }
 
-.sv-lhp-table td:nth-child(12) .small,
-.sv-lhp-table td:nth-child(12) .btn-xem-sv,
-.sv-lhp-table td:nth-child(12) .btn-giangday {
+.sv-lhp-table td:nth-child(13) .small,
+.sv-lhp-table td:nth-child(13) .btn-xem-sv,
+.sv-lhp-table td:nth-child(13) .btn-giangday {
   width: auto;
   min-width: 46px;
   max-width: 86px;
@@ -3326,11 +3422,11 @@ button.small,
   justify-content: center;
 }
 
-.sv-lhp-table td:nth-child(12) .btn-xem-sv {
+.sv-lhp-table td:nth-child(13) .btn-xem-sv {
   background: #0f766e;
 }
 
-.sv-lhp-table td:nth-child(12) .btn-giangday {
+.sv-lhp-table td:nth-child(13) .btn-giangday {
   background: #f59e0b;
 }
 

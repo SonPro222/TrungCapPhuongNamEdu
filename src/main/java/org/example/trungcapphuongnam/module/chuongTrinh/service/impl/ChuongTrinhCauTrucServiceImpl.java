@@ -11,6 +11,8 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhCauTrucService;
+import org.example.trungcapphuongnam.module.diem.mapper.CauHinhDanhGiaMapper;
+import org.example.trungcapphuongnam.module.diem.repository.CauHinhDanhGiaRepository;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyResponse;
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKy;
 import org.example.trungcapphuongnam.module.daoTao.mapper.KhungKyMapper;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiemMau;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +45,9 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
     private final MonHocRepository monHocRepository;
     private final MonTienQuyetRepository monTienQuyetRepository;
     private final QuyDoiDiemRepository quyDoiDiemRepository;
+    private final ChuongTrinhMonQuyDoiDiemMauRepository chuongTrinhMonQuyDoiDiemMauRepository;
     private final SyllabusMonHocRepository syllabusMonHocRepository;
+    private final CauHinhDanhGiaRepository cauHinhDanhGiaRepository;
     private final DieuKienMonHocRepository dieuKienMonHocRepository;
     private final SyllabusChuongBaiRepository syllabusChuongBaiRepository;
     private final SyllabusTaiLieuRepository syllabusTaiLieuRepository;
@@ -60,13 +66,24 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
     private final MonHocMapper monHocMapper;
     private final MonTienQuyetMapper monTienQuyetMapper;
     private final QuyDoiDiemMapper quyDoiDiemMapper;
+    private final ChuongTrinhMonQuyDoiDiemMauMapper chuongTrinhMonQuyDoiDiemMauMapper;
     private final SyllabusMonHocMapper syllabusMonHocMapper;
+    private final CauHinhDanhGiaMapper cauHinhDanhGiaMapper;
     private final DieuKienMonHocMapper dieuKienMonHocMapper;
     private final SyllabusChuongBaiMapper syllabusChuongBaiMapper;
     private final SyllabusTaiLieuMapper syllabusTaiLieuMapper;
-
+    private final QuyDoiDiemMauRepository quyDoiDiemMauRepository;
     @Override
     public ChuongTrinhCauTrucResponse findCauTrucByVersionId(Long chuongTrinhVersionId) {
+        return findCauTrucByVersionId(chuongTrinhVersionId, null, true);
+    }
+
+    @Override
+    public ChuongTrinhCauTrucResponse findCauTrucByVersionId(
+            Long chuongTrinhVersionId,
+            Long khungKyId,
+            boolean includeSyllabusDetail
+    ) {
         Pageable pageable = Pageable.unpaged();
 
         ChuongTrinhVersion version = chuongTrinhVersionRepository.findById(chuongTrinhVersionId)
@@ -84,18 +101,29 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                 .map(nhomKienThucMapper::toResponse)
                 .getContent();
 
-        List<ChuongTrinhMon> monEntities = chuongTrinhMonRepository
+        List<ChuongTrinhMon> monEntities = khungKyId == null
+                ? chuongTrinhMonRepository
                 .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+                .getContent()
+                : chuongTrinhMonRepository
+                .findByChuongTrinhVersionIdAndKhungKyId(chuongTrinhVersionId, khungKyId, pageable)
                 .getContent();
 
         List<ChuongTrinhMonCauTrucResponse> monTrongChuongTrinh = monEntities.stream()
-                .map(this::buildMonTrongChuongTrinh)
+                .map(mon -> buildMonTrongChuongTrinh(mon, includeSyllabusDetail))
                 .toList();
 
-        List<KhungKyCauTrucResponse> khungKy = khungKyRepository
+        List<KhungKy> khungKyEntities = khungKyRepository
                 .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
-                .getContent()
-                .stream()
+                .getContent();
+
+        if (khungKyId != null) {
+            khungKyEntities = khungKyEntities.stream()
+                    .filter(ky -> ky.getId() != null && ky.getId().equals(khungKyId))
+                    .toList();
+        }
+
+        List<KhungKyCauTrucResponse> khungKy = khungKyEntities.stream()
                 .map(ky -> buildKhungKy(ky, monTrongChuongTrinh))
                 .toList();
 
@@ -187,6 +215,10 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
     }
 
     private ChuongTrinhMonCauTrucResponse buildMonTrongChuongTrinh(ChuongTrinhMon entity) {
+        return buildMonTrongChuongTrinh(entity, true);
+    }
+
+    private ChuongTrinhMonCauTrucResponse buildMonTrongChuongTrinh(ChuongTrinhMon entity, boolean includeSyllabusDetail) {
         Pageable pageable = Pageable.unpaged();
 
         ChuongTrinhMonResponse chuongTrinhMon = chuongTrinhMonMapper.toResponse(entity);
@@ -203,21 +235,28 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                 .map(nhomKienThucMapper::toResponse)
                 .orElse(null);
 
-        List<MonTienQuyetResponse> monTienQuyet = monTienQuyetRepository
+        List<MonTienQuyetResponse> monTienQuyet = includeSyllabusDetail
+                ? monTienQuyetRepository
                 .findByMonId(entity.getId(), pageable)
                 .map(monTienQuyetMapper::toResponse)
-                .getContent();
+                .getContent()
+                : List.of();
 
-        List<QuyDoiDiemResponse> quyDoiDiem = quyDoiDiemRepository
+        List<QuyDoiDiemResponse> quyDoiDiem = includeSyllabusDetail
+                ? quyDoiDiemRepository
                 .findByChuongTrinhMonId(entity.getId(), pageable)
                 .map(quyDoiDiemMapper::toResponse)
-                .getContent();
+                .getContent()
+                : List.of();
 
         List<SyllabusMonHocCauTrucResponse> syllabusMonHoc = syllabusMonHocRepository
                 .findByChuongTrinhMonId(entity.getId(), pageable)
                 .getContent()
                 .stream()
-                .map(this::buildSyllabusMonHoc)
+                .map(syllabus -> includeSyllabusDetail
+                        ? buildSyllabusMonHoc(syllabus)
+                        : buildSyllabusMonHocTomTat(syllabus)
+                )
                 .toList();
 
         return ChuongTrinhMonCauTrucResponse.builder()
@@ -227,6 +266,29 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                 .monTienQuyet(monTienQuyet)
                 .quyDoiDiem(quyDoiDiem)
                 .syllabusMonHoc(syllabusMonHoc)
+                .build();
+    }
+
+
+    @Override
+    public SyllabusMonHocCauTrucResponse findSyllabusChiTietById(Long syllabusMonHocId) {
+        SyllabusMonHoc entity = syllabusMonHocRepository.findById(syllabusMonHocId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Syllabus môn học không tồn tại: " + syllabusMonHocId
+                ));
+
+        return buildSyllabusMonHoc(entity);
+    }
+
+    private SyllabusMonHocCauTrucResponse buildSyllabusMonHocTomTat(SyllabusMonHoc entity) {
+        return SyllabusMonHocCauTrucResponse.builder()
+                .syllabusMonHoc(syllabusMonHocMapper.toResponse(entity))
+                .dieuKienMonHoc(List.of())
+                .chuongBai(List.of())
+                .taiLieu(List.of())
+                .cauHinhDanhGia(List.of())
+                .quyDoiDiem(List.of())
+                .quyDoiDiemTheoChuongTrinh(List.of())
                 .build();
     }
 
@@ -250,6 +312,54 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                                 .map(syllabusTaiLieuMapper::toResponse)
                                 .getContent()
                 )
+                .cauHinhDanhGia(
+                        cauHinhDanhGiaRepository.findBySyllabusMonHocIdOrderByThuTuAscIdAsc(entity.getId())
+                                .stream()
+                                .map(cauHinhDanhGiaMapper::toResponse)
+                                .toList()
+                )
+                .quyDoiDiem(
+                        quyDoiDiemRepository.findBySyllabusMonHocIdOrderByThuTuAscIdAsc(entity.getId())
+                                .stream()
+                                .map(quyDoiDiemMapper::toResponse)
+                                .toList()
+                )
+                .quyDoiDiemTheoChuongTrinh(buildQuyDoiDiemTheoChuongTrinh(entity.getId()))
                 .build();
+    }
+
+    private List<ChuongTrinhMonQuyDoiDiemMauResponse> buildQuyDoiDiemTheoChuongTrinh(Long syllabusMonHocId) {
+        if (syllabusMonHocId == null) {
+            return List.of();
+        }
+
+        return chuongTrinhMonQuyDoiDiemMauRepository.findBySyllabusMonHocId(syllabusMonHocId)
+                .stream()
+                .map(row -> {
+                    QuyDoiDiemMau mau = row.getQuyDoiDiemMauId() == null
+                            ? null
+                            : quyDoiDiemMauRepository.findById(row.getQuyDoiDiemMauId()).orElse(null);
+
+                    return ChuongTrinhMonQuyDoiDiemMauResponse.builder()
+                            .id(row.getId())
+                            .chuongTrinhMonId(row.getChuongTrinhMonId())
+                            .syllabusMonHocId(row.getSyllabusMonHocId())
+                            .quyDoiDiemMauId(row.getQuyDoiDiemMauId())
+                            .ghiChu(row.getGhiChu())
+                            .ma(mau != null ? mau.getMa() : null)
+                            .ten(mau != null ? mau.getTen() : null)
+                            .nguongTu(mau != null ? mau.getNguongTu() : null)
+                            .nguongDen(mau != null ? mau.getNguongDen() : null)
+                            .diemQuyDoi(mau != null ? mau.getDiemQuyDoi() : null)
+                            .ketQua(mau != null && mau.getKetQua() != null ? mau.getKetQua().getValue() : null)
+                            .congThuc(mau != null ? mau.getCongThuc() : null)
+                            .loaiMau(mau != null ? mau.getLoaiMau() : null)
+                            .tyLe(mau != null ? mau.getTyLe() : null)
+                            .diemToiDa(mau != null ? mau.getDiemToiDa() : null)
+                            .thuTu(mau != null ? mau.getThuTu() : null)
+                            .batBuoc(mau != null ? mau.getBatBuoc() : null)
+                            .build();
+                })
+                .toList();
     }
 }

@@ -558,7 +558,13 @@ export const baiTapLopService = {
     async moLai(id) { const c = await this.layTheoId(id); return this.capNhat(id, { ...c, trangThai: 'dang_mo' }) },
     async chotDiem(id) { const c = await this.layTheoId(id); return this.capNhat(id, { ...c, trangThai: 'da_chot' }) },
     async moChot(id) { const c = await this.layTheoId(id); return this.capNhat(id, { ...c, trangThai: 'da_dong' }) },
-    async daySangBangDiem(id, payload = {}) { const c = await this.layTheoId(id); return this.capNhat(id, { ...c, ...payload, trangThai: 'da_day_sang_diem' }) },
+    async daySangBangDiem(id, payload = {}) {
+        return unwrap(await lmsApi.baiTapLop.dayDiem(id, {
+            cauHinhDanhGiaId: Number(payload.cauHinhDanhGiaId),
+            nguoiThucHienId: payload.nguoiThucHienId ? Number(payload.nguoiThucHienId) : null,
+            ghiChu: payload.ghiChu || payload.cotDiem || ''
+        }))
+    },
 }
 
 export const ketQuaService = {
@@ -759,4 +765,64 @@ export const lmsCrudService = {
         if (!item) throw new Error('Resource không hợp lệ')
         return unwrap(await item.api.delete(id))
     },
+}
+
+export const bangDiemLopService = {
+    async layBangDiem(lopHocPhanId) {
+        const [dm, cauHinhs, diemPage, ketQuaPage, sinhViens] = await Promise.all([
+            loadDanhMucCache(),
+            lmsDanhMucService.layCauHinhDanhGia(lopHocPhanId),
+            apiPage(() => lmsApi.diemChiTiet.getAll({ lopHocPhanId, size: 5000 })),
+            apiPage(() => lmsApi.ketQuaLopHocPhan.getAll({ lopHocPhanId, size: 5000 })),
+            lmsDanhMucService.laySinhVien().catch(() => []),
+        ])
+        const diemRows = diemPage.content || []
+        const ketQuaRows = ketQuaPage.content || []
+        const sinhVienIds = [...new Set([
+            ...diemRows.map(x => x.sinhVienId),
+            ...ketQuaRows.map(x => x.sinhVienId),
+        ].filter(Boolean))]
+        const rows = sinhVienIds.map(sinhVienId => {
+            const sv = byId(sinhViens, sinhVienId) || byId(dm.sinhVien, sinhVienId) || {}
+            const ketQua = ketQuaRows.find(x => String(x.sinhVienId) === String(sinhVienId)) || {}
+            const diemTheoCot = {}
+            cauHinhs.forEach(c => {
+                diemTheoCot[c.id] = diemRows.find(d => String(d.sinhVienId) === String(sinhVienId) && String(d.cauHinhDanhGiaId) === String(c.id)) || null
+            })
+            return {
+                sinhVienId,
+                maSinhVien: pick(sv, ['maSinhVien', 'maSv', 'ma', 'code']) || sinhVienId,
+                tenSinhVien: pick(sv, ['hoTen', 'tenSinhVien', 'ten', 'name']) || `SV #${sinhVienId}`,
+                diemTheoCot,
+                ketQua,
+            }
+        })
+        return { cauHinhs, rows, ketQuaRows, diemRows }
+    },
+    async layDiemSinhVien(sinhVienId) {
+        const [dm, diemPage, ketQuaPage, cauHinhs, lopHocPhans] = await Promise.all([
+            loadDanhMucCache(),
+            apiPage(() => lmsApi.diemChiTiet.getAll({ sinhVienId, size: 5000 })),
+            apiPage(() => lmsApi.ketQuaLopHocPhan.getAll({ sinhVienId, size: 5000 })),
+            lmsDanhMucService.layCauHinhDanhGia(),
+            lmsDanhMucService.layLopHocPhan(),
+        ])
+        const diemRows = diemPage.content || []
+        const ketQuaRows = ketQuaPage.content || []
+        const lopIds = [...new Set([
+            ...diemRows.map(x => x.lopHocPhanId),
+            ...ketQuaRows.map(x => x.lopHocPhanId),
+        ].filter(Boolean))]
+        return lopIds.map(lopHocPhanId => {
+            const lop = byId(lopHocPhans, lopHocPhanId) || byId(dm.lopHocPhan, lopHocPhanId) || {}
+            const cols = cauHinhs.filter(c => String(c.lopHocPhanId) === String(lopHocPhanId))
+            return {
+                lopHocPhanId,
+                tenLopHocPhan: tenLop(lop),
+                cauHinhs: cols,
+                diemChiTiet: diemRows.filter(d => String(d.lopHocPhanId) === String(lopHocPhanId)),
+                ketQua: ketQuaRows.find(k => String(k.lopHocPhanId) === String(lopHocPhanId)) || {},
+            }
+        })
+    }
 }

@@ -96,7 +96,17 @@ export const daoTaoService = {
     khungKy: createCrudService(daoTaoApi.khungKy),
     khungKyGoc: createCrudService(daoTaoApi.khungKyGoc),
 
-    chuongTrinh: createCrudService(daoTaoApi.chuongTrinh),
+    chuongTrinh: {
+        ...createCrudService(daoTaoApi.chuongTrinh),
+
+        async getTongThe(chuongTrinhId, versionId = null, options = {}) {
+            if (chuongTrinhId === null || chuongTrinhId === undefined || chuongTrinhId === '') {
+                throw new Error('Thiếu chuongTrinhId để xem tổng thể chương trình đào tạo')
+            }
+
+            return await daoTaoApi.chuongTrinh.getTongThe(chuongTrinhId, versionId, options)
+        }
+    },
     chuongTrinhVersion: createCrudService(daoTaoApi.chuongTrinhVersion),
     chuongTrinhMon: createCrudService(daoTaoApi.chuongTrinhMon),
 
@@ -109,6 +119,7 @@ export const daoTaoService = {
     quyDoiDiemMau: createCrudService(daoTaoApi.quyDoiDiemMau),
     chuongTrinhMonQuyDoiDiemMau: createCrudService(daoTaoApi.chuongTrinhMonQuyDoiDiemMau),
     cauHinhDanhGiaMau: createCrudService(daoTaoApi.cauHinhDanhGiaMau),
+    cauHinhDanhGia: createCrudService(daoTaoApi.cauHinhDanhGia),
 
     mucTieuChuongTrinh: createCrudService(daoTaoApi.mucTieuChuongTrinh),
     nangLucDauRa: createCrudService(daoTaoApi.nangLucDauRa),
@@ -130,7 +141,17 @@ export const daoTaoService = {
     nhomKienThucGoc: createCrudService(daoTaoApi.nhomKienThucGoc),
     nhomTuChonGoc: createCrudService(daoTaoApi.nhomTuChonGoc),
 
-    syllabusMonHoc: createCrudService(daoTaoApi.syllabusMonHoc),
+    syllabusMonHoc: {
+        ...createCrudService(daoTaoApi.syllabusMonHoc),
+
+        async getChiTietXem(id) {
+            if (id === null || id === undefined || id === '') {
+                throw new Error('Thiếu syllabusMonHocId để xem chi tiết syllabus')
+            }
+
+            return await daoTaoApi.syllabusMonHoc.getChiTietXem(id)
+        }
+    },
     syllabusMonHocGoc: createCrudService(daoTaoApi.syllabusMonHocGoc),
     syllabusMonHocGocChuongBai: createCrudService(daoTaoApi.syllabusMonHocGocChuongBai),
     syllabusMonHocGocDieuKien: createCrudService(daoTaoApi.syllabusMonHocGocDieuKien),

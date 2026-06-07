@@ -15,7 +15,9 @@ public class SyllabusMonHocGocChuongBaiMapper {
 
         return SyllabusMonHocGocChuongBai.builder()
                 .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
+                .maChuong(request.getMaChuong())
                 .ten(request.getTen())
+                .mucTieu(request.getMucTieu())
                 .noiDung(request.getNoiDung())
                 .thuTu(request.getThuTu())
                 .tongGio(request.getTongGio())
@@ -32,7 +34,9 @@ public class SyllabusMonHocGocChuongBaiMapper {
         }
 
         entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
+        entity.setMaChuong(request.getMaChuong());
         entity.setTen(request.getTen());
+        entity.setMucTieu(request.getMucTieu());
         entity.setNoiDung(request.getNoiDung());
         entity.setThuTu(request.getThuTu());
         entity.setTongGio(request.getTongGio());
@@ -50,7 +54,9 @@ public class SyllabusMonHocGocChuongBaiMapper {
         return SyllabusMonHocGocChuongBaiResponse.builder()
                 .id(entity.getId())
                 .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
+                .maChuong(entity.getMaChuong())
                 .ten(entity.getTen())
+                .mucTieu(entity.getMucTieu())
                 .noiDung(entity.getNoiDung())
                 .thuTu(entity.getThuTu())
                 .tongGio(entity.getTongGio())

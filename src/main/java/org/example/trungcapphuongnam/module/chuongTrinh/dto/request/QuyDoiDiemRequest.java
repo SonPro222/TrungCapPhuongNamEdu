@@ -1,6 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
+
 import lombok.*;
-import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -11,8 +12,9 @@ import java.time.LocalDateTime;
 @Builder
 public class QuyDoiDiemRequest {
 
-    @NotNull(message = "chuong_trinh_mon_id không được để trống")
     private Long chuongTrinhMonId;
+
+    private Long syllabusMonHocId;
 
     private BigDecimal nguongTu;
 
@@ -43,5 +45,4 @@ public class QuyDoiDiemRequest {
     private Integer thuTu;
 
     private Boolean batBuoc;
-
 }

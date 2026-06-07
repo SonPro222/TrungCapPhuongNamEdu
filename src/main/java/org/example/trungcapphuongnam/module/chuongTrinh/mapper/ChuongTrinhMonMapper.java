@@ -6,11 +6,14 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ChuongTrinh
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.MonHocRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocTongHopViewRepository;
 import org.springframework.stereotype.Component;
-
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.view.SyllabusMonHocTongHopView;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocTongHopViewRepository;
 @Component
 @RequiredArgsConstructor
 public class ChuongTrinhMonMapper {
+    private final SyllabusMonHocTongHopViewRepository syllabusTongHopRepository;
 
     private final MonHocRepository monHocRepository;
 
@@ -28,11 +31,11 @@ public class ChuongTrinhMonMapper {
                 .batBuoc(request.getBatBuoc())
                 .laMonDieuKien(request.getLaMonDieuKien())
                 .thuTu(request.getThuTu())
-                .soTinChi(request.getSoTinChi())
-                .tongGio(request.getTongGio())
-                .gioLyThuyet(request.getGioLyThuyet())
-                .gioThucHanh(request.getGioThucHanh())
-                .gioKiemTra(request.getGioKiemTra())
+//                .soTinChi(request.getSoTinChi())
+//                .tongGio(request.getTongGio())
+//                .gioLyThuyet(request.getGioLyThuyet())
+//                .gioThucHanh(request.getGioThucHanh())
+//                .gioKiemTra(request.getGioKiemTra())
                 .ghiChu(request.getGhiChu())
                 .build();
     }
@@ -43,7 +46,9 @@ public class ChuongTrinhMonMapper {
         MonHoc monHoc = entity.getMonHocId() == null
                 ? null
                 : monHocRepository.findById(entity.getMonHocId()).orElse(null);
-
+        SyllabusMonHocTongHopView tongHop = entity.getId() == null
+                ? null
+                : syllabusTongHopRepository.findByChuongTrinhMonId(entity.getId()).orElse(null);
         return ChuongTrinhMonResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
@@ -59,11 +64,11 @@ public class ChuongTrinhMonMapper {
                 .batBuoc(entity.getBatBuoc())
                 .laMonDieuKien(entity.getLaMonDieuKien())
                 .thuTu(entity.getThuTu())
-                .soTinChi(entity.getSoTinChi())
-                .tongGio(entity.getTongGio())
-                .gioLyThuyet(entity.getGioLyThuyet())
-                .gioThucHanh(entity.getGioThucHanh())
-                .gioKiemTra(entity.getGioKiemTra())
+                .soTinChi(tongHop != null ? tongHop.getSoTinChi() : null)
+                .tongGio(tongHop != null ? tongHop.getTongGio() : null)
+                .gioLyThuyet(tongHop != null ? tongHop.getGioLyThuyet() : null)
+                .gioThucHanh(tongHop != null ? tongHop.getGioThucHanh() : null)
+                .gioKiemTra(tongHop != null ? tongHop.getGioKiemTra() : null)
                 .ghiChu(entity.getGhiChu())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
@@ -83,11 +88,11 @@ public class ChuongTrinhMonMapper {
         entity.setBatBuoc(request.getBatBuoc());
         entity.setLaMonDieuKien(request.getLaMonDieuKien());
         entity.setThuTu(request.getThuTu());
-        entity.setSoTinChi(request.getSoTinChi());
-        entity.setTongGio(request.getTongGio());
-        entity.setGioLyThuyet(request.getGioLyThuyet());
-        entity.setGioThucHanh(request.getGioThucHanh());
-        entity.setGioKiemTra(request.getGioKiemTra());
+//        entity.setSoTinChi(request.getSoTinChi());
+//        entity.setTongGio(request.getTongGio());
+//        entity.setGioLyThuyet(request.getGioLyThuyet());
+//        entity.setGioThucHanh(request.getGioThucHanh());
+//        entity.setGioKiemTra(request.getGioKiemTra());
         entity.setGhiChu(request.getGhiChu());
     }
 

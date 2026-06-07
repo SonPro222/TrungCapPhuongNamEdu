@@ -8,8 +8,9 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChu
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinhGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusChuongTrinhGocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusChuongTrinhGocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusChuongTrinhGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusChuongTrinhService;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class SyllabusChuongTrinhGocServiceImpl implements SyllabusChuongTrinhGoc
     private final SyllabusChuongTrinhGocRepository repository;
     private final SyllabusChuongTrinhGocMapper mapper;
     private final ChuongTrinhNghiepVuValidator validator;
+    private final SyllabusChuongTrinhService syllabusChuongTrinhService;
 
     @Override
     @Transactional(readOnly = true)
@@ -62,7 +64,13 @@ public class SyllabusChuongTrinhGocServiceImpl implements SyllabusChuongTrinhGoc
         validator.validateSyllabusChuongTrinhGoc(request, null);
 
         SyllabusChuongTrinhGoc entity = mapper.toEntity(request);
-        return mapper.toResponse(repository.save(entity));
+        SyllabusChuongTrinhGoc saved = repository.save(entity);
+
+        if (request.getChuongTrinhVersionId() != null) {
+            syllabusChuongTrinhService.dongBoTuSyllabusGoc(saved, request.getChuongTrinhVersionId());
+        }
+
+        return mapper.toResponse(saved);
     }
 
     @Override
@@ -73,7 +81,13 @@ public class SyllabusChuongTrinhGocServiceImpl implements SyllabusChuongTrinhGoc
         validator.validateSyllabusChuongTrinhGoc(request, id);
 
         mapper.updateEntity(entity, request);
-        return mapper.toResponse(repository.save(entity));
+        SyllabusChuongTrinhGoc saved = repository.save(entity);
+
+        if (request.getChuongTrinhVersionId() != null) {
+            syllabusChuongTrinhService.dongBoTuSyllabusGoc(saved, request.getChuongTrinhVersionId());
+        }
+
+        return mapper.toResponse(saved);
     }
 
     @Override

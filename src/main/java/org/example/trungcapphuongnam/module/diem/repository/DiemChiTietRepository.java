@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -41,4 +42,6 @@ public interface DiemChiTietRepository extends JpaRepository<DiemChiTiet, Long> 
     );
 
     Page<DiemChiTiet> findByBaiKiemTraId(Long baiKiemTraId, Pageable pageable);
+
+    List<DiemChiTiet> findBySinhVienIdAndLopHocPhanId(Long sinhVienId, Long lopHocPhanId);
 }

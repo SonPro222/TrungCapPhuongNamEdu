@@ -22,10 +22,12 @@ public class CauHinhDanhGiaMauController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CauHinhDanhGiaMauResponse>>> findAll(
             Pageable pageable,
-            @RequestParam(required = false) Long chuongTrinhMonId,
+            @RequestParam(required = false) Long syllabusMonHocGocId,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhMonId, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAll(syllabusMonHocGocId, keyword, pageable)
+        ));
     }
 
     @GetMapping(ChuongTrinhPath.ID)
@@ -34,7 +36,9 @@ public class CauHinhDanhGiaMauController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CauHinhDanhGiaMauResponse>> create(@Valid @RequestBody CauHinhDanhGiaMauRequest request) {
+    public ResponseEntity<ApiResponse<CauHinhDanhGiaMauResponse>> create(
+            @Valid @RequestBody CauHinhDanhGiaMauRequest request
+    ) {
         return ResponseEntity.status(201).body(ApiResponse.created(service.create(request)));
     }
 

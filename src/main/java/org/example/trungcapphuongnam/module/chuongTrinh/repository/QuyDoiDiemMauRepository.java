@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiemMau;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.util.List;
 
 @Repository
 public interface QuyDoiDiemMauRepository extends JpaRepository<QuyDoiDiemMau, Long>, JpaSpecificationExecutor<QuyDoiDiemMau> {
@@ -15,4 +16,10 @@ public interface QuyDoiDiemMauRepository extends JpaRepository<QuyDoiDiemMau, Lo
     boolean existsByMa(String ma);
 
     boolean existsByMaAndIdNot(String ma, Long id);
+
+    boolean existsBySyllabusMonHocGocIdAndMa(Long syllabusMonHocGocId, String ma);
+
+    boolean existsBySyllabusMonHocGocIdAndMaAndIdNot(Long syllabusMonHocGocId, String ma, Long id);
+
+    List<QuyDoiDiemMau> findBySyllabusMonHocGocIdOrderByThuTuAscIdAsc(Long syllabusMonHocGocId);
 }

@@ -34,15 +34,15 @@ public class ChuongTrinhVersionRequest {
 
     private String fileQuyetDinh;
 
-    private BigDecimal tongTinChi;
-
-    private BigDecimal tongSoGio;
-
-    private BigDecimal tongGioLyThuyet;
-
-    private BigDecimal tongGioThucHanh;
-
-    private BigDecimal tongGioKiemTra;
+//    private BigDecimal tongTinChi;
+//
+//    private BigDecimal tongSoGio;
+//
+//    private BigDecimal tongGioLyThuyet;
+//
+//    private BigDecimal tongGioThucHanh;
+//
+//    private BigDecimal tongGioKiemTra;
 
     private Boolean laHienHanh;
 

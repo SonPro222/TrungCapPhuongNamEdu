@@ -36,4 +36,6 @@ public interface LopHocPhanChuongTrinhMonRepository extends JpaRepository<LopHoc
     void deleteByLopHocPhanId(Long lopHocPhanId);
 
     boolean existsByChuongTrinhMonId(Long chuongTrinhMonId);
+
+    boolean existsByChuongTrinhMonIdAndLopHocPhanIdNot(Long chuongTrinhMonId, Long lopHocPhanId);
 }

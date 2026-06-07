@@ -11,6 +11,9 @@ public class ChuongTrinhVersionViTriViecLamRequest {
 
     private Long chuongTrinhVersionId;
     private Long viTriGocId;
+    private String ma;
+    private String ten;
+    private String moTa;
     private Integer thuTu;
     private String ghiChu;
 }

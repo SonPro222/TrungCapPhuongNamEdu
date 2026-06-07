@@ -20,7 +20,8 @@ public class SyllabusMonHoc {
 
     @Column(name = "chuong_trinh_mon_id")
     private Long chuongTrinhMonId;
-
+    @Column(name = "so_tin_chi", precision = 6, scale = 1)
+    private BigDecimal soTinChi;
     @Column(name = "syllabus_mon_hoc_goc_id")
     private Long syllabusMonHocGocId;
 
@@ -29,7 +30,14 @@ public class SyllabusMonHoc {
 
     @Column(name = "tinh_chat")
     private String tinhChat;
+    @Column(name = "so_buoi_hoc", nullable = false)
+    private Integer soBuoiHoc;
 
+    @Column(name = "so_tiet_moi_buoi", nullable = false, precision = 4, scale = 1)
+    private BigDecimal soTietMoiBuoi;
+
+    @Column(name = "so_phut_mot_tiet", nullable = false)
+    private Integer soPhutMotTiet;
     @Column(name = "muc_tieu")
     private String mucTieu;
 

@@ -24,15 +24,15 @@ public class NhomKienThucRequest {
     @NotBlank(message = "loai_nhom không được để trống")
     private String loaiNhom;
 
-    private BigDecimal tongTinChi;
-
-    private BigDecimal tongSoGio;
-
-    private BigDecimal tongGioLyThuyet;
-
-    private BigDecimal tongGioThucHanh;
-
-    private BigDecimal tongGioKiemTra;
+//    private BigDecimal tongTinChi;
+//
+//    private BigDecimal tongSoGio;
+//
+//    private BigDecimal tongGioLyThuyet;
+//
+//    private BigDecimal tongGioThucHanh;
+//
+//    private BigDecimal tongGioKiemTra;
 
     private String moTa;
 

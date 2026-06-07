@@ -37,7 +37,7 @@ public class NhomKienThucServiceImpl implements NhomKienThucService {
                         .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
                         .and(LocJpa.eq("nhomKienThucGocId", nhomKienThucGocId))
                         .and(LocJpa.like("loaiNhom", loaiNhom))
-                        .and(LocJpa.keyword(keyword, "ma", "ten", "loaiNhom", "ghiChu")),
+                        .and(LocJpa.keyword(keyword, "ma", "ten", "loaiNhom", "moTa")),
                 pageable
         ).map(mapper::toResponse);
     }

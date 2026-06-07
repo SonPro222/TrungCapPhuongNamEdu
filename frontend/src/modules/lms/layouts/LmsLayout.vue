@@ -103,6 +103,14 @@
               <span class="dot"></span>
               <span class="nav-text">Bài tập lớp</span>
             </RouterLink>
+
+            <RouterLink
+                :to="{ name: 'Lms.BangDiemLop' }"
+                :class="['menu-link', { active: isActive(['Lms.BangDiemLop']) }]"
+            >
+              <span class="dot"></span>
+              <span class="nav-text">Bảng điểm lớp</span>
+            </RouterLink>
           </div>
         </div>
 
@@ -131,6 +139,14 @@
             >
               <span class="dot"></span>
               <span class="nav-text">Lịch sử làm bài</span>
+            </RouterLink>
+
+            <RouterLink
+                :to="{ name: 'Lms.DiemCuaToi' }"
+                :class="['menu-link', { active: isActive(['Lms.DiemCuaToi']) }]"
+            >
+              <span class="dot"></span>
+              <span class="nav-text">Điểm của tôi</span>
             </RouterLink>
           </div>
         </div>

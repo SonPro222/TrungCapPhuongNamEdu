@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -18,8 +19,15 @@ public class QuyDoiDiem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Chỉ là khóa cha được suy ra từ syllabus_mon_hoc_id để giữ tương thích report/filter cũ.
+     * Không nhận trực tiếp từ request nghiệp vụ.
+     */
     @Column(name = "chuong_trinh_mon_id")
     private Long chuongTrinhMonId;
+
+    @Column(name = "syllabus_mon_hoc_id", nullable = false)
+    private Long syllabusMonHocId;
 
     @Column(name = "nguong_tu")
     private BigDecimal nguongTu;
@@ -65,5 +73,4 @@ public class QuyDoiDiem {
 
     @Column(name = "bat_buoc")
     private Boolean batBuoc;
-
 }

@@ -9,9 +9,13 @@ import java.util.List;
 @Repository
 public interface CauHinhDanhGiaRepository extends JpaRepository<CauHinhDanhGia, Long> {
 
-    boolean existsByLopHocPhanIdAndTenCotDiem(Long lopHocPhanId, String tenCotDiem);
-    boolean existsByLopHocPhanIdAndTenCotDiemAndIdNot(Long lopHocPhanId, String tenCotDiem, Long id);
+    boolean existsBySyllabusMonHocIdAndTenCotDiem(Long syllabusMonHocId, String tenCotDiem);
 
-    /** Lấy toàn bộ cột điểm của lớp học phần, sắp theo thuTu tăng dần. */
-    List<CauHinhDanhGia> findByLopHocPhanIdOrderByThuTuAsc(Long lopHocPhanId);
+    boolean existsBySyllabusMonHocIdAndTenCotDiemAndIdNot(Long syllabusMonHocId, String tenCotDiem, Long id);
+
+    boolean existsBySyllabusMonHocIdAndThuTu(Long syllabusMonHocId, Integer thuTu);
+
+    boolean existsBySyllabusMonHocIdAndThuTuAndIdNot(Long syllabusMonHocId, Integer thuTu, Long id);
+
+    List<CauHinhDanhGia> findBySyllabusMonHocIdOrderByThuTuAscIdAsc(Long syllabusMonHocId);
 }

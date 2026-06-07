@@ -12,11 +12,17 @@ import java.time.LocalDateTime;
 public class CauHinhDanhGiaResponse {
     private Long id;
 
+    private Long syllabusMonHocId;
+
+    /** Chỉ trả kèm khi BE resolve từ lopHocPhanId filter cũ; DB không còn lưu cột này. */
     private Long lopHocPhanId;
 
     private String tenCotDiem;
 
     private String loaiDiem;
+
+    /** Deprecated, luôn null ở flow mới. */
+    private String nguonDiem;
 
     private BigDecimal tyLe;
 
@@ -24,9 +30,11 @@ public class CauHinhDanhGiaResponse {
 
     private Integer thuTu;
 
+    private Boolean batBuoc;
+
+    private String ghiChu;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-
 }
