@@ -129,9 +129,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { baiTapLopService } from '../services/lmsService'
 import { TRANG_THAI_BAI_TAP_LOP, CACH_TINH_DIEM, mauTrangThaiBaiTapLop, formatDateTime } from '../services/lmsEnum'
 
+const router = useRouter()
 const TRANG_THAI_BTL = TRANG_THAI_BAI_TAP_LOP
 const dangTai = ref(true), dangXuLy = ref(false)
 const danhSach = ref([]), menuItem = ref(null), confirmAction = ref(null)
@@ -151,7 +153,11 @@ function fmt(dt) { return formatDateTime(dt) }
 function pct(a, b) { return b ? Math.round((a / b) * 100) + '%' : '0%' }
 function datLaiLoc() { loc.value = { tenMonHoc: '', maLop: '', trangThai: '', keyword: '' } }
 function moMenu(item) { menuItem.value = item }
-function dayDiem() { menuItem.value = null }
+function dayDiem() {
+  const id = menuItem.value?.id
+  menuItem.value = null
+  if (id) router.push({ name: 'Lms.DayDiem', params: { id } })
+}
 
 function xacNhan(type) {
   const item = menuItem.value

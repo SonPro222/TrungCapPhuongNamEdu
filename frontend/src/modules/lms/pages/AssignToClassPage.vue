@@ -108,7 +108,7 @@
               <span>Cấu hình đánh giá</span>
               <select v-model="form.cauHinhDanhGiaId" class="fi">
                 <option value="">-- Không liên kết --</option>
-                <option v-for="ch in cauHinhDanhGias" :key="ch.id" :value="ch.id">{{ ch.tenCauHinh }}</option>
+                <option v-for="ch in cauHinhDanhGias" :key="ch.id" :value="ch.id">{{ ch.tenCotDiem || ch.tenCauHinh || `Cột #${ch.id}` }}</option>
               </select>
             </label>
             <label class="fl" v-if="form.cauHinhDanhGiaId">

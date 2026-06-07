@@ -18,6 +18,8 @@ import PushScorePage from './pages/PushScorePage.vue'
 import StudentAssignedWorkPage from './pages/StudentAssignedWorkPage.vue'
 import StudentAttemptPage from './pages/StudentAttemptPage.vue'
 import StudentResultPage from './pages/StudentResultPage.vue'
+import ClassGradebookPage from './pages/ClassGradebookPage.vue'
+import StudentScorebookPage from './pages/StudentScorebookPage.vue'
 import LmsHistoryPage from './pages/LmsHistoryPage.vue'
 import LmsDataApiPage from './pages/LmsDataApiPage.vue'
 
@@ -49,10 +51,12 @@ export const lmsRoutes = [
       { path: 'lan-lam-bai/:id/cham-bai', name: 'Lms.ChamBai', component: GradeEssayPage, meta: { title: 'Chấm bài', roles: GV_ROLES } },
       { path: 'bai-tap-lop/:id/ket-qua', name: 'Lms.KetQua', component: AssignmentResultPage, meta: { title: 'Kết quả bài tập lớp', roles: GV_ROLES } },
       { path: 'bai-tap-lop/:id/day-diem', name: 'Lms.DayDiem', component: PushScorePage, meta: { title: 'Đẩy điểm sang bảng điểm', roles: GV_ROLES } },
+      { path: 'bang-diem-lop', name: 'Lms.BangDiemLop', component: ClassGradebookPage, meta: { title: 'Bảng điểm lớp học phần', roles: GV_ROLES } },
 
       { path: 'bai-duoc-giao', name: 'Lms.SinhVienBaiDuocGiao', component: StudentAssignedWorkPage, meta: { title: 'Bài được giao', roles: SV_ROLES } },
       { path: 'lam-bai/:id', name: 'Lms.LamBai', component: StudentAttemptPage, meta: { title: 'Làm bài online', roles: SV_ROLES } },
       { path: 'bai-tap-lop/:id/ket-qua-sinh-vien', name: 'Lms.KetQuaSinhVien', component: StudentResultPage, meta: { title: 'Kết quả của tôi', roles: SV_ROLES } },
+      { path: 'diem-cua-toi', name: 'Lms.DiemCuaToi', component: StudentScorebookPage, meta: { title: 'Điểm của tôi', roles: SV_ROLES } },
 
       { path: 'lich-su', name: 'Lms.LichSu', component: LmsHistoryPage, meta: { title: 'Lịch sử LMS', roles: ALL_ROLES } },
       { path: 'du-lieu-api', name: 'Lms.DuLieuApi', component: LmsDataApiPage, meta: { title: 'Kho dữ liệu API LMS', roles: GV_ROLES } },

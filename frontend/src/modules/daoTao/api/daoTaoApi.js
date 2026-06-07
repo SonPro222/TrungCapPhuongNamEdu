@@ -2,6 +2,7 @@ import apiClient from '@/core/api/apiClient'
 
 const DAO_TAO_URL = '/dao-tao'
 const CHUONG_TRINH_URL = '/chuongTrinh'
+const DIEM_URL = '/diem'
 
 function createCrudApi(baseUrl, path) {
     return {
@@ -40,7 +41,27 @@ export const daoTaoApi = {
     khungKy: createCrudApi(DAO_TAO_URL, 'khung-ky'),
     khungKyGoc: createCrudApi(DAO_TAO_URL, 'khung-ky-goc'),
 
-    chuongTrinh: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh'),
+    chuongTrinh: {
+        ...createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh'),
+
+        getTongThe(chuongTrinhId, versionId = null, options = {}) {
+            const params = {}
+
+            if (versionId !== null && versionId !== undefined && versionId !== '') {
+                params.versionId = versionId
+            }
+
+            if (options?.khungKyId !== null && options?.khungKyId !== undefined && options?.khungKyId !== '') {
+                params.khungKyId = options.khungKyId
+            }
+
+            if (options?.includeSyllabusDetail !== null && options?.includeSyllabusDetail !== undefined) {
+                params.includeSyllabusDetail = Boolean(options.includeSyllabusDetail)
+            }
+
+            return apiClient.get(`${CHUONG_TRINH_URL}/chuong-trinh/${chuongTrinhId}/tong-the`, { params })
+        }
+    },
     chuongTrinhVersion: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version'),
     chuongTrinhMon: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-mon'),
 
@@ -53,6 +74,7 @@ export const daoTaoApi = {
     quyDoiDiemMau: createCrudApi(CHUONG_TRINH_URL, 'quy-doi-diem-mau'),
     chuongTrinhMonQuyDoiDiemMau: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-mon-quy-doi-diem-mau'),
     cauHinhDanhGiaMau: createCrudApi(CHUONG_TRINH_URL, 'cau-hinh-danh-gia-mau'),
+    cauHinhDanhGia: createCrudApi(DIEM_URL, 'cau-hinh-danh-gia'),
 
     mucTieuChuongTrinh: createCrudApi(CHUONG_TRINH_URL, 'muc-tieu-chuong-trinh'),
     nangLucDauRa: createCrudApi(CHUONG_TRINH_URL, 'nang-luc-dau-ra'),
@@ -74,7 +96,13 @@ export const daoTaoApi = {
     nhomKienThucGoc: createCrudApi(CHUONG_TRINH_URL, 'nhom-kien-thuc-goc'),
     nhomTuChonGoc: createCrudApi(CHUONG_TRINH_URL, 'nhom-tu-chon-goc'),
 
-    syllabusMonHoc: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc'),
+    syllabusMonHoc: {
+        ...createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc'),
+
+        getChiTietXem(id) {
+            return apiClient.get(`${CHUONG_TRINH_URL}/syllabus-mon-hoc/${id}/xem`)
+        }
+    },
     syllabusMonHocGoc: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-goc'),
     syllabusMonHocGocChuongBai: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-goc-chuong-bai'),
     syllabusMonHocGocDieuKien: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-goc-dieu-kien'),

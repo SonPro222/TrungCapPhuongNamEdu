@@ -42,7 +42,7 @@
             <span>Cấu hình đánh giá mục tiêu</span>
             <select v-model="form.cauHinhDanhGiaId" class="fi" :class="{ error: errs.cauHinhDanhGiaId }">
               <option value="">-- Chọn cấu hình --</option>
-              <option v-for="ch in cauHinhDanhGias" :key="ch.id" :value="ch.id">{{ ch.tenCauHinh }}</option>
+              <option v-for="ch in cauHinhDanhGias" :key="ch.id" :value="ch.id">{{ ch.tenCotDiem || ch.tenCauHinh || `Cột #${ch.id}` }}</option>
             </select>
             <span class="err-msg" v-if="errs.cauHinhDanhGiaId">Bắt buộc chọn cấu hình</span>
           </label>
@@ -125,7 +125,7 @@
       <div class="sb-icon">🎉</div>
       <div>
         <div class="sb-title">Đẩy điểm thành công!</div>
-        <div class="sb-sub">Điểm của {{ danhSach.length }} sinh viên đã được đẩy sang bảng điểm.</div>
+        <div class="sb-sub">Tạo mới {{ pushResult?.soDiemTaoMoi ?? 0 }} điểm, cập nhật {{ pushResult?.soDiemCapNhat ?? 0 }} điểm, bỏ qua {{ pushResult?.soBoQua ?? 0 }} dòng.</div>
       </div>
       <RouterLink :to="{ name: 'Lms.BaiTapLop' }" class="lms-btn primary">Về danh sách bài</RouterLink>
     </div>
@@ -141,7 +141,7 @@ import { formatDiem } from '../services/lmsEnum'
 const route = useRoute(), router = useRouter()
 const dangTai = ref(true), dangXuLy = ref(false)
 const baiTapLop = ref(null), danhSach = ref([]), cauHinhDanhGias = ref([])
-const showConfirm = ref(false), success = ref(false)
+const showConfirm = ref(false), success = ref(false), pushResult = ref(null)
 const form = ref({ cauHinhDanhGiaId: '', cotDiem: '', ghiChu: '' })
 const errs = ref({})
 
@@ -163,7 +163,7 @@ function xacNhanDay() {
 async function thucHienDay() {
   dangXuLy.value = true
   try {
-    await baiTapLopService.daySangBangDiem(route.params.id, form.value)
+    pushResult.value = await baiTapLopService.daySangBangDiem(route.params.id, form.value)
     showConfirm.value = false
     success.value = true
   } finally { dangXuLy.value = false }
@@ -179,7 +179,7 @@ onMounted(async () => {
     ])
     baiTapLop.value = btl
     danhSach.value = res.content || res
-    cauHinhDanhGias.value = cacCauHinh
+    cauHinhDanhGias.value = cacCauHinh.filter(ch => !btl?.lopHocPhanId || String(ch.lopHocPhanId) === String(btl.lopHocPhanId))
     if (btl.cotDiem) form.value.cotDiem = btl.cotDiem
     if (btl.cauHinhDanhGiaId) form.value.cauHinhDanhGiaId = btl.cauHinhDanhGiaId
   } finally { dangTai.value = false }

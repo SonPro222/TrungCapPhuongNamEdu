@@ -10,6 +10,7 @@ import { requireAuth } from '../core/guards/authGuard'
 import { requireAdmin } from '../core/guards/adminGuard'
 
 import { moduleRoutes } from '@/routerCha/moduleRotuer.js'
+import { tongTheRoutes } from '@/modules/daoTao/tongTheRouter.js'
 import {
     authRoutes,
     oauthRoutes
@@ -35,6 +36,8 @@ const routes = [
             ...authRoutes
         ]
     },
+
+    ...tongTheRoutes,
 
     {
         path: '/admin',

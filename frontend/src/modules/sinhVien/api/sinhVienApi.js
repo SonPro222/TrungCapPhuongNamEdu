@@ -42,10 +42,11 @@ export const sinhVienApi = {
 
     khungKy: createCrudApi(DAO_TAO_URL, 'khung-ky'),
 
-    // ── CHƯƠNG TRÌNH ─────────────────────────────────────────────────────────
+// ── CHƯƠNG TRÌNH ─────────────────────────────────────────────────────────
     chuongTrinh:        createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh'),
     chuongTrinhVersion: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version'),
     chuongTrinhMon:     createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-mon'),
+    syllabusMonHoc:     createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc'),
 
     // ── SINH VIÊN ─────────────────────────────────────────────────────────────
     sinhVien: {

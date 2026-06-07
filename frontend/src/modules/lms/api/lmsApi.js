@@ -44,7 +44,10 @@ export const lmsApi = {
     baiTapOnline: crudApi('bai-tap-online'),
     baiTapOnlineCauHoi: crudApi('bai-tap-online-cau-hoi'),
     dotGiaoBaiOnline: crudApi('dot-giao-bai-online'),
-    baiTapLop: crudApi('bai-tap-lop'),
+    baiTapLop: {
+        ...crudApi('bai-tap-lop'),
+        dayDiem(id, payload) { return apiClient.post(`${BASE}/bai-tap-lop/${id}/day-diem`, payload) },
+    },
 
     // Lam bai / snapshot / nop bai
     lanLamBaiOnline: crudApi('lan-lam-bai-online'),
@@ -61,6 +64,20 @@ export const lmsApi = {
     lichSuBaiTapLop: crudApi('lich-su-bai-tap-lop'),
     lichSuChinhDiem: crudApi('lich-su-chinh-diem-bai-tap'),
     lichSuDayDiem: crudApi('lich-su-day-diem-lms'),
+
+
+    diemChiTiet: {
+        getAll(params = {}) { return apiClient.get(`${DIEM_BASE}/diem-chi-tiet`, { params }) },
+        getById(id) { return apiClient.get(`${DIEM_BASE}/diem-chi-tiet/${id}`) },
+        create(payload) { return apiClient.post(`${DIEM_BASE}/diem-chi-tiet`, payload) },
+        update(id, payload) { return apiClient.put(`${DIEM_BASE}/diem-chi-tiet/${id}`, payload) },
+        delete(id) { return apiClient.delete(`${DIEM_BASE}/diem-chi-tiet/${id}`) },
+    },
+    ketQuaLopHocPhan: {
+        getAll(params = {}) { return apiClient.get(`${DIEM_BASE}/ket-qua-lop-hoc-phan`, { params }) },
+        getById(id) { return apiClient.get(`${DIEM_BASE}/ket-qua-lop-hoc-phan/${id}`) },
+        update(id, payload) { return apiClient.put(`${DIEM_BASE}/ket-qua-lop-hoc-phan/${id}`, payload) },
+    },
 
     // Nghiep vu sinh vien hien co trong BE
     sinhVien: {

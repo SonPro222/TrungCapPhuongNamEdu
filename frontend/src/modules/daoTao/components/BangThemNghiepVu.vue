@@ -202,7 +202,13 @@
             <tr
                 v-for="item in hienThiItems"
                 :key="item.id || item.__localId"
-                :class="{ selected: isSelected(item), related: isRelated(item), viewing: isViewing(item), clickable: canToggleSave || canSelect }"
+                :class="{
+      selected: isSelected(item) || isMultiSelected(item),
+      related: isRelated(item),
+      viewing: isViewing(item),
+      clickable: canToggleSave || canSelect,
+      'is-expanded': isExpanded(item)
+    }"
                 @click="clickDong(item, $event)"
             >
               <td v-if="hienCotTrangThai" class="col-action col-action-wide action-pair status-action-cell">
@@ -213,11 +219,11 @@
                 <button
                     v-if="canSelect"
                     type="button"
-                    :class="['btn tiny choose-btn', { chosen: isSelected(item) }]"
-                    :title="isSelected(item) ? 'Bỏ chọn dòng này' : 'Tích chọn dữ liệu hàng này'"
+                    :class="['btn tiny choose-btn', { chosen: isSelected(item) || isMultiSelected(item) }]"
+                    :title="layTieuDeNutChon(item)"
                     @click.stop="selectItem(item)"
                 >
-                  {{ isSelected(item) ? 'Bỏ chọn' : 'Chọn' }}
+                  {{ layNhanNutChon(item) }}
                 </button>
 
                 <button
@@ -259,6 +265,15 @@
               </td>
 
               <td v-if="hienCotThaoTac" class="col-action actions-cell">
+                <button
+                    type="button"
+                    :class="['btn tiny expand-row-btn', { active: isExpanded(item) }]"
+                    :title="isExpanded(item) ? 'Thu gọn nội dung hàng này' : 'Xem đầy đủ nội dung hàng này'"
+                    @click.stop="toggleExpandedRow(item)"
+                >
+                  {{ isExpanded(item) ? 'Thu gọn ▴' : 'Xem thêm ▾' }}
+                </button>
+
                 <button v-if="canView" type="button" class="btn tiny view-btn" @click.stop="viewItem(item)">
                   {{ viewLabel }}
                 </button>
@@ -301,6 +316,10 @@ const props = defineProps({
   canToggleSave: {type: Boolean, default: false},
   canSelect: {type: Boolean, default: true},
   canShowSavedStatus: {type: Boolean, default: false},
+  multiSelect: {type: Boolean, default: false},
+  multiSelectIds: {type: Array, default: () => []},
+  multiSelectLabel: {type: String, default: 'Tích chọn'},
+  multiSelectedLabel: {type: String, default: 'Bỏ tích'},
 
   toggleSaveLabel: {type: String, default: 'Gán vào'},
   toggleSavedLabel: {type: String, default: 'Đã gán'},
@@ -330,7 +349,7 @@ const props = defineProps({
   resetAfterSave: {type: Boolean, default: true},
   uploadFile: {type: Function, default: null}
 })
-const emit = defineEmits(['saved', 'deleted', 'select', 'view', 'toggle-save', 'notify', 'file-view'])
+const emit = defineEmits(['saved', 'deleted', 'select', 'view', 'toggle-save', 'notify', 'file-view', 'multi-select'])
 
 const form = reactive({})
 const fieldErrors = reactive({})
@@ -341,6 +360,7 @@ const formKey = ref(0)
 const saving = ref(false)
 const moBang = ref(true)
 const cachedItems = ref([])
+const expandedRowKeys = ref(new Set())
 const fileInputs = reactive({})
 const fileInputCounts = reactive({})
 
@@ -372,8 +392,14 @@ const hienThiItems = computed(() => {
 const visibleFields = computed(() => props.fields.filter((field) => !field.hidden))
 const thongBaoBang = computed(() => props.tableMessage?.message || localMessage.value)
 const loaiThongBaoBang = computed(() => props.tableMessage?.type || localMessageType.value)
-const hienCotTrangThai = computed(() => !props.readOnly && (props.canSelect || props.canToggleSave || props.canShowSavedStatus))
-const hienCotThaoTac = computed(() => props.canView || !props.readOnly)
+const hienCotTrangThai = computed(() => props.canToggleSave || (!props.readOnly && props.canSelect) || props.canShowSavedStatus)
+
+/*
+  Luôn giữ cột thao tác khi bảng có cột dữ liệu để đặt nút Xem thêm/Thu gọn.
+  Không đổi logic Xem/Sửa/Xóa cũ; chỉ thêm nút mở rộng nội dung hàng.
+*/
+const hienCotThaoTac = computed(() => props.columns.length > 0 || props.canView || !props.readOnly)
+
 const soCotBang = computed(() => props.columns.length + (hienCotTrangThai.value ? 1 : 0) + (hienCotThaoTac.value ? 1 : 0))
 
 function baoTinTaiBang(message, type = 'success') {
@@ -940,10 +966,16 @@ function isSelected(item) {
   return String(props.selectedId || '') === String(itemId)
 }
 
+function isMultiSelected(item) {
+  const itemId = item?.id
+  if (!props.multiSelect || itemId === null || itemId === undefined || itemId === '') return false
+  return props.multiSelectIds.some((id) => String(id || '') === String(itemId))
+}
+
 function isRelated(item) {
   const itemId = item?.id
   if (itemId === null || itemId === undefined || itemId === '') return false
-  if (isSelected(item)) return false
+  if (isSelected(item) || isMultiSelected(item)) return false
 
   const biBoChonThuCong = props.excludedSelectedIds.some((id) => String(id || '') === String(itemId))
   if (biBoChonThuCong) return false
@@ -959,11 +991,22 @@ function isSaved(item) {
 
 function layTrangThaiDong(item) {
   if (isSaved(item)) return {label: props.statusSavedLabel, className: 'da-luu'}
+  if (isMultiSelected(item)) return {label: '☑ Đã tích chọn', className: 'dang-chon'}
   if (isSelected(item)) return {label: '● Đang chọn', className: 'dang-chon'}
   if (props.canToggleSave) return {label: props.statusUnsavedLabel, className: 'chua-luu'}
   if (props.canSelect) return {label: '+ Chưa chọn', className: 'co-the-chon'}
   if (props.canShowSavedStatus) return {label: props.statusUnsavedLabel, className: 'chua-luu'}
   return {label: 'Trạng thái', className: 'co-the-chon'}
+}
+
+function layNhanNutChon(item) {
+  if (props.multiSelect) return isMultiSelected(item) ? props.multiSelectedLabel : props.multiSelectLabel
+  return isSelected(item) ? 'Bỏ chọn' : 'Chọn'
+}
+
+function layTieuDeNutChon(item) {
+  if (props.multiSelect) return isMultiSelected(item) ? 'Bỏ tích chọn dòng này' : 'Tích chọn dòng này để gán theo lô'
+  return isSelected(item) ? 'Bỏ chọn dòng này' : 'Tích chọn dữ liệu hàng này'
 }
 
 function isViewing(item) {
@@ -972,12 +1015,51 @@ function isViewing(item) {
   return String(props.viewedId || '') === String(itemId)
 }
 
+function layRowKey(item) {
+  const key =
+      item?.id ||
+      item?.__localId ||
+      item?.maNganh ||
+      item?.maChuongTrinh ||
+      item?.maVersion ||
+      item?.maMon ||
+      item?.maMonTrongCt ||
+      item?.ma ||
+      hienThiItems.value.indexOf(item)
+
+  return String(`${props.title || 'bang'}-${key}`)
+}
+
+function isExpanded(item) {
+  return expandedRowKeys.value.has(layRowKey(item))
+}
+
+function toggleExpandedRow(item) {
+  const key = layRowKey(item)
+  const next = new Set(expandedRowKeys.value)
+
+  if (next.has(key)) {
+    next.delete(key)
+  } else {
+    next.add(key)
+  }
+
+  expandedRowKeys.value = next
+}
+
 function isDangChonTrucTiep(item) {
   return isSelected(item)
 }
 
 function selectItem(item) {
   if (!props.canSelect) return
+
+  if (props.multiSelect) {
+    const checked = !isMultiSelected(item)
+    emit('multi-select', {item, checked})
+    emitThongBao(checked ? `Đã tích chọn dòng trong bảng ${props.title}.` : `Đã bỏ tích chọn dòng trong bảng ${props.title}.`, 'success')
+    return
+  }
 
   if (props.allowToggleSelect && isDangChonTrucTiep(item)) {
     emit('select', null)
@@ -1536,22 +1618,27 @@ tr.selected td:first-child {
 }
 
 .col-action-wide {
-  width: 170px;
-  min-width: 170px;
-  max-width: 170px;
+  width: 260px;
+  min-width: 260px;
+  max-width: 320px;
 }
 
 .action-pair {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .status-action-cell {
-  white-space: nowrap;
-  flex-wrap: nowrap;
+  white-space: normal;
+  flex-wrap: wrap;
   align-content: center;
+  row-gap: 4px;
+}
+
+.status-action-cell .btn {
+  flex-shrink: 0;
 }
 
 .status-badge {
@@ -1593,6 +1680,27 @@ tr.selected td:first-child {
 .actions-cell {
   display: flex;
   gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.expand-row-btn {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+}
+
+.expand-row-btn:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.expand-row-btn.active {
+  border-color: #2563eb;
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .empty-cell {
@@ -1690,4 +1798,5 @@ tr.selected td:first-child {
   padding-right: 0;
   font-weight: 700;
 }
+
 </style>

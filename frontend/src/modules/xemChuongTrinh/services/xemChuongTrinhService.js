@@ -259,7 +259,7 @@ export const xemChuongTrinhService = {
       daoTaoXemChuongTrinhService.quyDoiDiem.getAll({ size: 200, chuongTrinhMonId }),
       daoTaoXemChuongTrinhService.chuongTrinhMonQuyDoiDiemMau.getAll({ size: 200, chuongTrinhMonId }),
       daoTaoXemChuongTrinhService.quyDoiDiemMau.getAll({ size: 200 }),
-      daoTaoXemChuongTrinhService.cauHinhDanhGiaMau.getAll({ size: 200, chuongTrinhMonId }),
+      daoTaoXemChuongTrinhService.cauHinhDanhGia.getAll({ size: 200, syllabusMonHocId: syllabusMonId }),
       daoTaoXemChuongTrinhService.syllabusChuongBai.getAll({ size: 200, syllabusMonId }),
       daoTaoXemChuongTrinhService.dieuKienMonHoc.getAll({ size: 200, syllabusMonId }),
       daoTaoXemChuongTrinhService.syllabusMonHocDieuKien.getAll({ size: 200, syllabusMonId }),
