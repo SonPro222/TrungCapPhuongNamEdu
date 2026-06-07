@@ -10,6 +10,10 @@ import lombok.*;
 public class ChuongTrinhMonQuyDoiDiemMauRequest {
 
     private Long chuongTrinhMonId;
+
+    private Long syllabusMonHocId;
+
     private Long quyDoiDiemMauId;
+
     private String ghiChu;
 }

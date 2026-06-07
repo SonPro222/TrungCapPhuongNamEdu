@@ -12,8 +12,8 @@ public interface NangLucDauRaGocRepository extends JpaRepository<NangLucDauRaGoc
 
     Page<NangLucDauRaGoc> findByMa(String ma, Pageable pageable);
 
-    boolean existsByMa(String ma);
+    boolean existsByChuongTrinhIdAndMa(Long chuongTrinhId, String ma);
 
-    boolean existsByMaAndIdNot(String ma, Long id);
+    boolean existsByChuongTrinhIdAndMaAndIdNot(Long chuongTrinhId, String ma, Long id);
 
 }

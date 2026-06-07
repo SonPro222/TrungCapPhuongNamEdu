@@ -9,20 +9,21 @@ import org.springframework.stereotype.Component;
 public class QuyDoiDiemMapper {
 
     public QuyDoiDiem toEntity(QuyDoiDiemRequest request) {
-        if (request == null) return null;
+        if (request == null) {
+            return null;
+        }
+
         return QuyDoiDiem.builder()
                 .chuongTrinhMonId(request.getChuongTrinhMonId())
+                .syllabusMonHocId(request.getSyllabusMonHocId())
                 .nguongTu(request.getNguongTu())
                 .nguongDen(request.getNguongDen())
                 .diemQuyDoi(request.getDiemQuyDoi())
-
-
                 .ketQua(request.getKetQua())
                 .congThuc(request.getCongThuc())
                 .ghiChu(request.getGhiChu())
                 .ma(request.getMa())
                 .ten(request.getTen())
-
                 .loaiMau(request.getLoaiMau())
                 .tyLe(request.getTyLe())
                 .diemToiDa(request.getDiemToiDa())
@@ -32,10 +33,14 @@ public class QuyDoiDiemMapper {
     }
 
     public QuyDoiDiemResponse toResponse(QuyDoiDiem entity) {
-        if (entity == null) return null;
+        if (entity == null) {
+            return null;
+        }
+
         return QuyDoiDiemResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhMonId(entity.getChuongTrinhMonId())
+                .syllabusMonHocId(entity.getSyllabusMonHocId())
                 .nguongTu(entity.getNguongTu())
                 .nguongDen(entity.getNguongDen())
                 .diemQuyDoi(entity.getDiemQuyDoi())
@@ -55,8 +60,12 @@ public class QuyDoiDiemMapper {
     }
 
     public void updateEntity(QuyDoiDiem entity, QuyDoiDiemRequest request) {
-        if (entity == null || request == null) return;
+        if (entity == null || request == null) {
+            return;
+        }
+
         entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
+        entity.setSyllabusMonHocId(request.getSyllabusMonHocId());
         entity.setNguongTu(request.getNguongTu());
         entity.setNguongDen(request.getNguongDen());
         entity.setDiemQuyDoi(request.getDiemQuyDoi());
@@ -65,12 +74,10 @@ public class QuyDoiDiemMapper {
         entity.setGhiChu(request.getGhiChu());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
-
         entity.setLoaiMau(request.getLoaiMau());
         entity.setTyLe(request.getTyLe());
         entity.setDiemToiDa(request.getDiemToiDa());
         entity.setThuTu(request.getThuTu());
         entity.setBatBuoc(request.getBatBuoc());
-
     }
 }

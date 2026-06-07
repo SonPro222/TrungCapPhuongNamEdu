@@ -7,7 +7,11 @@ import org.springframework.data.domain.Pageable;
 
 public interface CauHinhDanhGiaMauService {
 
-    Page<CauHinhDanhGiaMauResponse> findAll(Long chuongTrinhMonId, String keyword, Pageable pageable);
+    Page<CauHinhDanhGiaMauResponse> findAll(
+            Long syllabusMonHocGocId,
+            String keyword,
+            Pageable pageable
+    );
 
     CauHinhDanhGiaMauResponse findById(Long id);
 

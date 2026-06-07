@@ -27,9 +27,10 @@ public class NangLucDauRaGocServiceImpl implements NangLucDauRaGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<NangLucDauRaGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable) {
+    public Page<NangLucDauRaGocResponse> findAll(Long chuongTrinhId, String ma, String loai, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<NangLucDauRaGoc>empty()
+                    .and(LocJpa.eq("chuongTrinhId", chuongTrinhId))
                     .and(LocJpa.like("ma", ma))
                     .and(LocJpa.like("loai", loai))
                     .and(LocJpa.keyword(keyword, "ma", "loai", "noiDung", "ghiChu")),
@@ -47,9 +48,6 @@ public class NangLucDauRaGocServiceImpl implements NangLucDauRaGocService {
 
     @Override
     public NangLucDauRaGocResponse create(NangLucDauRaGocRequest request) {
-        if (request.getMa() != null && repository.existsByMa(request.getMa())) {
-            throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được tạo trùng.");
-        }
         validator.validateNangLucDauRaGoc(request, null);
         NangLucDauRaGoc entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
@@ -59,9 +57,6 @@ public class NangLucDauRaGocServiceImpl implements NangLucDauRaGocService {
     public NangLucDauRaGocResponse update(Long id, NangLucDauRaGocRequest request) {
         NangLucDauRaGoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nang Luc Dau Ra Goc không tồn tại: " + id));
-        if (request.getMa() != null && repository.existsByMaAndIdNot(request.getMa(), id)) {
-            throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được cập nhật trùng.");
-        }
         validator.validateNangLucDauRaGoc(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));

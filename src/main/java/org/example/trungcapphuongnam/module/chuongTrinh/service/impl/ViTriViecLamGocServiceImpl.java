@@ -27,9 +27,10 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ViTriViecLamGocResponse> findAll(String ma, String keyword, Pageable pageable) {
+    public Page<ViTriViecLamGocResponse> findAll(Long chuongTrinhId, String ma, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<ViTriViecLamGoc>empty()
+                    .and(LocJpa.eq("chuongTrinhId", chuongTrinhId))
                     .and(LocJpa.like("ma", ma))
                     .and(LocJpa.keyword(keyword, "ma", "ten", "moTa", "ghiChu")),
                 pageable
@@ -46,9 +47,6 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
 
     @Override
     public ViTriViecLamGocResponse create(ViTriViecLamGocRequest request) {
-        if (request.getMa() != null && repository.existsByMa(request.getMa())) {
-            throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được tạo trùng.");
-        }
         validator.validateViTriViecLamGoc(request, null);
         ViTriViecLamGoc entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
@@ -58,9 +56,6 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
     public ViTriViecLamGocResponse update(Long id, ViTriViecLamGocRequest request) {
         ViTriViecLamGoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vi Tri Viec Lam Goc không tồn tại: " + id));
-        if (request.getMa() != null && repository.existsByMaAndIdNot(request.getMa(), id)) {
-            throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được cập nhật trùng.");
-        }
         validator.validateViTriViecLamGoc(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));

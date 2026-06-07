@@ -13,6 +13,7 @@ public class ViTriViecLamGocMapper {
             return null;
         }
         ViTriViecLamGoc entity = new ViTriViecLamGoc();
+        entity.setChuongTrinhId(request.getChuongTrinhId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
@@ -24,6 +25,7 @@ public class ViTriViecLamGocMapper {
         if (entity == null || request == null) {
             return;
         }
+        entity.setChuongTrinhId(request.getChuongTrinhId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
@@ -36,6 +38,7 @@ public class ViTriViecLamGocMapper {
         }
         return ViTriViecLamGocResponse.builder()
                 .id(entity.getId())
+                .chuongTrinhId(entity.getChuongTrinhId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())
                 .moTa(entity.getMoTa())

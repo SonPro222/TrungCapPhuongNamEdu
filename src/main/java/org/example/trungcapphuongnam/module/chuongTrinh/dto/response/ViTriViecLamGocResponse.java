@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class ViTriViecLamGocResponse {
 
     private Long id;
+    private Long chuongTrinhId;
     private String ma;
     private String ten;
     private String moTa;

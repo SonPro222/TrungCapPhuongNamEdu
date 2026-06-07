@@ -11,6 +11,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.CauHinhDanh
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.CauHinhDanhGiaMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.CauHinhDanhGiaMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.CauHinhDanhGiaMauRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.CauHinhDanhGiaMauService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +29,22 @@ import java.util.List;
 public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
 
     private final CauHinhDanhGiaMauRepository repository;
+    private final SyllabusMonHocGocRepository syllabusMonHocGocRepository;
     private final CauHinhDanhGiaMauMapper mapper;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CauHinhDanhGiaMauResponse> findAll(Long chuongTrinhMonId, String keyword, Pageable pageable) {
-        return repository.findAll(buildSpecification(chuongTrinhMonId, keyword), pageable)
+    public Page<CauHinhDanhGiaMauResponse> findAll(
+            Long syllabusMonHocGocId,
+            String keyword,
+            Pageable pageable
+    ) {
+        // Cột điểm mẫu thuộc syllabus môn học gốc. Không trả toàn bộ bảng khi thiếu syllabusMonHocGocId.
+        if (syllabusMonHocGocId == null) {
+            return Page.empty(pageable);
+        }
+
+        return repository.findAll(buildSpecification(syllabusMonHocGocId, keyword), pageable)
                 .map(mapper::toResponse);
     }
 
@@ -46,25 +57,8 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
     @Override
     public CauHinhDanhGiaMauResponse create(CauHinhDanhGiaMauRequest request) {
         validate(request);
-
-        if (request.getChuongTrinhMonId() == null) {
-            if (repository.existsByTenCotDiem(request.getTenCotDiem())) {
-                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại");
-            }
-
-            if (request.getThuTu() != null && repository.existsByThuTu(request.getThuTu())) {
-                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại");
-            }
-        } else {
-            if (repository.existsByChuongTrinhMonIdAndTenCotDiem(request.getChuongTrinhMonId(), request.getTenCotDiem())) {
-                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong chương trình môn này");
-            }
-
-            if (request.getThuTu() != null &&
-                    repository.existsByChuongTrinhMonIdAndThuTu(request.getChuongTrinhMonId(), request.getThuTu())) {
-                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại trong chương trình môn này");
-            }
-        }
+        validateSyllabusGocExists(request.getSyllabusMonHocGocId());
+        validateDuplicate(request, null);
 
         CauHinhDanhGiaMau entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
@@ -74,25 +68,8 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
     public CauHinhDanhGiaMauResponse update(Long id, CauHinhDanhGiaMauRequest request) {
         CauHinhDanhGiaMau entity = getEntity(id);
         validate(request);
-
-        if (request.getChuongTrinhMonId() == null) {
-            if (repository.existsByTenCotDiemAndIdNot(request.getTenCotDiem(), id)) {
-                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại");
-            }
-
-            if (request.getThuTu() != null && repository.existsByThuTuAndIdNot(request.getThuTu(), id)) {
-                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại");
-            }
-        } else {
-            if (repository.existsByChuongTrinhMonIdAndTenCotDiemAndIdNot(request.getChuongTrinhMonId(), request.getTenCotDiem(), id)) {
-                throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong chương trình môn này");
-            }
-
-            if (request.getThuTu() != null &&
-                    repository.existsByChuongTrinhMonIdAndThuTuAndIdNot(request.getChuongTrinhMonId(), request.getThuTu(), id)) {
-                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại trong chương trình môn này");
-            }
-        }
+        validateSyllabusGocExists(request.getSyllabusMonHocGocId());
+        validateDuplicate(request, id);
 
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
@@ -113,8 +90,25 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
     }
 
     private void validate(CauHinhDanhGiaMauRequest request) {
+        if (request == null) {
+            throw new BadRequestException("Dữ liệu cấu hình đánh giá mẫu không được để trống");
+        }
+
+        if (request.getChuongTrinhMonId() != null) {
+            throw new BadRequestException("Cột điểm mẫu không thuộc môn trong chương trình. Hãy truyền syllabusMonHocGocId.");
+        }
+
+        if (request.getSyllabusMonHocId() != null) {
+            throw new BadRequestException("Cột điểm mẫu không thuộc syllabus áp dụng. Hãy truyền syllabusMonHocGocId.");
+        }
+
+        if (request.getSyllabusMonHocGocId() == null) {
+            throw new BadRequestException("syllabusMonHocGocId không được để trống");
+        }
+
         request.setTenCotDiem(TextUtil.trimRequired(request.getTenCotDiem()));
         request.setLoaiDiem(TextUtil.trimToNull(request.getLoaiDiem()));
+        request.setGhiChu(TextUtil.trimToNull(request.getGhiChu()));
 
         if (request.getTyLe() == null ||
                 request.getTyLe().compareTo(BigDecimal.ZERO) < 0 ||
@@ -127,12 +121,40 @@ public class CauHinhDanhGiaMauServiceImpl implements CauHinhDanhGiaMauService {
         }
     }
 
-    private Specification<CauHinhDanhGiaMau> buildSpecification(Long chuongTrinhMonId, String keyword) {
+    private void validateSyllabusGocExists(Long syllabusMonHocGocId) {
+        if (!syllabusMonHocGocRepository.existsById(syllabusMonHocGocId)) {
+            throw new ResourceNotFoundException("Syllabus môn học gốc không tồn tại: " + syllabusMonHocGocId);
+        }
+    }
+
+    private void validateDuplicate(CauHinhDanhGiaMauRequest request, Long currentId) {
+        Long syllabusMonHocGocId = request.getSyllabusMonHocGocId();
+
+        boolean duplicateTenCotDiem = currentId == null
+                ? repository.existsBySyllabusMonHocGocIdAndTenCotDiem(syllabusMonHocGocId, request.getTenCotDiem())
+                : repository.existsBySyllabusMonHocGocIdAndTenCotDiemAndIdNot(syllabusMonHocGocId, request.getTenCotDiem(), currentId);
+
+        if (duplicateTenCotDiem) {
+            throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong syllabus gốc này");
+        }
+
+        if (request.getThuTu() != null) {
+            boolean duplicateThuTu = currentId == null
+                    ? repository.existsBySyllabusMonHocGocIdAndThuTu(syllabusMonHocGocId, request.getThuTu())
+                    : repository.existsBySyllabusMonHocGocIdAndThuTuAndIdNot(syllabusMonHocGocId, request.getThuTu(), currentId);
+
+            if (duplicateThuTu) {
+                throw new DuplicateResourceException("Thứ tự cột điểm mẫu đã tồn tại trong syllabus gốc này");
+            }
+        }
+    }
+
+    private Specification<CauHinhDanhGiaMau> buildSpecification(Long syllabusMonHocGocId, String keyword) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (chuongTrinhMonId != null) {
-                predicates.add(cb.equal(root.get("chuongTrinhMonId"), chuongTrinhMonId));
+            if (syllabusMonHocGocId != null) {
+                predicates.add(cb.equal(root.get("syllabusMonHocGocId"), syllabusMonHocGocId));
             }
 
             if (keyword != null && !keyword.isBlank()) {

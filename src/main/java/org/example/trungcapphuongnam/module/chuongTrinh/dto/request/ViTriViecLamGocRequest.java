@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ViTriViecLamGocRequest {
 
+    private Long chuongTrinhId;
     private String ma;
     private String ten;
     private String moTa;

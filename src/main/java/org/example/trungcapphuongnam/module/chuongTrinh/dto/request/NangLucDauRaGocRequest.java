@@ -10,6 +10,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiNangLucDauRa;
 @Builder
 public class NangLucDauRaGocRequest {
 
+    private Long chuongTrinhId;
     private String ma;
     private LoaiNangLucDauRa loai;
     private String noiDung;

@@ -16,6 +16,13 @@ public class SyllabusMonHocGocTaiLieuMapper {
         return SyllabusMonHocGocTaiLieu.builder()
                 .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
                 .taiLieuGocId(request.getTaiLieuGocId())
+                .ma(request.getMa())
+                .ten(request.getTen())
+                .loai(request.getLoai())
+                .tacGia(request.getTacGia())
+                .nhaXuatBan(request.getNhaXuatBan())
+                .namXuatBan(request.getNamXuatBan())
+                .duongDan(request.getDuongDan())
                 .thuTu(request.getThuTu())
                 .batBuoc(request.getBatBuoc())
                 .ghiChu(request.getGhiChu())
@@ -29,6 +36,13 @@ public class SyllabusMonHocGocTaiLieuMapper {
 
         entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
         entity.setTaiLieuGocId(request.getTaiLieuGocId());
+        entity.setMa(request.getMa());
+        entity.setTen(request.getTen());
+        entity.setLoai(request.getLoai());
+        entity.setTacGia(request.getTacGia());
+        entity.setNhaXuatBan(request.getNhaXuatBan());
+        entity.setNamXuatBan(request.getNamXuatBan());
+        entity.setDuongDan(request.getDuongDan());
         entity.setThuTu(request.getThuTu());
         entity.setBatBuoc(request.getBatBuoc());
         entity.setGhiChu(request.getGhiChu());
@@ -43,6 +57,13 @@ public class SyllabusMonHocGocTaiLieuMapper {
                 .id(entity.getId())
                 .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
                 .taiLieuGocId(entity.getTaiLieuGocId())
+                .ma(entity.getMa())
+                .ten(entity.getTen())
+                .loai(entity.getLoai())
+                .tacGia(entity.getTacGia())
+                .nhaXuatBan(entity.getNhaXuatBan())
+                .namXuatBan(entity.getNamXuatBan())
+                .duongDan(entity.getDuongDan())
                 .thuTu(entity.getThuTu())
                 .batBuoc(entity.getBatBuoc())
                 .ghiChu(entity.getGhiChu())

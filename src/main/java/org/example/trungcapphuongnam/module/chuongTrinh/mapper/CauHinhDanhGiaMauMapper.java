@@ -10,9 +10,8 @@ public class CauHinhDanhGiaMauMapper {
 
     public CauHinhDanhGiaMau toEntity(CauHinhDanhGiaMauRequest request) {
         if (request == null) return null;
-
         return CauHinhDanhGiaMau.builder()
-                .chuongTrinhMonId(request.getChuongTrinhMonId())
+                .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
                 .tenCotDiem(request.getTenCotDiem())
                 .loaiDiem(request.getLoaiDiem())
                 .tyLe(request.getTyLe())
@@ -25,10 +24,11 @@ public class CauHinhDanhGiaMauMapper {
 
     public CauHinhDanhGiaMauResponse toResponse(CauHinhDanhGiaMau entity) {
         if (entity == null) return null;
-
         return CauHinhDanhGiaMauResponse.builder()
                 .id(entity.getId())
-                .chuongTrinhMonId(entity.getChuongTrinhMonId())
+                .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
+                .chuongTrinhMonId(null)
+                .syllabusMonHocId(null)
                 .tenCotDiem(entity.getTenCotDiem())
                 .loaiDiem(entity.getLoaiDiem())
                 .tyLe(entity.getTyLe())
@@ -43,8 +43,7 @@ public class CauHinhDanhGiaMauMapper {
 
     public void updateEntity(CauHinhDanhGiaMau entity, CauHinhDanhGiaMauRequest request) {
         if (entity == null || request == null) return;
-
-        entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
+        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
         entity.setTenCotDiem(request.getTenCotDiem());
         entity.setLoaiDiem(request.getLoaiDiem());
         entity.setTyLe(request.getTyLe());

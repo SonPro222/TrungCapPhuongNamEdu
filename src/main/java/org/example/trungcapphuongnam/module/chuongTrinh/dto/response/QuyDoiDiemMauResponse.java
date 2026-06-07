@@ -12,6 +12,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.enums.KetQuaDatKhongDat;
 @Builder
 public class QuyDoiDiemMauResponse {
 
+    private Long syllabusMonHocGocId;
     private Long id;
     private String ma;
     private String ten;

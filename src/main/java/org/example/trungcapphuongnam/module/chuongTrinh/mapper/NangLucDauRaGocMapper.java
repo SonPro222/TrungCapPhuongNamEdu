@@ -13,6 +13,7 @@ public class NangLucDauRaGocMapper {
             return null;
         }
         NangLucDauRaGoc entity = new NangLucDauRaGoc();
+        entity.setChuongTrinhId(request.getChuongTrinhId());
         entity.setMa(request.getMa());
         entity.setLoai(request.getLoai());
         entity.setNoiDung(request.getNoiDung());
@@ -24,6 +25,7 @@ public class NangLucDauRaGocMapper {
         if (entity == null || request == null) {
             return;
         }
+        entity.setChuongTrinhId(request.getChuongTrinhId());
         entity.setMa(request.getMa());
         entity.setLoai(request.getLoai());
         entity.setNoiDung(request.getNoiDung());
@@ -36,6 +38,7 @@ public class NangLucDauRaGocMapper {
         }
         return NangLucDauRaGocResponse.builder()
                 .id(entity.getId())
+                .chuongTrinhId(entity.getChuongTrinhId())
                 .ma(entity.getMa())
                 .loai(entity.getLoai())
                 .noiDung(entity.getNoiDung())

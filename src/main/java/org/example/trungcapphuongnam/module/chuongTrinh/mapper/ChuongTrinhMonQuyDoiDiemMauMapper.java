@@ -1,9 +1,9 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
-import org.springframework.stereotype.Component;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ChuongTrinhMonQuyDoiDiemMauRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ChuongTrinhMonQuyDoiDiemMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMonQuyDoiDiemMau;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ChuongTrinhMonQuyDoiDiemMauMapper {
@@ -12,18 +12,22 @@ public class ChuongTrinhMonQuyDoiDiemMauMapper {
         if (request == null) {
             return null;
         }
-        ChuongTrinhMonQuyDoiDiemMau entity = new ChuongTrinhMonQuyDoiDiemMau();
-        entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
-        entity.setQuyDoiDiemMauId(request.getQuyDoiDiemMauId());
-        entity.setGhiChu(request.getGhiChu());
-        return entity;
+
+        return ChuongTrinhMonQuyDoiDiemMau.builder()
+                .chuongTrinhMonId(request.getChuongTrinhMonId())
+                .syllabusMonHocId(request.getSyllabusMonHocId())
+                .quyDoiDiemMauId(request.getQuyDoiDiemMauId())
+                .ghiChu(request.getGhiChu())
+                .build();
     }
 
     public void updateEntity(ChuongTrinhMonQuyDoiDiemMau entity, ChuongTrinhMonQuyDoiDiemMauRequest request) {
         if (entity == null || request == null) {
             return;
         }
+
         entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
+        entity.setSyllabusMonHocId(request.getSyllabusMonHocId());
         entity.setQuyDoiDiemMauId(request.getQuyDoiDiemMauId());
         entity.setGhiChu(request.getGhiChu());
     }
@@ -32,9 +36,11 @@ public class ChuongTrinhMonQuyDoiDiemMauMapper {
         if (entity == null) {
             return null;
         }
+
         return ChuongTrinhMonQuyDoiDiemMauResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhMonId(entity.getChuongTrinhMonId())
+                .syllabusMonHocId(entity.getSyllabusMonHocId())
                 .quyDoiDiemMauId(entity.getQuyDoiDiemMauId())
                 .ghiChu(entity.getGhiChu())
                 .build();

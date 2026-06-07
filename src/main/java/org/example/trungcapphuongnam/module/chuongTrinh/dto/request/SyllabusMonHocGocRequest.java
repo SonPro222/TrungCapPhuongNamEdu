@@ -2,8 +2,9 @@ package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
 
 
 import lombok.*;
+import jakarta.validation.constraints.*;
 
-        import java.math.BigDecimal;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -19,6 +20,20 @@ public class SyllabusMonHocGocRequest {
     private String ten;
 
     private String viTri;
+    @DecimalMin(value = "0.0", message = "Số tín chỉ không được âm")
+    private BigDecimal soTinChi;
+    @NotNull(message = "Số buổi học không được để trống")
+    @Min(value = 1, message = "Số buổi học phải lớn hơn 0")
+    private Integer soBuoiHoc;
+
+    @NotNull(message = "Số tiết mỗi buổi không được để trống")
+    @DecimalMin(value = "0.1", message = "Số tiết mỗi buổi phải lớn hơn 0")
+    private BigDecimal soTietMoiBuoi;
+
+    @NotNull(message = "Số phút một tiết không được để trống")
+    @Min(value = 1, message = "Số phút một tiết phải lớn hơn 0")
+    private Integer soPhutMotTiet;
+
 
     private String tinhChat;
 

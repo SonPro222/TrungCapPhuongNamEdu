@@ -16,7 +16,11 @@ public class SyllabusMonHocGocChuongBaiResponse {
 
     private Long syllabusMonHocGocId;
 
+    private String maChuong;
+
     private String ten;
+
+    private String mucTieu;
 
     private String noiDung;
 

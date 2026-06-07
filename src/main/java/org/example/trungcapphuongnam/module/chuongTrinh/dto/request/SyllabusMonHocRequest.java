@@ -15,8 +15,22 @@ public class SyllabusMonHocRequest {
     private Long chuongTrinhMonId;
     private Long syllabusMonHocGocId;
     private String viTri;
-
+    @DecimalMin(value = "0.0", message = "Số tín chỉ không được âm")
+    private BigDecimal soTinChi;
     private String tinhChat;
+
+    @NotNull(message = "Số buổi học không được để trống")
+    @Min(value = 1, message = "Số buổi học phải lớn hơn 0")
+    private Integer soBuoiHoc;
+
+    @NotNull(message = "Số tiết mỗi buổi không được để trống")
+    @DecimalMin(value = "0.1", message = "Số tiết mỗi buổi phải lớn hơn 0")
+    private BigDecimal soTietMoiBuoi;
+
+    @NotNull(message = "Số phút một tiết không được để trống")
+    @Min(value = 1, message = "Số phút một tiết phải lớn hơn 0")
+    private Integer soPhutMotTiet;
+
 
     private String mucTieu;
 

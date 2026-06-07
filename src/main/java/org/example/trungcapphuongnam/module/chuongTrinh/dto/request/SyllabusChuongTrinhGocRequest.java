@@ -9,12 +9,16 @@ import lombok.*;
 @Builder
 public class SyllabusChuongTrinhGocRequest {
 
+    private Long chuongTrinhVersionId;
+
     private String ma;
 
     private String ten;
 
     private String mucTieu;
+
     private String duongDan;
+
     private String doiTuongTuyenSinh;
 
     private String thoiGianDaoTao;

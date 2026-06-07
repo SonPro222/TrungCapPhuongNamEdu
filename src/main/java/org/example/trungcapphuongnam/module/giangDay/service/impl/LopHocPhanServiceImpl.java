@@ -3,17 +3,20 @@ package org.example.trungcapphuongnam.module.giangDay.service.impl;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LopHocPhanRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LopHocPhanResponse;
 import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhanChuongTrinhMon;
 import org.example.trungcapphuongnam.module.giangDay.enums.LoaiLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.mapper.LopHocPhanMapper;
+import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
 import org.example.trungcapphuongnam.module.giangDay.service.LopHocPhanService;
-import org.example.trungcapphuongnam.module.giangDay.service.SaoChepCauHinhDanhGiaService;
 import org.example.trungcapphuongnam.module.giangDay.validator.LopHocPhanValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,9 +35,10 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
 
     private final LopHocPhanValidator validator;
     private final LopHocPhanRepository repository;
+    private final LopHocPhanChuongTrinhMonRepository lopHocPhanChuongTrinhMonRepository;
     private final ChuongTrinhMonRepository chuongTrinhMonRepository;
+    private final SyllabusMonHocRepository syllabusMonHocRepository;
     private final LopHocPhanMapper mapper;
-    private final SaoChepCauHinhDanhGiaService saoChepCauHinhDanhGiaService;
 
     @Override
     @Transactional(readOnly = true)
@@ -65,16 +69,15 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
     public LopHocPhanResponse create(LopHocPhanRequest request) {
         validator.validateCreate(request);
 
+        Long chuongTrinhMonIdGoc = request.getChuongTrinhMonId();
+
         LopHocPhan entity = mapper.toEntity(request);
-        chuanHoaLopHocPhan(entity);
+        chuanHoaLopHocPhan(entity, chuongTrinhMonIdGoc);
 
         LopHocPhan saved = repository.save(entity);
 
-        if (saved.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH && saved.getChuongTrinhMonId() != null) {
-            saoChepCauHinhDanhGiaService.saoChepTuChuongTrinhMonSangLopHocPhan(
-                    saved.getId(),
-                    saved.getChuongTrinhMonId()
-            );
+        if (saved.getLoaiLopHocPhan() == LoaiLopHocPhan.HOC_CHUNG && chuongTrinhMonIdGoc != null) {
+            ganChuongTrinhMonChoLopHocChung(saved.getId(), chuongTrinhMonIdGoc);
         }
 
         return mapper.toResponse(saved);
@@ -84,11 +87,19 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
     public LopHocPhanResponse update(Long id, LopHocPhanRequest request) {
         validator.validateUpdate(id, request);
 
+        Long chuongTrinhMonIdGoc = request.getChuongTrinhMonId();
+
         LopHocPhan entity = findEntity(id);
         mapper.updateEntity(entity, request);
-        chuanHoaLopHocPhan(entity);
+        chuanHoaLopHocPhan(entity, chuongTrinhMonIdGoc);
 
-        return mapper.toResponse(repository.save(entity));
+        LopHocPhan saved = repository.save(entity);
+
+        if (saved.getLoaiLopHocPhan() == LoaiLopHocPhan.HOC_CHUNG && chuongTrinhMonIdGoc != null) {
+            ganChuongTrinhMonChoLopHocChung(saved.getId(), chuongTrinhMonIdGoc);
+        }
+
+        return mapper.toResponse(saved);
     }
 
     @Override
@@ -102,7 +113,7 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
                 .orElseThrow(() -> new GiangDayNotFoundException("Lớp học phần không tồn tại với id = " + id));
     }
 
-    private void chuanHoaLopHocPhan(LopHocPhan entity) {
+    private void chuanHoaLopHocPhan(LopHocPhan entity, Long chuongTrinhMonIdGoc) {
         if (entity.getLoaiLopHocPhan() == null) {
             entity.setLoaiLopHocPhan(LoaiLopHocPhan.CHUYEN_NGANH);
         }
@@ -116,15 +127,73 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
         }
 
         if (entity.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH) {
+            if (entity.getChuongTrinhMonId() == null) {
+                throw new GiangDayNotFoundException("Lớp học phần chuyên ngành phải có chương trình môn");
+            }
+
             ChuongTrinhMon chuongTrinhMon = chuongTrinhMonRepository.findById(entity.getChuongTrinhMonId())
                     .orElseThrow(() -> new GiangDayNotFoundException("Chương trình môn của lớp học phần không tồn tại"));
 
             entity.setMonHocId(chuongTrinhMon.getMonHocId());
+            entity.setSoBuoiHoc(laySoBuoiHocTuSyllabus(entity.getChuongTrinhMonId()));
         }
 
         if (entity.getLoaiLopHocPhan() == LoaiLopHocPhan.HOC_CHUNG) {
+            if (chuongTrinhMonIdGoc != null) {
+                ChuongTrinhMon chuongTrinhMon = chuongTrinhMonRepository.findById(chuongTrinhMonIdGoc)
+                        .orElseThrow(() -> new GiangDayNotFoundException("Chương trình môn của lớp học phần không tồn tại"));
+
+                entity.setMonHocId(chuongTrinhMon.getMonHocId());
+                entity.setSoBuoiHoc(laySoBuoiHocTuSyllabus(chuongTrinhMonIdGoc));
+            }
+
+            if (entity.getMonHocId() == null) {
+                throw new GiangDayNotFoundException("Lớp học chung phải có môn học");
+            }
+
+            if (entity.getSoBuoiHoc() == null || entity.getSoBuoiHoc() < 1) {
+                throw new GiangDayNotFoundException("Lớp học chung phải có số buổi học từ syllabus");
+            }
+
             entity.setChuongTrinhMonId(null);
         }
+    }
+
+    private void ganChuongTrinhMonChoLopHocChung(Long lopHocPhanId, Long chuongTrinhMonId) {
+        if (lopHocPhanId == null || chuongTrinhMonId == null) {
+            return;
+        }
+
+        boolean daGan = lopHocPhanChuongTrinhMonRepository.existsByLopHocPhanIdAndChuongTrinhMonId(
+                lopHocPhanId,
+                chuongTrinhMonId
+        );
+
+        if (daGan) {
+            return;
+        }
+
+        LopHocPhanChuongTrinhMon entity = LopHocPhanChuongTrinhMon.builder()
+                .lopHocPhanId(lopHocPhanId)
+                .chuongTrinhMonId(chuongTrinhMonId)
+                .build();
+
+        lopHocPhanChuongTrinhMonRepository.save(entity);
+    }
+
+    private Integer laySoBuoiHocTuSyllabus(Long chuongTrinhMonId) {
+        SyllabusMonHoc syllabus = syllabusMonHocRepository.findFirstByChuongTrinhMonId(chuongTrinhMonId)
+                .orElseThrow(() -> new GiangDayNotFoundException(
+                        "Môn này chưa có syllabus đã lưu vào version, không thể mở/cập nhật lớp học phần"
+                ));
+
+        Integer soBuoiHoc = syllabus.getSoBuoiHoc();
+
+        if (soBuoiHoc == null || soBuoiHoc < 1) {
+            throw new GiangDayNotFoundException("Syllabus của môn chưa có số buổi học hợp lệ");
+        }
+
+        return soBuoiHoc;
     }
 
     private Specification<LopHocPhan> buildSpecification(
