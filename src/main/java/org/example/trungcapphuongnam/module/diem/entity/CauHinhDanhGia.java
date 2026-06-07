@@ -28,6 +28,9 @@ public class CauHinhDanhGia {
     @Column(name = "loai_diem", nullable = false, length = 50)
     private String loaiDiem;
 
+    @Column(name = "nguon_diem", length = 50)
+    private String nguonDiem;
+
     @Column(name = "ty_le", nullable = false, precision = 5, scale = 2)
     private BigDecimal tyLe;
 
@@ -49,6 +52,7 @@ public class CauHinhDanhGia {
         createdAt = now;
         updatedAt = now;
         if (diemToiDa == null) diemToiDa = BigDecimal.TEN;
+        if (nguonDiem == null || nguonDiem.isBlank()) nguonDiem = "GIANG_VIEN_NHAP";
     }
 
     @PreUpdate

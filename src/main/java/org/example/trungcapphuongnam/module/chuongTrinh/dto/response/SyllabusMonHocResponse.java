@@ -18,6 +18,13 @@ public class SyllabusMonHocResponse {
 
     private String tinhChat;
 
+    private Integer soBuoiHoc;
+
+    private BigDecimal soTietMoiBuoi;
+
+    private Integer soPhutMotTiet;
+
+
     private String mucTieu;
 
     private String phuongPhapDanhGia;

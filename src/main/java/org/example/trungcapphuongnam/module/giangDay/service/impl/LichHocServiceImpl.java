@@ -5,6 +5,8 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
+import org.example.trungcapphuongnam.common.security.CurrentUserService;
+import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LichHocRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.entity.CaHoc;
@@ -34,6 +36,7 @@ import org.example.trungcapphuongnam.module.giangDay.repository.DiemDanhReposito
 import org.example.trungcapphuongnam.module.giangDay.repository.SinhVienLopHocPhanRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +55,7 @@ public class LichHocServiceImpl implements LichHocService {
     private final CaHocRepository caHocRepository;
     private final LichHocMapper mapper;
     private final LichHocValidator validator;
+    private final CurrentUserService currentUserService;
     private final DiemDanhRepository diemDanhRepository;
     private final SinhVienLopHocPhanRepository sinhVienLopHocPhanRepository;
     @Override
@@ -76,7 +80,9 @@ public class LichHocServiceImpl implements LichHocService {
                         keywordCa,
                         trangThai,
                         tuNgay,
-                        denNgay
+                        denNgay,
+                        null,
+                        null
                 ),
                 pageable
         );
@@ -157,16 +163,72 @@ public class LichHocServiceImpl implements LichHocService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<LichHocResponse> getLichHocSinhVienHienTai(
+            TrangThaiLichHoc trangThai,
+            LocalDate tuNgay,
+            LocalDate denNgay,
+            Pageable pageable
+    ) {
+        Long sinhVienId = currentUserService.getSinhVienId();
+        return repository.findAll(
+                buildSpecification(null, null, null, null, null, trangThai, tuNgay, denNgay, null, sinhVienId),
+                pageable
+        ).map(this::toResponseDayDu);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LichHocResponse> getLichDayGiangVienHienTai(
+            TrangThaiLichHoc trangThai,
+            LocalDate tuNgay,
+            LocalDate denNgay,
+            Pageable pageable
+    ) {
+        Long giaoVienId = currentUserService.getGiaoVienId();
+        return repository.findAll(
+                buildSpecification(null, null, null, null, null, trangThai, tuNgay, denNgay, giaoVienId, null),
+                pageable
+        ).map(this::toResponseDayDu);
+    }
+
+    @Override
     public LichHocResponse create(LichHocRequest request) {
-        validator.validateCreate(request);
-        LichHoc entity = mapper.toEntity(request);
-        LichHoc saved = repository.save(entity);
-        taoDiemDanhChoBuoiHoc(saved);
-        return getById(saved.getId());
+        List<Long> caHocIds = layCaHocIdsTuRequest(request);
+        validateNgayVaCaHopLe(request, caHocIds);
+        validateSoBuoiConLai(request.getLopHocPhanId(), caHocIds.size(), null);
+
+        // Validate toàn bộ các ca trước khi lưu bất kỳ bản ghi nào.
+        // Nếu một ca bị trùng lớp/giảng viên/phòng/sinh viên thì trả lỗi rõ ràng
+        // và không để transaction bị rollback âm thầm sau khi đã save một phần.
+        for (Long caHocId : caHocIds) {
+            request.setCaHocId(caHocId);
+            validator.validateCreate(request);
+        }
+
+        LichHocResponse responseDauTien = null;
+        for (Long caHocId : caHocIds) {
+            request.setCaHocId(caHocId);
+            LichHoc entity = mapper.toEntity(request);
+            LichHoc saved = repository.save(entity);
+            taoDiemDanhChoBuoiHoc(saved);
+            if (responseDauTien == null) {
+                responseDauTien = getById(saved.getId());
+            }
+        }
+
+        return responseDauTien;
     }
 
     @Override
     public LichHocResponse update(Long id, LichHocRequest request) {
+        List<Long> caHocIds = layCaHocIdsTuRequest(request);
+        if (caHocIds.size() > 1) {
+            throw new GiangDayException("Khi cập nhật một buổi học chỉ được chọn một ca học");
+        }
+        request.setCaHocId(caHocIds.get(0));
+        validateNgayVaCaHopLe(request, caHocIds);
+        validateSoBuoiConLai(request.getLopHocPhanId(), 1, id);
         validator.validateUpdate(id, request);
         LichHoc entity = findEntity(id);
         mapper.updateEntity(entity, request);
@@ -193,13 +255,37 @@ public class LichHocServiceImpl implements LichHocService {
             String keywordCa,
             TrangThaiLichHoc trangThai,
             LocalDate tuNgay,
-            LocalDate denNgay
+            LocalDate denNgay,
+            Long giaoVienIdExact,
+            Long sinhVienIdExact
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (lopHocPhanId != null) {
                 predicates.add(cb.equal(root.get("lopHocPhanId"), lopHocPhanId));
+            }
+
+            if (giaoVienIdExact != null) {
+                predicates.add(cb.equal(root.get("giaoVienId"), giaoVienIdExact));
+            }
+
+            if (sinhVienIdExact != null) {
+                Subquery<Long> subquery = query.subquery(Long.class);
+                Root<SinhVienLopHocPhan> svlhpRoot = subquery.from(SinhVienLopHocPhan.class);
+
+                subquery.select(svlhpRoot.get("id"));
+                subquery.where(cb.and(
+                        cb.equal(svlhpRoot.get("lopHocPhanId"), root.get("lopHocPhanId")),
+                        cb.equal(svlhpRoot.get("sinhVienId"), sinhVienIdExact),
+                        svlhpRoot.get("trangThai").in(List.of(
+                                TrangThaiSinhVienLopHocPhan.da_dang_ky,
+                                TrangThaiSinhVienLopHocPhan.dang_hoc,
+                                TrangThaiSinhVienLopHocPhan.hoc_lai
+                        ))
+                ));
+
+                predicates.add(cb.exists(subquery));
             }
 
             if (trangThai != null) {
@@ -303,6 +389,10 @@ public class LichHocServiceImpl implements LichHocService {
         if (lopHocPhan != null) {
             response.setMaLop(lopHocPhan.getMaLop());
             response.setTenLop(lopHocPhan.getTenLop());
+            response.setSoBuoiHoc(lopHocPhan.getSoBuoiHoc());
+            long soBuoiDaXep = repository.countSoBuoiDangTinh(lopHocPhan.getId(), TrangThaiLichHoc.nghi, null);
+            response.setSoBuoiDaXep(soBuoiDaXep);
+            response.setSoBuoiConLai(Math.max((long) (lopHocPhan.getSoBuoiHoc() == null ? 0 : lopHocPhan.getSoBuoiHoc()) - soBuoiDaXep, 0));
         }
 
         GiaoVien giaoVien = giaoVienMap.get(entity.getGiaoVienId());
@@ -327,6 +417,108 @@ public class LichHocServiceImpl implements LichHocService {
 
         return response;
     }
+    private LichHocResponse toResponseDayDu(LichHoc entity) {
+        Map<Long, LopHocPhan> lopHocPhanMap = entity.getLopHocPhanId() == null
+                ? Map.of()
+                : lopHocPhanRepository.findAllById(List.of(entity.getLopHocPhanId()))
+                .stream()
+                .collect(Collectors.toMap(LopHocPhan::getId, Function.identity()));
+
+        Map<Long, GiaoVien> giaoVienMap = entity.getGiaoVienId() == null
+                ? Map.of()
+                : giaoVienRepository.findAllById(List.of(entity.getGiaoVienId()))
+                .stream()
+                .collect(Collectors.toMap(GiaoVien::getId, Function.identity()));
+
+        Map<Long, PhongHoc> phongHocMap = entity.getPhongHocId() == null
+                ? Map.of()
+                : phongHocRepository.findAllById(List.of(entity.getPhongHocId()))
+                .stream()
+                .collect(Collectors.toMap(PhongHoc::getId, Function.identity()));
+
+        Map<Long, CaHoc> caHocMap = entity.getCaHocId() == null
+                ? Map.of()
+                : caHocRepository.findAllById(List.of(entity.getCaHocId()))
+                .stream()
+                .collect(Collectors.toMap(CaHoc::getId, Function.identity()));
+
+        return toResponse(entity, lopHocPhanMap, giaoVienMap, phongHocMap, caHocMap);
+    }
+
+    private List<Long> layCaHocIdsTuRequest(LichHocRequest request) {
+        if (request == null) {
+            throw new GiangDayException("Dữ liệu lịch học không hợp lệ");
+        }
+
+        LinkedHashSet<Long> ids = new LinkedHashSet<>();
+        if (request.getCaHocIds() != null) {
+            request.getCaHocIds().stream()
+                    .filter(Objects::nonNull)
+                    .forEach(ids::add);
+        }
+        if (ids.isEmpty() && request.getCaHocId() != null) {
+            ids.add(request.getCaHocId());
+        }
+
+        if (request.getTrangThai() != TrangThaiLichHoc.nghi && ids.isEmpty()) {
+            throw new GiangDayException("Vui lòng chọn ca học");
+        }
+
+
+        if (ids.isEmpty()) {
+            List<Long> caRong = new ArrayList<>();
+            caRong.add(null);
+            return caRong;
+        }
+        return new ArrayList<>(ids);
+    }
+
+
+    private void validateSoBuoiConLai(Long lopHocPhanId, int soBuoiMuonXep, Long idDangCapNhat) {
+        if (lopHocPhanId == null || soBuoiMuonXep < 1) {
+            return;
+        }
+
+        LopHocPhan lopHocPhan = lopHocPhanRepository.findById(lopHocPhanId)
+                .orElseThrow(() -> new GiangDayException("Lớp học phần không tồn tại"));
+
+        Integer soBuoiHoc = lopHocPhan.getSoBuoiHoc();
+        if (soBuoiHoc == null || soBuoiHoc < 1) {
+            throw new GiangDayException("Lớp học phần chưa cấu hình số buổi học để phân bố lịch");
+        }
+
+        long soBuoiDaXep = repository.countSoBuoiDangTinh(lopHocPhanId, TrangThaiLichHoc.nghi, idDangCapNhat);
+        long soBuoiConLai = soBuoiHoc - soBuoiDaXep;
+
+        if (soBuoiMuonXep > soBuoiConLai) {
+            throw new GiangDayException("Lớp học phần chỉ còn " + Math.max(soBuoiConLai, 0) + " buổi chưa xếp");
+        }
+    }
+
+    private void validateNgayVaCaHopLe(LichHocRequest request, List<Long> caHocIds) {
+        if (request == null || request.getTrangThai() == TrangThaiLichHoc.nghi) {
+            return;
+        }
+
+        if (request.getNgayHoc() != null && request.getThuTrongTuan() != null) {
+            Integer thuThucTe = tinhThuTrongTuan(request.getNgayHoc());
+            if (!request.getThuTrongTuan().equals(thuThucTe)) {
+                throw new GiangDayException("Thứ trong tuần không khớp với ngày học");
+            }
+        }
+
+        List<CaHoc> caHocs = caHocRepository.findAllById(caHocIds);
+        if (caHocs.size() != caHocIds.stream().filter(Objects::nonNull).distinct().count()) {
+            throw new GiangDayException("Ca học không tồn tại");
+        }
+    }
+
+    private Integer tinhThuTrongTuan(LocalDate ngayHoc) {
+        if (ngayHoc == null) return null;
+        int dayOfWeek = ngayHoc.getDayOfWeek().getValue();
+        return dayOfWeek == 7 ? 8 : dayOfWeek + 1;
+    }
+
     private void taoDiemDanhChoBuoiHoc(LichHoc lichHoc) {
         if (lichHoc == null || lichHoc.getId() == null || lichHoc.getLopHocPhanId() == null) {
             return;

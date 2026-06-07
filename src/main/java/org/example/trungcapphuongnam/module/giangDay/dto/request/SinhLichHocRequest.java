@@ -12,6 +12,7 @@ public class SinhLichHocRequest {
     private Long giaoVienId;
     private Long phongHocId;
     private Long caHocId;
+    private List<Long> caHocIds;
     private LocalDate tuNgay;
     private LocalDate denNgay;
     private List<Integer> thuTrongTuan;

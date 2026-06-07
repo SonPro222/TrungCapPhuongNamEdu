@@ -31,6 +31,8 @@ public class LichHocMapper {
                 .phongHocId(entity.getPhongHocId())
                 .caHocId(entity.getCaHocId())
                 .ngayHoc(entity.getNgayHoc())
+                .thuTrongTuan(tinhThuTrongTuan(entity.getNgayHoc()))
+                .ngayTrongThang(entity.getNgayHoc() == null ? null : entity.getNgayHoc().getDayOfMonth())
                 .noiDungBuoiHoc(entity.getNoiDungBuoiHoc())
                 .trangThai(entity.getTrangThai())
                 .ghiChu(entity.getGhiChu())
@@ -49,5 +51,11 @@ public class LichHocMapper {
         entity.setNoiDungBuoiHoc(request.getNoiDungBuoiHoc());
         entity.setTrangThai(request.getTrangThai());
         entity.setGhiChu(request.getGhiChu());
+    }
+
+    private Integer tinhThuTrongTuan(java.time.LocalDate ngayHoc) {
+        if (ngayHoc == null) return null;
+        int dayOfWeek = ngayHoc.getDayOfWeek().getValue();
+        return dayOfWeek == 7 ? 8 : dayOfWeek + 1;
     }
 }

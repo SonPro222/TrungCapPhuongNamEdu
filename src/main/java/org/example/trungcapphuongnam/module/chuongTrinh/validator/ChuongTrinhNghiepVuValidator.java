@@ -604,6 +604,8 @@ public class ChuongTrinhNghiepVuValidator {
 
         requireExists(chuongTrinhMonRepository, chuongTrinhMonId, "Môn trong chương trình");
 
+        validateThongSoBuoiHoc(request.getSoBuoiHoc(), request.getSoTietMoiBuoi(), request.getSoPhutMotTiet());
+
         validateDiemTrongKhoang(request.getDiemDatToiThieu(), "Điểm đạt tối thiểu", BigDecimal.ZERO, BigDecimal.TEN);
         validateDiemTrongKhoang(request.getTyLeChuyenCanToiThieu(), "Tỷ lệ chuyên cần tối thiểu", BigDecimal.ZERO, new BigDecimal("100"));
 
@@ -672,6 +674,8 @@ public class ChuongTrinhNghiepVuValidator {
         String ten = trimRequired(request.getTen(), "Tên syllabus môn học gốc");
 
         requireExists(monHocRepository, monHocId, "Môn học");
+
+        validateThongSoBuoiHoc(request.getSoBuoiHoc(), request.getSoTietMoiBuoi(), request.getSoPhutMotTiet());
 
         validateDiemTrongKhoang(
                 request.getDiemDatToiThieu(),
@@ -896,6 +900,20 @@ public class ChuongTrinhNghiepVuValidator {
             if (id != null && syllabusChuongBaiRepository.existsBySyllabusMonIdAndThuTuAndIdNot(syllabusMonId, request.getThuTu(), id)) {
                 throw new DuplicateResourceException("Thứ tự chương bài đã tồn tại trong syllabus môn");
             }
+        }
+    }
+
+    private void validateThongSoBuoiHoc(Integer soBuoiHoc, BigDecimal soTietMoiBuoi, Integer soPhutMotTiet) {
+        if (soBuoiHoc == null || soBuoiHoc < 1) {
+            throw new BadRequestException("Số buổi học phải lớn hơn 0");
+        }
+
+        if (soTietMoiBuoi == null || soTietMoiBuoi.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("Số tiết mỗi buổi phải lớn hơn 0");
+        }
+
+        if (soPhutMotTiet == null || soPhutMotTiet < 1) {
+            throw new BadRequestException("Số phút một tiết phải lớn hơn 0");
         }
     }
 

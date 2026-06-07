@@ -19,6 +19,8 @@ public class CauHinhDanhGiaRequest {
     @NotBlank(message = "loaiDiem không được để trống")
     private String loaiDiem;
 
+    private String nguonDiem;
+
     @NotNull(message = "tyLe không được để trống")
     @DecimalMin(value = "0.0", message = "tyLe không được âm")
     @DecimalMax(value = "100.0", message = "tyLe không được vượt quá 100")

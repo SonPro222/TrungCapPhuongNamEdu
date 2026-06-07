@@ -15,6 +15,9 @@ public class SyllabusMonHocMapper {
                 .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
                 .viTri(request.getViTri())
                 .tinhChat(request.getTinhChat())
+                .soBuoiHoc(request.getSoBuoiHoc())
+                .soTietMoiBuoi(request.getSoTietMoiBuoi())
+                .soPhutMotTiet(request.getSoPhutMotTiet())
                 .mucTieu(request.getMucTieu())
                 .phuongPhapDanhGia(request.getPhuongPhapDanhGia())
                 .dieuKienHoanThanh(request.getDieuKienHoanThanh())
@@ -40,6 +43,9 @@ public class SyllabusMonHocMapper {
                 .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
                 .viTri(entity.getViTri())
                 .tinhChat(entity.getTinhChat())
+                .soBuoiHoc(entity.getSoBuoiHoc())
+                .soTietMoiBuoi(entity.getSoTietMoiBuoi())
+                .soPhutMotTiet(entity.getSoPhutMotTiet())
                 .mucTieu(entity.getMucTieu())
                 .phuongPhapDanhGia(entity.getPhuongPhapDanhGia())
                 .dieuKienHoanThanh(entity.getDieuKienHoanThanh())
@@ -64,6 +70,9 @@ public class SyllabusMonHocMapper {
         entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
         entity.setViTri(request.getViTri());
         entity.setTinhChat(request.getTinhChat());
+        entity.setSoBuoiHoc(request.getSoBuoiHoc());
+        entity.setSoTietMoiBuoi(request.getSoTietMoiBuoi());
+        entity.setSoPhutMotTiet(request.getSoPhutMotTiet());
         entity.setMucTieu(request.getMucTieu());
         entity.setPhuongPhapDanhGia(request.getPhuongPhapDanhGia());
         entity.setDieuKienHoanThanh(request.getDieuKienHoanThanh());

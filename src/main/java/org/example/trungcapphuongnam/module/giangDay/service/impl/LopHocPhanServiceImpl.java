@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
+import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LopHocPhanRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LopHocPhanResponse;
@@ -120,10 +121,21 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
                     .orElseThrow(() -> new GiangDayNotFoundException("Chương trình môn của lớp học phần không tồn tại"));
 
             entity.setMonHocId(chuongTrinhMon.getMonHocId());
+            validateSoBuoiHocCuaLopHocPhan(entity);
         }
 
         if (entity.getLoaiLopHocPhan() == LoaiLopHocPhan.HOC_CHUNG) {
             entity.setChuongTrinhMonId(null);
+            if (entity.getSoBuoiHoc() == null || entity.getSoBuoiHoc() < 1) {
+                throw new GiangDayException("Lớp học chung phải cấu hình số buổi học");
+            }
+        }
+    }
+
+
+    private void validateSoBuoiHocCuaLopHocPhan(LopHocPhan entity) {
+        if (entity.getSoBuoiHoc() == null || entity.getSoBuoiHoc() < 1) {
+            throw new GiangDayException("Lớp học phần phải có số buổi học hợp lệ để phân bố lịch học");
         }
     }
 

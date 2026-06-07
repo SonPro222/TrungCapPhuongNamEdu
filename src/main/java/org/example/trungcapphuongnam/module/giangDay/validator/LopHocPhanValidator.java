@@ -50,11 +50,6 @@ public class LopHocPhanValidator {
         if (request == null) {
             throw new GiangDayException("Dữ liệu lớp học phần không hợp lệ");
         }
-        Integer soBuoiHoc = request.getSoBuoiHoc();
-
-        if (soBuoiHoc == null || soBuoiHoc < 1) {
-            throw new GiangDayException("Số buổi học phải lớn hơn 0");
-        }
         if (request.getLoaiLopHocPhan() == null) {
             throw new GiangDayException("Loại lớp học phần không được để trống");
         }
@@ -121,6 +116,11 @@ public class LopHocPhanValidator {
     private void validateLopHocChung(LopHocPhanRequest request) {
         if (request.getMonHocId() == null) {
             throw new GiangDayException("Lớp học chung phải chọn môn học chung");
+        }
+
+        Integer soBuoiHoc = request.getSoBuoiHoc();
+        if (soBuoiHoc == null || soBuoiHoc < 1) {
+            throw new GiangDayException("Lớp học chung phải cấu hình số buổi học lớn hơn 0");
         }
     }
 

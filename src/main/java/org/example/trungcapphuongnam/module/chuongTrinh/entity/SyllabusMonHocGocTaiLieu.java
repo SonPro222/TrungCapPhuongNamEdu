@@ -24,6 +24,28 @@ public class SyllabusMonHocGocTaiLieu {
     @Column(name = "tai_lieu_goc_id", nullable = false)
     private Long taiLieuGocId;
 
+
+    @Column(name = "ma", length = 100)
+    private String ma;
+
+    @Column(name = "ten", length = 500)
+    private String ten;
+
+    @Column(name = "loai", length = 100)
+    private String loai;
+
+    @Column(name = "tac_gia", length = 255)
+    private String tacGia;
+
+    @Column(name = "nha_xuat_ban", length = 255)
+    private String nhaXuatBan;
+
+    @Column(name = "nam_xuat_ban")
+    private Integer namXuatBan;
+
+    @Column(name = "duong_dan", columnDefinition = "TEXT")
+    private String duongDan;
+
     @Column(name = "thu_tu")
     private Integer thuTu;
 

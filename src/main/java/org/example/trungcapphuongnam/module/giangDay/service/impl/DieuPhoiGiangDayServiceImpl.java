@@ -34,18 +34,18 @@ import org.example.trungcapphuongnam.module.giangDay.repository.PhanCongGiangDay
 import org.example.trungcapphuongnam.module.giangDay.repository.PhongHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.SinhVienLopHocPhanRepository;
 import org.example.trungcapphuongnam.module.giangDay.service.DieuPhoiGiangDayService;
-import org.example.trungcapphuongnam.module.giangDay.service.LichHocService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
 
     private static final List<TrangThaiSinhVienLopHocPhan> TRANG_THAI_SINH_VIEN_DANG_HOC = List.of(
@@ -65,7 +65,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
     private final GiaoVienKhaDungRepository giaoVienKhaDungRepository;
     private final SyllabusMonHocRepository syllabusMonHocRepository;
     private final SyllabusChuongBaiRepository syllabusChuongBaiRepository;
-    private final LichHocService lichHocService;
+    private final LichHocTuDongTransactionService lichHocTuDongTransactionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -74,6 +74,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
                 .orElseThrow(() -> new GiangDayException("Lớp học phần không tồn tại"));
 
         validateRequest(lop, request);
+        List<Long> caHocIds = layCaHocIds(request);
 
         int soBuoiCanXep = lop.getSoBuoiHoc();
         int soBuoiDaXep = (int) lichHocRepository.countSoBuoiDangTinh(
@@ -88,24 +89,30 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
 
         LocalDate ngay = request.getTuNgay();
         while (!ngay.isAfter(request.getDenNgay()) && items.size() < soBuoiConLai) {
-            int thu = ngay.getDayOfWeek().getValue();
+            int thu = tinhThuTrongTuan(ngay);
 
             if (request.getThuTrongTuan().contains(thu)) {
-                List<String> canhBao = taoCanhBaoSlot(lopHocPhanId, request, ngay, thu);
+                for (Long caHocId : caHocIds) {
+                    if (items.size() >= soBuoiConLai) {
+                        break;
+                    }
 
-                if (canhBao.isEmpty()) {
-                    int stt = soBuoiDaXep + items.size() + 1;
-                    items.add(LichHocPreviewItemResponse.builder()
-                            .stt(stt)
-                            .ngayHoc(ngay)
-                            .caHocId(request.getCaHocId())
-                            .phongHocId(request.getPhongHocId())
-                            .giaoVienId(request.getGiaoVienId())
-                            .noiDungBuoiHoc(taoNoiDungBuoiHoc(lop, stt, soBuoiCanXep, request.getTuDongGanNoiDungSyllabus()))
-                            .canhBao(List.of())
-                            .build());
-                } else {
-                    canhBaoTong.add("Ngày " + ngay + ": " + String.join(", ", canhBao));
+                    List<String> canhBao = taoCanhBaoSlot(lopHocPhanId, request, ngay, thu, caHocId);
+
+                    if (canhBao.isEmpty()) {
+                        int stt = soBuoiDaXep + items.size() + 1;
+                        items.add(LichHocPreviewItemResponse.builder()
+                                .stt(stt)
+                                .ngayHoc(ngay)
+                                .caHocId(caHocId)
+                                .phongHocId(request.getPhongHocId())
+                                .giaoVienId(request.getGiaoVienId())
+                                .noiDungBuoiHoc(taoNoiDungBuoiHoc(lop, stt, soBuoiCanXep, request.getTuDongGanNoiDungSyllabus()))
+                                .canhBao(List.of())
+                                .build());
+                    } else {
+                        canhBaoTong.add("Ngày " + ngay + " - ca " + caHocId + ": " + String.join(", ", canhBao));
+                    }
                 }
             }
 
@@ -131,27 +138,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
     @Override
     public List<LichHocResponse> taoLichTuDong(Long lopHocPhanId, SinhLichHocRequest request) {
         SinhLichHocPreviewResponse preview = previewSinhLich(lopHocPhanId, request);
-
-        if (!Boolean.TRUE.equals(preview.getHopLe())) {
-            throw new GiangDayException("Lịch preview chưa hợp lệ, không thể lưu");
-        }
-
-        List<LichHocResponse> result = new ArrayList<>();
-        for (LichHocPreviewItemResponse item : preview.getItems()) {
-            LichHocRequest lichRequest = LichHocRequest.builder()
-                    .lopHocPhanId(lopHocPhanId)
-                    .giaoVienId(item.getGiaoVienId())
-                    .phongHocId(item.getPhongHocId())
-                    .caHocId(item.getCaHocId())
-                    .ngayHoc(item.getNgayHoc())
-                    .noiDungBuoiHoc(item.getNoiDungBuoiHoc())
-                    .trangThai(TrangThaiLichHoc.du_kien)
-                    .build();
-
-            result.add(lichHocService.create(lichRequest));
-        }
-
-        return result;
+        return lichHocTuDongTransactionService.luuLichTuDongTuPreview(lopHocPhanId, preview);
     }
 
 
@@ -163,19 +150,11 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
 
         validateRequestCoBan(lop, request);
 
-        List<PhongHoc> danhSachPhong = phongHocRepository.findAll().stream()
-                .filter(phong -> phong.getTrangThai() == TrangThaiPhongHoc.dang_su_dung)
-                .filter(phong -> phong.getSucChua() == null
-                        || lop.getSoLuongHienTai() == null
-                        || phong.getSucChua() >= lop.getSoLuongHienTai())
-                .toList();
-
-        List<CaHoc> danhSachCa = caHocRepository.findAll().stream()
-                .sorted(Comparator.comparing(CaHoc::getGioBatDau))
-                .toList();
+        List<PhongHoc> danhSachPhong = danhSachPhongUngVien(lop, request);
+        List<List<Long>> danhSachNhomCa = danhSachNhomCaUngVien(request);
 
         List<Integer> danhSachThu = request.getThuTrongTuan() == null || request.getThuTrongTuan().isEmpty()
-                ? List.of(1, 2, 3, 4, 5, 6)
+                ? List.of(2, 3, 4, 5, 6, 7)
                 : request.getThuTrongTuan();
 
         int gioiHan = request.getSoPhuongAn() == null || request.getSoPhuongAn() < 1
@@ -184,10 +163,11 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
 
         List<GoiYLichHocResponse> ketQua = new ArrayList<>();
         for (PhongHoc phong : danhSachPhong) {
-            for (CaHoc ca : danhSachCa) {
+            for (List<Long> nhomCaHocIds : danhSachNhomCa) {
                 SinhLichHocRequest thuRequest = saoChepRequest(request);
                 thuRequest.setPhongHocId(phong.getId());
-                thuRequest.setCaHocId(ca.getId());
+                thuRequest.setCaHocId(nhomCaHocIds.isEmpty() ? null : nhomCaHocIds.get(0));
+                thuRequest.setCaHocIds(new ArrayList<>(nhomCaHocIds));
                 thuRequest.setThuTrongTuan(danhSachThu);
 
                 SinhLichHocPreviewResponse preview;
@@ -209,7 +189,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
                         .hopLe(preview.getHopLe())
                         .diemUuTien(diemUuTien)
                         .phongHocId(phong.getId())
-                        .caHocId(ca.getId())
+                        .caHocId(nhomCaHocIds.isEmpty() ? null : nhomCaHocIds.get(0))
                         .thuTrongTuan(danhSachThu)
                         .soBuoiCanXep(preview.getSoBuoiConLai())
                         .soBuoiXepDuoc(preview.getSoBuoiXepDuoc())
@@ -234,6 +214,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public XepLichHangLoatResponse xepLichHangLoat(XepLichHangLoatRequest request) {
         if (request == null || request.getLopHocPhanIds() == null || request.getLopHocPhanIds().isEmpty()) {
             throw new GiangDayException("Phải chọn ít nhất một lớp học phần để xếp hàng loạt");
@@ -254,32 +235,27 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
             }
 
             try {
-                SinhLichHocRequest lopRequest = saoChepRequest(request);
-                if (lopRequest.getGiaoVienId() == null) {
-                    phanCongGiangDayRepository.findFirstByLopHocPhanIdAndVaiTro(lopHocPhanId, VaiTroGiangDay.giang_vien_chinh)
-                            .ifPresent(phanCong -> lopRequest.setGiaoVienId(phanCong.getGiaoVienId()));
-                }
-                List<GoiYLichHocResponse> goiY = goiYLichHoc(lopHocPhanId, lopRequest);
-                GoiYLichHocResponse totNhat = goiY.isEmpty() ? null : goiY.get(0);
-                if (totNhat == null || !Boolean.TRUE.equals(totNhat.getHopLe())) {
+                SinhLichHocRequest lopRequest = chuanBiRequestXepHangLoat(lopHocPhanId, lop, request);
+
+                SinhLichHocPreviewResponse preview = previewSinhLich(lopHocPhanId, lopRequest);
+                if (!Boolean.TRUE.equals(preview.getHopLe())) {
                     items.add(XepLichHangLoatItemResponse.builder()
                             .lopHocPhanId(lop.getId())
                             .maLop(lop.getMaLop())
                             .tenLop(lop.getTenLop())
                             .thanhCong(false)
-                            .thongBao("Không tìm được phương án xếp đủ số buổi")
-                            .phuongAnTotNhat(totNhat)
+                            .thongBao(preview.getCanhBao() == null || preview.getCanhBao().isEmpty()
+                                    ? "Không xếp đủ số buổi còn lại"
+                                    : String.join("; ", preview.getCanhBao()))
                             .build());
                     continue;
                 }
 
                 List<LichHocResponse> lichDaTao = List.of();
                 if (!chiPreview) {
-                    SinhLichHocRequest luuRequest = saoChepRequest(lopRequest);
-                    luuRequest.setPhongHocId(totNhat.getPhongHocId());
-                    luuRequest.setCaHocId(totNhat.getCaHocId());
-                    luuRequest.setThuTrongTuan(totNhat.getThuTrongTuan());
-                    lichDaTao = taoLichTuDong(lopHocPhanId, luuRequest);
+                    // Luu theo preview da kiem tra, trong transaction rieng cho tung lop.
+                    // Co che nay chi bo sung lich con thieu vao o trong hop le, khong xoa/ghi de lich cu.
+                    lichDaTao = lichHocTuDongTransactionService.luuLichTuDongTuPreview(lopHocPhanId, preview);
                 }
 
                 items.add(XepLichHangLoatItemResponse.builder()
@@ -287,8 +263,9 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
                         .maLop(lop.getMaLop())
                         .tenLop(lop.getTenLop())
                         .thanhCong(true)
-                        .thongBao(chiPreview ? "Tìm được phương án hợp lệ" : "Đã tạo lịch")
-                        .phuongAnTotNhat(totNhat)
+                        .thongBao(chiPreview
+                                ? "Preview hợp lệ: có thể tạo " + preview.getSoBuoiXepDuoc() + " buổi"
+                                : "Đã tạo " + lichDaTao.size() + " buổi lịch học")
                         .lichDaTao(lichDaTao)
                         .build());
             } catch (RuntimeException ex) {
@@ -297,7 +274,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
                         .maLop(lop.getMaLop())
                         .tenLop(lop.getTenLop())
                         .thanhCong(false)
-                        .thongBao(ex.getMessage())
+                        .thongBao(ex.getMessage() == null ? "Không xếp được lịch cho lớp này" : ex.getMessage())
                         .build());
             }
         }
@@ -312,11 +289,97 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
                 .build();
     }
 
+    private SinhLichHocRequest chuanBiRequestXepHangLoat(Long lopHocPhanId, LopHocPhan lop, XepLichHangLoatRequest request) {
+        SinhLichHocRequest lopRequest = saoChepRequest(request);
+
+        if (lopRequest.getGiaoVienId() == null) {
+            phanCongGiangDayRepository.findFirstByLopHocPhanIdAndVaiTro(lopHocPhanId, VaiTroGiangDay.giang_vien_chinh)
+                    .ifPresent(phanCong -> lopRequest.setGiaoVienId(phanCong.getGiaoVienId()));
+        }
+
+        if (lopRequest.getGiaoVienId() == null) {
+            throw new GiangDayException("Lớp học phần chưa có giáo viên chính để xếp tự động");
+        }
+
+        validateRequestCoBan(lop, lopRequest);
+
+        boolean thieuPhong = lopRequest.getPhongHocId() == null;
+        boolean thieuCa = !coCaHoc(lopRequest);
+
+        if (thieuPhong || thieuCa || Boolean.TRUE.equals(lopRequest.getTuDongChonPhong()) || Boolean.TRUE.equals(lopRequest.getTuDongChonCa())) {
+            List<GoiYLichHocResponse> goiY = goiYLichHoc(lopHocPhanId, lopRequest);
+            GoiYLichHocResponse phuongAn = goiY.stream()
+                    .filter(item -> Boolean.TRUE.equals(item.getHopLe()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (phuongAn == null) {
+                String lyDo = goiY.isEmpty()
+                        ? "Không tìm được phòng/ca phù hợp"
+                        : (goiY.get(0).getCanhBao() == null || goiY.get(0).getCanhBao().isEmpty()
+                        ? "Không tìm được phương án hợp lệ"
+                        : String.join("; ", goiY.get(0).getCanhBao()));
+                throw new GiangDayException(lyDo);
+            }
+
+            if (thieuPhong || Boolean.TRUE.equals(lopRequest.getTuDongChonPhong())) {
+                lopRequest.setPhongHocId(phuongAn.getPhongHocId());
+            }
+            if (thieuCa || Boolean.TRUE.equals(lopRequest.getTuDongChonCa())) {
+                Long caHocId = phuongAn.getCaHocId();
+                lopRequest.setCaHocId(caHocId);
+                lopRequest.setCaHocIds(caHocId == null ? null : List.of(caHocId));
+            }
+        }
+
+        return lopRequest;
+    }
+
+    private boolean coCaHoc(SinhLichHocRequest request) {
+        return (request.getCaHocIds() != null && request.getCaHocIds().stream().anyMatch(java.util.Objects::nonNull))
+                || request.getCaHocId() != null;
+    }
+
+    private List<PhongHoc> danhSachPhongUngVien(LopHocPhan lop, SinhLichHocRequest request) {
+        if (request.getPhongHocId() != null) {
+            PhongHoc phong = phongHocRepository.findById(request.getPhongHocId())
+                    .orElseThrow(() -> new GiangDayException("Phòng học không tồn tại"));
+            if (phong.getTrangThai() != TrangThaiPhongHoc.dang_su_dung) {
+                throw new GiangDayException("Chỉ phòng học đang sử dụng mới được xếp lịch");
+            }
+            if (phong.getSucChua() != null
+                    && lop.getSoLuongHienTai() != null
+                    && phong.getSucChua() < lop.getSoLuongHienTai()) {
+                throw new GiangDayException("Phòng học không đủ sức chứa");
+            }
+            return List.of(phong);
+        }
+
+        return phongHocRepository.findAll().stream()
+                .filter(phong -> phong.getTrangThai() == TrangThaiPhongHoc.dang_su_dung)
+                .filter(phong -> phong.getSucChua() == null
+                        || lop.getSoLuongHienTai() == null
+                        || phong.getSucChua() >= lop.getSoLuongHienTai())
+                .toList();
+    }
+
+    private List<List<Long>> danhSachNhomCaUngVien(SinhLichHocRequest request) {
+        if (coCaHoc(request)) {
+            return List.of(layCaHocIds(request));
+        }
+
+        return caHocRepository.findAll().stream()
+                .sorted(Comparator.comparing(CaHoc::getGioBatDau))
+                .map(ca -> List.of(ca.getId()))
+                .toList();
+    }
+
     private SinhLichHocRequest saoChepRequest(SinhLichHocRequest source) {
         SinhLichHocRequest target = new SinhLichHocRequest();
         target.setGiaoVienId(source.getGiaoVienId());
         target.setPhongHocId(source.getPhongHocId());
         target.setCaHocId(source.getCaHocId());
+        target.setCaHocIds(source.getCaHocIds() == null ? null : new ArrayList<>(source.getCaHocIds()));
         target.setTuNgay(source.getTuNgay());
         target.setDenNgay(source.getDenNgay());
         target.setThuTrongTuan(source.getThuTrongTuan() == null ? null : new ArrayList<>(source.getThuTrongTuan()));
@@ -432,13 +495,11 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
             throw new GiangDayException("Phòng học không đủ sức chứa");
         }
 
-        if (request.getCaHocId() == null) {
-            throw new GiangDayException("Ca học không được để trống");
-        }
-        if (!caHocRepository.existsById(request.getCaHocId())) {
+        List<Long> caHocIds = layCaHocIds(request);
+        List<CaHoc> caHocs = caHocRepository.findAllById(caHocIds);
+        if (caHocs.size() != caHocIds.size()) {
             throw new GiangDayException("Ca học không tồn tại");
         }
-
         if (request.getTuNgay() == null || request.getDenNgay() == null) {
             throw new GiangDayException("Từ ngày và đến ngày không được để trống");
         }
@@ -456,13 +517,13 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
             throw new GiangDayException("Phải chọn ít nhất một thứ trong tuần");
         }
         for (Integer thu : request.getThuTrongTuan()) {
-            if (thu == null || thu < 1 || thu > 7) {
+            if (thu == null || thu < 2 || thu > 8) {
                 throw new GiangDayException("Thứ trong tuần không hợp lệ");
             }
         }
     }
 
-    private List<String> taoCanhBaoSlot(Long lopHocPhanId, SinhLichHocRequest request, LocalDate ngay, int thu) {
+    private List<String> taoCanhBaoSlot(Long lopHocPhanId, SinhLichHocRequest request, LocalDate ngay, int thu, Long caHocId) {
         List<String> canhBao = new ArrayList<>();
 
         if (ngayNghiRepository.existsByNgay(ngay)) {
@@ -472,7 +533,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         if (lichHocRepository.existsByLopHocPhanIdAndNgayHocAndCaHocIdAndTrangThaiNot(
                 lopHocPhanId,
                 ngay,
-                request.getCaHocId(),
+                caHocId,
                 TrangThaiLichHoc.nghi
         )) {
             canhBao.add("Lớp đã có lịch");
@@ -481,7 +542,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         if (lichHocRepository.existsByGiaoVienIdAndNgayHocAndCaHocIdAndTrangThaiNot(
                 request.getGiaoVienId(),
                 ngay,
-                request.getCaHocId(),
+                caHocId,
                 TrangThaiLichHoc.nghi
         )) {
             canhBao.add("Giáo viên bận");
@@ -490,7 +551,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         if (giaoVienKhaDungRepository.existsGiaoVienKhongKhaDung(
                 request.getGiaoVienId(),
                 thu,
-                request.getCaHocId(),
+                caHocId,
                 ngay
         )) {
             canhBao.add("Giáo viên không khả dụng");
@@ -499,7 +560,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         if (lichHocRepository.existsByPhongHocIdAndNgayHocAndCaHocIdAndTrangThaiNot(
                 request.getPhongHocId(),
                 ngay,
-                request.getCaHocId(),
+                caHocId,
                 TrangThaiLichHoc.nghi
         )) {
             canhBao.add("Phòng bận");
@@ -508,7 +569,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         if (lichHocRepository.existsTrungLichSinhVien(
                 lopHocPhanId,
                 ngay,
-                request.getCaHocId(),
+                caHocId,
                 null
         )) {
             canhBao.add("Sinh viên trùng lịch");
@@ -517,15 +578,37 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         return canhBao;
     }
 
+    private List<Long> layCaHocIds(SinhLichHocRequest request) {
+        LinkedHashSet<Long> ids = new LinkedHashSet<>();
+        if (request.getCaHocIds() != null) {
+            request.getCaHocIds().stream()
+                    .filter(java.util.Objects::nonNull)
+                    .forEach(ids::add);
+        }
+        if (ids.isEmpty() && request.getCaHocId() != null) {
+            ids.add(request.getCaHocId());
+        }
+        if (ids.isEmpty()) {
+            throw new GiangDayException("Ca học không được để trống");
+        }
+        return new ArrayList<>(ids);
+    }
+
+    private Integer tinhThuTrongTuan(LocalDate ngayHoc) {
+        if (ngayHoc == null) return null;
+        int dayOfWeek = ngayHoc.getDayOfWeek().getValue();
+        return dayOfWeek == 7 ? 8 : dayOfWeek + 1;
+    }
+
     private String taoNoiDungBuoiHoc(LopHocPhan lop, int stt, int tongBuoi, Boolean tuDongGanNoiDungSyllabus) {
         if (!Boolean.TRUE.equals(tuDongGanNoiDungSyllabus) || lop.getChuongTrinhMonId() == null) {
             return "Buổi " + stt;
         }
 
-        return syllabusMonHocRepository.findFirstByChuongTrinhMonId(lop.getChuongTrinhMonId())
-                .map(syllabus -> {
+        return syllabusMonHocRepository.findFirstIdByChuongTrinhMonId(lop.getChuongTrinhMonId())
+                .map(syllabusMonHocId -> {
                     List<SyllabusChuongBai> chuongBai = syllabusChuongBaiRepository
-                            .findBySyllabusMonIdOrderByThuTuAsc(syllabus.getId());
+                            .findBySyllabusMonIdOrderByThuTuAsc(syllabusMonHocId);
                     if (chuongBai.isEmpty()) {
                         return "Buổi " + stt;
                     }

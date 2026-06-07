@@ -91,9 +91,26 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
     private void validate(CauHinhDanhGiaRequest request) {
         request.setTenCotDiem(TextUtil.trimRequired(request.getTenCotDiem()));
         request.setLoaiDiem(TextUtil.trimToNull(request.getLoaiDiem()));
+        request.setNguonDiem(TextUtil.trimToNull(request.getNguonDiem()));
+        if (request.getNguonDiem() == null) {
+            String loai = request.getLoaiDiem() == null ? "" : request.getLoaiDiem().toLowerCase();
+            String ten = request.getTenCotDiem() == null ? "" : request.getTenCotDiem().toLowerCase();
+            if (loai.contains("online") || ten.contains("online") || ten.contains("lms")) {
+                request.setNguonDiem("LMS");
+            } else {
+                request.setNguonDiem("GIANG_VIEN_NHAP");
+            }
+        }
 
         if (request.getLopHocPhanId() == null) {
             throw new BadRequestException("Lớp học phần không được để trống");
+        }
+
+        if (!request.getNguonDiem().equals("LMS")
+                && !request.getNguonDiem().equals("GIANG_VIEN_NHAP")
+                && !request.getNguonDiem().equals("IMPORT")
+                && !request.getNguonDiem().equals("THI")) {
+            throw new BadRequestException("Nguồn điểm không hợp lệ: " + request.getNguonDiem());
         }
 
         if (request.getTyLe() == null

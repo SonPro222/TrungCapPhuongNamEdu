@@ -23,6 +23,13 @@ public class SyllabusMonHocGocResponse {
 
     private String viTri;
 
+    private Integer soBuoiHoc;
+
+    private BigDecimal soTietMoiBuoi;
+
+    private Integer soPhutMotTiet;
+
+
     private String tinhChat;
 
     private String mucTieu;

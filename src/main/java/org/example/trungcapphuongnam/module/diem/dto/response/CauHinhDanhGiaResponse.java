@@ -18,6 +18,8 @@ public class CauHinhDanhGiaResponse {
 
     private String loaiDiem;
 
+    private String nguonDiem;
+
     private BigDecimal tyLe;
 
     private BigDecimal diemToiDa;

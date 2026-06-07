@@ -9,11 +9,13 @@ import org.example.trungcapphuongnam.module.giangDay.dto.response.GoiYLichHocRes
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.SinhLichHocPreviewResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.XepLichHangLoatResponse;
+import org.example.trungcapphuongnam.module.giangDay.dto.response.XepLichHangLoatItemResponse;
 import org.example.trungcapphuongnam.module.giangDay.service.DieuPhoiGiangDayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -56,11 +58,43 @@ public class DieuPhoiGiangDayController {
 
     @PostMapping("/lich-hoc/xep-hang-loat")
     public ResponseEntity<ApiResponse<XepLichHangLoatResponse>> xepLichHangLoat(
-            @RequestBody XepLichHangLoatRequest request
+            @PathVariable Long lopHocPhanId,
+            @RequestBody(required = false) XepLichHangLoatRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                dieuPhoiGiangDayService.xepLichHangLoat(request)
-        ));
+        if (request == null) {
+            request = new XepLichHangLoatRequest();
+        }
+
+        if (request.getLopHocPhanIds() == null || request.getLopHocPhanIds().isEmpty()) {
+            request.setLopHocPhanIds(new ArrayList<>(List.of(lopHocPhanId)));
+        }
+
+        try {
+            return ResponseEntity.ok(ApiResponse.ok(
+                    dieuPhoiGiangDayService.xepLichHangLoat(request)
+            ));
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            if (message == null || message.trim().isEmpty()) {
+                message = "Không thể xếp lịch tự động. Vui lòng kiểm tra lớp, khoảng ngày, giáo viên, phòng và ca học.";
+            }
+
+            XepLichHangLoatItemResponse item = XepLichHangLoatItemResponse.builder()
+                    .lopHocPhanId(lopHocPhanId)
+                    .thanhCong(false)
+                    .thongBao(message)
+                    .build();
+
+            XepLichHangLoatResponse response = XepLichHangLoatResponse.builder()
+                    .tongLop(1)
+                    .soLopThanhCong(0)
+                    .soLopLoi(1)
+                    .chiPreview(request.getChiPreview())
+                    .items(List.of(item))
+                    .build();
+
+            return ResponseEntity.ok(ApiResponse.ok(response));
+        }
     }
 }
 

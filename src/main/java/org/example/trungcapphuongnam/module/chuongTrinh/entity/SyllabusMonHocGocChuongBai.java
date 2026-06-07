@@ -23,8 +23,14 @@ public class SyllabusMonHocGocChuongBai {
     @Column(name = "syllabus_mon_hoc_goc_id", nullable = false)
     private Long syllabusMonHocGocId;
 
+    @Column(name = "ma_chuong", length = 100)
+    private String maChuong;
+
     @Column(name = "ten", nullable = false, length = 255)
     private String ten;
+
+    @Column(name = "muc_tieu", columnDefinition = "TEXT")
+    private String mucTieu;
 
     @Column(name = "noi_dung", columnDefinition = "TEXT")
     private String noiDung;

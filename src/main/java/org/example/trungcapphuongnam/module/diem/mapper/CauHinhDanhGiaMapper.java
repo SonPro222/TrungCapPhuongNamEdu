@@ -14,6 +14,7 @@ public class CauHinhDanhGiaMapper {
                 .lopHocPhanId(request.getLopHocPhanId())
                 .tenCotDiem(request.getTenCotDiem())
                 .loaiDiem(request.getLoaiDiem())
+                .nguonDiem(request.getNguonDiem())
                 .tyLe(request.getTyLe())
                 .diemToiDa(request.getDiemToiDa())
                 .thuTu(request.getThuTu())
@@ -27,6 +28,7 @@ public class CauHinhDanhGiaMapper {
                 .lopHocPhanId(entity.getLopHocPhanId())
                 .tenCotDiem(entity.getTenCotDiem())
                 .loaiDiem(entity.getLoaiDiem())
+                .nguonDiem(entity.getNguonDiem())
                 .tyLe(entity.getTyLe())
                 .diemToiDa(entity.getDiemToiDa())
                 .thuTu(entity.getThuTu())
@@ -40,6 +42,7 @@ public class CauHinhDanhGiaMapper {
         entity.setLopHocPhanId(request.getLopHocPhanId());
         entity.setTenCotDiem(request.getTenCotDiem());
         entity.setLoaiDiem(request.getLoaiDiem());
+        entity.setNguonDiem(request.getNguonDiem());
         entity.setTyLe(request.getTyLe());
         entity.setDiemToiDa(request.getDiemToiDa());
         entity.setThuTu(request.getThuTu());

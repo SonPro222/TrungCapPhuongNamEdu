@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.RoleConstant;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;
+import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
 import org.example.trungcapphuongnam.module.heThong.repository.TaiKhoanRepository;
 import org.example.trungcapphuongnam.module.sinhVien.repository.SinhVienRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,6 +20,7 @@ public class CurrentUserService {
 
     private final TaiKhoanRepository taiKhoanRepository;
     private final SinhVienRepository sinhVienRepository;
+    private final GiaoVienRepository giaoVienRepository;
 
     @Transactional(readOnly = true)
     public TaiKhoan getTaiKhoan() {
@@ -37,6 +39,14 @@ public class CurrentUserService {
         Long taiKhoanId = getTaiKhoanId();
         return sinhVienRepository.findByTaiKhoanId(taiKhoanId)
                 .orElseThrow(() -> new AccessDeniedException("Tài khoản hiện tại không phải sinh viên"))
+                .getId();
+    }
+
+    @Transactional(readOnly = true)
+    public Long getGiaoVienId() {
+        Long taiKhoanId = getTaiKhoanId();
+        return giaoVienRepository.findByTaiKhoanId(taiKhoanId)
+                .orElseThrow(() -> new AccessDeniedException("Tài khoản hiện tại không phải giảng viên"))
                 .getId();
     }
 
