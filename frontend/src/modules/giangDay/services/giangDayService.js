@@ -197,6 +197,36 @@ export const giangDayService = {
         }))
     },
 
+    async layTrangLichHocAdmin(params = {}) {
+        return layPage(await giangDayApi.lichHoc.getAdmin({
+            page: 0,
+            size: 100,
+            sortBy: 'ngayHoc',
+            sortDir: 'desc',
+            ...params
+        }))
+    },
+
+    async layLichHocSinhVien(params = {}) {
+        return layPage(await giangDayApi.lichHoc.getSinhVienMe({
+            page: 0,
+            size: 100,
+            sortBy: 'ngayHoc',
+            sortDir: 'asc',
+            ...params
+        }))
+    },
+
+    async layLichDayGiangVien(params = {}) {
+        return layPage(await giangDayApi.lichHoc.getGiangVienMe({
+            page: 0,
+            size: 100,
+            sortBy: 'ngayHoc',
+            sortDir: 'asc',
+            ...params
+        }))
+    },
+
     async taoLichHoc(payload) {
         return giangDayApi.lichHoc.create(payload)
     },
@@ -456,3 +486,5 @@ export const giangDayService = {
     },
 
 }
+
+export default giangDayService

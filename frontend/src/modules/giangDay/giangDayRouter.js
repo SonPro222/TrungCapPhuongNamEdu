@@ -12,9 +12,9 @@ import AdminPhongHoc from './pages/AdminPhongHoc.vue'
 import AdminCaHoc from './pages/AdminCaHoc.vue'
 import AdminPhanCongGiangDay from './pages/AdminPhanCongGiangDay.vue'
 import AdminLichHoc from './pages/AdminLichHoc.vue'
-import AdminMaTranLichHoc from './pages/AdminMaTranLichHoc.vue'
+import SinhVienXemLichHoc from './pages/SinhVienXemLichHoc.vue'
+import GiangVienXemLichDay from './pages/GiangVienXemLichDay.vue'
 import AdminRangBuocLichHoc from './pages/AdminRangBuocLichHoc.vue'
-import AdminXepLichHangLoat from './pages/AdminXepLichHangLoat.vue'
 
 function taoQueryFlow(params = {}) {
     const query = {}
@@ -157,12 +157,22 @@ export const giangDayRoutes = [
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
                 }
             },
+
             {
-                path: 'ma-tran-lich-hoc',
-                name: 'GiangDay.MaTranLichHoc',
-                component: AdminMaTranLichHoc,
+                path: 'sinh-vien/xem-lich-hoc',
+                name: 'GiangDay.SinhVienXemLichHoc',
+                component: SinhVienXemLichHoc,
                 meta: {
-                    title: 'Ma trận lịch học',
+                    title: 'Sinh viên xem lịch học',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.SINH_VIEN]
+                }
+            },
+            {
+                path: 'giang-vien/xem-lich-day',
+                name: 'GiangDay.GiangVienXemLichDay',
+                component: GiangVienXemLichDay,
+                meta: {
+                    title: 'Giảng viên xem lịch dạy',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
                 }
             },
@@ -172,15 +182,6 @@ export const giangDayRoutes = [
                 component: AdminRangBuocLichHoc,
                 meta: {
                     title: 'Ràng buộc xếp lịch',
-                    roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
-                }
-            },
-            {
-                path: 'xep-lich-hang-loat',
-                name: 'GiangDay.XepLichHangLoat',
-                component: AdminXepLichHangLoat,
-                meta: {
-                    title: 'Xếp lịch hàng loạt',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO, ROLES.GIAO_VIEN]
                 }
             }
