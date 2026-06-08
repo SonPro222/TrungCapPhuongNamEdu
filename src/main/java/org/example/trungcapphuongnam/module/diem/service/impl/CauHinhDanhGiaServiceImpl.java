@@ -14,6 +14,8 @@ import org.example.trungcapphuongnam.module.diem.mapper.CauHinhDanhGiaMapper;
 import org.example.trungcapphuongnam.module.diem.repository.CauHinhDanhGiaRepository;
 import org.example.trungcapphuongnam.module.diem.service.CauHinhDanhGiaService;
 import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhanChuongTrinhMon;
+import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +35,7 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
     private final CauHinhDanhGiaRepository repository;
     private final SyllabusMonHocRepository syllabusMonHocRepository;
     private final LopHocPhanRepository lopHocPhanRepository;
+    private final LopHocPhanChuongTrinhMonRepository lopHocPhanChuongTrinhMonRepository;
     private final CauHinhDanhGiaMapper mapper;
 
     @Override
@@ -166,10 +170,7 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
         LopHocPhan lopHocPhan = lopHocPhanRepository.findById(lopHocPhanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lớp học phần không tồn tại: " + lopHocPhanId));
 
-        Long chuongTrinhMonId = lopHocPhan.getChuongTrinhMonId();
-        if (chuongTrinhMonId == null) {
-            throw new BadRequestException("Lớp học phần chưa tham chiếu môn trong chương trình nên không xác định được syllabus");
-        }
+        Long chuongTrinhMonId = resolveChuongTrinhMonIdTuLopHocPhan(lopHocPhan);
 
         SyllabusMonHoc syllabusMonHoc = syllabusMonHocRepository.findFirstByChuongTrinhMonIdOrderByIdAsc(chuongTrinhMonId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -178,4 +179,20 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
 
         return syllabusMonHoc.getId();
     }
+
+    private Long resolveChuongTrinhMonIdTuLopHocPhan(LopHocPhan lopHocPhan) {
+        if (lopHocPhan.getChuongTrinhMonId() != null) {
+            return lopHocPhan.getChuongTrinhMonId();
+        }
+
+        return lopHocPhanChuongTrinhMonRepository.findByLopHocPhanId(lopHocPhan.getId())
+                .stream()
+                .map(LopHocPhanChuongTrinhMon::getChuongTrinhMonId)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException(
+                        "Lớp học phần chưa tham chiếu môn trong chương trình nên không xác định được syllabus"
+                ));
+    }
+
 }

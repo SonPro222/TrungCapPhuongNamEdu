@@ -119,7 +119,12 @@
               <td>{{ item.tenKy || '-' }}</td>
               <td>{{ hienThiKhoangNgay(item.ngayBatDau, item.ngayKetThuc) }}</td>
               <td>
-                <button type="button" class="btn small" @click="xemBuoiHoc(item)">
+                <button
+                    type="button"
+                    class="btn small"
+                    :disabled="!item.coLopHocPhan"
+                    @click="xemBuoiHoc(item)"
+                >
                   Buổi học
                 </button>
               </td>
@@ -236,7 +241,8 @@ function taoDongPhanCong(phanCong, lopHocPhan, chuongTrinhMon, index) {
   return {
     key: `${phanCong.id}-${lopHocPhan?.id || 'lop'}-${chuongTrinhMon?.id || 'ctm'}-${index}`,
     phanCongId: phanCong.id,
-    lopHocPhanId: phanCong.lopHocPhanId,
+    lopHocPhanId: lopHocPhan?.id || phanCong.lopHocPhanId,
+    coLopHocPhan: Boolean(lopHocPhan?.id),
     maLop: lopHocPhan?.maLop || phanCong.maLop,
     tenLop: lopHocPhan?.tenLop || phanCong.tenLop,
     vaiTro: phanCong.vaiTro,
@@ -293,6 +299,11 @@ function timKhungKy(id) {
 }
 
 function xemBuoiHoc(item) {
+  if (!item?.coLopHocPhan || !item?.lopHocPhanId) {
+    loi.value = 'Phân công này không còn tham chiếu lớp học phần hợp lệ nên không thể mở điều phối giảng dạy.'
+    return
+  }
+
   router.push({
     name: 'GiangDay.ChiTietLopHocPhan',
     params: {

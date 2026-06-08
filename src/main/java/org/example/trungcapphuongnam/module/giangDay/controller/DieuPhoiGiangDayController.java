@@ -4,11 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.GiangDayPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.SinhLichHocRequest;
-import org.example.trungcapphuongnam.module.giangDay.dto.request.XepLichHangLoatRequest;
-import org.example.trungcapphuongnam.module.giangDay.dto.response.GoiYLichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.SinhLichHocPreviewResponse;
-import org.example.trungcapphuongnam.module.giangDay.dto.response.XepLichHangLoatResponse;
 import org.example.trungcapphuongnam.module.giangDay.service.DieuPhoiGiangDayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,17 +30,6 @@ public class DieuPhoiGiangDayController {
         ));
     }
 
-
-    @PostMapping("/lich-hoc/goi-y")
-    public ResponseEntity<ApiResponse<List<GoiYLichHocResponse>>> goiYLichHoc(
-            @PathVariable Long lopHocPhanId,
-            @RequestBody SinhLichHocRequest request
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                dieuPhoiGiangDayService.goiYLichHoc(lopHocPhanId, request)
-        ));
-    }
-
     @PostMapping("/lich-hoc/tao-tu-dong")
     public ResponseEntity<ApiResponse<List<LichHocResponse>>> taoLichTuDong(
             @PathVariable Long lopHocPhanId,
@@ -53,14 +39,4 @@ public class DieuPhoiGiangDayController {
                 dieuPhoiGiangDayService.taoLichTuDong(lopHocPhanId, request)
         ));
     }
-
-    @PostMapping("/lich-hoc/xep-hang-loat")
-    public ResponseEntity<ApiResponse<XepLichHangLoatResponse>> xepLichHangLoat(
-            @RequestBody XepLichHangLoatRequest request
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                dieuPhoiGiangDayService.xepLichHangLoat(request)
-        ));
-    }
 }
-

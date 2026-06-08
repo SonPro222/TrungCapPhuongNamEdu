@@ -81,14 +81,6 @@
             </RouterLink>
 
             <RouterLink
-                :to="{ name: 'GiangDay.MaTranLichHoc' }"
-                :class="['menu-link', { active: isActive(['GiangDay.MaTranLichHoc']) }]"
-            >
-              <span class="dot"></span>
-              <span class="nav-text">Ma trận lịch</span>
-            </RouterLink>
-
-            <RouterLink
                 :to="{ name: 'GiangDay.RangBuocLichHoc' }"
                 :class="['menu-link', { active: isActive(['GiangDay.RangBuocLichHoc']) }]"
             >
@@ -96,13 +88,6 @@
               <span class="nav-text">Ràng buộc lịch</span>
             </RouterLink>
 
-            <RouterLink
-                :to="{ name: 'GiangDay.XepLichHangLoat' }"
-                :class="['menu-link', { active: isActive(['GiangDay.XepLichHangLoat']) }]"
-            >
-              <span class="dot"></span>
-              <span class="nav-text">Xếp lịch hàng loạt</span>
-            </RouterLink>
           </div>
         </div>
 
@@ -201,10 +186,15 @@ const openGroups = reactive({
 })
 
 const lopHocPhanDangChonId = computed(() => {
-  return route.params.id ||
-      route.params.lopHocPhanId ||
-      route.query.lopHocPhanId ||
-      null
+  if (route.name === 'GiangDay.ChiTietLopHocPhan') {
+    return route.params.id || null
+  }
+
+  if (route.name === 'GiangDay.ChiTietBuoiHoc') {
+    return route.params.lopHocPhanId || null
+  }
+
+  return route.query.lopHocPhanId || null
 })
 
 const phanCongTo = computed(() => {

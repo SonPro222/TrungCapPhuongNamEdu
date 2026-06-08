@@ -412,13 +412,21 @@
                   <option v-for="p in danhSachPhongHoc" :key="p.id" :value="p.id">{{ hienThiPhongHoc(p) }}</option>
                 </select>
               </label>
-              <label>
+              <div class="form-field ca-field">
                 <span>Ca học ấn định</span>
-                <select v-model.number="formSinhLich.caHocId">
-                  <option :value="null">-- Chọn ca --</option>
-                  <option v-for="c in danhSachCaHoc" :key="c.id" :value="c.id">{{ hienThiCaHoc(c) }}</option>
-                </select>
-              </label>
+                <div class="ca-chip-grid">
+                  <button
+                    v-for="c in danhSachCaHocSapXep"
+                    :key="c.id"
+                    type="button"
+                    :class="['ca-chip', { active: laCaDangChon(c.id) }]"
+                    @click="chonCaSinhLich(c.id)"
+                  >
+                    {{ hienThiCaHoc(c) }}
+                  </button>
+                </div>
+                <small class="hint">Chọn tối đa 2 ca liền kề trong danh sách. Ví dụ: Ca 1 + Ca 2, Ca 2 + Ca 3.</small>
+              </div>
               <label>
                 <span>Từ ngày khởi đầu</span>
                 <input v-model="formSinhLich.tuNgay" type="date" />
@@ -697,7 +705,62 @@ const dieuPhoiLoi = ref('')
 const dieuPhoiOk = ref('')
 
 const formLecturer = reactive({ chuyenMon: '', giaoVienId: '', vaiTro: 'giang_vien_chinh' })
-const formSinhLich = reactive({ phongHocId: null, caHocId: null, tuNgay: '', denNgay: '', thuTrongTuan: [] })
+const formSinhLich = reactive({ phongHocId: null, caHocIds: [], tuNgay: '', denNgay: '', thuTrongTuan: [] })
+
+const danhSachCaHocSapXep = computed(() => [...danhSachCaHoc.value].sort((a, b) => thuTuCaHoc(a) - thuTuCaHoc(b)))
+
+function layCaHocIdsSinhLich() {
+  return [...new Set((formSinhLich.caHocIds || []).filter((id) => id != null).map(Number))]
+}
+
+function laCaDangChon(caHocId) {
+  return layCaHocIdsSinhLich().includes(Number(caHocId))
+}
+
+function chonCaSinhLich(caHocId) {
+  const id = Number(caHocId)
+  const hienTai = layCaHocIdsSinhLich()
+
+  if (hienTai.includes(id)) {
+    formSinhLich.caHocIds = hienTai.filter((x) => x !== id)
+    previewLich.value = null
+    return
+  }
+
+  const moi = [...hienTai, id]
+  const loi = kiemTraCaLienTucSinhLich(moi)
+  if (loi) {
+    showToast(loi, 'error')
+    return
+  }
+
+  formSinhLich.caHocIds = moi
+  previewLich.value = null
+}
+
+function kiemTraCaLienTucSinhLich(idsInput = layCaHocIdsSinhLich()) {
+  const ids = [...new Set((idsInput || []).filter((id) => id != null).map(Number))]
+  if (ids.length > 2) return 'Chỉ được chọn tối đa 2 ca trong một ngày'
+  if (ids.length === 2) {
+    const viTri = ids.map(viTriCaHoc).sort((a, b) => a - b)
+    if (viTri.some((idx) => idx < 0)) return 'Ca học không tồn tại'
+    if (viTri[1] - viTri[0] !== 1) return 'Chỉ được chọn 2 ca liền kề trong danh sách ca học'
+  }
+  return ''
+}
+
+function viTriCaHoc(caHocId) {
+  return danhSachCaHocSapXep.value.findIndex((ca) => bangId(ca.id, caHocId))
+}
+
+function thuTuCaHoc(ca) {
+  if (!ca) return 0
+  const text = `${ca.maCa || ''} ${ca.tenCa || ''}`
+  const match = text.match(/\d+/)
+  if (match) return Number(match[0])
+  return Number(ca.thuTu || ca.id || 0)
+}
+
 
 /* ---------- CASCADING FILTER OPTIONS ---------- */
 const chuongTrinhTheoNganh = computed(() => {
@@ -846,7 +909,7 @@ const phongChinh = computed(() => {
 const caChinh = computed(() => {
   const buoi = lichHocTheoLop.value.find((b) => b.caHocId != null)
   if (buoi) return buoi.tenCa || tenCaTheoId(buoi.caHocId)
-  return formSinhLich.caHocId ? tenCaTheoId(formSinhLich.caHocId) : 'Chưa ấn định'
+  return layCaHocIdsSinhLich().length ? layCaHocIdsSinhLich().map(tenCaTheoId).join(' + ') : 'Chưa ấn định'
 })
 
 /* ---------- LECTURER FORM OPTIONS ---------- */
@@ -961,7 +1024,7 @@ function chonLop(lop, imLang = false) {
   formLecturer.giaoVienId = ''
   formLecturer.vaiTro = 'giang_vien_chinh'
   formSinhLich.phongHocId = null
-  formSinhLich.caHocId = null
+  formSinhLich.caHocIds = []
   formSinhLich.tuNgay = lop.ngayBatDau || ''
   formSinhLich.denNgay = lop.ngayKetThuc || ''
   formSinhLich.thuTrongTuan = []
@@ -970,7 +1033,8 @@ function chonLop(lop, imLang = false) {
   const cauHinhCu = suyRaCauHinhTuLich(lop.id)
   if (cauHinhCu) {
     if (cauHinhCu.phongHocId != null) formSinhLich.phongHocId = cauHinhCu.phongHocId
-    if (cauHinhCu.caHocId != null) formSinhLich.caHocId = cauHinhCu.caHocId
+    if (cauHinhCu.caHocIds?.length) formSinhLich.caHocIds = [...cauHinhCu.caHocIds]
+    else if (cauHinhCu.caHocId != null) formSinhLich.caHocIds = [cauHinhCu.caHocId]
     if (cauHinhCu.thu.length) formSinhLich.thuTrongTuan = cauHinhCu.thu
   }
 
@@ -1061,10 +1125,12 @@ async function xoaPhanCong(gv) {
 
 /* ---------- SCHEDULE ACTIONS (API) ---------- */
 function taoPayloadSinhLich() {
+  const caHocIds = layCaHocIdsSinhLich()
   return {
     giaoVienId: giaoVienChinh.value?.giaoVienId || null,
     phongHocId: formSinhLich.phongHocId || null,
-    caHocId: formSinhLich.caHocId || null,
+    caHocId: caHocIds.length === 1 ? caHocIds[0] : null,
+    caHocIds,
     tuNgay: formSinhLich.tuNgay || null,
     denNgay: formSinhLich.denNgay || null,
     thuTrongTuan: formSinhLich.thuTrongTuan.map((x) => Number(x)),
@@ -1082,7 +1148,9 @@ function kiemTraSinhLich() {
   if (!coGiaoVienChinh.value) return 'Lớp học phần chưa có giảng viên chính, hãy phân công trước'
   if (soBuoiConLai.value <= 0) return 'Lớp học phần đã xếp đủ số buổi học'
   if (!formSinhLich.phongHocId) return 'Vui lòng chọn phòng học'
-  if (!formSinhLich.caHocId) return 'Vui lòng chọn ca học'
+  if (!layCaHocIdsSinhLich().length) return 'Vui lòng chọn ca học'
+  const loiCa = kiemTraCaLienTucSinhLich()
+  if (loiCa) return loiCa
   if (!formSinhLich.tuNgay || !formSinhLich.denNgay) return 'Vui lòng chọn từ ngày và đến ngày'
   if (formSinhLich.tuNgay > formSinhLich.denNgay) return 'Từ ngày không được sau đến ngày'
   if (lop.ngayBatDau && formSinhLich.tuNgay < lop.ngayBatDau) return 'Từ ngày không được trước ngày bắt đầu của lớp học phần'
@@ -1383,7 +1451,7 @@ function suyRaCauHinhTuLich(lopId) {
   const phongHocId = phoBienNhat(ds.map((x) => x.phongHocId))
   const caHocId = phoBienNhat(ds.map((x) => x.caHocId))
   const thu = [...new Set(ds.map((x) => soThuTrongTuan(x.ngayHoc)).filter((x) => x != null))].sort((a, b) => a - b)
-  return { phongHocId, caHocId, thu }
+  return { phongHocId, caHocId, caHocIds: caHocId != null ? [caHocId] : [], thu }
 }
 function phoBienNhat(arr) {
   const dem = new Map()
@@ -1634,4 +1702,12 @@ input:focus, select:focus { border-color: var(--primary); background: #fff; box-
   .filter-grid, .form-box, .form-box.four, .overview-grid, .chip-grid { grid-template-columns: 1fr; }
   .weekday-row { grid-template-columns: repeat(2, 1fr); }
 }
+
+.ca-field { display: flex; flex-direction: column; gap: 8px; }
+.ca-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.ca-chip { border: 1px solid var(--border); background: #fff; border-radius: 12px; padding: 8px 10px; font-weight: 700; cursor: pointer; color: var(--text); }
+.ca-chip:hover { border-color: #2563eb; color: #1d4ed8; }
+.ca-chip.active { background: #2563eb; border-color: #2563eb; color: #fff; box-shadow: 0 8px 18px rgba(37, 99, 235, .22); }
+.hint { color: var(--muted); font-size: 12px; font-weight: 600; }
+
 </style>

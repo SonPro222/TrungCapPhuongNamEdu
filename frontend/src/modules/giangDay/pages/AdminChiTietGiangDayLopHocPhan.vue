@@ -15,7 +15,7 @@
 
       <div class="header-actions">
         <button type="button" class="btn" @click="diDenMaTranLich">
-          Xem ma trận lịch
+          Xem lịch học
         </button>
 
         <button type="button" class="btn" @click="taiDuLieu">
@@ -620,7 +620,7 @@ function diDenPhanCongGiangDay() {
 
 function diDenMaTranLich() {
   router.push({
-    name: 'GiangDay.MaTranLichHoc',
+    name: 'GiangDay.LichHoc',
     query: route.query
   })
 }

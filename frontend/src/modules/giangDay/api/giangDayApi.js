@@ -67,7 +67,25 @@ export const giangDayApi = {
         }
     },
 
-    lichHoc: createCrudApi('lich-hoc'),
+    lichHoc: {
+        ...createCrudApi('lich-hoc'),
+
+        getAdmin(params = {}) {
+            // Backend LichHocController chưa có endpoint /lich-hoc/admin.
+            // Nếu gọi /lich-hoc/admin, Spring sẽ bắt "admin" vào route /lich-hoc/{id}
+            // và convert sang Long nên trả 400 Bad Request.
+            // Danh sách lịch học admin dùng chung endpoint GET /giang-day/lich-hoc.
+            return apiClient.get(`${BASE_URL}/lich-hoc`, { params })
+        },
+
+        getSinhVienMe(params = {}) {
+            return apiClient.get(`${BASE_URL}/lich-hoc/sinh-vien/me`, { params })
+        },
+
+        getGiangVienMe(params = {}) {
+            return apiClient.get(`${BASE_URL}/lich-hoc/giang-vien/me`, { params })
+        }
+    },
     yeuCauDoiLich: createCrudApi('yeu-cau-doi-lich'),
     diemDanh: createCrudApi('diem-danh'),
 

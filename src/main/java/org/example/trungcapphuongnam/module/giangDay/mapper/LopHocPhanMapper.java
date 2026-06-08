@@ -5,9 +5,9 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.MonHocRepository;
+import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LopHocPhanRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LopHocPhanResponse;
-import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,7 +19,6 @@ public class LopHocPhanMapper {
 
     public LopHocPhan toEntity(LopHocPhanRequest request) {
         if (request == null) return null;
-
         return LopHocPhan.builder()
                 .chuongTrinhMonId(request.getChuongTrinhMonId())
                 .monHocId(request.getMonHocId())
@@ -28,8 +27,7 @@ public class LopHocPhanMapper {
                 .maLop(request.getMaLop())
                 .tenLop(request.getTenLop())
                 .soLuongToiDa(request.getSoLuongToiDa())
-                // Không lấy số buổi học từ request.
-                // Service sẽ copy từ syllabus_mon_hoc.so_buoi_hoc sang lop_hoc_phan.so_buoi_hoc.
+                .soBuoiHoc(request.getSoBuoiHoc())
                 .soLuongHienTai(request.getSoLuongHienTai())
                 .ngayBatDau(request.getNgayBatDau())
                 .ngayKetThuc(request.getNgayKetThuc())
@@ -74,10 +72,8 @@ public class LopHocPhanMapper {
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
-
     public void updateEntity(LopHocPhan entity, LopHocPhanRequest request) {
         if (entity == null || request == null) return;
-
         entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
         entity.setMonHocId(request.getMonHocId());
         entity.setLoaiLopHocPhan(request.getLoaiLopHocPhan());
@@ -85,16 +81,8 @@ public class LopHocPhanMapper {
         entity.setMaLop(request.getMaLop());
         entity.setTenLop(request.getTenLop());
         entity.setSoLuongToiDa(request.getSoLuongToiDa());
-
-        // Không update soBuoiHoc từ request.
-        // Service sẽ set lại theo syllabus sau mapper.updateEntity().
-        // entity.setSoBuoiHoc(request.getSoBuoiHoc());
-
-        // Không reset sĩ số hiện tại khi FE không gửi.
-        if (request.getSoLuongHienTai() != null) {
-            entity.setSoLuongHienTai(request.getSoLuongHienTai());
-        }
-
+        entity.setSoBuoiHoc(request.getSoBuoiHoc());
+        entity.setSoLuongHienTai(request.getSoLuongHienTai());
         entity.setNgayBatDau(request.getNgayBatDau());
         entity.setNgayKetThuc(request.getNgayKetThuc());
         entity.setTrangThai(request.getTrangThai());

@@ -35,13 +35,13 @@ public class PhanCongGiangDayValidator {
         )) {
             throw new GiangDayException("Giáo viên đã được phân công vai trò này trong lớp học phần");
         }
-//        if (request.getVaiTro() == VaiTroGiangDay.giang_vien_chinh
-//                && repository.existsByLopHocPhanIdAndVaiTro(
-//                request.getLopHocPhanId(),
-//                VaiTroGiangDay.giang_vien_chinh
-//        )) {
-//            throw new GiangDayException("Lớp học phần đã có giảng viên chính");
-//        }
+        if (request.getVaiTro() == VaiTroGiangDay.giang_vien_chinh
+                && repository.existsByLopHocPhanIdAndVaiTro(
+                request.getLopHocPhanId(),
+                VaiTroGiangDay.giang_vien_chinh
+        )) {
+            throw new GiangDayException("Lớp học phần đã có giảng viên chính");
+        }
     }
 
     public void validateUpdate(Long id, PhanCongGiangDayRequest request) {
