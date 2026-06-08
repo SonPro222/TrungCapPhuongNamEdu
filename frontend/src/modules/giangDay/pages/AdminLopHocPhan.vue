@@ -176,7 +176,8 @@
 
         <label>
           <span>Số buổi học</span>
-          <input v-model.trim="form.soBuoiHoc" type="number" min="1" required />
+          <input v-model.trim="form.soBuoiHoc" type="number" min="1" disabled />
+          <small>Số buổi học được lấy tự động từ syllabus, không nhập tay tại lớp học phần.</small>
         </label>
 
         <label>
@@ -495,7 +496,6 @@ async function capNhatLopHocPhan() {
     siSoToiThieu: Number(form.siSoToiThieu),
     soLuongToiDa: Number(form.soLuongToiDa),
     soLuongHienTai: form.soLuongHienTai === '' ? 0 : Number(form.soLuongHienTai),
-    soBuoiHoc: Number(form.soBuoiHoc),
     ngayBatDau: form.ngayBatDau || null,
     ngayKetThuc: form.ngayKetThuc || null,
     trangThai: form.trangThai,
