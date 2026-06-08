@@ -16,7 +16,4 @@ public class SinhLichHocRequest {
     private LocalDate denNgay;
     private List<Integer> thuTrongTuan;
     private Boolean tuDongGanNoiDungSyllabus = true;
-    private Boolean tuDongChonPhong = false;
-    private Boolean tuDongChonCa = false;
-    private Integer soPhuongAn = 5;
 }

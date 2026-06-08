@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface SyllabusMonHocGocRepository
         extends JpaRepository<SyllabusMonHocGoc, Long>, JpaSpecificationExecutor<SyllabusMonHocGoc> {
@@ -16,4 +18,8 @@ public interface SyllabusMonHocGocRepository
     boolean existsByMonHocIdAndTen(Long monHocId, String ten);
 
     boolean existsByMonHocIdAndTenAndIdNot(Long monHocId, String ten, Long id);
+
+    Optional<SyllabusMonHocGoc> findFirstByMonHocIdOrderByIdAsc(Long monHocId);
+
+    boolean existsByMonHocId(Long monHocId);
 }

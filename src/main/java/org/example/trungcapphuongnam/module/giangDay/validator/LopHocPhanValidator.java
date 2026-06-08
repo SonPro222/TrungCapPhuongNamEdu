@@ -3,9 +3,10 @@ package org.example.trungcapphuongnam.module.giangDay.validator;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LopHocPhanRequest;
-import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.enums.LoaiLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
@@ -17,6 +18,8 @@ public class LopHocPhanValidator {
 
     private final LopHocPhanRepository lopHocPhanRepository;
     private final ChuongTrinhMonRepository chuongTrinhMonRepository;
+    private final SyllabusMonHocRepository syllabusMonHocRepository;
+    private final SyllabusMonHocGocRepository syllabusMonHocGocRepository;
     private final LopHocPhanChuongTrinhMonRepository lopHocPhanChuongTrinhMonRepository;
 
     public void validateCreate(LopHocPhanRequest request) {
@@ -34,8 +37,9 @@ public class LopHocPhanValidator {
             throw new GiangDayException("Lớp học phần cần cập nhật không hợp lệ");
         }
 
-        LopHocPhan lopDangCapNhat = lopHocPhanRepository.findById(id)
-                .orElseThrow(() -> new GiangDayException("Không tìm thấy lớp học phần cần cập nhật"));
+        if (!lopHocPhanRepository.existsById(id)) {
+            throw new GiangDayException("Không tìm thấy lớp học phần cần cập nhật");
+        }
 
         validateCommon(request);
 
@@ -43,23 +47,13 @@ public class LopHocPhanValidator {
             throw new GiangDayException("Mã lớp học phần đã tồn tại");
         }
 
-        boolean doiMonHoacLoaiLop =
-                lopDangCapNhat.getLoaiLopHocPhan() != request.getLoaiLopHocPhan()
-                        || !java.util.Objects.equals(
-                        lopDangCapNhat.getChuongTrinhMonId(),
-                        request.getChuongTrinhMonId()
-                );
-
-        if (doiMonHoacLoaiLop) {
-            validateMotChuongTrinhMonChiCoMotLopHocPhan(id, request);
-        }
+        validateMotChuongTrinhMonChiCoMotLopHocPhan(id, request);
     }
 
     private void validateCommon(LopHocPhanRequest request) {
         if (request == null) {
             throw new GiangDayException("Dữ liệu lớp học phần không hợp lệ");
         }
-
         if (request.getLoaiLopHocPhan() == null) {
             throw new GiangDayException("Loại lớp học phần không được để trống");
         }
@@ -121,20 +115,19 @@ public class LopHocPhanValidator {
         if (request.getMonHocId() != null && !request.getMonHocId().equals(chuongTrinhMon.getMonHocId())) {
             throw new GiangDayException("Môn học của lớp không khớp với chương trình môn chuyên ngành");
         }
+
+        if (!syllabusMonHocRepository.existsByChuongTrinhMonId(request.getChuongTrinhMonId())) {
+            throw new GiangDayException("Chương trình môn chưa có syllabus, không thể mở hoặc cập nhật lớp học phần");
+        }
     }
 
     private void validateLopHocChung(LopHocPhanRequest request) {
-        if (request.getMonHocId() == null && request.getChuongTrinhMonId() == null) {
-            throw new GiangDayException("Lớp học chung phải chọn môn học chung hoặc môn trong chương trình");
+        if (request.getMonHocId() == null) {
+            throw new GiangDayException("Lớp học chung phải chọn môn học chung");
         }
 
-        if (request.getChuongTrinhMonId() != null) {
-            ChuongTrinhMon chuongTrinhMon = chuongTrinhMonRepository.findById(request.getChuongTrinhMonId())
-                    .orElseThrow(() -> new GiangDayException("Chương trình môn không tồn tại"));
-
-            if (request.getMonHocId() != null && !request.getMonHocId().equals(chuongTrinhMon.getMonHocId())) {
-                throw new GiangDayException("Môn học của lớp học chung không khớp với chương trình môn đã chọn");
-            }
+        if (!syllabusMonHocGocRepository.existsByMonHocId(request.getMonHocId())) {
+            throw new GiangDayException("Môn học chung chưa có syllabus gốc, không thể mở hoặc cập nhật lớp học phần");
         }
     }
 
@@ -149,23 +142,13 @@ public class LopHocPhanValidator {
 
         boolean daCoLopChuyenNganh = idDangCapNhat == null
                 ? lopHocPhanRepository.existsByChuongTrinhMonId(request.getChuongTrinhMonId())
-                : lopHocPhanRepository.existsByChuongTrinhMonIdAndIdNot(
-                request.getChuongTrinhMonId(),
-                idDangCapNhat
-        );
+                : lopHocPhanRepository.existsByChuongTrinhMonIdAndIdNot(request.getChuongTrinhMonId(), idDangCapNhat);
 
         if (daCoLopChuyenNganh) {
             throw new GiangDayException("Môn này đã có lớp học phần chuyên ngành, không được tạo thêm lớp mới");
         }
 
-        boolean daGanVaoLopHocChung = idDangCapNhat == null
-                ? lopHocPhanChuongTrinhMonRepository.existsByChuongTrinhMonId(request.getChuongTrinhMonId())
-                : lopHocPhanChuongTrinhMonRepository.existsByChuongTrinhMonIdAndLopHocPhanIdNot(
-                request.getChuongTrinhMonId(),
-                idDangCapNhat
-        );
-
-        if (daGanVaoLopHocChung) {
+        if (lopHocPhanChuongTrinhMonRepository.existsByChuongTrinhMonId(request.getChuongTrinhMonId())) {
             throw new GiangDayException("Môn này đã được gắn vào lớp học chung, không được tạo thêm lớp chuyên ngành");
         }
     }

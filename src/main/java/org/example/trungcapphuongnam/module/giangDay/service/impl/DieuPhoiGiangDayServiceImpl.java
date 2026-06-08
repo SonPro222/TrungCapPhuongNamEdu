@@ -4,26 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongBai;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusChuongBaiRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocRepository;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LichHocRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.SinhLichHocRequest;
-import org.example.trungcapphuongnam.module.giangDay.dto.request.XepLichHangLoatRequest;
-import org.example.trungcapphuongnam.module.giangDay.dto.response.GoiYLichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocPreviewItemResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.SinhLichHocPreviewResponse;
-import org.example.trungcapphuongnam.module.giangDay.dto.response.XepLichHangLoatItemResponse;
-import org.example.trungcapphuongnam.module.giangDay.dto.response.XepLichHangLoatResponse;
-import org.example.trungcapphuongnam.module.giangDay.entity.CaHoc;
 import org.example.trungcapphuongnam.module.giangDay.entity.GiaoVien;
 import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.entity.PhongHoc;
+import org.example.trungcapphuongnam.module.giangDay.enums.LoaiLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiGiaoVien;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLichHoc;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiPhongHoc;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiSinhVienLopHocPhan;
-import org.example.trungcapphuongnam.module.giangDay.enums.VaiTroGiangDay;
 import org.example.trungcapphuongnam.module.giangDay.repository.CaHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienKhaDungRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
@@ -40,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -64,6 +59,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
     private final NgayNghiRepository ngayNghiRepository;
     private final GiaoVienKhaDungRepository giaoVienKhaDungRepository;
     private final SyllabusMonHocRepository syllabusMonHocRepository;
+    private final SyllabusMonHocGocRepository syllabusMonHocGocRepository;
     private final SyllabusChuongBaiRepository syllabusChuongBaiRepository;
     private final LichHocService lichHocService;
 
@@ -75,7 +71,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
 
         validateRequest(lop, request);
 
-        int soBuoiCanXep = lop.getSoBuoiHoc();
+        int soBuoiCanXep = laySoBuoiCanXep(lop);
         int soBuoiDaXep = (int) lichHocRepository.countSoBuoiDangTinh(
                 lopHocPhanId,
                 TrangThaiLichHoc.nghi,
@@ -155,228 +151,36 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
     }
 
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<GoiYLichHocResponse> goiYLichHoc(Long lopHocPhanId, SinhLichHocRequest request) {
-        LopHocPhan lop = lopHocPhanRepository.findById(lopHocPhanId)
-                .orElseThrow(() -> new GiangDayException("Lớp học phần không tồn tại"));
+    private int laySoBuoiCanXep(LopHocPhan lop) {
+        Integer soBuoiTuSyllabus = null;
 
-        validateRequestCoBan(lop, request);
-
-        List<PhongHoc> danhSachPhong = phongHocRepository.findAll().stream()
-                .filter(phong -> phong.getTrangThai() == TrangThaiPhongHoc.dang_su_dung)
-                .filter(phong -> phong.getSucChua() == null
-                        || lop.getSoLuongHienTai() == null
-                        || phong.getSucChua() >= lop.getSoLuongHienTai())
-                .toList();
-
-        List<CaHoc> danhSachCa = caHocRepository.findAll().stream()
-                .sorted(Comparator.comparing(CaHoc::getGioBatDau))
-                .toList();
-
-        List<Integer> danhSachThu = request.getThuTrongTuan() == null || request.getThuTrongTuan().isEmpty()
-                ? List.of(1, 2, 3, 4, 5, 6)
-                : request.getThuTrongTuan();
-
-        int gioiHan = request.getSoPhuongAn() == null || request.getSoPhuongAn() < 1
-                ? 5
-                : Math.min(request.getSoPhuongAn(), 20);
-
-        List<GoiYLichHocResponse> ketQua = new ArrayList<>();
-        for (PhongHoc phong : danhSachPhong) {
-            for (CaHoc ca : danhSachCa) {
-                SinhLichHocRequest thuRequest = saoChepRequest(request);
-                thuRequest.setPhongHocId(phong.getId());
-                thuRequest.setCaHocId(ca.getId());
-                thuRequest.setThuTrongTuan(danhSachThu);
-
-                SinhLichHocPreviewResponse preview;
-                try {
-                    preview = previewSinhLich(lopHocPhanId, thuRequest);
-                } catch (RuntimeException ex) {
-                    continue;
-                }
-
-                int soCanhBao = preview.getCanhBao() == null ? 0 : preview.getCanhBao().size();
-                int diemSucChua = phong.getSucChua() == null || lop.getSoLuongHienTai() == null
-                        ? 0
-                        : Math.max(0, 200 - Math.abs(phong.getSucChua() - lop.getSoLuongHienTai()));
-                int diemUuTien = preview.getSoBuoiXepDuoc() * 1000
-                        + diemSucChua
-                        - soCanhBao * 25;
-
-                ketQua.add(GoiYLichHocResponse.builder()
-                        .hopLe(preview.getHopLe())
-                        .diemUuTien(diemUuTien)
-                        .phongHocId(phong.getId())
-                        .caHocId(ca.getId())
-                        .thuTrongTuan(danhSachThu)
-                        .soBuoiCanXep(preview.getSoBuoiConLai())
-                        .soBuoiXepDuoc(preview.getSoBuoiXepDuoc())
-                        .soCanhBao(soCanhBao)
-                        .canhBao(preview.getCanhBao())
-                        .items(preview.getItems())
-                        .build());
-            }
-        }
-
-        ketQua.sort(Comparator
-                .comparing((GoiYLichHocResponse item) -> Boolean.TRUE.equals(item.getHopLe())).reversed()
-                .thenComparing(GoiYLichHocResponse::getDiemUuTien, Comparator.reverseOrder())
-                .thenComparing(GoiYLichHocResponse::getSoCanhBao)
-        );
-
-        List<GoiYLichHocResponse> rutGon = ketQua.stream().limit(gioiHan).toList();
-        for (int i = 0; i < rutGon.size(); i++) {
-            rutGon.get(i).setThuTuPhuongAn(i + 1);
-        }
-        return rutGon;
-    }
-
-    @Override
-    public XepLichHangLoatResponse xepLichHangLoat(XepLichHangLoatRequest request) {
-        if (request == null || request.getLopHocPhanIds() == null || request.getLopHocPhanIds().isEmpty()) {
-            throw new GiangDayException("Phải chọn ít nhất một lớp học phần để xếp hàng loạt");
-        }
-
-        boolean chiPreview = !Boolean.FALSE.equals(request.getChiPreview());
-        List<XepLichHangLoatItemResponse> items = new ArrayList<>();
-
-        for (Long lopHocPhanId : request.getLopHocPhanIds()) {
-            LopHocPhan lop = lopHocPhanRepository.findById(lopHocPhanId).orElse(null);
-            if (lop == null) {
-                items.add(XepLichHangLoatItemResponse.builder()
-                        .lopHocPhanId(lopHocPhanId)
-                        .thanhCong(false)
-                        .thongBao("Lớp học phần không tồn tại")
-                        .build());
-                continue;
+        if (lop.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH) {
+            if (lop.getChuongTrinhMonId() == null) {
+                throw new GiangDayException("Lớp chuyên ngành chưa gắn chương trình môn, không thể xếp lịch");
             }
 
-            try {
-                SinhLichHocRequest lopRequest = saoChepRequest(request);
-                if (lopRequest.getGiaoVienId() == null) {
-                    phanCongGiangDayRepository.findFirstByLopHocPhanIdAndVaiTro(lopHocPhanId, VaiTroGiangDay.giang_vien_chinh)
-                            .ifPresent(phanCong -> lopRequest.setGiaoVienId(phanCong.getGiaoVienId()));
-                }
-                List<GoiYLichHocResponse> goiY = goiYLichHoc(lopHocPhanId, lopRequest);
-                GoiYLichHocResponse totNhat = goiY.isEmpty() ? null : goiY.get(0);
-                if (totNhat == null || !Boolean.TRUE.equals(totNhat.getHopLe())) {
-                    items.add(XepLichHangLoatItemResponse.builder()
-                            .lopHocPhanId(lop.getId())
-                            .maLop(lop.getMaLop())
-                            .tenLop(lop.getTenLop())
-                            .thanhCong(false)
-                            .thongBao("Không tìm được phương án xếp đủ số buổi")
-                            .phuongAnTotNhat(totNhat)
-                            .build());
-                    continue;
-                }
+            soBuoiTuSyllabus = syllabusMonHocRepository
+                    .findFirstByChuongTrinhMonIdOrderByIdAsc(lop.getChuongTrinhMonId())
+                    .orElseThrow(() -> new GiangDayException("Chương trình môn chưa có syllabus, không thể xếp lịch"))
+                    .getSoBuoiHoc();
+        }
 
-                List<LichHocResponse> lichDaTao = List.of();
-                if (!chiPreview) {
-                    SinhLichHocRequest luuRequest = saoChepRequest(lopRequest);
-                    luuRequest.setPhongHocId(totNhat.getPhongHocId());
-                    luuRequest.setCaHocId(totNhat.getCaHocId());
-                    luuRequest.setThuTrongTuan(totNhat.getThuTrongTuan());
-                    lichDaTao = taoLichTuDong(lopHocPhanId, luuRequest);
-                }
-
-                items.add(XepLichHangLoatItemResponse.builder()
-                        .lopHocPhanId(lop.getId())
-                        .maLop(lop.getMaLop())
-                        .tenLop(lop.getTenLop())
-                        .thanhCong(true)
-                        .thongBao(chiPreview ? "Tìm được phương án hợp lệ" : "Đã tạo lịch")
-                        .phuongAnTotNhat(totNhat)
-                        .lichDaTao(lichDaTao)
-                        .build());
-            } catch (RuntimeException ex) {
-                items.add(XepLichHangLoatItemResponse.builder()
-                        .lopHocPhanId(lop.getId())
-                        .maLop(lop.getMaLop())
-                        .tenLop(lop.getTenLop())
-                        .thanhCong(false)
-                        .thongBao(ex.getMessage())
-                        .build());
+        if (lop.getLoaiLopHocPhan() == LoaiLopHocPhan.HOC_CHUNG) {
+            if (lop.getMonHocId() == null) {
+                throw new GiangDayException("Lớp học chung chưa gắn môn học, không thể xếp lịch");
             }
+
+            soBuoiTuSyllabus = syllabusMonHocGocRepository
+                    .findFirstByMonHocIdOrderByIdAsc(lop.getMonHocId())
+                    .orElseThrow(() -> new GiangDayException("Môn học chung chưa có syllabus gốc, không thể xếp lịch"))
+                    .getSoBuoiHoc();
         }
 
-        int thanhCong = (int) items.stream().filter(item -> Boolean.TRUE.equals(item.getThanhCong())).count();
-        return XepLichHangLoatResponse.builder()
-                .tongLop(items.size())
-                .soLopThanhCong(thanhCong)
-                .soLopLoi(items.size() - thanhCong)
-                .chiPreview(chiPreview)
-                .items(items)
-                .build();
-    }
-
-    private SinhLichHocRequest saoChepRequest(SinhLichHocRequest source) {
-        SinhLichHocRequest target = new SinhLichHocRequest();
-        target.setGiaoVienId(source.getGiaoVienId());
-        target.setPhongHocId(source.getPhongHocId());
-        target.setCaHocId(source.getCaHocId());
-        target.setTuNgay(source.getTuNgay());
-        target.setDenNgay(source.getDenNgay());
-        target.setThuTrongTuan(source.getThuTrongTuan() == null ? null : new ArrayList<>(source.getThuTrongTuan()));
-        target.setTuDongGanNoiDungSyllabus(source.getTuDongGanNoiDungSyllabus());
-        target.setTuDongChonPhong(source.getTuDongChonPhong());
-        target.setTuDongChonCa(source.getTuDongChonCa());
-        target.setSoPhuongAn(source.getSoPhuongAn());
-        return target;
-    }
-
-    private void validateRequestCoBan(LopHocPhan lop, SinhLichHocRequest request) {
-        if (request == null) {
-            throw new GiangDayException("Dữ liệu sinh lịch không hợp lệ");
+        if (soBuoiTuSyllabus == null || soBuoiTuSyllabus < 1) {
+            throw new GiangDayException("Syllabus chưa cấu hình số buổi học hợp lệ");
         }
 
-        if (lop.getTrangThai() == TrangThaiLopHocPhan.huy) {
-            throw new GiangDayException("Lớp học phần đã hủy, không được sinh lịch");
-        }
-
-        if (lop.getTrangThai() == TrangThaiLopHocPhan.da_ket_thuc) {
-            throw new GiangDayException("Lớp học phần đã kết thúc, không được sinh lịch");
-        }
-
-        if (lop.getSoBuoiHoc() == null || lop.getSoBuoiHoc() < 1) {
-            throw new GiangDayException("Lớp học phần chưa cấu hình số buổi học");
-        }
-
-        long soSinhVien = sinhVienLopHocPhanRepository.countByLopHocPhanIdAndTrangThaiIn(
-                lop.getId(),
-                TRANG_THAI_SINH_VIEN_DANG_HOC
-        );
-        if (soSinhVien < 1) {
-            throw new GiangDayException("Lớp học phần chưa có sinh viên đang học, không được sinh lịch");
-        }
-
-        if (request.getGiaoVienId() == null) {
-            throw new GiangDayException("Giáo viên không được để trống");
-        }
-
-        GiaoVien giaoVien = giaoVienRepository.findById(request.getGiaoVienId())
-                .orElseThrow(() -> new GiangDayException("Giáo viên không tồn tại"));
-        if (giaoVien.getTrangThai() != TrangThaiGiaoVien.dang_day) {
-            throw new GiangDayException("Chỉ giáo viên đang dạy mới được xếp lịch");
-        }
-        if (!phanCongGiangDayRepository.existsByLopHocPhanIdAndGiaoVienId(lop.getId(), request.getGiaoVienId())) {
-            throw new GiangDayException("Giáo viên chưa được phân công cho lớp học phần này");
-        }
-
-        if (request.getTuNgay() == null || request.getDenNgay() == null) {
-            throw new GiangDayException("Từ ngày và đến ngày không được để trống");
-        }
-        if (request.getTuNgay().isAfter(request.getDenNgay())) {
-            throw new GiangDayException("Từ ngày không được sau đến ngày");
-        }
-        if (lop.getNgayBatDau() != null && request.getTuNgay().isBefore(lop.getNgayBatDau())) {
-            throw new GiangDayException("Từ ngày không được trước ngày bắt đầu của lớp học phần");
-        }
-        if (lop.getNgayKetThuc() != null && request.getDenNgay().isAfter(lop.getNgayKetThuc())) {
-            throw new GiangDayException("Đến ngày không được sau ngày kết thúc của lớp học phần");
-        }
+        return soBuoiTuSyllabus;
     }
 
     private void validateRequest(LopHocPhan lop, SinhLichHocRequest request) {
@@ -392,9 +196,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
             throw new GiangDayException("Lớp học phần đã kết thúc, không được sinh lịch");
         }
 
-        if (lop.getSoBuoiHoc() == null || lop.getSoBuoiHoc() < 1) {
-            throw new GiangDayException("Lớp học phần chưa cấu hình số buổi học");
-        }
+        laySoBuoiCanXep(lop);
 
         long soSinhVien = sinhVienLopHocPhanRepository.countByLopHocPhanIdAndTrangThaiIn(
                 lop.getId(),
