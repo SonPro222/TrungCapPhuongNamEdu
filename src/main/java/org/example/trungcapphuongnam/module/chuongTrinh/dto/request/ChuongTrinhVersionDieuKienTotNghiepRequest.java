@@ -10,7 +10,7 @@ import lombok.*;
 public class ChuongTrinhVersionDieuKienTotNghiepRequest {
 
     private Long chuongTrinhVersionId;
-    private Long dieuKienGocId;
+    private Long dieuKienMauId;
     private Integer thuTu;
     private String ghiChu;
 }

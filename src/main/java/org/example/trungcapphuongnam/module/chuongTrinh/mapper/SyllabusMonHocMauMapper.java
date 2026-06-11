@@ -1,14 +1,14 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocMau;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SyllabusMonHocGocMapper {
+public class SyllabusMonHocMauMapper {
 
-    public SyllabusMonHocMau toEntity(SyllabusMonHocGocRequest request) {
+    public SyllabusMonHocMau toEntity(SyllabusMonHocMauRequest request) {
         if (request == null) {
             return null;
         }
@@ -36,7 +36,7 @@ public class SyllabusMonHocGocMapper {
                 .build();
     }
 
-    public void updateEntity(SyllabusMonHocMau entity, SyllabusMonHocGocRequest request) {
+    public void updateEntity(SyllabusMonHocMau entity, SyllabusMonHocMauRequest request) {
         if (entity == null || request == null) {
             return;
         }
@@ -62,12 +62,12 @@ public class SyllabusMonHocGocMapper {
         entity.setGhiChu(request.getGhiChu());
     }
 
-    public SyllabusMonHocGocResponse toResponse(SyllabusMonHocMau entity) {
+    public SyllabusMonHocMauResponse toResponse(SyllabusMonHocMau entity) {
         if (entity == null) {
             return null;
         }
 
-        return SyllabusMonHocGocResponse.builder()
+        return SyllabusMonHocMauResponse.builder()
                 .id(entity.getId())
                 .monHocId(entity.getMonHocId())
                 .ma(entity.getMa())

@@ -4,19 +4,17 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.MucTieuChuongTrin
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MucTieuChuongTrinhRepository extends JpaRepository<MucTieuChuongTrinh, Long>, JpaSpecificationExecutor<MucTieuChuongTrinh> {
 
-    Page<MucTieuChuongTrinh> findByChuongTrinhVersionId(
-            Long chuongTrinhVersionId,
-            Pageable pageable
-    );
-    void deleteByChuongTrinhVersionId(Long chuongTrinhVersionId);
+    Page<MucTieuChuongTrinh> findBySyllabusChuongTrinhId(Long syllabusChuongTrinhId, Pageable pageable);
 
-    boolean existsByChuongTrinhVersionIdAndThuTu(Long chuongTrinhVersionId, Integer thuTu);
+    void deleteBySyllabusChuongTrinhId(Long syllabusChuongTrinhId);
 
-    boolean existsByChuongTrinhVersionIdAndThuTuAndIdNot(Long chuongTrinhVersionId, Integer thuTu, Long id);
+    boolean existsBySyllabusChuongTrinhIdAndThuTu(Long syllabusChuongTrinhId, Integer thuTu);
+
+    boolean existsBySyllabusChuongTrinhIdAndThuTuAndIdNot(Long syllabusChuongTrinhId, Integer thuTu, Long id);
 }

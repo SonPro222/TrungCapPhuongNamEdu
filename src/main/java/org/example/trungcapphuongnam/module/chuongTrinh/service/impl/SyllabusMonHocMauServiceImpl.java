@@ -3,14 +3,14 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocMauChuongBaiRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocMauRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocMauService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class SyllabusMonHocGocServiceImpl implements SyllabusMonHocGocService {
+public class SyllabusMonHocMauServiceImpl implements SyllabusMonHocMauService {
 
     private final SyllabusMonHocMauRepository repository;
     private final SyllabusMonHocMauChuongBaiRepository syllabusMonHocMauChuongBaiRepository;
@@ -30,7 +30,7 @@ public class SyllabusMonHocGocServiceImpl implements SyllabusMonHocGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<SyllabusMonHocGocResponse> findAll(Long monHocId, String ma, String keyword, Pageable pageable) {
+    public Page<SyllabusMonHocMauResponse> findAll(Long monHocId, String ma, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<SyllabusMonHocMau>empty()
                         .and(LocJpa.eq("monHocId", monHocId))
@@ -42,15 +42,15 @@ public class SyllabusMonHocGocServiceImpl implements SyllabusMonHocGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public SyllabusMonHocGocResponse findById(Long id) {
+    public SyllabusMonHocMauResponse findById(Long id) {
         SyllabusMonHocMau entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Syllabus môn học gốc không tồn tại: " + id));
         return toResponseCoTongGio(entity);
     }
 
     @Override
-    public SyllabusMonHocGocResponse create(SyllabusMonHocGocRequest request) {
-        validator.validateSyllabusMonHocGoc(request, null);
+    public SyllabusMonHocMauResponse create(SyllabusMonHocMauRequest request) {
+        validator.validateSyllabusMonHocMau(request, null);
 
         SyllabusMonHocMau entity = mapper.toEntity(request);
 
@@ -62,11 +62,11 @@ public class SyllabusMonHocGocServiceImpl implements SyllabusMonHocGocService {
     }
 
     @Override
-    public SyllabusMonHocGocResponse update(Long id, SyllabusMonHocGocRequest request) {
+    public SyllabusMonHocMauResponse update(Long id, SyllabusMonHocMauRequest request) {
         SyllabusMonHocMau entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Syllabus môn học gốc không tồn tại: " + id));
 
-        validator.validateSyllabusMonHocGoc(request, id);
+        validator.validateSyllabusMonHocMau(request, id);
 
         mapper.updateEntity(entity, request);
 
@@ -83,22 +83,22 @@ public class SyllabusMonHocGocServiceImpl implements SyllabusMonHocGocService {
             throw new ResourceNotFoundException("Syllabus môn học gốc không tồn tại: " + id);
         }
 
-        xoaChuongTrinhCascadeService.xoaTheoSyllabusMonHocGocId(id);
+        xoaChuongTrinhCascadeService.xoaTheoSyllabusMonHocMauId(id);
 
         repository.deleteById(id);
     }
 
-    private SyllabusMonHocGocResponse toResponseCoTongGio(SyllabusMonHocMau entity) {
-        SyllabusMonHocGocResponse response = mapper.toResponse(entity);
+    private SyllabusMonHocMauResponse toResponseCoTongGio(SyllabusMonHocMau entity) {
+        SyllabusMonHocMauResponse response = mapper.toResponse(entity);
         if (entity == null || entity.getId() == null) {
             return response;
         }
 
-        Long syllabusMonHocGocId = entity.getId();
-        response.setTongGio(syllabusMonHocMauChuongBaiRepository.tongGioTheoSyllabusMonHocGocId(syllabusMonHocGocId));
-        response.setGioLyThuyet(syllabusMonHocMauChuongBaiRepository.tongGioLyThuyetTheoSyllabusMonHocGocId(syllabusMonHocGocId));
-        response.setGioThucHanh(syllabusMonHocMauChuongBaiRepository.tongGioThucHanhTheoSyllabusMonHocGocId(syllabusMonHocGocId));
-        response.setGioKiemTra(syllabusMonHocMauChuongBaiRepository.tongGioKiemTraTheoSyllabusMonHocGocId(syllabusMonHocGocId));
+        Long syllabusMonHocMauId = entity.getId();
+        response.setTongGio(syllabusMonHocMauChuongBaiRepository.tongGioTheoSyllabusMonHocMauId(syllabusMonHocMauId));
+        response.setGioLyThuyet(syllabusMonHocMauChuongBaiRepository.tongGioLyThuyetTheoSyllabusMonHocMauId(syllabusMonHocMauId));
+        response.setGioThucHanh(syllabusMonHocMauChuongBaiRepository.tongGioThucHanhTheoSyllabusMonHocMauId(syllabusMonHocMauId));
+        response.setGioKiemTra(syllabusMonHocMauChuongBaiRepository.tongGioKiemTraTheoSyllabusMonHocMauId(syllabusMonHocMauId));
         return response;
     }
 }

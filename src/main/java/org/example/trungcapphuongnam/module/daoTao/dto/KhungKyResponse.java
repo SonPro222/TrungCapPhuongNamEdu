@@ -1,7 +1,9 @@
 package org.example.trungcapphuongnam.module.daoTao.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,10 +17,6 @@ public class KhungKyResponse {
 
     private Long chuongTrinhVersionId;
 
-    private Long loaiChuongTrinhId;
-
-    private Long khungKyGocId;
-
     private String maKy;
 
     private String tenKy;
@@ -26,6 +24,12 @@ public class KhungKyResponse {
     private Integer thuTu;
 
     private String moTa;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate ngayBatDau;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate ngayKetThuc;
 
     private LocalDateTime createdAt;
 

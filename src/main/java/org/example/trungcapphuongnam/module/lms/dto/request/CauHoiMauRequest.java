@@ -1,7 +1,6 @@
 package org.example.trungcapphuongnam.module.lms.dto.request;
 
-import jakarta.validation.constraints.*;
-import org.example.trungcapphuongnam.module.lms.enums.TrangThaiCauHoiGoc;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiCauHoiMau;
 import lombok.*;
 
 @Getter
@@ -9,14 +8,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CauHoiGocRequest {
+public class CauHoiMauRequest {
     private Long monHocId;
 
     private String maCauHoi;
 
     private Long nguoiTaoTaiKhoanId;
 
-    private TrangThaiCauHoiGoc trangThai;
+    private TrangThaiCauHoiMau trangThai;
 
     private Long donViSoHuuId;
 

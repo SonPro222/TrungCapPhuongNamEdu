@@ -22,11 +22,12 @@ public class MucTieuChuongTrinhController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<MucTieuChuongTrinhResponse>>> findAll(
             Pageable pageable,
+            @RequestParam(required = false) Long syllabusChuongTrinhId,
             @RequestParam(required = false) Long chuongTrinhVersionId,
             @RequestParam(required = false) String loai,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, loai, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusChuongTrinhId, chuongTrinhVersionId, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

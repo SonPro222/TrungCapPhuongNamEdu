@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(DaoTaoPath.TRINH_DO_DAO_TAO)
 @RequiredArgsConstructor
@@ -22,6 +24,11 @@ public class TrinhDoDaoTaoController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<TrinhDoDaoTaoResponse>>> findAll(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/options")
+    public ResponseEntity<ApiResponse<List<TrinhDoDaoTaoResponse>>> findOptions() {
+        return ResponseEntity.ok(ApiResponse.ok(service.findOptions()));
     }
 
     @GetMapping(DaoTaoPath.ID)

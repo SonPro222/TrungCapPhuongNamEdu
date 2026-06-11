@@ -16,8 +16,8 @@ public class MigrateCauHoiLegacyMap {
     @Column(name = "ngan_hang_cau_hoi_id", nullable = false)
     private Long nganHangCauHoiId;
 
-    @Column(name = "cau_hoi_goc_id", nullable = false)
-    private Long cauHoiGocId;
+    @Column(name = "cau_hoi_mau_id", nullable = false)
+    private Long cauHoiMauId;
 
     @Column(name = "cau_hoi_version_id", nullable = false)
     private Long cauHoiVersionId;

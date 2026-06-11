@@ -1,12 +1,15 @@
 package org.example.trungcapphuongnam.module.giangDay.service.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiem;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.QuyDoiDiemRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
 import org.example.trungcapphuongnam.module.diem.entity.CauHinhDanhGia;
 import org.example.trungcapphuongnam.module.diem.repository.CauHinhDanhGiaRepository;
+import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.mapper.CauHinhDanhGiaGiangDayMapper;
+import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
 import org.example.trungcapphuongnam.module.giangDay.service.SaoChepCauHinhDanhGiaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +26,9 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
 
     private final CauHinhDanhGiaRepository cauHinhDanhGiaRepository;
     private final QuyDoiDiemRepository quyDoiDiemRepository;
-    private final SyllabusMonHocRepository syllabusMonHocRepository;
+    private final LopHocPhanRepository lopHocPhanRepository;
+    private final CauHinhDanhGiaGiangDayMapper cauHinhDanhGiaMapper;
+    private final EntityManager entityManager;
 
     @Override
     public void saoChepTuChuongTrinhMonSangLopHocPhan(Long lopHocPhanId, Long chuongTrinhMonId) {
@@ -35,11 +40,7 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
             throw new BadRequestException("Chương trình môn không hợp lệ");
         }
 
-        Long syllabusMonHocId = syllabusMonHocRepository.findFirstByChuongTrinhMonIdOrderByIdAsc(chuongTrinhMonId)
-                .orElseThrow(() -> new BadRequestException(
-                        "Môn trong chương trình chưa có syllabus áp dụng: " + chuongTrinhMonId
-                ))
-                .getId();
+        Long syllabusMonHocId = resolveSyllabusMonHocId(lopHocPhanId, chuongTrinhMonId);
 
         List<QuyDoiDiem> danhSachQuyDoiDiem = quyDoiDiemRepository
                 .findByChuongTrinhMonIdOrderByThuTuAscIdAsc(chuongTrinhMonId);
@@ -53,21 +54,66 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
         for (QuyDoiDiem quyDoiDiem : danhSachQuyDoiDiem) {
             String tenCotDiem = layTenCotDiemTuQuyDoiDiem(quyDoiDiem);
 
-            if (cauHinhDanhGiaRepository.existsBySyllabusMonHocIdAndTenCotDiem(syllabusMonHocId, tenCotDiem)) {
+            if (tonTaiCauHinhDanhGia(syllabusMonHocId, tenCotDiem)) {
                 continue;
             }
 
-            CauHinhDanhGia cauHinhDanhGia = CauHinhDanhGia.builder()
-                    .syllabusMonHocId(syllabusMonHocId)
-                    .tenCotDiem(tenCotDiem)
-                    .loaiDiem(chuanHoaLoaiDiem(quyDoiDiem.getLoaiMau()))
-                    .tyLe(quyDoiDiem.getTyLe())
-                    .diemToiDa(quyDoiDiem.getDiemToiDa() == null ? BigDecimal.TEN : quyDoiDiem.getDiemToiDa())
-                    .thuTu(quyDoiDiem.getThuTu())
-                    .build();
+            CauHinhDanhGia cauHinhDanhGia = cauHinhDanhGiaMapper.toEntityFromQuyDoiDiem(
+                    syllabusMonHocId,
+                    quyDoiDiem,
+                    tenCotDiem,
+                    chuanHoaLoaiDiem(quyDoiDiem.getLoaiMau())
+            );
 
             cauHinhDanhGiaRepository.save(cauHinhDanhGia);
         }
+    }
+
+    private Long resolveSyllabusMonHocId(Long lopHocPhanId, Long chuongTrinhMonIdRequest) {
+        LopHocPhan lopHocPhan = lopHocPhanRepository.findById(lopHocPhanId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy lớp học phần"));
+
+        Long chuongTrinhMonId = lopHocPhan.getChuongTrinhMonId() == null
+                ? chuongTrinhMonIdRequest
+                : lopHocPhan.getChuongTrinhMonId();
+
+        if (chuongTrinhMonId == null) {
+            throw new BadRequestException("Lớp học phần chưa gắn chương trình môn");
+        }
+
+        if (chuongTrinhMonIdRequest != null && !chuongTrinhMonIdRequest.equals(chuongTrinhMonId)) {
+            throw new BadRequestException("Chương trình môn truyền lên không khớp với lớp học phần");
+        }
+
+        List<?> result = entityManager.createNativeQuery("""
+                        SELECT smh.id
+                        FROM syllabus_mon_hoc smh
+                        WHERE smh.chuong_trinh_mon_id = :chuongTrinhMonId
+                        ORDER BY smh.id
+                        LIMIT 1
+                        """)
+                .setParameter("chuongTrinhMonId", chuongTrinhMonId)
+                .getResultList();
+
+        if (result.isEmpty()) {
+            throw new BadRequestException("Chương trình môn chưa có syllabus môn học");
+        }
+
+        return ((Number) result.get(0)).longValue();
+    }
+
+    private boolean tonTaiCauHinhDanhGia(Long syllabusMonHocId, String tenCotDiem) {
+        Number count = (Number) entityManager.createNativeQuery("""
+                        SELECT COUNT(1)
+                        FROM cau_hinh_danh_gia chdg
+                        WHERE chdg.syllabus_mon_hoc_id = :syllabusMonHocId
+                          AND LOWER(TRIM(chdg.ten_cot_diem)) = LOWER(TRIM(:tenCotDiem))
+                        """)
+                .setParameter("syllabusMonHocId", syllabusMonHocId)
+                .setParameter("tenCotDiem", tenCotDiem)
+                .getSingleResult();
+
+        return count.longValue() > 0;
     }
 
     private void kiemTraQuyDoiDiemDaLuu(List<QuyDoiDiem> danhSachQuyDoiDiem) {
@@ -128,7 +174,8 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
         String value = loaiDiem.trim().toLowerCase();
 
         return switch (value) {
-            case "chuyen_can", "bai_tap", "giua_ky", "cuoi_ky", "thuc_hanh", "do_an", "khac" -> value;
+            case "chuyen_can", "bai_tap", "bai_tap_online", "kiem_tra_online", "kiem_tra_tren_lop",
+                 "giua_ky", "cuoi_ky", "thuc_hanh", "do_an", "khac" -> value;
             default -> "khac";
         };
     }

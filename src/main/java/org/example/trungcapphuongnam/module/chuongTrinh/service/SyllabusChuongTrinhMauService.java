@@ -1,19 +1,19 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.service;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusChuongTrinhGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChuongTrinhGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusChuongTrinhMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChuongTrinhMauResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface SyllabusChuongTrinhGocService {
+public interface SyllabusChuongTrinhMauService {
 
-    Page<SyllabusChuongTrinhGocResponse> findAll(String ma, String keyword, Pageable pageable);
+    Page<SyllabusChuongTrinhMauResponse> findAll(Long chuongTrinhId, String ma, String keyword, Pageable pageable);
 
-    SyllabusChuongTrinhGocResponse findById(Long id);
+    SyllabusChuongTrinhMauResponse findById(Long id);
 
-    SyllabusChuongTrinhGocResponse create(SyllabusChuongTrinhGocRequest request);
+    SyllabusChuongTrinhMauResponse create(SyllabusChuongTrinhMauRequest request);
 
-    SyllabusChuongTrinhGocResponse update(Long id, SyllabusChuongTrinhGocRequest request);
+    SyllabusChuongTrinhMauResponse update(Long id, SyllabusChuongTrinhMauRequest request);
 
     void delete(Long id);
 }

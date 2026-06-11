@@ -21,8 +21,8 @@ public class SyllabusMonHocDieuKien {
     @Column(name = "syllabus_mon_id", nullable = false)
     private Long syllabusMonId;
 
-    @Column(name = "dieu_kien_goc_id", nullable = false)
-    private Long dieuKienGocId;
+    @Column(name = "dieu_kien_mau_id", nullable = false)
+    private Long dieuKienMauId;
 
     @Column(name = "thu_tu")
     private Integer thuTu;

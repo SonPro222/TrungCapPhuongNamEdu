@@ -12,7 +12,7 @@ public class SyllabusMonHocDieuKienRequest {
 
     private Long syllabusMonId;
 
-    private Long dieuKienGocId;
+    private Long dieuKienMauId;
 
     private Integer thuTu;
 

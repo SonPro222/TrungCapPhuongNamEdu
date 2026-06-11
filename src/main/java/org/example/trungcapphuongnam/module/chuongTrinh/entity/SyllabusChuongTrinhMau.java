@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 @Table(
         name = "syllabus_chuong_trinh_mau",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uq_syllabus_chuong_trinh_goc_ma", columnNames = "ma")
+                @UniqueConstraint(name = "uq_syllabus_chuong_trinh_mau_ma", columnNames = "ma")
         }
 )
-public class SyllabusChuongTrinhGoc {
+public class SyllabusChuongTrinhMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +28,9 @@ public class SyllabusChuongTrinhGoc {
 
     @Column(name = "ten", nullable = false, length = 255)
     private String ten;
+    @Column(name = "chuong_trinh_id")
+    private Long chuongTrinhId;
+
     @Column(name = "duong_dan", columnDefinition = "TEXT")
     private String duongDan;
     @Column(name = "muc_tieu", columnDefinition = "TEXT")

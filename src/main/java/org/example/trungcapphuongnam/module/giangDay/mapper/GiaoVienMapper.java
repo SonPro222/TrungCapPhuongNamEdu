@@ -3,7 +3,12 @@ package org.example.trungcapphuongnam.module.giangDay.mapper;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.GiaoVienRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.GiaoVienResponse;
 import org.example.trungcapphuongnam.module.giangDay.entity.GiaoVien;
+import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiTaiKhoan;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiTaiKhoan;
 import org.springframework.stereotype.Component;
+
+import java.util.LinkedHashSet;
 
 @Component
 public class GiaoVienMapper {
@@ -19,6 +24,17 @@ public class GiaoVienMapper {
                 .chuyenMon(chuanHoa(request.getChuyenMon()))
                 .trangThai(request.getTrangThai())
                 .taiKhoanId(request.getTaiKhoanId())
+                .build();
+    }
+
+
+    public TaiKhoan toTaiKhoanGiaoVien(String email, String matKhauHash) {
+        return TaiKhoan.builder()
+                .email(chuanHoaEmail(email))
+                .matKhauHash(matKhauHash)
+                .loaiTaiKhoan(LoaiTaiKhoan.giao_vien)
+                .trangThai(TrangThaiTaiKhoan.da_kich_hoat)
+                .taiKhoanVaiTros(new LinkedHashSet<>())
                 .build();
     }
 

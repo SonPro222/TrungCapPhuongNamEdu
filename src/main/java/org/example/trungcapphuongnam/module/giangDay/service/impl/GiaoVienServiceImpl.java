@@ -103,13 +103,10 @@ public class GiaoVienServiceImpl implements GiaoVienService {
             throw new GiangDayException("Gmail này đã có tài khoản trong hệ thống");
         }
 
-        TaiKhoan taiKhoan = TaiKhoan.builder()
-                .email(email)
-                .matKhauHash(passwordEncoder.encode(matKhauTam))
-                .loaiTaiKhoan(LoaiTaiKhoan.giao_vien)
-                .trangThai(TrangThaiTaiKhoan.da_kich_hoat)
-                .taiKhoanVaiTros(new LinkedHashSet<>())
-                .build();
+        TaiKhoan taiKhoan = mapper.toTaiKhoanGiaoVien(
+                email,
+                passwordEncoder.encode(matKhauTam)
+        );
 
         ganVaiTroGiaoVien(taiKhoan);
 

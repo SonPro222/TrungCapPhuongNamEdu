@@ -7,6 +7,6 @@ import org.springframework.data.domain.Pageable;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface LichSuCauHoiRepository extends JpaRepository<LichSuCauHoi, Long> {
-    Page<LichSuCauHoi> findByCauHoiGocId(Long cauHoiGocId, Pageable pageable);
+    Page<LichSuCauHoi> findByCauHoiMauId(Long cauHoiMauId, Pageable pageable);
     Page<LichSuCauHoi> findByCauHoiVersionId(Long cauHoiVersionId, Pageable pageable);
 }

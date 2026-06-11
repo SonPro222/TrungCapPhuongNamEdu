@@ -11,11 +11,14 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "dieu_kien_tot_nghiep_mau")
-public class DieuKienTotNghiepGoc {
+public class DieuKienTotNghiepMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "syllabus_chuong_trinh_mau_id", nullable = false)
+    private Long syllabusChuongTrinhMauId;
 
 
     @Column(name = "ma", nullable = true, length = 50)

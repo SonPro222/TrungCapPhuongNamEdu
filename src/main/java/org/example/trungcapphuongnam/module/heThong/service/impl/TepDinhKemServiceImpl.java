@@ -74,7 +74,7 @@ public class TepDinhKemServiceImpl implements TepDinhKemService {
             LoaiNoiDungTep loaiNoiDung = thongTinTep.loaiNoiDung();
 
             TepDinhKem entity = TepDinhKem.builder()
-                    .tenGoc(thongTinTep.tenGoc())
+                    .tenMau(thongTinTep.tenMau())
                     .tenLuu(tenLuu)
                     .duongDanTuongDoi(duongDanTuongDoi)
                     .duongDanDayDu(filePath.toString())
@@ -108,7 +108,7 @@ public class TepDinhKemServiceImpl implements TepDinhKemService {
                     .lanNop(request.getLanNop())
                     .syllabusChuongTrinhId(request.getSyllabusChuongTrinhId())
                     .syllabusMonHocId(request.getSyllabusMonHocId())
-                    .taiLieuGocId(request.getTaiLieuGocId())
+                    .taiLieuMauId(request.getTaiLieuMauId())
                     .tangNghiepVu(request.getTangNghiepVu())
                     .duongDanNghiepVu(duongDanNghiepVu)
 
@@ -200,7 +200,7 @@ public class TepDinhKemServiceImpl implements TepDinhKemService {
             Resource resource = new UrlResource(filePath.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
-                throw new HeThongNotFoundException("Không tìm thấy file vật lý: " + tep.getTenGoc());
+                throw new HeThongNotFoundException("Không tìm thấy file vật lý: " + tep.getTenMau());
             }
 
             return resource;
@@ -264,7 +264,7 @@ public class TepDinhKemServiceImpl implements TepDinhKemService {
             addPart(parts, "chuong-trinh-mon", request.getChuongTrinhMonId());
             addPart(parts, "syllabus-chuong-trinh", request.getSyllabusChuongTrinhId());
             addPart(parts, "syllabus-mon", request.getSyllabusMonHocId());
-            addPart(parts, "tai-lieu-goc", request.getTaiLieuGocId());
+            addPart(parts, "tai-lieu-Mau", request.getTaiLieuMauId());
         } else {
             addPart(parts, "doi-tuong", request.getDoiTuongId());
         }
@@ -351,7 +351,7 @@ public class TepDinhKemServiceImpl implements TepDinhKemService {
             }
 
             if (!Files.exists(filePath) || !Files.isReadable(filePath)) {
-                throw new HeThongNotFoundException("Không tìm thấy file vật lý: " + tep.getTenGoc());
+                throw new HeThongNotFoundException("Không tìm thấy file vật lý: " + tep.getTenMau());
             }
 
             String extension = layExtensionTep(tep);
@@ -363,7 +363,7 @@ public class TepDinhKemServiceImpl implements TepDinhKemService {
             Resource resource = new UrlResource(filePath.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
-                throw new HeThongNotFoundException("Không đọc được file: " + tep.getTenGoc());
+                throw new HeThongNotFoundException("Không đọc được file: " + tep.getTenMau());
             }
 
             return resource;
@@ -455,11 +455,11 @@ public class TepDinhKemServiceImpl implements TepDinhKemService {
         String extension = tep.getExtension();
 
         if (extension == null || extension.isBlank()) {
-            String tenGoc = tep.getTenGoc() == null ? "" : tep.getTenGoc();
-            int index = tenGoc.lastIndexOf('.');
+            String tenMau = tep.getTenMau() == null ? "" : tep.getTenMau();
+            int index = tenMau.lastIndexOf('.');
 
-            if (index >= 0 && index < tenGoc.length() - 1) {
-                extension = tenGoc.substring(index + 1);
+            if (index >= 0 && index < tenMau.length() - 1) {
+                extension = tenMau.substring(index + 1);
             }
         }
 

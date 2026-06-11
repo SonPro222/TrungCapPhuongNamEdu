@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusMonHocGocChuongBaiResponse {
+public class SyllabusMonHocMauChuongBaiResponse {
 
     private Long id;
 
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
 
     private String maChuong;
 

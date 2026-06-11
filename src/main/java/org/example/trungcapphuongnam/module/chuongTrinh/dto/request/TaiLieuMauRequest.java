@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TaiLieuGocRequest {
+public class TaiLieuMauRequest {
 
     private String ma;
 

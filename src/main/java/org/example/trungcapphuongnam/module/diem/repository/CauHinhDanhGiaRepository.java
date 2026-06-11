@@ -16,6 +16,5 @@ public interface CauHinhDanhGiaRepository extends JpaRepository<CauHinhDanhGia, 
     boolean existsBySyllabusMonHocIdAndThuTu(Long syllabusMonHocId, Integer thuTu);
 
     boolean existsBySyllabusMonHocIdAndThuTuAndIdNot(Long syllabusMonHocId, Integer thuTu, Long id);
-
     List<CauHinhDanhGia> findBySyllabusMonHocIdOrderByThuTuAscIdAsc(Long syllabusMonHocId);
 }

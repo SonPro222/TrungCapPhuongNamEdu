@@ -1,8 +1,10 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.controller;
 
 import org.example.trungcapphuongnam.common.response.ApiResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ChuyenTrangThaiChuongTrinhVersionRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ChuongTrinhVersionRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ChuongTrinhVersionResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.TrangThaiChuongTrinhVersion;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhVersionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +26,10 @@ public class ChuongTrinhVersionController {
             Pageable pageable,
             @RequestParam(required = false) Long chuongTrinhId,
             @RequestParam(required = false) Boolean laHienHanh,
+            @RequestParam(required = false) TrangThaiChuongTrinhVersion trangThai,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhId, laHienHanh, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhId, laHienHanh, trangThai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)
@@ -42,6 +45,14 @@ public class ChuongTrinhVersionController {
     @PutMapping(ChuongTrinhPath.ID)
     public ResponseEntity<ApiResponse<ChuongTrinhVersionResponse>> update(@PathVariable Long id, @Valid @RequestBody ChuongTrinhVersionRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(service.update(id, request)));
+    }
+
+    @PatchMapping(ChuongTrinhPath.ID + "/trang-thai")
+    public ResponseEntity<ApiResponse<ChuongTrinhVersionResponse>> chuyenTrangThai(
+            @PathVariable Long id,
+            @Valid @RequestBody ChuyenTrangThaiChuongTrinhVersionRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.chuyenTrangThai(id, request)));
     }
 
     @DeleteMapping(ChuongTrinhPath.ID)

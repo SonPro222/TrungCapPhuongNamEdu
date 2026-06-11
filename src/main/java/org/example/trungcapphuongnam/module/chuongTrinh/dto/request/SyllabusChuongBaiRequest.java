@@ -31,7 +31,7 @@ public class SyllabusChuongBaiRequest {
 
     private Integer thuTu;
 
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
 
     private String ghiChu;
 

@@ -18,8 +18,8 @@ public class ViTriViecLam {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "chuong_trinh_version_id")
-    private Long chuongTrinhVersionId;
+    @Column(name = "syllabus_chuong_trinh_id")
+    private Long syllabusChuongTrinhId;
 
     @Column(name = "ten")
     private String ten;

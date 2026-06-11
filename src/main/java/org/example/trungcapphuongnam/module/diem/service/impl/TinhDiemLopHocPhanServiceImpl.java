@@ -7,6 +7,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHo
 import org.example.trungcapphuongnam.module.diem.entity.CauHinhDanhGia;
 import org.example.trungcapphuongnam.module.diem.entity.DiemChiTiet;
 import org.example.trungcapphuongnam.module.diem.entity.KetQuaLopHocPhan;
+import org.example.trungcapphuongnam.module.diem.mapper.KetQuaLopHocPhanMapper;
 import org.example.trungcapphuongnam.module.diem.repository.CauHinhDanhGiaRepository;
 import org.example.trungcapphuongnam.module.diem.repository.DiemChiTietRepository;
 import org.example.trungcapphuongnam.module.diem.repository.KetQuaLopHocPhanRepository;
@@ -37,6 +38,7 @@ public class TinhDiemLopHocPhanServiceImpl implements TinhDiemLopHocPhanService 
     private final KetQuaLopHocPhanRepository ketQuaLopHocPhanRepository;
     private final LopHocPhanRepository lopHocPhanRepository;
     private final SyllabusMonHocRepository syllabusMonHocRepository;
+    private final KetQuaLopHocPhanMapper ketQuaLopHocPhanMapper;
 
     @Override
     public void tinhLaiKetQuaLopHocPhan(Long sinhVienId, Long lopHocPhanId) {
@@ -81,11 +83,7 @@ public class TinhDiemLopHocPhanServiceImpl implements TinhDiemLopHocPhanService 
         diemTongKet = diemTongKet.setScale(2, RoundingMode.HALF_UP);
         KetQuaLopHocPhan ketQua = ketQuaLopHocPhanRepository
                 .findFirstBySinhVienIdAndLopHocPhanId(sinhVienId, lopHocPhanId)
-                .orElseGet(() -> KetQuaLopHocPhan.builder()
-                        .sinhVienId(sinhVienId)
-                        .lopHocPhanId(lopHocPhanId)
-                        .trangThai("nhap")
-                        .build());
+                .orElseGet(() -> ketQuaLopHocPhanMapper.toDefaultEntity(sinhVienId, lopHocPhanId));
 
         ketQua.setDiemChuyenCan(diemChuyenCan);
         ketQua.setDiemQuaTrinh(diemQuaTrinh);

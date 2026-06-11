@@ -11,7 +11,7 @@ public class ChuongTrinhVersionDieuKienTotNghiepResponse {
 
     private Long id;
     private Long chuongTrinhVersionId;
-    private Long dieuKienGocId;
+    private Long dieuKienMauId;
     private Integer thuTu;
     private String ghiChu;
 }

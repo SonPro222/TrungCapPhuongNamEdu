@@ -23,6 +23,20 @@ public interface LichHocService {
 
     LichHocResponse getById(Long id);
 
+    Page<LichHocResponse> getLichHocSinhVienHienTai(
+            TrangThaiLichHoc trangThai,
+            LocalDate tuNgay,
+            LocalDate denNgay,
+            Pageable pageable
+    );
+
+    Page<LichHocResponse> getLichDayGiangVienHienTai(
+            TrangThaiLichHoc trangThai,
+            LocalDate tuNgay,
+            LocalDate denNgay,
+            Pageable pageable
+    );
+
     LichHocResponse create(LichHocRequest request);
 
     LichHocResponse update(Long id, LichHocRequest request);

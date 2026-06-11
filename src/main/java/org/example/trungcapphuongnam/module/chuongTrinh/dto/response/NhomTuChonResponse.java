@@ -13,7 +13,7 @@ public class NhomTuChonResponse {
     private Long id;
 
     private Long chuongTrinhVersionId;
-    private Long nhomTuChonGocId;
+    private Long nhomTuChonMauId;
     private String ten;
 
     private Integer soMonChon;

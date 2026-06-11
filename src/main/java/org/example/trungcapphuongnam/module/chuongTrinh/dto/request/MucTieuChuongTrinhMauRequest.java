@@ -8,7 +8,9 @@ import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiMucTieuChuongT
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MucTieuChuongTrinhGocRequest {
+public class MucTieuChuongTrinhMauRequest {
+
+    private Long syllabusChuongTrinhMauId;
 
     private String ma;
     private LoaiMucTieuChuongTrinh loai;

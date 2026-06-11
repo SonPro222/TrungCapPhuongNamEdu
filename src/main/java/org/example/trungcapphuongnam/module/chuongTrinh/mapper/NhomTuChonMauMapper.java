@@ -1,14 +1,14 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomTuChonGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomTuChonGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomTuChonMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomTuChonMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChonMau;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NhomTuChonGocMapper {
+public class NhomTuChonMauMapper {
 
-    public NhomTuChonMau toEntity(NhomTuChonGocRequest request) {
+    public NhomTuChonMau toEntity(NhomTuChonMauRequest request) {
         if (request == null) {
             return null;
         }
@@ -20,7 +20,7 @@ public class NhomTuChonGocMapper {
                 .build();
     }
 
-    public void updateEntity(NhomTuChonMau entity, NhomTuChonGocRequest request) {
+    public void updateEntity(NhomTuChonMau entity, NhomTuChonMauRequest request) {
         if (entity == null || request == null) {
             return;
         }
@@ -30,12 +30,12 @@ public class NhomTuChonGocMapper {
         entity.setMoTa(request.getMoTa());
     }
 
-    public NhomTuChonGocResponse toResponse(NhomTuChonMau entity) {
+    public NhomTuChonMauResponse toResponse(NhomTuChonMau entity) {
         if (entity == null) {
             return null;
         }
 
-        return NhomTuChonGocResponse.builder()
+        return NhomTuChonMauResponse.builder()
                 .id(entity.getId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())

@@ -1,19 +1,20 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusChuongTrinhGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChuongTrinhGocResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinhGoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusChuongTrinhMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChuongTrinhMauResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinhMau;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SyllabusChuongTrinhGocMapper {
+public class SyllabusChuongTrinhMauMapper {
 
-    public SyllabusChuongTrinhGoc toEntity(SyllabusChuongTrinhGocRequest request) {
+    public SyllabusChuongTrinhMau toEntity(SyllabusChuongTrinhMauRequest request) {
         if (request == null) {
             return null;
         }
 
-        return SyllabusChuongTrinhGoc.builder()
+        return SyllabusChuongTrinhMau.builder()
+                .chuongTrinhId(request.getChuongTrinhId())
                 .ma(request.getMa())
                 .ten(request.getTen())
 
@@ -30,11 +31,12 @@ public class SyllabusChuongTrinhGocMapper {
                 .build();
     }
 
-    public void updateEntity(SyllabusChuongTrinhGoc entity, SyllabusChuongTrinhGocRequest request) {
+    public void updateEntity(SyllabusChuongTrinhMau entity, SyllabusChuongTrinhMauRequest request) {
         if (entity == null || request == null) {
             return;
         }
 
+        entity.setChuongTrinhId(request.getChuongTrinhId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setMucTieu(request.getMucTieu());
@@ -49,13 +51,14 @@ public class SyllabusChuongTrinhGocMapper {
         entity.setDuongDan(request.getDuongDan());
     }
 
-    public SyllabusChuongTrinhGocResponse toResponse(SyllabusChuongTrinhGoc entity) {
+    public SyllabusChuongTrinhMauResponse toResponse(SyllabusChuongTrinhMau entity) {
         if (entity == null) {
             return null;
         }
 
-        return SyllabusChuongTrinhGocResponse.builder()
+        return SyllabusChuongTrinhMauResponse.builder()
                 .id(entity.getId())
+                .chuongTrinhId(entity.getChuongTrinhId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())
                 .mucTieu(entity.getMucTieu())

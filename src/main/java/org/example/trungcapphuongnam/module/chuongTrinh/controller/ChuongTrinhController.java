@@ -33,17 +33,16 @@ public class ChuongTrinhController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ChuongTrinhResponse>>> findAll(
             Pageable pageable,
-            @RequestParam(required = false) Long nganhLoaiChuongTrinhId,
+            @RequestParam(required = false) Long nganhHeDaoTaoId,
             @RequestParam(required = false) Long nganhId,
-            @RequestParam(required = false) Long trinhDoId,
-            @RequestParam(required = false) Long loaiChuongTrinhId,
             @RequestParam(required = false) String keyword
     ) {
+        if (nganhHeDaoTaoId != null) {
+            return ResponseEntity.ok(ApiResponse.ok(service.findAllByNganhHeDaoTao(nganhHeDaoTaoId, keyword, pageable)));
+        }
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(
-                nganhLoaiChuongTrinhId,
+                nganhHeDaoTaoId,
                 nganhId,
-                trinhDoId,
-                loaiChuongTrinhId,
                 keyword,
                 pageable
         )));

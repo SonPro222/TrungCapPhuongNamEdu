@@ -1,19 +1,19 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.service;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocChuongBaiRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocChuongBaiResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocMauChuongBaiRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocMauChuongBaiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface SyllabusMonHocGocChuongBaiService {
+public interface SyllabusMonHocMauChuongBaiService {
 
-    Page<SyllabusMonHocGocChuongBaiResponse> findAll(Long syllabusMonHocGocId, String keyword, Pageable pageable);
+    Page<SyllabusMonHocMauChuongBaiResponse> findAll(Long syllabusMonHocMauId, String keyword, Pageable pageable);
 
-    SyllabusMonHocGocChuongBaiResponse findById(Long id);
+    SyllabusMonHocMauChuongBaiResponse findById(Long id);
 
-    SyllabusMonHocGocChuongBaiResponse create(SyllabusMonHocGocChuongBaiRequest request);
+    SyllabusMonHocMauChuongBaiResponse create(SyllabusMonHocMauChuongBaiRequest request);
 
-    SyllabusMonHocGocChuongBaiResponse update(Long id, SyllabusMonHocGocChuongBaiRequest request);
+    SyllabusMonHocMauChuongBaiResponse update(Long id, SyllabusMonHocMauChuongBaiRequest request);
 
     void delete(Long id);
 }

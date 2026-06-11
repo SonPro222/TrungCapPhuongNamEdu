@@ -11,7 +11,7 @@ public final class CauHoiVersionMapper {
         if (entity == null) return null;
         return CauHoiVersionResponse.builder()
             .id(entity.getId())
-            .cauHoiGocId(entity.getCauHoiGocId())
+            .cauHoiMauId(entity.getCauHoiMauId())
             .versionNo(entity.getVersionNo())
             .noiDung(entity.getNoiDung())
             .loaiCauHoi(entity.getLoaiCauHoi())
@@ -32,7 +32,7 @@ public final class CauHoiVersionMapper {
     public static CauHoiVersion toEntity(CauHoiVersionRequest request) {
         if (request == null) return null;
         return CauHoiVersion.builder()
-            .cauHoiGocId(request.getCauHoiGocId())
+            .cauHoiMauId(request.getCauHoiMauId())
             .versionNo(request.getVersionNo())
             .noiDung(request.getNoiDung())
             .loaiCauHoi(request.getLoaiCauHoi())
@@ -50,7 +50,7 @@ public final class CauHoiVersionMapper {
 
     public static void updateEntity(CauHoiVersion entity, CauHoiVersionRequest request) {
         if (entity == null || request == null) return;
-        entity.setCauHoiGocId(request.getCauHoiGocId());
+        entity.setCauHoiMauId(request.getCauHoiMauId());
         entity.setVersionNo(request.getVersionNo());
         entity.setNoiDung(request.getNoiDung());
         entity.setLoaiCauHoi(request.getLoaiCauHoi());

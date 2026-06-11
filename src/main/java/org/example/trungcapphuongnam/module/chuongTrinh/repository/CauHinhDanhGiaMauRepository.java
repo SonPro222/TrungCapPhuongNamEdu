@@ -8,13 +8,13 @@ import java.util.List;
 
 public interface CauHinhDanhGiaMauRepository extends JpaRepository<CauHinhDanhGiaMau, Long>, JpaSpecificationExecutor<CauHinhDanhGiaMau> {
 
-    List<CauHinhDanhGiaMau> findBySyllabusMonHocGocIdOrderByThuTuAscIdAsc(Long syllabusMonHocGocId);
+    List<CauHinhDanhGiaMau> findBySyllabusMonHocMauIdOrderByThuTuAscIdAsc(Long syllabusMonHocMauId);
 
-    boolean existsBySyllabusMonHocGocIdAndTenCotDiem(Long syllabusMonHocGocId, String tenCotDiem);
+    boolean existsBySyllabusMonHocMauIdAndTenCotDiem(Long syllabusMonHocMauId, String tenCotDiem);
 
-    boolean existsBySyllabusMonHocGocIdAndTenCotDiemAndIdNot(Long syllabusMonHocGocId, String tenCotDiem, Long id);
+    boolean existsBySyllabusMonHocMauIdAndTenCotDiemAndIdNot(Long syllabusMonHocMauId, String tenCotDiem, Long id);
 
-    boolean existsBySyllabusMonHocGocIdAndThuTu(Long syllabusMonHocGocId, Integer thuTu);
+    boolean existsBySyllabusMonHocMauIdAndThuTu(Long syllabusMonHocMauId, Integer thuTu);
 
-    boolean existsBySyllabusMonHocGocIdAndThuTuAndIdNot(Long syllabusMonHocGocId, Integer thuTu, Long id);
+    boolean existsBySyllabusMonHocMauIdAndThuTuAndIdNot(Long syllabusMonHocMauId, Integer thuTu, Long id);
 }

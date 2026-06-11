@@ -9,9 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusMonHocGocChuongBaiRequest {
+public class SyllabusMonHocMauChuongBaiRequest {
 
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
 
     private String maChuong;
 

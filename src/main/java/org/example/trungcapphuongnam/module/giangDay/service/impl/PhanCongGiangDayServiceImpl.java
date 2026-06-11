@@ -73,7 +73,7 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
                 .stream()
                 .collect(Collectors.toMap(GiaoVien::getId, Function.identity()));
 
-        return page.map(item -> toResponse(item, lopHocPhanMap, giaoVienMap));
+        return page.map(item -> mapper.toResponse(item, lopHocPhanMap, giaoVienMap));
     }
 
     @Override
@@ -93,7 +93,7 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
                 .stream()
                 .collect(Collectors.toMap(GiaoVien::getId, Function.identity()));
 
-        return toResponse(entity, lopHocPhanMap, giaoVienMap);
+        return mapper.toResponse(entity, lopHocPhanMap, giaoVienMap);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<LopHocPhan> lopHocPhanRoot = subquery.from(LopHocPhan.class);
 
-                subquery.select(lopHocPhanRoot.get("id"));
+                subquery.select(cb.literal(1L));
                 subquery.where(
                         cb.and(
                                 cb.equal(lopHocPhanRoot.get("id"), root.get("lopHocPhanId")),
@@ -162,7 +162,7 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<GiaoVien> giaoVienRoot = subquery.from(GiaoVien.class);
 
-                subquery.select(giaoVienRoot.get("id"));
+                subquery.select(cb.literal(1L));
                 subquery.where(
                         cb.and(
                                 cb.equal(giaoVienRoot.get("id"), root.get("giaoVienId")),
@@ -180,25 +180,5 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
         };
     }
 
-    private PhanCongGiangDayResponse toResponse(
-            PhanCongGiangDay entity,
-            Map<Long, LopHocPhan> lopHocPhanMap,
-            Map<Long, GiaoVien> giaoVienMap
-    ) {
-        PhanCongGiangDayResponse response = mapper.toResponse(entity);
 
-        LopHocPhan lopHocPhan = lopHocPhanMap.get(entity.getLopHocPhanId());
-        if (lopHocPhan != null) {
-            response.setMaLop(lopHocPhan.getMaLop());
-            response.setTenLop(lopHocPhan.getTenLop());
-        }
-
-        GiaoVien giaoVien = giaoVienMap.get(entity.getGiaoVienId());
-        if (giaoVien != null) {
-            response.setMaGiaoVien(giaoVien.getMaGiaoVien());
-            response.setTenGiaoVien(giaoVien.getHoTen());
-        }
-
-        return response;
-    }
 }

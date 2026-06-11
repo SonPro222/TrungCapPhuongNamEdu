@@ -21,10 +21,10 @@ public class ChuongTrinhVersionMucTieuController {
     public ResponseEntity<ApiResponse<Page<ChuongTrinhVersionMucTieuResponse>>> findAll(
             Pageable pageable,
             @RequestParam(required = false) Long chuongTrinhVersionId,
-            @RequestParam(required = false) Long mucTieuGocId,
+            @RequestParam(required = false) Long mucTieuMauId,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, mucTieuGocId, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, mucTieuMauId, keyword, pageable)));
     }
 
     @GetMapping("/{id}")

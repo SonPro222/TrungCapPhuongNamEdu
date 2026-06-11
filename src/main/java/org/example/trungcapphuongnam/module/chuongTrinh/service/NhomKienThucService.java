@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 public interface NhomKienThucService {
     Page<NhomKienThucResponse> findAll(
             Long chuongTrinhVersionId,
-            Long nhomKienThucGocId,
+            Long nhomKienThucMauId,
             String loaiNhom,
             String keyword,
             Pageable pageable

@@ -9,6 +9,6 @@ import org.example.trungcapphuongnam.module.lms.enums.MucDoCauHoi;
 import org.example.trungcapphuongnam.module.lms.enums.TrangThaiCauHoiVersion;
 
 public interface CauHoiVersionRepository extends JpaRepository<CauHoiVersion, Long> {
-    Page<CauHoiVersion> findByCauHoiGocId(Long cauHoiGocId, Pageable pageable);
+    Page<CauHoiVersion> findByCauHoiMauId(Long cauHoiMauId, Pageable pageable);
     Page<CauHoiVersion> findByTrangThai(TrangThaiCauHoiVersion trangThai, Pageable pageable);
 }

@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface SyllabusMonHocTaiLieuService {
 
-    Page<SyllabusMonHocTaiLieuResponse> findAll(Long syllabusMonId, Long taiLieuGocId, String keyword, Pageable pageable);
+    Page<SyllabusMonHocTaiLieuResponse> findAll(Long syllabusMonId, Long taiLieuMauId, String keyword, Pageable pageable);
 
     SyllabusMonHocTaiLieuResponse findById(Long id);
 

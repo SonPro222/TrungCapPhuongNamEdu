@@ -22,8 +22,8 @@ public class CauHoiVersion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cau_hoi_goc_id", nullable = false)
-    private Long cauHoiGocId;
+    @Column(name = "cau_hoi_mau_id", nullable = false)
+    private Long cauHoiMauId;
 
     @Column(name = "version_no", nullable = false)
     private Integer versionNo;

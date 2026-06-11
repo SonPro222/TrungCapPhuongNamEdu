@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class DieuKienTotNghiepRequest {
 
-    @NotNull(message = "chuong_trinh_version_id không được để trống")
+    private Long syllabusChuongTrinhId;
     private Long chuongTrinhVersionId;
 
     @NotBlank(message = "noi_dung không được để trống")

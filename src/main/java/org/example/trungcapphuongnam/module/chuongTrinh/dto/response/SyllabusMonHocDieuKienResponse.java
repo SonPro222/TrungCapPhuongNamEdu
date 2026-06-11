@@ -16,7 +16,7 @@ public class SyllabusMonHocDieuKienResponse {
 
     private Long syllabusMonId;
 
-    private Long dieuKienGocId;
+    private Long dieuKienMauId;
 
     private Integer thuTu;
 

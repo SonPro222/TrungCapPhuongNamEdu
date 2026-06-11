@@ -1,20 +1,20 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.service;
 
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.TaiLieuGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.TaiLieuGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.TaiLieuMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.TaiLieuMauResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface TaiLieuGocService {
+public interface TaiLieuMauService {
 
-    Page<TaiLieuGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable);
+    Page<TaiLieuMauResponse> findAll(String ma, String loai, String keyword, Pageable pageable);
 
-    TaiLieuGocResponse findById(Long id);
+    TaiLieuMauResponse findById(Long id);
 
-    TaiLieuGocResponse create(TaiLieuGocRequest request);
+    TaiLieuMauResponse create(TaiLieuMauRequest request);
 
-    TaiLieuGocResponse update(Long id, TaiLieuGocRequest request);
+    TaiLieuMauResponse update(Long id, TaiLieuMauRequest request);
 
     void delete(Long id);
 }

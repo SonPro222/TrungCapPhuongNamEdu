@@ -14,7 +14,7 @@ public class ChuongTrinhVersionMucTieuMapper {
         }
         ChuongTrinhVersionMucTieu entity = new ChuongTrinhVersionMucTieu();
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setMucTieuGocId(request.getMucTieuGocId());
+        entity.setMucTieuMauId(request.getMucTieuMauId());
         entity.setThuTu(request.getThuTu());
         entity.setGhiChu(request.getGhiChu());
         return entity;
@@ -25,7 +25,7 @@ public class ChuongTrinhVersionMucTieuMapper {
             return;
         }
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setMucTieuGocId(request.getMucTieuGocId());
+        entity.setMucTieuMauId(request.getMucTieuMauId());
         entity.setThuTu(request.getThuTu());
         entity.setGhiChu(request.getGhiChu());
     }
@@ -37,7 +37,7 @@ public class ChuongTrinhVersionMucTieuMapper {
         return ChuongTrinhVersionMucTieuResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
-                .mucTieuGocId(entity.getMucTieuGocId())
+                .mucTieuMauId(entity.getMucTieuMauId())
                 .thuTu(entity.getThuTu())
                 .ghiChu(entity.getGhiChu())
                 .build();

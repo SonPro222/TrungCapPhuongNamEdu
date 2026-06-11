@@ -7,11 +7,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusMonHocGocTaiLieuRequest {
+public class SyllabusMonHocMauTaiLieuRequest {
 
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
 
-    private Long taiLieuGocId;
+    private Long taiLieuMauId;
     private String ma;
 
     private String ten;

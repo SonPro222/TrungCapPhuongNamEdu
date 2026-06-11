@@ -156,39 +156,49 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                 )
                 .toList();
 
+        List<SyllabusChuongTrinhResponse> syllabusChuongTrinh = syllabusChuongTrinhRepository
+                .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+                .map(syllabusChuongTrinhMapper::toResponse)
+                .getContent();
+
+        Long syllabusChuongTrinhId = syllabusChuongTrinh.isEmpty() ? null : syllabusChuongTrinh.get(0).getId();
+
         return ChuongTrinhCauTrucResponse.builder()
                 .chuongTrinh(chuongTrinhMapper.toResponse(chuongTrinh))
                 .version(chuongTrinhVersionMapper.toResponse(version))
                 .mucTieuChuongTrinh(
-                        mucTieuChuongTrinhRepository
-                                .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+                        syllabusChuongTrinhId == null
+                                ? List.of()
+                                : mucTieuChuongTrinhRepository
+                                .findBySyllabusChuongTrinhId(syllabusChuongTrinhId, pageable)
                                 .map(mucTieuChuongTrinhMapper::toResponse)
                                 .getContent()
                 )
                 .nangLucDauRa(
-                        nangLucDauRaRepository
-                                .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+                        syllabusChuongTrinhId == null
+                                ? List.of()
+                                : nangLucDauRaRepository
+                                .findBySyllabusChuongTrinhId(syllabusChuongTrinhId, pageable)
                                 .map(nangLucDauRaMapper::toResponse)
                                 .getContent()
                 )
                 .viTriViecLam(
-                        viTriViecLamRepository
-                                .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+                        syllabusChuongTrinhId == null
+                                ? List.of()
+                                : viTriViecLamRepository
+                                .findBySyllabusChuongTrinhId(syllabusChuongTrinhId, pageable)
                                 .map(viTriViecLamMapper::toResponse)
                                 .getContent()
                 )
                 .dieuKienTotNghiep(
-                        dieuKienTotNghiepRepository
-                                .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+                        syllabusChuongTrinhId == null
+                                ? List.of()
+                                : dieuKienTotNghiepRepository
+                                .findBySyllabusChuongTrinhId(syllabusChuongTrinhId, pageable)
                                 .map(dieuKienTotNghiepMapper::toResponse)
                                 .getContent()
                 )
-                .syllabusChuongTrinh(
-                        syllabusChuongTrinhRepository
-                                .findByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
-                                .map(syllabusChuongTrinhMapper::toResponse)
-                                .getContent()
-                )
+                .syllabusChuongTrinh(syllabusChuongTrinh)
                 .nhomKienThuc(nhomKienThuc)
                 .nhomTuChon(nhomTuChon)
                 .khungKy(khungKy)
@@ -336,7 +346,7 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
         return chuongTrinhMonQuyDoiDiemMauRepository.findBySyllabusMonHocId(syllabusMonHocId)
                 .stream()
                 .map(row -> {
-                    QuyDoiDiemMau mau = row.getQuyDoiDiemMauId() == null
+                    QuyDoiDiemMau Mau = row.getQuyDoiDiemMauId() == null
                             ? null
                             : quyDoiDiemMauRepository.findById(row.getQuyDoiDiemMauId()).orElse(null);
 
@@ -346,18 +356,18 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                             .syllabusMonHocId(row.getSyllabusMonHocId())
                             .quyDoiDiemMauId(row.getQuyDoiDiemMauId())
                             .ghiChu(row.getGhiChu())
-                            .ma(mau != null ? mau.getMa() : null)
-                            .ten(mau != null ? mau.getTen() : null)
-                            .nguongTu(mau != null ? mau.getNguongTu() : null)
-                            .nguongDen(mau != null ? mau.getNguongDen() : null)
-                            .diemQuyDoi(mau != null ? mau.getDiemQuyDoi() : null)
-                            .ketQua(mau != null && mau.getKetQua() != null ? mau.getKetQua().getValue() : null)
-                            .congThuc(mau != null ? mau.getCongThuc() : null)
-                            .loaiMau(mau != null ? mau.getLoaiMau() : null)
-                            .tyLe(mau != null ? mau.getTyLe() : null)
-                            .diemToiDa(mau != null ? mau.getDiemToiDa() : null)
-                            .thuTu(mau != null ? mau.getThuTu() : null)
-                            .batBuoc(mau != null ? mau.getBatBuoc() : null)
+                            .ma(Mau != null ? Mau.getMa() : null)
+                            .ten(Mau != null ? Mau.getTen() : null)
+                            .nguongTu(Mau != null ? Mau.getNguongTu() : null)
+                            .nguongDen(Mau != null ? Mau.getNguongDen() : null)
+                            .diemQuyDoi(Mau != null ? Mau.getDiemQuyDoi() : null)
+                            .ketQua(Mau != null && Mau.getKetQua() != null ? Mau.getKetQua().getValue() : null)
+                            .congThuc(Mau != null ? Mau.getCongThuc() : null)
+                            .loaiMau(Mau != null ? Mau.getLoaiMau() : null)
+                            .tyLe(Mau != null ? Mau.getTyLe() : null)
+                            .diemToiDa(Mau != null ? Mau.getDiemToiDa() : null)
+                            .thuTu(Mau != null ? Mau.getThuTu() : null)
+                            .batBuoc(Mau != null ? Mau.getBatBuoc() : null)
                             .build();
                 })
                 .toList();

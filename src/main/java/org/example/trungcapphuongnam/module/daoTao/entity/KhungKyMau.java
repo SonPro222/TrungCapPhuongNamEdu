@@ -16,16 +16,16 @@ import java.time.LocalDateTime;
         name = "khung_ky_mau",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uq_khung_ky_goc_ma_ky",
+                        name = "uq_khung_ky_mau_ma_ky",
                         columnNames = "ma_ky"
                 ),
                 @UniqueConstraint(
-                        name = "uq_khung_ky_goc_thu_tu",
+                        name = "uq_khung_ky_mau_thu_tu",
                         columnNames = "thu_tu"
                 )
         }
 )
-public class KhungKyGoc {
+public class KhungKyMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.lms.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.module.lms.enums.TrangThaiCauHoiGoc;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiCauHoiMau;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,7 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Builder
 @Entity
 @Table(name = "cau_hoi_mau")
-public class CauHoiGoc {
+public class CauHoiMau {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,7 +30,7 @@ public class CauHoiGoc {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private TrangThaiCauHoiGoc trangThai;
+    private TrangThaiCauHoiMau trangThai;
 
     @Column(name = "don_vi_so_huu_id")
     private Long donViSoHuuId;

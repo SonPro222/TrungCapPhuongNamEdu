@@ -23,15 +23,15 @@ public class ChuongTrinhVersionMucTieuServiceImpl implements ChuongTrinhVersionM
     private final ChuongTrinhVersionMucTieuRepository repository;
     private final ChuongTrinhVersionMucTieuMapper mapper;
     private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
-    private final MucTieuChuongTrinhGocRepository mucTieuChuongTrinhGocRepository;
+    private final MucTieuChuongTrinhMauRepository mucTieuChuongTrinhMauRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionMucTieuResponse> findAll(Long chuongTrinhVersionId, Long mucTieuGocId, String keyword, Pageable pageable) {
+    public Page<ChuongTrinhVersionMucTieuResponse> findAll(Long chuongTrinhVersionId, Long mucTieuMauId, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<ChuongTrinhVersionMucTieu>empty()
                     .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                    .and(LocJpa.eq("mucTieuGocId", mucTieuGocId))
+                    .and(LocJpa.eq("mucTieuMauId", mucTieuMauId))
                     .and(LocJpa.keyword(keyword, "ghiChu")),
                 pageable
         ).map(mapper::toResponse);
@@ -50,10 +50,10 @@ public class ChuongTrinhVersionMucTieuServiceImpl implements ChuongTrinhVersionM
         if (!chuongTrinhVersionRepository.existsById(request.getChuongTrinhVersionId())) {
             throw new ResourceNotFoundException("Version chương trình không tồn tại: " + request.getChuongTrinhVersionId());
         }
-        if (!mucTieuChuongTrinhGocRepository.existsById(request.getMucTieuGocId())) {
-            throw new ResourceNotFoundException("Mục tiêu gốc không tồn tại: " + request.getMucTieuGocId());
+        if (!mucTieuChuongTrinhMauRepository.existsById(request.getMucTieuMauId())) {
+            throw new ResourceNotFoundException("Mục tiêu gốc không tồn tại: " + request.getMucTieuMauId());
         }
-        if (request.getChuongTrinhVersionId() != null && request.getMucTieuGocId() != null && repository.existsByChuongTrinhVersionIdAndMucTieuGocId(request.getChuongTrinhVersionId(), request.getMucTieuGocId())) {
+        if (request.getChuongTrinhVersionId() != null && request.getMucTieuMauId() != null && repository.existsByChuongTrinhVersionIdAndMucTieuMauId(request.getChuongTrinhVersionId(), request.getMucTieuMauId())) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được tạo trùng.");
         }
         validator.validateChuongTrinhVersionMucTieu(request, null);
@@ -68,10 +68,10 @@ public class ChuongTrinhVersionMucTieuServiceImpl implements ChuongTrinhVersionM
         if (!chuongTrinhVersionRepository.existsById(request.getChuongTrinhVersionId())) {
             throw new ResourceNotFoundException("Version chương trình không tồn tại: " + request.getChuongTrinhVersionId());
         }
-        if (!mucTieuChuongTrinhGocRepository.existsById(request.getMucTieuGocId())) {
-            throw new ResourceNotFoundException("Mục tiêu gốc không tồn tại: " + request.getMucTieuGocId());
+        if (!mucTieuChuongTrinhMauRepository.existsById(request.getMucTieuMauId())) {
+            throw new ResourceNotFoundException("Mục tiêu gốc không tồn tại: " + request.getMucTieuMauId());
         }
-        if (request.getChuongTrinhVersionId() != null && request.getMucTieuGocId() != null && repository.existsByChuongTrinhVersionIdAndMucTieuGocIdAndIdNot(request.getChuongTrinhVersionId(), request.getMucTieuGocId(), id)) {
+        if (request.getChuongTrinhVersionId() != null && request.getMucTieuMauId() != null && repository.existsByChuongTrinhVersionIdAndMucTieuMauIdAndIdNot(request.getChuongTrinhVersionId(), request.getMucTieuMauId(), id)) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được cập nhật trùng.");
         }
         validator.validateChuongTrinhVersionMucTieu(request, id);

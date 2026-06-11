@@ -20,8 +20,8 @@ public class QuyDoiDiemMau {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "syllabus_mon_hoc_goc_id")
-    private Long syllabusMonHocGocId;
+    @Column(name = "syllabus_mon_hoc_mau_id")
+    private Long syllabusMonHocMauId;
 
     @Column(name = "ma", nullable = true, length = 50)
     private String ma;

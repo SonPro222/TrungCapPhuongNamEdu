@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @Builder
 public class CauHinhDanhGiaMauRequest {
 
-    @NotNull(message = "syllabusMonHocGocId không được để trống")
-    private Long syllabusMonHocGocId;
+    @NotNull(message = "syllabusMonHocMauId không được để trống")
+    private Long syllabusMonHocMauId;
 
     /** Deprecated: giữ để không vỡ payload cũ, không dùng trong nghiệp vụ mới. */
     private Long chuongTrinhMonId;

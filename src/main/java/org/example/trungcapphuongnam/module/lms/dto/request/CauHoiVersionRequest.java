@@ -14,7 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CauHoiVersionRequest {
-    private Long cauHoiGocId;
+    private Long cauHoiMauId;
 
     private Integer versionNo;
 

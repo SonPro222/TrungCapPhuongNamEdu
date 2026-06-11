@@ -3,13 +3,13 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomTuChonGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomTuChonGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomTuChonMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomTuChonMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChonMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.NhomTuChonMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.NhomTuChonMauRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomTuChonGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomTuChonMauService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class NhomTuChonGocServiceImpl implements NhomTuChonGocService {
+public class NhomTuChonMauServiceImpl implements NhomTuChonMauService {
 
     private final NhomTuChonMauRepository repository;
     private final NhomTuChonMauMapper mapper;
@@ -28,7 +28,7 @@ public class NhomTuChonGocServiceImpl implements NhomTuChonGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<NhomTuChonGocResponse> findAll(String ma, String keyword, Pageable pageable) {
+    public Page<NhomTuChonMauResponse> findAll(String ma, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<NhomTuChonMau>empty()
                         .and(LocJpa.like("ma", ma))
@@ -39,7 +39,7 @@ public class NhomTuChonGocServiceImpl implements NhomTuChonGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public NhomTuChonGocResponse findById(Long id) {
+    public NhomTuChonMauResponse findById(Long id) {
         NhomTuChonMau entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nhóm tự chọn gốc không tồn tại: " + id));
 
@@ -47,19 +47,19 @@ public class NhomTuChonGocServiceImpl implements NhomTuChonGocService {
     }
 
     @Override
-    public NhomTuChonGocResponse create(NhomTuChonGocRequest request) {
-        validator.validateNhomTuChonGoc(request, null);
+    public NhomTuChonMauResponse create(NhomTuChonMauRequest request) {
+        validator.validateNhomTuChonMau(request, null);
 
         NhomTuChonMau entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
 
     @Override
-    public NhomTuChonGocResponse update(Long id, NhomTuChonGocRequest request) {
+    public NhomTuChonMauResponse update(Long id, NhomTuChonMauRequest request) {
         NhomTuChonMau entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nhóm tự chọn gốc không tồn tại: " + id));
 
-        validator.validateNhomTuChonGoc(request, id);
+        validator.validateNhomTuChonMau(request, id);
 
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
@@ -71,7 +71,7 @@ public class NhomTuChonGocServiceImpl implements NhomTuChonGocService {
             throw new ResourceNotFoundException("Nhóm tự chọn gốc không tồn tại: " + id);
         }
 
-        xoaChuongTrinhCascadeService.xoaTheoNhomTuChonGocId(id);
+        xoaChuongTrinhCascadeService.xoaTheoNhomTuChonMauId(id);
 
         repository.deleteById(id);
     }

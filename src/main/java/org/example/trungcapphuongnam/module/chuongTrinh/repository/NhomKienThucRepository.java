@@ -18,15 +18,15 @@ public interface NhomKienThucRepository extends JpaRepository<NhomKienThuc, Long
     boolean existsByChuongTrinhVersionIdAndThuTu(Long chuongTrinhVersionId, Integer thuTu);
 
     boolean existsByChuongTrinhVersionIdAndThuTuAndIdNot(Long chuongTrinhVersionId, Integer thuTu, Long id);
-    boolean existsByChuongTrinhVersionIdAndNhomKienThucGocId(
+    boolean existsByChuongTrinhVersionIdAndNhomKienThucMauId(
             Long chuongTrinhVersionId,
-            Long nhomKienThucGocId
+            Long nhomKienThucMauId
     );
 
-    boolean existsByChuongTrinhVersionIdAndNhomKienThucGocIdAndIdNot(
+    boolean existsByChuongTrinhVersionIdAndNhomKienThucMauIdAndIdNot(
             Long chuongTrinhVersionId,
-            Long nhomKienThucGocId,
+            Long nhomKienThucMauId,
             Long id
     );
-    Page<NhomKienThuc> findByNhomKienThucGocId(Long nhomKienThucGocId, Pageable pageable);
+    Page<NhomKienThuc> findByNhomKienThucMauId(Long nhomKienThucMauId, Pageable pageable);
 }

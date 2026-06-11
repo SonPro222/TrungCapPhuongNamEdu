@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 @Table(
         name = "nhom_kien_thuc_mau",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uq_nhom_kien_thuc_goc_ma", columnNames = "ma")
+                @UniqueConstraint(name = "uq_nhom_kien_thuc_mau_ma", columnNames = "ma")
         }
 )
-public class NhomKienThucGoc {
+public class NhomKienThucMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

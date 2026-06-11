@@ -16,6 +16,9 @@ public class LichHocResponse {
     private Long lopHocPhanId;
     private String maLop;
     private String tenLop;
+    private Integer soBuoiHoc;
+    private Long soBuoiDaXep;
+    private Long soBuoiConLai;
 
     private Long giaoVienId;
     private String maGiaoVien;
@@ -32,6 +35,8 @@ public class LichHocResponse {
     private LocalTime gioKetThuc;
 
     private LocalDate ngayHoc;
+    private Integer thuTrongTuan;
+    private Integer ngayTrongThang;
     private String noiDungBuoiHoc;
     private TrangThaiLichHoc trangThai;
     private String ghiChu;

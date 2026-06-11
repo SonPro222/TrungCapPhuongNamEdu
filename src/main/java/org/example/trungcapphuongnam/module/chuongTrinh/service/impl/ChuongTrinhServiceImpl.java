@@ -1,5 +1,6 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 
+import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ChuongTrinhRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ChuongTrinhResponse;
@@ -10,8 +11,12 @@ import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNgh
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhService;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
+import org.example.trungcapphuongnam.module.daoTao.entity.Nganh;
+import org.example.trungcapphuongnam.module.daoTao.entity.NganhHeDaoTao;
 import org.example.trungcapphuongnam.module.daoTao.entity.NganhLoaiChuongTrinh;
+import org.example.trungcapphuongnam.module.daoTao.repository.NganhHeDaoTaoRepository;
 import org.example.trungcapphuongnam.module.daoTao.repository.NganhLoaiChuongTrinhRepository;
+import org.example.trungcapphuongnam.module.daoTao.repository.NganhRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,26 +32,37 @@ public class ChuongTrinhServiceImpl implements ChuongTrinhService {
     private final ChuongTrinhMapper mapper;
     private final ChuongTrinhNghiepVuValidator validator;
     private final NganhLoaiChuongTrinhRepository nganhLoaiChuongTrinhRepository;
+    private final NganhHeDaoTaoRepository nganhHeDaoTaoRepository;
+    private final NganhRepository nganhRepository;
 
     @Override
     @Transactional(readOnly = true)
     public Page<ChuongTrinhResponse> findAll(
-            Long nganhLoaiChuongTrinhId,
+            Long nganhHeDaoTaoId,
             Long nganhId,
-            Long trinhDoId,
-            Long loaiChuongTrinhId,
             String keyword,
             Pageable pageable
     ) {
         return repository.findAll(
                 LocJpa.<ChuongTrinh>empty()
-                        .and(LocJpa.eq("nganhLoaiChuongTrinhId", nganhLoaiChuongTrinhId))
+                        .and(LocJpa.eq("nganhHeDaoTaoId", nganhHeDaoTaoId))
                         .and(LocJpa.eq("nganhId", nganhId))
-                        .and(LocJpa.eq("trinhDoId", trinhDoId))
-                        .and(LocJpa.eq("loaiChuongTrinhId", loaiChuongTrinhId))
                         .and(LocJpa.keyword(keyword, "maChuongTrinh", "tenChuongTrinh", "doiTuongTuyenSinh", "thoiGianDaoTao")),
                 pageable
-        ).map(mapper::toResponse);
+        ).map(this::toResponseEnriched);
+    }
+
+    public Page<ChuongTrinhResponse> findAllByNganhHeDaoTao(
+            Long nganhHeDaoTaoId,
+            String keyword,
+            Pageable pageable
+    ) {
+        return repository.findAll(
+                LocJpa.<ChuongTrinh>empty()
+                        .and(LocJpa.eq("nganhHeDaoTaoId", nganhHeDaoTaoId))
+                        .and(LocJpa.keyword(keyword, "maChuongTrinh", "tenChuongTrinh", "doiTuongTuyenSinh", "thoiGianDaoTao")),
+                pageable
+        ).map(this::toResponseEnriched);
     }
 
     @Override
@@ -54,30 +70,25 @@ public class ChuongTrinhServiceImpl implements ChuongTrinhService {
     public ChuongTrinhResponse findById(Long id) {
         ChuongTrinh entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ChuongTrinh không tồn tại: " + id));
-        return mapper.toResponse(entity);
+        return toResponseEnriched(entity);
     }
 
     @Override
     public ChuongTrinhResponse create(ChuongTrinhRequest request) {
         validator.validateChuongTrinh(request, null);
-
         ChuongTrinh entity = mapper.toEntity(request);
-        ganLoaiChuongTrinhTheoNganh(entity, request.getNganhLoaiChuongTrinhId());
-
-        return mapper.toResponse(repository.save(entity));
+        ganThongTinNganh(entity, request);
+        return toResponseEnriched(repository.save(entity));
     }
 
     @Override
     public ChuongTrinhResponse update(Long id, ChuongTrinhRequest request) {
         validator.validateChuongTrinh(request, id);
-
         ChuongTrinh entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ChuongTrinh không tồn tại: " + id));
-
         mapper.updateEntity(entity, request);
-        ganLoaiChuongTrinhTheoNganh(entity, request.getNganhLoaiChuongTrinhId());
-
-        return mapper.toResponse(repository.save(entity));
+        ganThongTinNganh(entity, request);
+        return toResponseEnriched(repository.save(entity));
     }
 
     @Override
@@ -85,16 +96,45 @@ public class ChuongTrinhServiceImpl implements ChuongTrinhService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("ChuongTrinh không tồn tại: " + id);
         }
-
         xoaChuongTrinhCascadeService.xoaTheoChuongTrinhId(id);
     }
 
-    private void ganLoaiChuongTrinhTheoNganh(ChuongTrinh entity, Long nganhLoaiChuongTrinhId) {
-        NganhLoaiChuongTrinh nganhLoai = nganhLoaiChuongTrinhRepository.findById(nganhLoaiChuongTrinhId)
-                .orElseThrow(() -> new ResourceNotFoundException("Loại chương trình theo ngành không tồn tại: " + nganhLoaiChuongTrinhId));
+    // ---- helpers ----
 
-        entity.setNganhLoaiChuongTrinhId(nganhLoai.getId());
-        entity.setNganhId(nganhLoai.getNganhId());
-        entity.setLoaiChuongTrinhId(nganhLoai.getLoaiChuongTrinhId());
+    private void ganThongTinNganh(ChuongTrinh entity, ChuongTrinhRequest request) {
+        if (request.getNganhHeDaoTaoId() == null) {
+            throw new BadRequestException("nganhHeDaoTaoId không được để trống");
+        }
+
+        ganNganhHeDaoTao(entity, request.getNganhHeDaoTaoId());
+    }
+
+    private void ganNganhHeDaoTao(ChuongTrinh entity, Long nganhHeDaoTaoId) {
+        NganhHeDaoTao nganhHe = nganhHeDaoTaoRepository.findById(nganhHeDaoTaoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ngành hệ đào tạo không tồn tại: " + nganhHeDaoTaoId));
+
+        entity.setNganhHeDaoTaoId(nganhHe.getId());
+
+        entity.setNganhId(nganhHe.getNganhId());
+
+        if (entity.getThoiGianDaoTao() == null || entity.getThoiGianDaoTao().isBlank()) {
+            if (nganhHe.getSoThang() != null && nganhHe.getSoKy() != null) {
+                entity.setThoiGianDaoTao(nganhHe.getSoThang() + " tháng / " + nganhHe.getSoKy() + " kỳ");
+            }
+        }
+    }
+
+
+    private ChuongTrinhResponse toResponseEnriched(ChuongTrinh entity) {
+        NganhHeDaoTao nganhHe = entity.getNganhHeDaoTaoId() != null
+                ? nganhHeDaoTaoRepository.findById(entity.getNganhHeDaoTaoId()).orElse(null)
+                : null;
+
+        Nganh nganh = null;
+        if (nganhHe != null && nganhHe.getNganhId() != null) {
+            nganh = nganhRepository.findById(nganhHe.getNganhId()).orElse(null);
+        }
+
+        return mapper.toResponseEnriched(entity, nganh, nganhHe);
     }
 }

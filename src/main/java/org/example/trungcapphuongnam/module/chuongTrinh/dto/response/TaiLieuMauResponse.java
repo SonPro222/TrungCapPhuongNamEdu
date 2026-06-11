@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TaiLieuGocResponse {
+public class TaiLieuMauResponse {
 
     private Long id;
 

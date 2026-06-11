@@ -15,7 +15,7 @@ public class NhomKienThucRequest {
     private Long chuongTrinhVersionId;
 
     private String ma;
-    private Long nhomKienThucGocId;
+    private Long nhomKienThucMauId;
     @NotBlank(message = "ten không được để trống")
     private String ten;
 
@@ -24,15 +24,7 @@ public class NhomKienThucRequest {
     @NotBlank(message = "loai_nhom không được để trống")
     private String loaiNhom;
 
-//    private BigDecimal tongTinChi;
-//
-//    private BigDecimal tongSoGio;
-//
-//    private BigDecimal tongGioLyThuyet;
-//
-//    private BigDecimal tongGioThucHanh;
-//
-//    private BigDecimal tongGioKiemTra;
+
 
     private String moTa;
 

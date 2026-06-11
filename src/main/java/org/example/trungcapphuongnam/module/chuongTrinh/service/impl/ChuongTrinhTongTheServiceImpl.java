@@ -9,10 +9,12 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.cauTruc.Chu
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.tongThe.ChuongTrinhTongTheResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinh;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersion;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinh;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ChuongTrinhMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ChuongTrinhVersionMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhVersionRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusChuongTrinhRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhCauTrucService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhTongTheService;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +45,7 @@ public class ChuongTrinhTongTheServiceImpl implements ChuongTrinhTongTheService 
 
     private final ChuongTrinhRepository chuongTrinhRepository;
     private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
+    private final SyllabusChuongTrinhRepository syllabusChuongTrinhRepository;
     private final ChuongTrinhMapper chuongTrinhMapper;
     private final ChuongTrinhVersionMapper chuongTrinhVersionMapper;
     private final ChuongTrinhCauTrucService chuongTrinhCauTrucService;
@@ -83,6 +86,8 @@ public class ChuongTrinhTongTheServiceImpl implements ChuongTrinhTongTheService 
                     .coVersion(false)
                     .chuongTrinhId(chuongTrinh.getId())
                     .versionDangXemId(null)
+                    .syllabusChuongTrinhId(null)
+                    .syllabusChuongTrinhGocId(null)
                     .tongSoKy(0)
                     .tongSoMon(0)
                     .tongSoTinChi(null)
@@ -98,11 +103,14 @@ public class ChuongTrinhTongTheServiceImpl implements ChuongTrinhTongTheService 
 
         ChuongTrinhVersion version = versionDaChon.version();
         ChuongTrinhVersionResponse versionResponse = chuongTrinhVersionMapper.toResponse(version);
+
         ChuongTrinhCauTrucResponse cauTruc = chuongTrinhCauTrucService.findCauTrucByVersionId(
                 version.getId(),
                 khungKyId,
                 Boolean.TRUE.equals(includeSyllabusDetail)
         );
+
+        SyllabusChuongTrinh syllabusChuongTrinh = laySyllabusChuongTrinhTheoVersion(version.getId());
 
         return ChuongTrinhTongTheResponse.builder()
                 .chuongTrinh(chuongTrinhResponse)
@@ -112,6 +120,8 @@ public class ChuongTrinhTongTheServiceImpl implements ChuongTrinhTongTheService 
                 .coVersion(true)
                 .chuongTrinhId(chuongTrinh.getId())
                 .versionDangXemId(version.getId())
+                .syllabusChuongTrinhId(laySyllabusChuongTrinhId(syllabusChuongTrinh))
+                .syllabusChuongTrinhGocId(laySyllabusChuongTrinhGocId(syllabusChuongTrinh))
                 .tongSoKy(demTongSoKy(cauTruc))
                 .tongSoMon(demTongSoMon(cauTruc))
                 .tongSoTinChi(layTongSoTinChi(versionResponse, version))
@@ -119,6 +129,22 @@ public class ChuongTrinhTongTheServiceImpl implements ChuongTrinhTongTheService 
                 .lyDoChonVersion(versionDaChon.lyDo())
                 .message("Lấy tổng thể chương trình đào tạo thành công.")
                 .build();
+    }
+
+    private SyllabusChuongTrinh laySyllabusChuongTrinhTheoVersion(Long versionId) {
+        if (versionId == null) return null;
+
+        return syllabusChuongTrinhRepository
+                .findFirstByChuongTrinhVersionIdOrderByIdDesc(versionId)
+                .orElse(null);
+    }
+
+    private Long laySyllabusChuongTrinhId(SyllabusChuongTrinh syllabusChuongTrinh) {
+        return syllabusChuongTrinh == null ? null : syllabusChuongTrinh.getId();
+    }
+
+    private Long laySyllabusChuongTrinhGocId(SyllabusChuongTrinh syllabusChuongTrinh) {
+        return syllabusChuongTrinh == null ? null : syllabusChuongTrinh.getSyllabusChuongTrinhMauId();
     }
 
     private VersionDaChon layVersionTheoRequest(Long chuongTrinhId, Long versionId) {

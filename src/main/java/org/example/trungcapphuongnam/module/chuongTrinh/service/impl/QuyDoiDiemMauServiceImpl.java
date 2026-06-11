@@ -29,16 +29,16 @@ public class QuyDoiDiemMauServiceImpl implements QuyDoiDiemMauService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<QuyDoiDiemMauResponse> findAll(Long syllabusMonHocGocId, String ma, String ketQua, String keyword, Pageable pageable) {
-        // Mẫu quy đổi kết quả ở tầng syllabus gốc bắt buộc phải được truy vấn theo syllabusMonHocGocId.
+    public Page<QuyDoiDiemMauResponse> findAll(Long syllabusMonHocMauId, String ma, String ketQua, String keyword, Pageable pageable) {
+        // Mẫu quy đổi kết quả ở tầng syllabus gốc bắt buộc phải được truy vấn theo syllabusMonHocMauId.
         // Không trả toàn bộ bảng khi thiếu tham số, tránh FE bảng 3 hiển thị dữ liệu toàn ngành.
-        if (syllabusMonHocGocId == null) {
+        if (syllabusMonHocMauId == null) {
             return Page.empty(pageable);
         }
 
         return repository.findAll(
                 LocJpa.<QuyDoiDiemMau>empty()
-                    .and(LocJpa.eq("syllabusMonHocGocId", syllabusMonHocGocId))
+                    .and(LocJpa.eq("syllabusMonHocMauId", syllabusMonHocMauId))
                     .and(LocJpa.eq("loaiMau", "QUY_DOI_KET_QUA"))
                     .and(LocJpa.like("ma", ma))
                     .and(LocJpa.like("ketQua", ketQua))
@@ -59,7 +59,7 @@ public class QuyDoiDiemMauServiceImpl implements QuyDoiDiemMauService {
     public QuyDoiDiemMauResponse create(QuyDoiDiemMauRequest request) {
         chuanHoaMauQuyDoiKetQua(request);
         validator.validateQuyDoiDiemMau(request, null);
-        validateTrungMaTrongSyllabusGoc(request, null);
+        validateTrungMaTrongSyllabusMau(request, null);
         QuyDoiDiemMau entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -70,7 +70,7 @@ public class QuyDoiDiemMauServiceImpl implements QuyDoiDiemMauService {
                 .orElseThrow(() -> new ResourceNotFoundException("Quy Doi Diem Mau không tồn tại: " + id));
         chuanHoaMauQuyDoiKetQua(request);
         validator.validateQuyDoiDiemMau(request, id);
-        validateTrungMaTrongSyllabusGoc(request, id);
+        validateTrungMaTrongSyllabusMau(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -80,7 +80,7 @@ public class QuyDoiDiemMauServiceImpl implements QuyDoiDiemMauService {
             throw new BadRequestException("Dữ liệu mẫu quy đổi kết quả không được để trống");
         }
 
-        if (request.getSyllabusMonHocGocId() == null) {
+        if (request.getSyllabusMonHocMauId() == null) {
             throw new BadRequestException("Cần chọn syllabus môn học gốc trước khi tạo quy đổi điểm mẫu");
         }
 
@@ -95,16 +95,16 @@ public class QuyDoiDiemMauServiceImpl implements QuyDoiDiemMauService {
         }
     }
 
-    private void validateTrungMaTrongSyllabusGoc(QuyDoiDiemMauRequest request, Long id) {
+    private void validateTrungMaTrongSyllabusMau(QuyDoiDiemMauRequest request, Long id) {
         if (request.getMa() == null || request.getMa().isBlank()) {
             return;
         }
 
-        if (id == null && repository.existsBySyllabusMonHocGocIdAndMa(request.getSyllabusMonHocGocId(), request.getMa().trim())) {
+        if (id == null && repository.existsBySyllabusMonHocMauIdAndMa(request.getSyllabusMonHocMauId(), request.getMa().trim())) {
             throw new DuplicateResourceException("Mã quy đổi điểm mẫu đã tồn tại trong syllabus gốc: " + request.getMa());
         }
 
-        if (id != null && repository.existsBySyllabusMonHocGocIdAndMaAndIdNot(request.getSyllabusMonHocGocId(), request.getMa().trim(), id)) {
+        if (id != null && repository.existsBySyllabusMonHocMauIdAndMaAndIdNot(request.getSyllabusMonHocMauId(), request.getMa().trim(), id)) {
             throw new DuplicateResourceException("Mã quy đổi điểm mẫu đã tồn tại trong syllabus gốc: " + request.getMa());
         }
     }

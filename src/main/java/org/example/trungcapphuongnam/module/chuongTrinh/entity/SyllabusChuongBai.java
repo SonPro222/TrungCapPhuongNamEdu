@@ -46,8 +46,8 @@ public class SyllabusChuongBai {
     @Column(name = "thu_tu")
     private Integer thuTu;
 
-    @Column(name = "syllabus_mon_hoc_goc_id")
-    private Long syllabusMonHocGocId;
+    @Column(name = "syllabus_mon_hoc_mau_id")
+    private Long syllabusMonHocMauId;
 
     @Column(name = "ghi_chu")
     private String ghiChu;

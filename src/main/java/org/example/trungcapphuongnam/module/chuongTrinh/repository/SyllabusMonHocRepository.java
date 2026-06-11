@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -14,7 +16,14 @@ public interface SyllabusMonHocRepository extends JpaRepository<SyllabusMonHoc, 
 
     Page<SyllabusMonHoc> findByChuongTrinhMonId(Long chuongTrinhMonId, Pageable pageable);
 
-    Optional<SyllabusMonHoc> findFirstByChuongTrinhMonId(Long chuongTrinhMonId);
+    @Query(value = """
+            select smh.id
+            from syllabus_mon_hoc smh
+            where smh.chuong_trinh_mon_id = :chuongTrinhMonId
+            order by smh.id asc
+            limit 1
+            """, nativeQuery = true)
+    Optional<Long> findFirstIdByChuongTrinhMonId(@Param("chuongTrinhMonId") Long chuongTrinhMonId);
 
     Optional<SyllabusMonHoc> findFirstByChuongTrinhMonIdOrderByIdAsc(Long chuongTrinhMonId);
 
@@ -22,5 +31,5 @@ public interface SyllabusMonHocRepository extends JpaRepository<SyllabusMonHoc, 
 
     boolean existsByChuongTrinhMonIdAndIdNot(Long chuongTrinhMonId, Long id);
 
-    Page<SyllabusMonHoc> findBySyllabusMonHocGocId(Long syllabusMonHocGocId, Pageable pageable);
+    Page<SyllabusMonHoc> findBySyllabusMonHocMauId(Long syllabusMonHocMauId, Pageable pageable);
 }

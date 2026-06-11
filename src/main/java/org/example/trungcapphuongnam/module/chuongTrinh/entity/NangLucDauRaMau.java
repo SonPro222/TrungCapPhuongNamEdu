@@ -13,14 +13,14 @@ import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiNangLucDauRaCo
 @Builder
 @Entity
 @Table(name = "nang_luc_dau_ra_mau")
-public class NangLucDauRaGoc {
+public class NangLucDauRaMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "chuong_trinh_id", nullable = false)
-    private Long chuongTrinhId;
+    @Column(name = "syllabus_chuong_trinh_mau_id", nullable = false)
+    private Long syllabusChuongTrinhMauId;
 
     @Column(name = "ma", nullable = true, length = 50)
     private String ma;

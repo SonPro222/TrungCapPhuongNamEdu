@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DieuKienMonHocGocResponse {
+public class DieuKienMonHocMauResponse {
 
     private Long id;
 

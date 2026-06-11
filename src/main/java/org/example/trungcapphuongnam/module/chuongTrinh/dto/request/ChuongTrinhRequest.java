@@ -10,10 +10,8 @@ import jakarta.validation.constraints.*;
 @Builder
 public class ChuongTrinhRequest {
 
-    @NotNull(message = "loại chương trình theo ngành không được để trống")
-    private Long nganhLoaiChuongTrinhId;
-
-    private Long trinhDoId;
+    /** Mô hình mới: chọn ngành hệ đào tạo thay vì chọn rời trinhDo + loaiChuongTrinh */
+    private Long nganhHeDaoTaoId;
 
     @NotBlank(message = "ma_chuong_trinh không được để trống")
     private String maChuongTrinh;

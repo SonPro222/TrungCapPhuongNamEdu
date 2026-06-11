@@ -29,14 +29,14 @@ public class SyllabusMonHocDieuKienServiceImpl implements SyllabusMonHocDieuKien
     @Transactional(readOnly = true)
     public Page<SyllabusMonHocDieuKienResponse> findAll(
             Long syllabusMonId,
-            Long dieuKienGocId,
+            Long dieuKienMauId,
             String keyword,
             Pageable pageable
     ) {
         return repository.findAll(
                 LocJpa.<SyllabusMonHocDieuKien>empty()
                         .and(LocJpa.eq("syllabusMonId", syllabusMonId))
-                        .and(LocJpa.eq("dieuKienGocId", dieuKienGocId))
+                        .and(LocJpa.eq("dieuKienMauId", dieuKienMauId))
                         .and(LocJpa.keyword(keyword, "ghiChu")),
                 pageable
         ).map(mapper::toResponse);

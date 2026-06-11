@@ -3,13 +3,13 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocTaiLieuRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocTaiLieuResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocMauTaiLieuRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocMauTaiLieuResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocMauTaiLieu;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusMonHocMauTaiLieuMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocMauTaiLieuRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocGocTaiLieuService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocMauTaiLieuService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class SyllabusMonHocGocTaiLieuServiceImpl implements SyllabusMonHocGocTaiLieuService {
+public class SyllabusMonHocMauTaiLieuServiceImpl implements SyllabusMonHocMauTaiLieuService {
 
     private final SyllabusMonHocMauTaiLieuRepository repository;
     private final SyllabusMonHocMauTaiLieuMapper mapper;
@@ -26,30 +26,30 @@ public class SyllabusMonHocGocTaiLieuServiceImpl implements SyllabusMonHocGocTai
 
     @Override
     @Transactional(readOnly = true)
-    public Page<SyllabusMonHocGocTaiLieuResponse> findAll(
-            Long syllabusMonHocGocId,
-            Long taiLieuGocId,
+    public Page<SyllabusMonHocMauTaiLieuResponse> findAll(
+            Long syllabusMonHocMauId,
+            Long taiLieuMauId,
             Pageable pageable
     ) {
         return repository.findAll(
                 LocJpa.<SyllabusMonHocMauTaiLieu>empty()
-                        .and(LocJpa.eq("syllabusMonHocGocId", syllabusMonHocGocId))
-                        .and(LocJpa.eq("taiLieuGocId", taiLieuGocId)),
+                        .and(LocJpa.eq("syllabusMonHocMauId", syllabusMonHocMauId))
+                        .and(LocJpa.eq("taiLieuMauId", taiLieuMauId)),
                 pageable
         ).map(mapper::toResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SyllabusMonHocGocTaiLieuResponse findById(Long id) {
+    public SyllabusMonHocMauTaiLieuResponse findById(Long id) {
         SyllabusMonHocMauTaiLieu entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tài liệu syllabus gốc không tồn tại: " + id));
         return mapper.toResponse(entity);
     }
 
     @Override
-    public SyllabusMonHocGocTaiLieuResponse create(SyllabusMonHocGocTaiLieuRequest request) {
-        validator.validateSyllabusMonHocGocTaiLieu(request, null);
+    public SyllabusMonHocMauTaiLieuResponse create(SyllabusMonHocMauTaiLieuRequest request) {
+        validator.validateSyllabusMonHocMauTaiLieu(request, null);
 
         SyllabusMonHocMauTaiLieu entity = mapper.toEntity(request);
 
@@ -61,11 +61,11 @@ public class SyllabusMonHocGocTaiLieuServiceImpl implements SyllabusMonHocGocTai
     }
 
     @Override
-    public SyllabusMonHocGocTaiLieuResponse update(Long id, SyllabusMonHocGocTaiLieuRequest request) {
+    public SyllabusMonHocMauTaiLieuResponse update(Long id, SyllabusMonHocMauTaiLieuRequest request) {
         SyllabusMonHocMauTaiLieu entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tài liệu syllabus gốc không tồn tại: " + id));
 
-        validator.validateSyllabusMonHocGocTaiLieu(request, id);
+        validator.validateSyllabusMonHocMauTaiLieu(request, id);
 
         mapper.updateEntity(entity, request);
 

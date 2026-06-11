@@ -2,16 +2,16 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamMauResponse;
 
-public interface ViTriViecLamGocService {
-    Page<ViTriViecLamGocResponse> findAll(Long chuongTrinhId, String ma, String keyword, Pageable pageable);
-    ViTriViecLamGocResponse findById(Long id);
+public interface ViTriViecLamMauService {
+    Page<ViTriViecLamMauResponse> findAll(Long syllabusChuongTrinhMauId, String ma, String keyword, Pageable pageable);
+    ViTriViecLamMauResponse findById(Long id);
 
-    ViTriViecLamGocResponse create(ViTriViecLamGocRequest request);
+    ViTriViecLamMauResponse create(ViTriViecLamMauRequest request);
 
-    ViTriViecLamGocResponse update(Long id, ViTriViecLamGocRequest request);
+    ViTriViecLamMauResponse update(Long id, ViTriViecLamMauRequest request);
 
     void delete(Long id);
 }

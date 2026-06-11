@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface KhungKyGocRepository extends JpaRepository<KhungKyMau, Long> {
+public interface KhungKyMauRepository extends JpaRepository<KhungKyMau, Long> {
 
     Page<KhungKyMau> findByMaKyContainingIgnoreCaseOrTenKyContainingIgnoreCaseOrMoTaContainingIgnoreCase(
             String maKy,

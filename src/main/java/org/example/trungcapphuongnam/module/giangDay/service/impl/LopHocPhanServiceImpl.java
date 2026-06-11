@@ -3,11 +3,8 @@ package org.example.trungcapphuongnam.module.giangDay.service.impl;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHoc;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocGoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
+import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LopHocPhanRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LopHocPhanResponse;
@@ -37,8 +34,6 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
     private final LopHocPhanValidator validator;
     private final LopHocPhanRepository repository;
     private final ChuongTrinhMonRepository chuongTrinhMonRepository;
-    private final SyllabusMonHocRepository syllabusMonHocRepository;
-    private final SyllabusMonHocGocRepository syllabusMonHocGocRepository;
     private final LopHocPhanMapper mapper;
     private final SaoChepCauHinhDanhGiaService saoChepCauHinhDanhGiaService;
 
@@ -125,28 +120,22 @@ public class LopHocPhanServiceImpl implements LopHocPhanService {
             ChuongTrinhMon chuongTrinhMon = chuongTrinhMonRepository.findById(entity.getChuongTrinhMonId())
                     .orElseThrow(() -> new GiangDayNotFoundException("Chương trình môn của lớp học phần không tồn tại"));
 
-            SyllabusMonHoc syllabus = syllabusMonHocRepository.findFirstByChuongTrinhMonIdOrderByIdAsc(entity.getChuongTrinhMonId())
-                    .orElseThrow(() -> new GiangDayNotFoundException("Chương trình môn chưa có syllabus, không thể mở hoặc cập nhật lớp học phần"));
-
-            if (syllabus.getSoBuoiHoc() == null || syllabus.getSoBuoiHoc() < 1) {
-                throw new GiangDayNotFoundException("Syllabus của chương trình môn chưa cấu hình số buổi học hợp lệ");
-            }
-
             entity.setMonHocId(chuongTrinhMon.getMonHocId());
-            entity.setSoBuoiHoc(syllabus.getSoBuoiHoc());
+            validateSoBuoiHocCuaLopHocPhan(entity);
         }
 
         if (entity.getLoaiLopHocPhan() == LoaiLopHocPhan.HOC_CHUNG) {
             entity.setChuongTrinhMonId(null);
-
-            SyllabusMonHocGoc syllabusGoc = syllabusMonHocGocRepository.findFirstByMonHocIdOrderByIdAsc(entity.getMonHocId())
-                    .orElseThrow(() -> new GiangDayNotFoundException("Môn học chung chưa có syllabus gốc, không thể mở hoặc cập nhật lớp học phần"));
-
-            if (syllabusGoc.getSoBuoiHoc() == null || syllabusGoc.getSoBuoiHoc() < 1) {
-                throw new GiangDayNotFoundException("Syllabus gốc của môn học chưa cấu hình số buổi học hợp lệ");
+            if (entity.getSoBuoiHoc() == null || entity.getSoBuoiHoc() < 1) {
+                throw new GiangDayException("Lớp học chung phải cấu hình số buổi học");
             }
+        }
+    }
 
-            entity.setSoBuoiHoc(syllabusGoc.getSoBuoiHoc());
+
+    private void validateSoBuoiHocCuaLopHocPhan(LopHocPhan entity) {
+        if (entity.getSoBuoiHoc() == null || entity.getSoBuoiHoc() < 1) {
+            throw new GiangDayException("Lớp học phần phải có số buổi học hợp lệ để phân bố lịch học");
         }
     }
 

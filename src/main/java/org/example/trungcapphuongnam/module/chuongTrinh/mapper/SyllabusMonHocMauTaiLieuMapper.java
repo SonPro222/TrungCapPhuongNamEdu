@@ -1,21 +1,21 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocTaiLieuRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocTaiLieuResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocMauTaiLieuRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocMauTaiLieuResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocMauTaiLieu;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SyllabusMonHocGocTaiLieuMapper {
+public class SyllabusMonHocMauTaiLieuMapper {
 
-    public SyllabusMonHocMauTaiLieu toEntity(SyllabusMonHocGocTaiLieuRequest request) {
+    public SyllabusMonHocMauTaiLieu toEntity(SyllabusMonHocMauTaiLieuRequest request) {
         if (request == null) {
             return null;
         }
 
         return SyllabusMonHocMauTaiLieu.builder()
-                .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
-                .taiLieuGocId(request.getTaiLieuGocId())
+                .syllabusMonHocMauId(request.getSyllabusMonHocMauId())
+                .taiLieuMauId(request.getTaiLieuMauId())
                 .ma(request.getMa())
                 .ten(request.getTen())
                 .loai(request.getLoai())
@@ -29,13 +29,13 @@ public class SyllabusMonHocGocTaiLieuMapper {
                 .build();
     }
 
-    public void updateEntity(SyllabusMonHocMauTaiLieu entity, SyllabusMonHocGocTaiLieuRequest request) {
+    public void updateEntity(SyllabusMonHocMauTaiLieu entity, SyllabusMonHocMauTaiLieuRequest request) {
         if (entity == null || request == null) {
             return;
         }
 
-        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
-        entity.setTaiLieuGocId(request.getTaiLieuGocId());
+        entity.setSyllabusMonHocMauId(request.getSyllabusMonHocMauId());
+        entity.setTaiLieuMauId(request.getTaiLieuMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setLoai(request.getLoai());
@@ -48,15 +48,15 @@ public class SyllabusMonHocGocTaiLieuMapper {
         entity.setGhiChu(request.getGhiChu());
     }
 
-    public SyllabusMonHocGocTaiLieuResponse toResponse(SyllabusMonHocMauTaiLieu entity) {
+    public SyllabusMonHocMauTaiLieuResponse toResponse(SyllabusMonHocMauTaiLieu entity) {
         if (entity == null) {
             return null;
         }
 
-        return SyllabusMonHocGocTaiLieuResponse.builder()
+        return SyllabusMonHocMauTaiLieuResponse.builder()
                 .id(entity.getId())
-                .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
-                .taiLieuGocId(entity.getTaiLieuGocId())
+                .syllabusMonHocMauId(entity.getSyllabusMonHocMauId())
+                .taiLieuMauId(entity.getTaiLieuMauId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())
                 .loai(entity.getLoai())

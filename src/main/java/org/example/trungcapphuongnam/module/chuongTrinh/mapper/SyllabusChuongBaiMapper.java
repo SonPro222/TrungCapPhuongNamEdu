@@ -21,7 +21,7 @@ public class SyllabusChuongBaiMapper {
                 .noiDung(request.getNoiDung())
                 .mucTieu(request.getMucTieu())
                 .thuTu(request.getThuTu())
-                .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
+                .syllabusMonHocMauId(request.getSyllabusMonHocMauId())
                 .ghiChu(request.getGhiChu())
 
                 .build();
@@ -41,7 +41,7 @@ public class SyllabusChuongBaiMapper {
                 .noiDung(entity.getNoiDung())
                 .mucTieu(entity.getMucTieu())
                 .thuTu(entity.getThuTu())
-                .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
+                .syllabusMonHocMauId(entity.getSyllabusMonHocMauId())
                 .ghiChu(entity.getGhiChu())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
@@ -60,7 +60,7 @@ public class SyllabusChuongBaiMapper {
         entity.setNoiDung(request.getNoiDung());
         entity.setMucTieu(request.getMucTieu());
         entity.setThuTu(request.getThuTu());
-        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
+        entity.setSyllabusMonHocMauId(request.getSyllabusMonHocMauId());
         entity.setGhiChu(request.getGhiChu());
 
 

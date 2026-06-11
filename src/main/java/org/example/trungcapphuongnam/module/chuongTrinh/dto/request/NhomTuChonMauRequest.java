@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NhomTuChonGocRequest {
+public class NhomTuChonMauRequest {
 
     private String ma;
 

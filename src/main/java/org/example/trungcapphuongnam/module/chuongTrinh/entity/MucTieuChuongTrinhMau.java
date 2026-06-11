@@ -13,11 +13,14 @@ import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiMucTieuChuongT
 @Builder
 @Entity
 @Table(name = "muc_tieu_chuong_trinh_mau")
-public class MucTieuChuongTrinhGoc {
+public class MucTieuChuongTrinhMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "syllabus_chuong_trinh_mau_id", nullable = false)
+    private Long syllabusChuongTrinhMauId;
 
 
     @Column(name = "ma", nullable = true, length = 50)

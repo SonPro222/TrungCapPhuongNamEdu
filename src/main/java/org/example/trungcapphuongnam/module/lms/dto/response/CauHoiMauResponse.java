@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.lms.dto.response;
 
 import java.time.LocalDateTime;
-import org.example.trungcapphuongnam.module.lms.enums.TrangThaiCauHoiGoc;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiCauHoiMau;
 import lombok.*;
 
 @Getter
@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CauHoiGocResponse {
+public class CauHoiMauResponse {
     private Long id;
 
     private Long monHocId;
@@ -18,7 +18,7 @@ public class CauHoiGocResponse {
 
     private Long nguoiTaoTaiKhoanId;
 
-    private TrangThaiCauHoiGoc trangThai;
+    private TrangThaiCauHoiMau trangThai;
 
     private Long donViSoHuuId;
 

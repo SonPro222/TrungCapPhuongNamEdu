@@ -7,10 +7,14 @@ import org.springframework.data.domain.Pageable;
 
 public interface ChuongTrinhService {
     Page<ChuongTrinhResponse> findAll(
-            Long nganhLoaiChuongTrinhId,
+            Long nganhHeDaoTaoId,
             Long nganhId,
-            Long trinhDoId,
-            Long loaiChuongTrinhId,
+            String keyword,
+            Pageable pageable
+    );
+
+    Page<ChuongTrinhResponse> findAllByNganhHeDaoTao(
+            Long nganhHeDaoTaoId,
             String keyword,
             Pageable pageable
     );

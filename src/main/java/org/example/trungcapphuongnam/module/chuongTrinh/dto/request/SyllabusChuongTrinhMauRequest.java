@@ -7,9 +7,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusChuongTrinhGocRequest {
+public class SyllabusChuongTrinhMauRequest {
 
-    private Long chuongTrinhVersionId;
+    private Long chuongTrinhId;
 
     private String ma;
 

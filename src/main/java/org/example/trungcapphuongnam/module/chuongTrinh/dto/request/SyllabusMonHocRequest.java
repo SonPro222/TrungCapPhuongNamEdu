@@ -13,7 +13,7 @@ public class SyllabusMonHocRequest {
 
     @NotNull(message = "chuong_trinh_mon_id không được để trống")
     private Long chuongTrinhMonId;
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
     private String viTri;
     @DecimalMin(value = "0.0", message = "Số tín chỉ không được âm")
     private BigDecimal soTinChi;

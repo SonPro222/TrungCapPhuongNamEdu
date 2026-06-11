@@ -9,9 +9,10 @@ import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiMucTieuChuongT
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MucTieuChuongTrinhGocResponse {
+public class MucTieuChuongTrinhMauResponse {
 
     private Long id;
+    private Long syllabusChuongTrinhMauId;
     private String ma;
     private LoaiMucTieuChuongTrinh loai;
     private String noiDung;

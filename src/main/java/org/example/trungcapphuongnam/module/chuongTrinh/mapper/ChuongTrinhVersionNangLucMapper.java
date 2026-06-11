@@ -14,7 +14,7 @@ public class ChuongTrinhVersionNangLucMapper {
         }
         ChuongTrinhVersionNangLuc entity = new ChuongTrinhVersionNangLuc();
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setNangLucGocId(request.getNangLucGocId());
+        entity.setNangLucMauId(request.getNangLucMauId());
         entity.setMa(request.getMa());
         entity.setLoai(request.getLoai());
         entity.setNoiDung(request.getNoiDung());
@@ -28,7 +28,7 @@ public class ChuongTrinhVersionNangLucMapper {
             return;
         }
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setNangLucGocId(request.getNangLucGocId());
+        entity.setNangLucMauId(request.getNangLucMauId());
         entity.setMa(request.getMa());
         entity.setLoai(request.getLoai());
         entity.setNoiDung(request.getNoiDung());
@@ -43,7 +43,7 @@ public class ChuongTrinhVersionNangLucMapper {
         return ChuongTrinhVersionNangLucResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
-                .nangLucGocId(entity.getNangLucGocId())
+                .nangLucMauId(entity.getNangLucMauId())
                 .ma(entity.getMa())
                 .loai(entity.getLoai())
                 .noiDung(entity.getNoiDung())

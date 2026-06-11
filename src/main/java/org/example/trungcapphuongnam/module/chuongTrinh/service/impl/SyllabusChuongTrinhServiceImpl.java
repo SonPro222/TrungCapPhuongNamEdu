@@ -5,16 +5,18 @@ import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusChuongTrinhRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChuongTrinhResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinh;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinhGoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.SyllabusChuongTrinhMapper;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusChuongTrinhRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusChuongTrinhService;
 import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -23,20 +25,29 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
 
     private final ChuongTrinhNghiepVuValidator validator;
     private final SyllabusChuongTrinhRepository repository;
+    private final SyllabusChuongTrinhMauRepository syllabusChuongTrinhMauRepository;
     private final SyllabusChuongTrinhMapper mapper;
+    private final MucTieuChuongTrinhRepository mucTieuChuongTrinhRepository;
+    private final NangLucDauRaRepository nangLucDauRaRepository;
+    private final ViTriViecLamRepository viTriViecLamRepository;
+    private final DieuKienTotNghiepRepository dieuKienTotNghiepRepository;
+    private final MucTieuChuongTrinhMauRepository mucTieuChuongTrinhMauRepository;
+    private final NangLucDauRaMauRepository nangLucDauRaMauRepository;
+    private final ViTriViecLamMauRepository viTriViecLamMauRepository;
+    private final DieuKienTotNghiepMauRepository dieuKienTotNghiepMauRepository;
 
     @Override
     @Transactional(readOnly = true)
     public Page<SyllabusChuongTrinhResponse> findAll(
             Long chuongTrinhVersionId,
-            Long syllabusChuongTrinhGocId,
+            Long syllabusChuongTrinhMauId,
             String keyword,
             Pageable pageable
     ) {
         return repository.findAll(
                 LocJpa.<SyllabusChuongTrinh>empty()
                         .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                        .and(LocJpa.eq("syllabusChuongTrinhGocId", syllabusChuongTrinhGocId))
+                        .and(LocJpa.eq("syllabusChuongTrinhMauId", syllabusChuongTrinhMauId))
                         .and(LocJpa.keyword(
                                 keyword,
                                 "ma",
@@ -88,40 +99,149 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
     }
 
     @Override
-    public SyllabusChuongTrinhResponse dongBoTuSyllabusGoc(
-            SyllabusChuongTrinhGoc syllabusGoc,
+    public SyllabusChuongTrinhResponse dongBoTuSyllabusMau(
+            Long syllabusChuongTrinhMauId,
             Long chuongTrinhVersionId
     ) {
-        if (syllabusGoc == null || syllabusGoc.getId() == null || chuongTrinhVersionId == null) {
+        if (syllabusChuongTrinhMauId == null || chuongTrinhVersionId == null) {
+            throw new IllegalArgumentException("Thiếu syllabusChuongTrinhMauId hoặc chuongTrinhVersionId để đồng bộ syllabus chương trình");
+        }
+
+        SyllabusChuongTrinhMau syllabusMau = syllabusChuongTrinhMauRepository.findById(syllabusChuongTrinhMauId)
+                .orElseThrow(() -> new ResourceNotFoundException("Syllabus chương trình mẫu không tồn tại: " + syllabusChuongTrinhMauId));
+
+        return dongBoTuSyllabusMau(syllabusMau, chuongTrinhVersionId);
+    }
+
+    @Override
+    public SyllabusChuongTrinhResponse dongBoTuSyllabusMau(
+            SyllabusChuongTrinhMau syllabusMau,
+            Long chuongTrinhVersionId
+    ) {
+        if (syllabusMau == null || syllabusMau.getId() == null || chuongTrinhVersionId == null) {
             throw new IllegalArgumentException("Thiếu dữ liệu đồng bộ syllabus chương trình");
         }
 
-        SyllabusChuongTrinh entity = repository
-                .findByChuongTrinhVersionIdAndSyllabusChuongTrinhGocId(
-                        chuongTrinhVersionId,
-                        syllabusGoc.getId()
-                )
-                .orElseGet(SyllabusChuongTrinh::new);
+        SyllabusChuongTrinh entity = layHoacTaoSyllabusApDungDuyNhat(chuongTrinhVersionId);
 
         entity.setChuongTrinhVersionId(chuongTrinhVersionId);
-        entity.setSyllabusChuongTrinhGocId(syllabusGoc.getId());
+        entity.setSyllabusChuongTrinhMauId(syllabusMau.getId());
 
-        entity.setMa(syllabusGoc.getMa());
-        entity.setTen(syllabusGoc.getTen());
-        entity.setDuongDan(syllabusGoc.getDuongDan());
+        entity.setMa(syllabusMau.getMa());
+        entity.setTen(syllabusMau.getTen());
+        entity.setDuongDan(syllabusMau.getDuongDan());
 
-        entity.setMucTieu(syllabusGoc.getMucTieu());
-        entity.setDoiTuongTuyenSinh(syllabusGoc.getDoiTuongTuyenSinh());
-        entity.setThoiGianDaoTao(syllabusGoc.getThoiGianDaoTao());
-        entity.setKhoiLuongKienThuc(syllabusGoc.getKhoiLuongKienThuc());
-        entity.setDieuKienTotNghiep(syllabusGoc.getDieuKienTotNghiep());
-        entity.setPhuongPhapDaoTao(syllabusGoc.getPhuongPhapDaoTao());
-        entity.setPhuongPhapDanhGia(syllabusGoc.getPhuongPhapDanhGia());
-        entity.setHuongDanThucHien(syllabusGoc.getHuongDanThucHien());
-        entity.setGhiChu(syllabusGoc.getGhiChu());
+        entity.setMucTieu(syllabusMau.getMucTieu());
+        entity.setDoiTuongTuyenSinh(syllabusMau.getDoiTuongTuyenSinh());
+        entity.setThoiGianDaoTao(syllabusMau.getThoiGianDaoTao());
+        entity.setKhoiLuongKienThuc(syllabusMau.getKhoiLuongKienThuc());
+        entity.setDieuKienTotNghiep(syllabusMau.getDieuKienTotNghiep());
+        entity.setPhuongPhapDaoTao(syllabusMau.getPhuongPhapDaoTao());
+        entity.setPhuongPhapDanhGia(syllabusMau.getPhuongPhapDanhGia());
+        entity.setHuongDanThucHien(syllabusMau.getHuongDanThucHien());
+        entity.setGhiChu(syllabusMau.getGhiChu());
 
         SyllabusChuongTrinh saved = repository.save(entity);
+        copyBangConTuSyllabusMau(saved.getId(), syllabusMau.getId());
         return mapper.toResponse(saved);
+    }
+
+    private SyllabusChuongTrinh layHoacTaoSyllabusApDungDuyNhat(Long chuongTrinhVersionId) {
+        List<SyllabusChuongTrinh> list = repository.findByChuongTrinhVersionIdOrderByIdDesc(chuongTrinhVersionId);
+        if (list.isEmpty()) {
+            return new SyllabusChuongTrinh();
+        }
+
+        SyllabusChuongTrinh entity = list.get(0);
+
+        if (list.size() > 1) {
+            list.stream()
+                    .skip(1)
+                    .map(SyllabusChuongTrinh::getId)
+                    .forEach(this::xoaBangConVaSyllabusApDung);
+        }
+
+        return entity;
+    }
+
+    private void xoaBangConVaSyllabusApDung(Long syllabusChuongTrinhId) {
+        if (syllabusChuongTrinhId == null) return;
+
+        mucTieuChuongTrinhRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+        nangLucDauRaRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+        viTriViecLamRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+        dieuKienTotNghiepRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+        repository.deleteById(syllabusChuongTrinhId);
+    }
+
+    private void copyBangConTuSyllabusMau(Long syllabusChuongTrinhId, Long syllabusChuongTrinhMauId) {
+        mucTieuChuongTrinhRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+        nangLucDauRaRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+        viTriViecLamRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+        dieuKienTotNghiepRepository.deleteBySyllabusChuongTrinhId(syllabusChuongTrinhId);
+
+        AtomicInteger thuTuMucTieu = new AtomicInteger(1);
+        List<MucTieuChuongTrinh> mucTieu = mucTieuChuongTrinhMauRepository
+                .findBySyllabusChuongTrinhMauId(syllabusChuongTrinhMauId, Pageable.unpaged())
+                .getContent()
+                .stream()
+                .map(Mau -> MucTieuChuongTrinh.builder()
+                        .syllabusChuongTrinhId(syllabusChuongTrinhId)
+                        .ma(Mau.getMa())
+                        .loai(Mau.getLoai() == null ? null : Mau.getLoai().getValue())
+                        .noiDung(Mau.getNoiDung())
+                        .thuTu(thuTuMucTieu.getAndIncrement())
+                        .ghiChu(Mau.getGhiChu())
+                        .build())
+                .toList();
+        mucTieuChuongTrinhRepository.saveAll(mucTieu);
+
+        AtomicInteger thuTuNangLuc = new AtomicInteger(1);
+        List<NangLucDauRa> nangLuc = nangLucDauRaMauRepository
+                .findBySyllabusChuongTrinhMauId(syllabusChuongTrinhMauId, Pageable.unpaged())
+                .getContent()
+                .stream()
+                .map(Mau -> NangLucDauRa.builder()
+                        .syllabusChuongTrinhId(syllabusChuongTrinhId)
+                        .ma(Mau.getMa())
+                        .loai(Mau.getLoai() == null ? null : Mau.getLoai().getValue())
+                        .noiDung(Mau.getNoiDung())
+                        .thuTu(thuTuNangLuc.getAndIncrement())
+                        .ghiChu(Mau.getGhiChu())
+                        .build())
+                .toList();
+        nangLucDauRaRepository.saveAll(nangLuc);
+
+        AtomicInteger thuTuViTri = new AtomicInteger(1);
+        List<ViTriViecLam> viTri = viTriViecLamMauRepository
+                .findBySyllabusChuongTrinhMauId(syllabusChuongTrinhMauId, Pageable.unpaged())
+                .getContent()
+                .stream()
+                .map(Mau -> ViTriViecLam.builder()
+                        .syllabusChuongTrinhId(syllabusChuongTrinhId)
+                        .ma(Mau.getMa())
+                        .ten(Mau.getTen())
+                        .moTa(Mau.getMoTa())
+                        .thuTu(thuTuViTri.getAndIncrement())
+                        .ghiChu(Mau.getGhiChu())
+                        .build())
+                .toList();
+        viTriViecLamRepository.saveAll(viTri);
+
+        AtomicInteger thuTuDieuKien = new AtomicInteger(1);
+        List<DieuKienTotNghiep> dieuKien = dieuKienTotNghiepMauRepository
+                .findBySyllabusChuongTrinhMauId(syllabusChuongTrinhMauId, Pageable.unpaged())
+                .getContent()
+                .stream()
+                .map(Mau -> DieuKienTotNghiep.builder()
+                        .syllabusChuongTrinhId(syllabusChuongTrinhId)
+                        .ma(Mau.getMa())
+                        .noiDung(Mau.getNoiDung())
+                        .thuTu(thuTuDieuKien.getAndIncrement())
+                        .ghiChu(Mau.getGhiChu())
+                        .build())
+                .toList();
+        dieuKienTotNghiepRepository.saveAll(dieuKien);
     }
 
     @Override
@@ -130,6 +250,6 @@ public class SyllabusChuongTrinhServiceImpl implements SyllabusChuongTrinhServic
             throw new ResourceNotFoundException("Syllabus chương trình không tồn tại: " + id);
         }
 
-        repository.deleteById(id);
+        xoaBangConVaSyllabusApDung(id);
     }
 }

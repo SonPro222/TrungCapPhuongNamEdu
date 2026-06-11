@@ -12,7 +12,7 @@ public class SyllabusChuongTrinhRequest {
 
     @NotNull(message = "chuong_trinh_version_id không được để trống")
     private Long chuongTrinhVersionId;
-    private Long syllabusChuongTrinhGocId;
+    private Long syllabusChuongTrinhMauId;
     private String moTaTongQuan;
     private String duongDan;
     private String mucDich;

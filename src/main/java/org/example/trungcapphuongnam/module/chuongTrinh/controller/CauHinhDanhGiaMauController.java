@@ -22,11 +22,11 @@ public class CauHinhDanhGiaMauController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CauHinhDanhGiaMauResponse>>> findAll(
             Pageable pageable,
-            @RequestParam(required = false) Long syllabusMonHocGocId,
+            @RequestParam(required = false) Long syllabusMonHocMauId,
             @RequestParam(required = false) String keyword
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
-                service.findAll(syllabusMonHocGocId, keyword, pageable)
+                service.findAll(syllabusMonHocMauId, keyword, pageable)
         ));
     }
 

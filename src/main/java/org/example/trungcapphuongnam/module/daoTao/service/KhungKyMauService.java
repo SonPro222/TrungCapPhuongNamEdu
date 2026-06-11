@@ -1,20 +1,20 @@
 package org.example.trungcapphuongnam.module.daoTao.service;
 
 
-import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocRequest;
-import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyMauRequest;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyMauResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface KhungKyGocService {
+public interface KhungKyMauService {
 
-    Page<KhungKyGocResponse> findAll(String keyword, Pageable pageable);
+    Page<KhungKyMauResponse> findAll(String keyword, Pageable pageable);
 
-    KhungKyGocResponse findById(Long id);
+    KhungKyMauResponse findById(Long id);
 
-    KhungKyGocResponse create(KhungKyGocRequest request);
+    KhungKyMauResponse create(KhungKyMauRequest request);
 
-    KhungKyGocResponse update(Long id, KhungKyGocRequest request);
+    KhungKyMauResponse update(Long id, KhungKyMauRequest request);
 
     void delete(Long id);
 }

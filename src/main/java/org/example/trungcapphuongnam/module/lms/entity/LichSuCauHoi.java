@@ -20,8 +20,8 @@ public class LichSuCauHoi {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cau_hoi_goc_id")
-    private Long cauHoiGocId;
+    @Column(name = "cau_hoi_mau_id")
+    private Long cauHoiMauId;
 
     @Column(name = "cau_hoi_version_id")
     private Long cauHoiVersionId;

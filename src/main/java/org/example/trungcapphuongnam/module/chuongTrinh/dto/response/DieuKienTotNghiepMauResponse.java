@@ -8,9 +8,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DieuKienTotNghiepGocResponse {
+public class DieuKienTotNghiepMauResponse {
 
     private Long id;
+    private Long syllabusChuongTrinhMauId;
     private String ma;
     private String noiDung;
     private String ghiChu;

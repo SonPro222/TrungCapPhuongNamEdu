@@ -26,12 +26,12 @@ public class SyllabusMonHocController {
     public ResponseEntity<ApiResponse<Page<SyllabusMonHocResponse>>> findAll(
             Pageable pageable,
             @RequestParam(required = false) Long chuongTrinhMonId,
-            @RequestParam(required = false) Long syllabusMonHocGocId,
+            @RequestParam(required = false) Long syllabusMonHocMauId,
             @RequestParam(required = false) Boolean batBuocDuThi,
             @RequestParam(required = false) String keyword
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
-                service.findAll(chuongTrinhMonId, syllabusMonHocGocId, batBuocDuThi, keyword, pageable)
+                service.findAll(chuongTrinhMonId, syllabusMonHocMauId, batBuocDuThi, keyword, pageable)
         ));
     }
 

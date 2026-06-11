@@ -51,13 +51,13 @@ public class TepDinhKemValidator {
         validateRequest(request);
         validateFileCoBan(file);
 
-        String tenGoc = StringUtils.cleanPath(file.getOriginalFilename() == null ? "file" : file.getOriginalFilename());
+        String tenMau = StringUtils.cleanPath(file.getOriginalFilename() == null ? "file" : file.getOriginalFilename());
 
-        if (tenGoc.contains("..") || tenGoc.contains("/") || tenGoc.contains("\\")) {
+        if (tenMau.contains("..") || tenMau.contains("/") || tenMau.contains("\\")) {
             throw new HeThongException("Tên file không hợp lệ");
         }
 
-        String extension = layExtension(tenGoc);
+        String extension = layExtension(tenMau);
         if (extension.isBlank()) {
             throw new HeThongException("File phải có phần mở rộng");
         }
@@ -67,7 +67,7 @@ public class TepDinhKemValidator {
         validateDungLuongTheoLoai(file, loaiNoiDung);
         validateLoaiFileChoPhep(extension, loaiNoiDung);
 
-        return new ThongTinTep(tenGoc, extension, loaiNoiDung);
+        return new ThongTinTep(tenMau, extension, loaiNoiDung);
     }
 
     public void validateLayTheoDoiTuong(String module, String nghiepVu, Long doiTuongId) {
@@ -216,7 +216,7 @@ public class TepDinhKemValidator {
         return normalized.isEmpty() ? "khac" : normalized;
     }
 
-    public record ThongTinTep(String tenGoc, String extension, LoaiNoiDungTep loaiNoiDung) {
+    public record ThongTinTep(String tenMau, String extension, LoaiNoiDungTep loaiNoiDung) {
     }
     private void validateDungLuongTheoNguoiGui(MultipartFile file, TepDinhKemRequest request) {
         if (request.getNguoiGuiLoai() == null) {

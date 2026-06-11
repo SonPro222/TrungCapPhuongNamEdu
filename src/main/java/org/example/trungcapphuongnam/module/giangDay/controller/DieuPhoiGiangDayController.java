@@ -4,13 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.GiangDayPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.SinhLichHocRequest;
+import org.example.trungcapphuongnam.module.giangDay.dto.request.XepLichHangLoatRequest;
+import org.example.trungcapphuongnam.module.giangDay.dto.response.GoiYLichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.SinhLichHocPreviewResponse;
+import org.example.trungcapphuongnam.module.giangDay.dto.response.XepLichHangLoatResponse;
+import org.example.trungcapphuongnam.module.giangDay.dto.response.XepLichHangLoatItemResponse;
 import org.example.trungcapphuongnam.module.giangDay.service.DieuPhoiGiangDayService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,6 +35,17 @@ public class DieuPhoiGiangDayController {
         ));
     }
 
+
+    @PostMapping("/lich-hoc/goi-y")
+    public ResponseEntity<ApiResponse<List<GoiYLichHocResponse>>> goiYLichHoc(
+            @PathVariable Long lopHocPhanId,
+            @RequestBody SinhLichHocRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                dieuPhoiGiangDayService.goiYLichHoc(lopHocPhanId, request)
+        ));
+    }
+
     @PostMapping("/lich-hoc/tao-tu-dong")
     public ResponseEntity<ApiResponse<List<LichHocResponse>>> taoLichTuDong(
             @PathVariable Long lopHocPhanId,
@@ -39,4 +55,46 @@ public class DieuPhoiGiangDayController {
                 dieuPhoiGiangDayService.taoLichTuDong(lopHocPhanId, request)
         ));
     }
+
+    @PostMapping("/lich-hoc/xep-hang-loat")
+    public ResponseEntity<ApiResponse<XepLichHangLoatResponse>> xepLichHangLoat(
+            @PathVariable Long lopHocPhanId,
+            @RequestBody(required = false) XepLichHangLoatRequest request
+    ) {
+        if (request == null) {
+            request = new XepLichHangLoatRequest();
+        }
+
+        if (request.getLopHocPhanIds() == null || request.getLopHocPhanIds().isEmpty()) {
+            request.setLopHocPhanIds(new ArrayList<>(List.of(lopHocPhanId)));
+        }
+
+        try {
+            return ResponseEntity.ok(ApiResponse.ok(
+                    dieuPhoiGiangDayService.xepLichHangLoat(request)
+            ));
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            if (message == null || message.trim().isEmpty()) {
+                message = "Không thể xếp lịch tự động. Vui lòng kiểm tra lớp, khoảng ngày, giáo viên, phòng và ca học.";
+            }
+
+            XepLichHangLoatItemResponse item = XepLichHangLoatItemResponse.builder()
+                    .lopHocPhanId(lopHocPhanId)
+                    .thanhCong(false)
+                    .thongBao(message)
+                    .build();
+
+            XepLichHangLoatResponse response = XepLichHangLoatResponse.builder()
+                    .tongLop(1)
+                    .soLopThanhCong(0)
+                    .soLopLoi(1)
+                    .chiPreview(request.getChiPreview())
+                    .items(List.of(item))
+                    .build();
+
+            return ResponseEntity.ok(ApiResponse.ok(response));
+        }
+    }
 }
+

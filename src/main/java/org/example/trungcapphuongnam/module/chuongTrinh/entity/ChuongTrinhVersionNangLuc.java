@@ -22,8 +22,8 @@ public class ChuongTrinhVersionNangLuc {
 
     @Column(name = "chuong_trinh_version_id", nullable = false)
     private Long chuongTrinhVersionId;
-    @Column(name = "nang_luc_goc_id", nullable = false)
-    private Long nangLucGocId;
+    @Column(name = "nang_luc_mau_id", nullable = false)
+    private Long nangLucMauId;
 
     @Column(name = "ma", length = 50)
     private String ma;

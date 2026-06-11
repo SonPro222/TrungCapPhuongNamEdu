@@ -1,19 +1,19 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.service;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomKienThucGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomKienThucGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomKienThucMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomKienThucMauResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface NhomKienThucGocService {
+public interface NhomKienThucMauService {
 
-    Page<NhomKienThucGocResponse> findAll(String ma, String loaiNhom, String keyword, Pageable pageable);
+    Page<NhomKienThucMauResponse> findAll(String ma, String loaiNhom, String keyword, Pageable pageable);
 
-    NhomKienThucGocResponse findById(Long id);
+    NhomKienThucMauResponse findById(Long id);
 
-    NhomKienThucGocResponse create(NhomKienThucGocRequest request);
+    NhomKienThucMauResponse create(NhomKienThucMauRequest request);
 
-    NhomKienThucGocResponse update(Long id, NhomKienThucGocRequest request);
+    NhomKienThucMauResponse update(Long id, NhomKienThucMauRequest request);
 
     void delete(Long id);
 }

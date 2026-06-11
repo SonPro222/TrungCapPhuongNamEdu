@@ -8,18 +8,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.DieuKienTotNghiepGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienTotNghiepGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.DieuKienTotNghiepMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienTotNghiepMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.DieuKienTotNghiepMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.DieuKienTotNghiepMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.DieuKienTotNghiepGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.DieuKienTotNghiepMauService;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocService {
+public class DieuKienTotNghiepMauServiceImpl implements DieuKienTotNghiepMauService {
     private final ChuongTrinhNghiepVuValidator validator;
     private final DieuKienTotNghiepMauRepository repository;
     private final DieuKienTotNghiepMauMapper mapper;
@@ -27,9 +27,10 @@ public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocServ
 
     @Override
     @Transactional(readOnly = true)
-    public Page<DieuKienTotNghiepGocResponse> findAll(String ma, String keyword, Pageable pageable) {
+    public Page<DieuKienTotNghiepMauResponse> findAll(Long syllabusChuongTrinhMauId, String ma, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<DieuKienTotNghiepMau>empty()
+                    .and(LocJpa.eq("syllabusChuongTrinhMauId", syllabusChuongTrinhMauId))
                     .and(LocJpa.like("ma", ma))
                     .and(LocJpa.keyword(keyword, "ma", "noiDung", "ghiChu")),
                 pageable
@@ -38,30 +39,30 @@ public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocServ
 
     @Override
     @Transactional(readOnly = true)
-    public DieuKienTotNghiepGocResponse findById(Long id) {
+    public DieuKienTotNghiepMauResponse findById(Long id) {
         return repository.findById(id)
                 .map(mapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Dieu Kien Tot Nghiep Goc không tồn tại: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Dieu Kien Tot Nghiep Mau không tồn tại: " + id));
     }
 
     @Override
-    public DieuKienTotNghiepGocResponse create(DieuKienTotNghiepGocRequest request) {
+    public DieuKienTotNghiepMauResponse create(DieuKienTotNghiepMauRequest request) {
         if (request.getMa() != null && repository.existsByMa(request.getMa())) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được tạo trùng.");
         }
-        validator.validateDieuKienTotNghiepGoc(request, null);
+        validator.validateDieuKienTotNghiepMau(request, null);
         DieuKienTotNghiepMau entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
 
     @Override
-    public DieuKienTotNghiepGocResponse update(Long id, DieuKienTotNghiepGocRequest request) {
+    public DieuKienTotNghiepMauResponse update(Long id, DieuKienTotNghiepMauRequest request) {
         DieuKienTotNghiepMau entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Dieu Kien Tot Nghiep Goc không tồn tại: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Dieu Kien Tot Nghiep Mau không tồn tại: " + id));
         if (request.getMa() != null && repository.existsByMaAndIdNot(request.getMa(), id)) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được cập nhật trùng.");
         }
-        validator.validateDieuKienTotNghiepGoc(request, id);
+        validator.validateDieuKienTotNghiepMau(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -69,10 +70,10 @@ public class DieuKienTotNghiepGocServiceImpl implements DieuKienTotNghiepGocServ
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Dieu Kien Tot Nghiep Goc không tồn tại: " + id);
+            throw new ResourceNotFoundException("Dieu Kien Tot Nghiep Mau không tồn tại: " + id);
         }
 
-        xoaChuongTrinhCascadeService.xoaTheoDieuKienTotNghiepGocId(id);
+        xoaChuongTrinhCascadeService.xoaTheoDieuKienTotNghiepMauId(id);
 
         repository.deleteById(id);
     }

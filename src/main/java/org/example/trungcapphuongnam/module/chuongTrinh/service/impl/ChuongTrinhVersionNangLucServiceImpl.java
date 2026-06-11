@@ -10,7 +10,7 @@ import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ChuongTrinhVersionNangLucRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ChuongTrinhVersionNangLucResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersionNangLuc;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.NangLucDauRaGoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.NangLucDauRaMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ChuongTrinhVersionNangLucMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhVersionNangLucService;
@@ -24,37 +24,37 @@ public class ChuongTrinhVersionNangLucServiceImpl implements ChuongTrinhVersionN
     private final ChuongTrinhVersionNangLucRepository repository;
     private final ChuongTrinhVersionNangLucMapper mapper;
     private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
-    private final NangLucDauRaGocRepository nangLucDauRaGocRepository;
+    private final NangLucDauRaMauRepository nangLucDauRaMauRepository;
 
     private boolean rong(String value) {
         return value == null || value.trim().isEmpty();
     }
 
-    private void dienThongTinNangLucTuGocNeuCan(ChuongTrinhVersionNangLuc entity, NangLucDauRaGoc goc) {
-        if (entity == null || goc == null) {
+    private void dienThongTinNangLucTuMauNeuCan(ChuongTrinhVersionNangLuc entity, NangLucDauRaMau Mau) {
+        if (entity == null || Mau == null) {
             return;
         }
         if (rong(entity.getMa())) {
-            entity.setMa(goc.getMa());
+            entity.setMa(Mau.getMa());
         }
         if (entity.getLoai() == null) {
-            entity.setLoai(goc.getLoai());
+            entity.setLoai(Mau.getLoai());
         }
         if (rong(entity.getNoiDung())) {
-            entity.setNoiDung(goc.getNoiDung());
+            entity.setNoiDung(Mau.getNoiDung());
         }
         if (rong(entity.getGhiChu())) {
-            entity.setGhiChu(goc.getGhiChu());
+            entity.setGhiChu(Mau.getGhiChu());
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ChuongTrinhVersionNangLucResponse> findAll(Long chuongTrinhVersionId, Long nangLucGocId, String keyword, Pageable pageable) {
+    public Page<ChuongTrinhVersionNangLucResponse> findAll(Long chuongTrinhVersionId, Long nangLucMauId, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<ChuongTrinhVersionNangLuc>empty()
                     .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                    .and(LocJpa.eq("nangLucGocId", nangLucGocId))
+                    .and(LocJpa.eq("nangLucMauId", nangLucMauId))
                     .and(LocJpa.keyword(keyword, "ma", "loai", "noiDung", "ghiChu")),
                 pageable
         ).map(mapper::toResponse);
@@ -73,14 +73,14 @@ public class ChuongTrinhVersionNangLucServiceImpl implements ChuongTrinhVersionN
         if (!chuongTrinhVersionRepository.existsById(request.getChuongTrinhVersionId())) {
             throw new ResourceNotFoundException("Version chương trình không tồn tại: " + request.getChuongTrinhVersionId());
         }
-        NangLucDauRaGoc nangLucGoc = nangLucDauRaGocRepository.findById(request.getNangLucGocId())
-                .orElseThrow(() -> new ResourceNotFoundException("Năng lực gốc không tồn tại: " + request.getNangLucGocId()));
-        if (request.getChuongTrinhVersionId() != null && request.getNangLucGocId() != null && repository.existsByChuongTrinhVersionIdAndNangLucGocId(request.getChuongTrinhVersionId(), request.getNangLucGocId())) {
+        NangLucDauRaMau nangLucMau = nangLucDauRaMauRepository.findById(request.getNangLucMauId())
+                .orElseThrow(() -> new ResourceNotFoundException("Năng lực gốc không tồn tại: " + request.getNangLucMauId()));
+        if (request.getChuongTrinhVersionId() != null && request.getNangLucMauId() != null && repository.existsByChuongTrinhVersionIdAndNangLucMauId(request.getChuongTrinhVersionId(), request.getNangLucMauId())) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được tạo trùng.");
         }
         validator.validateChuongTrinhVersionNangLuc(request, null);
         ChuongTrinhVersionNangLuc entity = mapper.toEntity(request);
-        dienThongTinNangLucTuGocNeuCan(entity, nangLucGoc);
+        dienThongTinNangLucTuMauNeuCan(entity, nangLucMau);
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -91,14 +91,14 @@ public class ChuongTrinhVersionNangLucServiceImpl implements ChuongTrinhVersionN
         if (!chuongTrinhVersionRepository.existsById(request.getChuongTrinhVersionId())) {
             throw new ResourceNotFoundException("Version chương trình không tồn tại: " + request.getChuongTrinhVersionId());
         }
-        NangLucDauRaGoc nangLucGoc = nangLucDauRaGocRepository.findById(request.getNangLucGocId())
-                .orElseThrow(() -> new ResourceNotFoundException("Năng lực gốc không tồn tại: " + request.getNangLucGocId()));
-        if (request.getChuongTrinhVersionId() != null && request.getNangLucGocId() != null && repository.existsByChuongTrinhVersionIdAndNangLucGocIdAndIdNot(request.getChuongTrinhVersionId(), request.getNangLucGocId(), id)) {
+        NangLucDauRaMau nangLucMau = nangLucDauRaMauRepository.findById(request.getNangLucMauId())
+                .orElseThrow(() -> new ResourceNotFoundException("Năng lực gốc không tồn tại: " + request.getNangLucMauId()));
+        if (request.getChuongTrinhVersionId() != null && request.getNangLucMauId() != null && repository.existsByChuongTrinhVersionIdAndNangLucMauIdAndIdNot(request.getChuongTrinhVersionId(), request.getNangLucMauId(), id)) {
             throw new IllegalArgumentException("Dữ liệu đã tồn tại, không được cập nhật trùng.");
         }
         validator.validateChuongTrinhVersionNangLuc(request, id);
         mapper.updateEntity(entity, request);
-        dienThongTinNangLucTuGocNeuCan(entity, nangLucGoc);
+        dienThongTinNangLucTuMauNeuCan(entity, nangLucMau);
         return mapper.toResponse(repository.save(entity));
     }
 

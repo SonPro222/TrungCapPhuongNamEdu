@@ -10,7 +10,7 @@ import lombok.*;
 public class ChuongTrinhVersionViTriViecLamRequest {
 
     private Long chuongTrinhVersionId;
-    private Long viTriGocId;
+    private Long viTriMauId;
     private String ma;
     private String ten;
     private String moTa;

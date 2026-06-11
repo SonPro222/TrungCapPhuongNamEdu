@@ -13,7 +13,7 @@ public class QuyDoiDiemMauMapper {
             return null;
         }
         QuyDoiDiemMau entity = new QuyDoiDiemMau();
-        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
+        entity.setSyllabusMonHocMauId(request.getSyllabusMonHocMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setNguongTu(request.getNguongTu());
@@ -34,7 +34,7 @@ public class QuyDoiDiemMauMapper {
         if (entity == null || request == null) {
             return;
         }
-        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
+        entity.setSyllabusMonHocMauId(request.getSyllabusMonHocMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setNguongTu(request.getNguongTu());
@@ -56,7 +56,7 @@ public class QuyDoiDiemMauMapper {
         }
         return QuyDoiDiemMauResponse.builder()
                 .id(entity.getId())
-                .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
+                .syllabusMonHocMauId(entity.getSyllabusMonHocMauId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())
                 .nguongTu(entity.getNguongTu())

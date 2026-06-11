@@ -11,7 +11,7 @@ public final class LichSuCauHoiMapper {
         if (entity == null) return null;
         return LichSuCauHoiResponse.builder()
             .id(entity.getId())
-            .cauHoiGocId(entity.getCauHoiGocId())
+            .cauHoiMauId(entity.getCauHoiMauId())
             .cauHoiVersionId(entity.getCauHoiVersionId())
             .hanhDong(entity.getHanhDong())
             .noiDungCu(entity.getNoiDungCu())
@@ -25,7 +25,7 @@ public final class LichSuCauHoiMapper {
     public static LichSuCauHoi toEntity(LichSuCauHoiRequest request) {
         if (request == null) return null;
         return LichSuCauHoi.builder()
-            .cauHoiGocId(request.getCauHoiGocId())
+            .cauHoiMauId(request.getCauHoiMauId())
             .cauHoiVersionId(request.getCauHoiVersionId())
             .hanhDong(request.getHanhDong())
             .noiDungCu(request.getNoiDungCu())
@@ -37,7 +37,7 @@ public final class LichSuCauHoiMapper {
 
     public static void updateEntity(LichSuCauHoi entity, LichSuCauHoiRequest request) {
         if (entity == null || request == null) return;
-        entity.setCauHoiGocId(request.getCauHoiGocId());
+        entity.setCauHoiMauId(request.getCauHoiMauId());
         entity.setCauHoiVersionId(request.getCauHoiVersionId());
         entity.setHanhDong(request.getHanhDong());
         entity.setNoiDungCu(request.getNoiDungCu());

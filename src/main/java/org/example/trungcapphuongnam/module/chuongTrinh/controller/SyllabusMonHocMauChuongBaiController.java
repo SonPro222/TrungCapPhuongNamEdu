@@ -3,46 +3,46 @@ package org.example.trungcapphuongnam.module.chuongTrinh.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.ChuongTrinhPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocChuongBaiRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocChuongBaiResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocGocChuongBaiService;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocMauChuongBaiRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocMauChuongBaiResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocMauChuongBaiService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(ChuongTrinhPath.SYLLABUS_MON_HOC_GOC_CHUONG_BAI)
+@RequestMapping(ChuongTrinhPath.SYLLABUS_MON_HOC_MAU_CHUONG_BAI)
 @RequiredArgsConstructor
-public class SyllabusMonHocGocChuongBaiController {
+public class SyllabusMonHocMauChuongBaiController {
 
-    private final SyllabusMonHocGocChuongBaiService service;
+    private final SyllabusMonHocMauChuongBaiService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SyllabusMonHocGocChuongBaiResponse>>> findAll(
+    public ResponseEntity<ApiResponse<Page<SyllabusMonHocMauChuongBaiResponse>>> findAll(
             Pageable pageable,
-            @RequestParam(required = false) Long syllabusMonHocGocId,
+            @RequestParam(required = false) Long syllabusMonHocMauId,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusMonHocGocId, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusMonHocMauId, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)
-    public ResponseEntity<ApiResponse<SyllabusMonHocGocChuongBaiResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<SyllabusMonHocMauChuongBaiResponse>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<SyllabusMonHocGocChuongBaiResponse>> create(
-            @RequestBody SyllabusMonHocGocChuongBaiRequest request
+    public ResponseEntity<ApiResponse<SyllabusMonHocMauChuongBaiResponse>> create(
+            @RequestBody SyllabusMonHocMauChuongBaiRequest request
     ) {
         return ResponseEntity.status(201).body(ApiResponse.created(service.create(request)));
     }
 
     @PutMapping(ChuongTrinhPath.ID)
-    public ResponseEntity<ApiResponse<SyllabusMonHocGocChuongBaiResponse>> update(
+    public ResponseEntity<ApiResponse<SyllabusMonHocMauChuongBaiResponse>> update(
             @PathVariable Long id,
-            @RequestBody SyllabusMonHocGocChuongBaiRequest request
+            @RequestBody SyllabusMonHocMauChuongBaiRequest request
     ) {
         return ResponseEntity.ok(ApiResponse.ok(service.update(id, request)));
     }

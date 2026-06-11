@@ -1,14 +1,14 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.TaiLieuGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.TaiLieuGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.TaiLieuMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.TaiLieuMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.TaiLieuMau;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaiLieuGocMapper {
+public class TaiLieuMauMapper {
 
-    public TaiLieuMau toEntity(TaiLieuGocRequest request) {
+    public TaiLieuMau toEntity(TaiLieuMauRequest request) {
         if (request == null) {
             return null;
         }
@@ -25,7 +25,7 @@ public class TaiLieuGocMapper {
                 .build();
     }
 
-    public void updateEntity(TaiLieuMau entity, TaiLieuGocRequest request) {
+    public void updateEntity(TaiLieuMau entity, TaiLieuMauRequest request) {
         if (entity == null || request == null) {
             return;
         }
@@ -40,12 +40,12 @@ public class TaiLieuGocMapper {
         entity.setGhiChu(request.getGhiChu());
     }
 
-    public TaiLieuGocResponse toResponse(TaiLieuMau entity) {
+    public TaiLieuMauResponse toResponse(TaiLieuMau entity) {
         if (entity == null) {
             return null;
         }
 
-        return TaiLieuGocResponse.builder()
+        return TaiLieuMauResponse.builder()
                 .id(entity.getId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())

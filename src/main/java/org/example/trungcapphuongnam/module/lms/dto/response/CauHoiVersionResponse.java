@@ -15,7 +15,7 @@ import lombok.*;
 public class CauHoiVersionResponse {
     private Long id;
 
-    private Long cauHoiGocId;
+    private Long cauHoiMauId;
 
     private Integer versionNo;
 

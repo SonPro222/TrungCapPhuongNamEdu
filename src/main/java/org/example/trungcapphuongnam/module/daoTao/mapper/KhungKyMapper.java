@@ -15,12 +15,12 @@ public class KhungKyMapper {
 
         return KhungKy.builder()
                 .chuongTrinhVersionId(request.getChuongTrinhVersionId())
-                .loaiChuongTrinhId(request.getLoaiChuongTrinhId())
-                .khungKyGocId(request.getKhungKyGocId())
                 .maKy(request.getMaKy())
                 .tenKy(request.getTenKy())
                 .thuTu(request.getThuTu())
                 .moTa(request.getMoTa())
+                .ngayBatDau(request.getNgayBatDau())
+                .ngayKetThuc(request.getNgayKetThuc())
                 .build();
     }
 
@@ -32,12 +32,12 @@ public class KhungKyMapper {
         return KhungKyResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
-                .loaiChuongTrinhId(entity.getLoaiChuongTrinhId())
-                .khungKyGocId(entity.getKhungKyGocId())
                 .maKy(entity.getMaKy())
                 .tenKy(entity.getTenKy())
                 .thuTu(entity.getThuTu())
                 .moTa(entity.getMoTa())
+                .ngayBatDau(entity.getNgayBatDau())
+                .ngayKetThuc(entity.getNgayKetThuc())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -48,12 +48,15 @@ public class KhungKyMapper {
             return;
         }
 
-        entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setLoaiChuongTrinhId(request.getLoaiChuongTrinhId());
-        entity.setKhungKyGocId(request.getKhungKyGocId());
+        // chuongTrinhVersionId không đổi khi update — chỉ ghi nếu không null để tránh NOT NULL violation
+        if (request.getChuongTrinhVersionId() != null) {
+            entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
+        }
         entity.setMaKy(request.getMaKy());
         entity.setTenKy(request.getTenKy());
         entity.setThuTu(request.getThuTu());
         entity.setMoTa(request.getMoTa());
+        entity.setNgayBatDau(request.getNgayBatDau());
+        entity.setNgayKetThuc(request.getNgayKetThuc());
     }
 }

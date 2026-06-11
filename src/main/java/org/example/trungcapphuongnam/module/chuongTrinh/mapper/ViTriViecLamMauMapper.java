@@ -1,19 +1,19 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
 import org.springframework.stereotype.Component;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLamMau;
 
 @Component
-public class ViTriViecLamGocMapper {
+public class ViTriViecLamMauMapper {
 
-    public ViTriViecLamMau toEntity(ViTriViecLamGocRequest request) {
+    public ViTriViecLamMau toEntity(ViTriViecLamMauRequest request) {
         if (request == null) {
             return null;
         }
         ViTriViecLamMau entity = new ViTriViecLamMau();
-        entity.setChuongTrinhId(request.getChuongTrinhId());
+        entity.setSyllabusChuongTrinhMauId(request.getSyllabusChuongTrinhMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
@@ -21,24 +21,24 @@ public class ViTriViecLamGocMapper {
         return entity;
     }
 
-    public void updateEntity(ViTriViecLamMau entity, ViTriViecLamGocRequest request) {
+    public void updateEntity(ViTriViecLamMau entity, ViTriViecLamMauRequest request) {
         if (entity == null || request == null) {
             return;
         }
-        entity.setChuongTrinhId(request.getChuongTrinhId());
+        entity.setSyllabusChuongTrinhMauId(request.getSyllabusChuongTrinhMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
         entity.setGhiChu(request.getGhiChu());
     }
 
-    public ViTriViecLamGocResponse toResponse(ViTriViecLamMau entity) {
+    public ViTriViecLamMauResponse toResponse(ViTriViecLamMau entity) {
         if (entity == null) {
             return null;
         }
-        return ViTriViecLamGocResponse.builder()
+        return ViTriViecLamMauResponse.builder()
                 .id(entity.getId())
-                .chuongTrinhId(entity.getChuongTrinhId())
+                .syllabusChuongTrinhMauId(entity.getSyllabusChuongTrinhMauId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())
                 .moTa(entity.getMoTa())

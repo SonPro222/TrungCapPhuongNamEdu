@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.QuyDoiDiemMa
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.QuyDoiDiemMauResponse;
 
 public interface QuyDoiDiemMauService {
-    Page<QuyDoiDiemMauResponse> findAll(Long syllabusMonHocGocId, String ma, String ketQua, String keyword, Pageable pageable);
+    Page<QuyDoiDiemMauResponse> findAll(Long syllabusMonHocMauId, String ma, String ketQua, String keyword, Pageable pageable);
 
     QuyDoiDiemMauResponse findById(Long id);
 

@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service;
 
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusChuongTrinhRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusChuongTrinhResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinhGoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusChuongTrinhMau;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +10,7 @@ public interface SyllabusChuongTrinhService {
 
     Page<SyllabusChuongTrinhResponse> findAll(
             Long chuongTrinhVersionId,
-            Long syllabusChuongTrinhGocId,
+            Long syllabusChuongTrinhMauId,
             String keyword,
             Pageable pageable
     );
@@ -23,8 +23,13 @@ public interface SyllabusChuongTrinhService {
 
     void delete(Long id);
 
-    SyllabusChuongTrinhResponse dongBoTuSyllabusGoc(
-            SyllabusChuongTrinhGoc syllabusGoc,
+    SyllabusChuongTrinhResponse dongBoTuSyllabusMau(
+            SyllabusChuongTrinhMau syllabusMau,
+            Long chuongTrinhVersionId
+    );
+
+    SyllabusChuongTrinhResponse dongBoTuSyllabusMau(
+            Long syllabusChuongTrinhMauId,
             Long chuongTrinhVersionId
     );
 }

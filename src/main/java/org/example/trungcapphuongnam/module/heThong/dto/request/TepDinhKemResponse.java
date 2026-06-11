@@ -18,7 +18,7 @@ public class TepDinhKemResponse {
 
     private Long id;
 
-    private String tenGoc;
+    private String tenMau;
 
     private String tenLuu;
 

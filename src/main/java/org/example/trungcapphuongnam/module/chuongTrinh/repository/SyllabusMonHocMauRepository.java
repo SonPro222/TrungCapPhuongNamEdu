@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SyllabusMonHocGocRepository
+public interface SyllabusMonHocMauRepository
         extends JpaRepository<SyllabusMonHocMau, Long>, JpaSpecificationExecutor<SyllabusMonHocMau> {
 
     boolean existsByMa(String ma);

@@ -15,10 +15,10 @@ import jakarta.persistence.*;
 @Table(
         name = "tai_lieu_mau",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uq_tai_lieu_goc_ma", columnNames = "ma")
+                @UniqueConstraint(name = "uq_tai_lieu_mau_ma", columnNames = "ma")
         }
 )
-public class TaiLieuGoc {
+public class TaiLieuMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

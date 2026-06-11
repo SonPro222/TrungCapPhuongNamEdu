@@ -3,6 +3,8 @@ package org.example.trungcapphuongnam.module.daoTao.dto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,19 +15,15 @@ public class KhungKyRequest {
     @NotNull(message = "chuongTrinhVersionId không được để trống")
     private Long chuongTrinhVersionId;
 
-    private Long loaiChuongTrinhId;
-
-    private Long khungKyGocId;
-
-    @NotBlank(message = "maKy không được để trống")
     private String maKy;
 
-    @NotBlank(message = "tenKy không được để trống")
     private String tenKy;
 
-    @NotNull(message = "thuTu không được để trống")
-    @Positive(message = "thuTu phải lớn hơn 0")
     private Integer thuTu;
 
     private String moTa;
+
+    private LocalDate ngayBatDau;
+
+    private LocalDate ngayKetThuc;
 }

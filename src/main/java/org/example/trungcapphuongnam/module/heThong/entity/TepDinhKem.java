@@ -22,8 +22,8 @@ public class TepDinhKem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "ten_goc", nullable = false, length = 500)
-    private String tenGoc;
+    @Column(name = "ten_Mau", nullable = false, length = 500)
+    private String tenMau;
 
     @Column(name = "ten_luu", nullable = false, length = 500)
     private String tenLuu;
@@ -122,8 +122,8 @@ public class TepDinhKem {
     @Column(name = "syllabus_mon_hoc_id")
     private Long syllabusMonHocId;
 
-    @Column(name = "tai_lieu_goc_id")
-    private Long taiLieuGocId;
+    @Column(name = "tai_lieu_Mau_id")
+    private Long taiLieuMauId;
 
     @Column(name = "tang_nghiep_vu", length = 150)
     private String tangNghiepVu;

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NhomTuChonGocResponse {
+public class NhomTuChonMauResponse {
 
     private Long id;
 

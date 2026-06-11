@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 public interface SyllabusMonHocTaiLieuRepository
         extends JpaRepository<SyllabusMonHocTaiLieu, Long>, JpaSpecificationExecutor<SyllabusMonHocTaiLieu> {
 
-    boolean existsBySyllabusMonIdAndTaiLieuGocId(Long syllabusMonId, Long taiLieuGocId);
+    boolean existsBySyllabusMonIdAndTaiLieuMauId(Long syllabusMonId, Long taiLieuMauId);
 
-    boolean existsBySyllabusMonIdAndTaiLieuGocIdAndIdNot(Long syllabusMonId, Long taiLieuGocId, Long id);
+    boolean existsBySyllabusMonIdAndTaiLieuMauIdAndIdNot(Long syllabusMonId, Long taiLieuMauId, Long id);
 
     boolean existsBySyllabusMonIdAndThuTu(Long syllabusMonId, Integer thuTu);
 
@@ -20,5 +20,5 @@ public interface SyllabusMonHocTaiLieuRepository
 
     void deleteBySyllabusMonId(Long syllabusMonId);
 
-    void deleteByTaiLieuGocId(Long taiLieuGocId);
+    void deleteByTaiLieuMauId(Long taiLieuMauId);
 }

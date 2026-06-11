@@ -1,14 +1,14 @@
 package org.example.trungcapphuongnam.module.lms.service;
 
-import org.example.trungcapphuongnam.module.lms.dto.request.CauHoiGocRequest;
-import org.example.trungcapphuongnam.module.lms.dto.response.CauHoiGocResponse;
+import org.example.trungcapphuongnam.module.lms.dto.request.CauHoiMauRequest;
+import org.example.trungcapphuongnam.module.lms.dto.response.CauHoiMauResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface CauHoiGocService {
-    Page<CauHoiGocResponse> findAll(Pageable pageable);
-    CauHoiGocResponse findById(Long id);
-    CauHoiGocResponse create(CauHoiGocRequest request);
-    CauHoiGocResponse update(Long id, CauHoiGocRequest request);
+public interface CauHoiMauService {
+    Page<CauHoiMauResponse> findAll(Pageable pageable);
+    CauHoiMauResponse findById(Long id);
+    CauHoiMauResponse create(CauHoiMauRequest request);
+    CauHoiMauResponse update(Long id, CauHoiMauRequest request);
     void delete(Long id);
 }

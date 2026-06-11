@@ -92,7 +92,7 @@ public class TepDinhKemController {
         TepDinhKemResponse tep = service.getById(id);
         Resource resource = service.download(id);
 
-        String fileName = URLEncoder.encode(tep.getTenGoc(), StandardCharsets.UTF_8)
+        String fileName = URLEncoder.encode(tep.getTenMau(), StandardCharsets.UTF_8)
                 .replace("+", "%20");
 
         return ResponseEntity.ok()
@@ -112,7 +112,7 @@ public class TepDinhKemController {
         TepDinhKemResponse tep = service.getById(id);
         Resource resource = service.preview(id);
 
-        String fileName = URLEncoder.encode(tep.getTenGoc(), StandardCharsets.UTF_8)
+        String fileName = URLEncoder.encode(tep.getTenMau(), StandardCharsets.UTF_8)
                 .replace("+", "%20");
 
         String contentType = layContentTypePreview(tep);

@@ -10,7 +10,7 @@ import lombok.*;
 public class ChuongTrinhVersionMucTieuRequest {
 
     private Long chuongTrinhVersionId;
-    private Long mucTieuGocId;
+    private Long mucTieuMauId;
     private Integer thuTu;
     private String ghiChu;
 }

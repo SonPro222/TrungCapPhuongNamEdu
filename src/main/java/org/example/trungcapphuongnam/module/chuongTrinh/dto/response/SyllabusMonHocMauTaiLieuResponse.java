@@ -10,13 +10,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusMonHocGocTaiLieuResponse {
+public class SyllabusMonHocMauTaiLieuResponse {
 
     private Long id;
 
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
 
-    private Long taiLieuGocId;
+    private Long taiLieuMauId;
     private String ma;
 
     private String ten;

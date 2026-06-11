@@ -11,13 +11,16 @@ public class ChuongTrinhResponse {
 
     private Long id;
 
-    private Long nganhLoaiChuongTrinhId;
+    private Long nganhHeDaoTaoId;
+    private String maHe;
+    private String tenHe;
 
     private Long nganhId;
+    private String maNganh;
+    private String tenNganh;
 
-    private Long trinhDoId;
-
-    private Long loaiChuongTrinhId;
+    private Integer soThang;
+    private Integer soKy;
 
     private String maChuongTrinh;
 

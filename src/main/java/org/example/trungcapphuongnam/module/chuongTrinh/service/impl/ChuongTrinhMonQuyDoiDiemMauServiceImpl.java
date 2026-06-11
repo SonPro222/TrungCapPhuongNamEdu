@@ -108,10 +108,10 @@ public class ChuongTrinhMonQuyDoiDiemMauServiceImpl implements ChuongTrinhMonQuy
         SyllabusMonHoc syllabusMonHoc = syllabusMonHocRepository.findById(request.getSyllabusMonHocId())
                 .orElseThrow(() -> new ResourceNotFoundException("Syllabus môn học không tồn tại: " + request.getSyllabusMonHocId()));
 
-        QuyDoiDiemMau mau = quyDoiDiemMauRepository.findById(request.getQuyDoiDiemMauId())
+        QuyDoiDiemMau Mau = quyDoiDiemMauRepository.findById(request.getQuyDoiDiemMauId())
                 .orElseThrow(() -> new ResourceNotFoundException("Quy đổi điểm mẫu không tồn tại: " + request.getQuyDoiDiemMauId()));
 
-        if (!"QUY_DOI_KET_QUA".equalsIgnoreCase(String.valueOf(mau.getLoaiMau()))) {
+        if (!"QUY_DOI_KET_QUA".equalsIgnoreCase(String.valueOf(Mau.getLoaiMau()))) {
             throw new BadRequestException("Chỉ được gán mẫu loại QUY_DOI_KET_QUA vào syllabus. Cột điểm không gán qua bảng mẫu quy đổi kết quả.");
         }
 

@@ -11,7 +11,7 @@ public class ViTriViecLamMapper {
     public ViTriViecLam toEntity(ViTriViecLamRequest request) {
         if (request == null) return null;
         return ViTriViecLam.builder()
-                .chuongTrinhVersionId(request.getChuongTrinhVersionId())
+                .syllabusChuongTrinhId(request.getSyllabusChuongTrinhId())
                 .ten(request.getTen())
                 .moTa(request.getMoTa())
                 .thuTu(request.getThuTu())
@@ -25,7 +25,7 @@ public class ViTriViecLamMapper {
         if (entity == null) return null;
         return ViTriViecLamResponse.builder()
                 .id(entity.getId())
-                .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
+                .syllabusChuongTrinhId(entity.getSyllabusChuongTrinhId())
                 .ten(entity.getTen())
                 .moTa(entity.getMoTa())
                 .thuTu(entity.getThuTu())
@@ -38,7 +38,7 @@ public class ViTriViecLamMapper {
 
     public void updateEntity(ViTriViecLam entity, ViTriViecLamRequest request) {
         if (entity == null || request == null) return;
-        entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
+        entity.setSyllabusChuongTrinhId(request.getSyllabusChuongTrinhId());
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
         entity.setThuTu(request.getThuTu());

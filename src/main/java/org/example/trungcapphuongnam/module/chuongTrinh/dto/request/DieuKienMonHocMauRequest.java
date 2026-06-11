@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DieuKienMonHocGocRequest {
+public class DieuKienMonHocMauRequest {
 
     private String ma;
 

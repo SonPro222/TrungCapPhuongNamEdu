@@ -16,7 +16,7 @@ public class SyllabusMonHocTaiLieuMapper {
 
         return SyllabusMonHocTaiLieu.builder()
                 .syllabusMonId(request.getSyllabusMonId())
-                .taiLieuGocId(request.getTaiLieuGocId())
+                .taiLieuMauId(request.getTaiLieuMauId())
                 .ma(request.getMa())
                 .ten(request.getTen())
                 .loai(request.getLoai())
@@ -36,7 +36,7 @@ public class SyllabusMonHocTaiLieuMapper {
         }
 
         entity.setSyllabusMonId(request.getSyllabusMonId());
-        entity.setTaiLieuGocId(request.getTaiLieuGocId());
+        entity.setTaiLieuMauId(request.getTaiLieuMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setLoai(request.getLoai());
@@ -57,7 +57,7 @@ public class SyllabusMonHocTaiLieuMapper {
         return SyllabusMonHocTaiLieuResponse.builder()
                 .id(entity.getId())
                 .syllabusMonId(entity.getSyllabusMonId())
-                .taiLieuGocId(entity.getTaiLieuGocId())
+                .taiLieuMauId(entity.getTaiLieuMauId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())
                 .loai(entity.getLoai())

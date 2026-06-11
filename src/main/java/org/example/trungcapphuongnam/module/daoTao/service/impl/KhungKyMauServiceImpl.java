@@ -7,12 +7,12 @@ import org.example.trungcapphuongnam.common.exception.DuplicateResourceException
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.util.TextUtil;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
-import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocRequest;
-import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyMauRequest;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyMauResponse;
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKyMau;
 import org.example.trungcapphuongnam.module.daoTao.mapper.KhungKyMauMapper;
 import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyMauRepository;
-import org.example.trungcapphuongnam.module.daoTao.service.KhungKyGocService;
+import org.example.trungcapphuongnam.module.daoTao.service.KhungKyMauService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,15 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class KhungKyGocServiceImpl implements KhungKyGocService {
+public class KhungKyMauServiceImpl implements KhungKyMauService {
 
     private final KhungKyMauRepository repository;
     private final KhungKyMauMapper mapper;
-    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<KhungKyGocResponse> findAll(String keyword, Pageable pageable) {
+    public Page<KhungKyMauResponse> findAll(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return repository.findAll(pageable).map(mapper::toResponse);
         }
@@ -46,40 +45,41 @@ public class KhungKyGocServiceImpl implements KhungKyGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public KhungKyGocResponse findById(Long id) {
+    public KhungKyMauResponse findById(Long id) {
         return mapper.toResponse(getEntity(id));
     }
 
     @Override
-    public KhungKyGocResponse create(KhungKyGocRequest request) {
+    public KhungKyMauResponse create(KhungKyMauRequest request) {
         validate(request, null);
 
         KhungKyMau entity = mapper.toEntity(request);
-        return mapper.toResponse(repository.save(entity));
+        KhungKyMau saved = repository.save(entity);
+        // Fetch lại để lấy createdAt/updatedAt mà DB đã set (DEFAULT NOW())
+        return mapper.toResponse(repository.findById(saved.getId()).orElse(saved));
     }
 
     @Override
-    public KhungKyGocResponse update(Long id, KhungKyGocRequest request) {
+    public KhungKyMauResponse update(Long id, KhungKyMauRequest request) {
         KhungKyMau entity = getEntity(id);
 
         validate(request, id);
 
         mapper.updateEntity(entity, request);
-        return mapper.toResponse(repository.save(entity));
+        KhungKyMau saved = repository.save(entity);
+        return mapper.toResponse(repository.findById(saved.getId()).orElse(saved));
     }
 
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Khung kỳ gốc không tồn tại: " + id);
+            throw new ResourceNotFoundException("Khung kỳ mẫu không tồn tại: " + id);
         }
-
-        xoaChuongTrinhCascadeService.xoaTheoKhungKyGocId(id);
 
         repository.deleteById(id);
     }
 
-    private void validate(KhungKyGocRequest request, Long id) {
+    private void validate(KhungKyMauRequest request, Long id) {
         if (request == null) {
             throw new BadRequestException("Dữ liệu khung kỳ gốc không hợp lệ");
         }

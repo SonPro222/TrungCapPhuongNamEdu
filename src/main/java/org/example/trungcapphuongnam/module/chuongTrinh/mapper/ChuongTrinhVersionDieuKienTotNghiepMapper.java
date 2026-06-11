@@ -14,7 +14,7 @@ public class ChuongTrinhVersionDieuKienTotNghiepMapper {
         }
         ChuongTrinhVersionDieuKienTotNghiep entity = new ChuongTrinhVersionDieuKienTotNghiep();
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setDieuKienGocId(request.getDieuKienGocId());
+        entity.setDieuKienMauId(request.getDieuKienMauId());
         entity.setThuTu(request.getThuTu());
         entity.setGhiChu(request.getGhiChu());
         return entity;
@@ -25,7 +25,7 @@ public class ChuongTrinhVersionDieuKienTotNghiepMapper {
             return;
         }
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setDieuKienGocId(request.getDieuKienGocId());
+        entity.setDieuKienMauId(request.getDieuKienMauId());
         entity.setThuTu(request.getThuTu());
         entity.setGhiChu(request.getGhiChu());
     }
@@ -37,7 +37,7 @@ public class ChuongTrinhVersionDieuKienTotNghiepMapper {
         return ChuongTrinhVersionDieuKienTotNghiepResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
-                .dieuKienGocId(entity.getDieuKienGocId())
+                .dieuKienMauId(entity.getDieuKienMauId())
                 .thuTu(entity.getThuTu())
                 .ghiChu(entity.getGhiChu())
                 .build();

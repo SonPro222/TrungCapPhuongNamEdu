@@ -1,20 +1,20 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocGocChuongBaiRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocGocChuongBaiResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocMauChuongBaiRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocMauChuongBaiResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.SyllabusMonHocMauChuongBai;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SyllabusMonHocGocChuongBaiMapper {
+public class SyllabusMonHocMauChuongBaiMapper {
 
-    public SyllabusMonHocMauChuongBai toEntity(SyllabusMonHocGocChuongBaiRequest request) {
+    public SyllabusMonHocMauChuongBai toEntity(SyllabusMonHocMauChuongBaiRequest request) {
         if (request == null) {
             return null;
         }
 
         return SyllabusMonHocMauChuongBai.builder()
-                .syllabusMonHocGocId(request.getSyllabusMonHocGocId())
+                .syllabusMonHocMauId(request.getSyllabusMonHocMauId())
                 .maChuong(request.getMaChuong())
                 .ten(request.getTen())
                 .mucTieu(request.getMucTieu())
@@ -28,12 +28,12 @@ public class SyllabusMonHocGocChuongBaiMapper {
                 .build();
     }
 
-    public void updateEntity(SyllabusMonHocMauChuongBai entity, SyllabusMonHocGocChuongBaiRequest request) {
+    public void updateEntity(SyllabusMonHocMauChuongBai entity, SyllabusMonHocMauChuongBaiRequest request) {
         if (entity == null || request == null) {
             return;
         }
 
-        entity.setSyllabusMonHocGocId(request.getSyllabusMonHocGocId());
+        entity.setSyllabusMonHocMauId(request.getSyllabusMonHocMauId());
         entity.setMaChuong(request.getMaChuong());
         entity.setTen(request.getTen());
         entity.setMucTieu(request.getMucTieu());
@@ -46,14 +46,14 @@ public class SyllabusMonHocGocChuongBaiMapper {
         entity.setGhiChu(request.getGhiChu());
     }
 
-    public SyllabusMonHocGocChuongBaiResponse toResponse(SyllabusMonHocMauChuongBai entity) {
+    public SyllabusMonHocMauChuongBaiResponse toResponse(SyllabusMonHocMauChuongBai entity) {
         if (entity == null) {
             return null;
         }
 
-        return SyllabusMonHocGocChuongBaiResponse.builder()
+        return SyllabusMonHocMauChuongBaiResponse.builder()
                 .id(entity.getId())
-                .syllabusMonHocGocId(entity.getSyllabusMonHocGocId())
+                .syllabusMonHocMauId(entity.getSyllabusMonHocMauId())
                 .maChuong(entity.getMaChuong())
                 .ten(entity.getTen())
                 .mucTieu(entity.getMucTieu())

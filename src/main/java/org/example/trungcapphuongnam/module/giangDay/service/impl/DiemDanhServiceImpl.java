@@ -86,7 +86,7 @@ public class DiemDanhServiceImpl implements DiemDanhService {
                 .stream()
                 .collect(Collectors.toMap(SinhVien::getId, Function.identity()));
 
-        return page.map(item -> toResponse(item, lichHocMap, lopHocPhanMap, sinhVienMap));
+        return page.map(item -> mapper.toResponse(item, lichHocMap, lopHocPhanMap, sinhVienMap));
     }
 
     @Override
@@ -112,7 +112,7 @@ public class DiemDanhServiceImpl implements DiemDanhService {
                 .stream()
                 .collect(Collectors.toMap(SinhVien::getId, Function.identity()));
 
-        return toResponse(entity, lichHocMap, lopHocPhanMap, sinhVienMap);
+        return mapper.toResponse(entity, lichHocMap, lopHocPhanMap, sinhVienMap);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class DiemDanhServiceImpl implements DiemDanhService {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<LichHoc> lichRoot = subquery.from(LichHoc.class);
 
-                subquery.select(lichRoot.get("id"));
+                subquery.select(cb.literal(1L));
                 subquery.where(cb.and(
                         cb.equal(lichRoot.get("id"), root.get("lichHocId")),
                         cb.equal(lichRoot.get("lopHocPhanId"), lopHocPhanId)
@@ -184,7 +184,7 @@ public class DiemDanhServiceImpl implements DiemDanhService {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<SinhVien> sinhVienRoot = subquery.from(SinhVien.class);
 
-                subquery.select(sinhVienRoot.get("id"));
+                subquery.select(cb.literal(1L));
                 subquery.where(cb.and(
                         cb.equal(sinhVienRoot.get("id"), root.get("sinhVienId")),
                         cb.or(
@@ -200,35 +200,6 @@ public class DiemDanhServiceImpl implements DiemDanhService {
         };
     }
 
-    private DiemDanhResponse toResponse(
-            DiemDanh entity,
-            Map<Long, LichHoc> lichHocMap,
-            Map<Long, LopHocPhan> lopHocPhanMap,
-            Map<Long, SinhVien> sinhVienMap
-    ) {
-        DiemDanhResponse response = mapper.toResponse(entity);
-
-        LichHoc lichHoc = lichHocMap.get(entity.getLichHocId());
-        if (lichHoc != null) {
-            response.setNgayHoc(lichHoc.getNgayHoc());
-            response.setNoiDungBuoiHoc(lichHoc.getNoiDungBuoiHoc());
-            response.setLopHocPhanId(lichHoc.getLopHocPhanId());
-
-            LopHocPhan lopHocPhan = lopHocPhanMap.get(lichHoc.getLopHocPhanId());
-            if (lopHocPhan != null) {
-                response.setMaLop(lopHocPhan.getMaLop());
-                response.setTenLop(lopHocPhan.getTenLop());
-            }
-        }
-
-        SinhVien sinhVien = sinhVienMap.get(entity.getSinhVienId());
-        if (sinhVien != null) {
-            response.setMaSinhVien(sinhVien.getMaSinhVien());
-            response.setTenSinhVien(sinhVien.getHoTen());
-        }
-
-        return response;
-    }
     private void chuanHoaThoiGianDiemDanh(DiemDanh entity) {
         if (entity.getTrangThai() == TrangThaiDiemDanh.chua_diem_danh) {
             entity.setThoiGianDiemDanh(null);

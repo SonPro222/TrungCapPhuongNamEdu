@@ -12,6 +12,7 @@ public class DieuKienTotNghiepResponse {
 
     private Long id;
 
+    private Long syllabusChuongTrinhId;
     private Long chuongTrinhVersionId;
 
     private String noiDung;

@@ -12,7 +12,7 @@ import lombok.*;
 public class LichSuCauHoiResponse {
     private Long id;
 
-    private Long cauHoiGocId;
+    private Long cauHoiMauId;
 
     private Long cauHoiVersionId;
 

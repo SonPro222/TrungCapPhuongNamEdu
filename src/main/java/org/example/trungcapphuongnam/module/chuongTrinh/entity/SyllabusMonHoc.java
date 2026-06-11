@@ -22,8 +22,8 @@ public class SyllabusMonHoc {
     private Long chuongTrinhMonId;
     @Column(name = "so_tin_chi", precision = 6, scale = 1)
     private BigDecimal soTinChi;
-    @Column(name = "syllabus_mon_hoc_goc_id")
-    private Long syllabusMonHocGocId;
+    @Column(name = "syllabus_mon_hoc_mau_id")
+    private Long syllabusMonHocMauId;
 
     @Column(name = "vi_tri")
     private String viTri;

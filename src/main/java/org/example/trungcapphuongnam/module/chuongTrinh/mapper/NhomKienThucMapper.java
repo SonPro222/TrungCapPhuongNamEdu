@@ -15,7 +15,7 @@ public class NhomKienThucMapper {
         return NhomKienThuc.builder()
                 .chuongTrinhVersionId(request.getChuongTrinhVersionId())
                 .ma(request.getMa())
-                .nhomKienThucGocId(request.getNhomKienThucGocId())
+                .nhomKienThucMauId(request.getNhomKienThucMauId())
                 .ten(request.getTen())
                 .thuTu(request.getThuTu())
                 .loaiNhom(request.getLoaiNhom())
@@ -36,7 +36,7 @@ public class NhomKienThucMapper {
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
                 .ma(entity.getMa())
-                .nhomKienThucGocId(entity.getNhomKienThucGocId())
+                .nhomKienThucMauId(entity.getNhomKienThucMauId())
                 .ten(entity.getTen())
                 .thuTu(entity.getThuTu())
                 .loaiNhom(entity.getLoaiNhom())
@@ -55,7 +55,7 @@ public class NhomKienThucMapper {
         if (entity == null || request == null) return;
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
         entity.setMa(request.getMa());
-        entity.setNhomKienThucGocId(request.getNhomKienThucGocId());
+        entity.setNhomKienThucMauId(request.getNhomKienThucMauId());
         entity.setTen(request.getTen());
         entity.setThuTu(request.getThuTu());
         entity.setLoaiNhom(request.getLoaiNhom());

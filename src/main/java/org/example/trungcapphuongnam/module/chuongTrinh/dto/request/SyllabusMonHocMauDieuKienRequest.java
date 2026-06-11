@@ -8,11 +8,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusMonHocGocDieuKienRequest {
+public class SyllabusMonHocMauDieuKienRequest {
 
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
 
-    private Long dieuKienGocId;
+    private Long dieuKienMauId;
 
     private Integer thuTu;
 

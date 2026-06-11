@@ -18,7 +18,7 @@ public class TepDinhKemResponse {
 
     private Long id;
 
-    private String tenGoc;
+    private String tenMau;
 
     private String tenLuu;
 
@@ -84,7 +84,7 @@ public class TepDinhKemResponse {
 
     private Long syllabusMonHocId;
 
-    private Long taiLieuGocId;
+    private Long taiLieuMauId;
 
     private String tangNghiepVu;
 

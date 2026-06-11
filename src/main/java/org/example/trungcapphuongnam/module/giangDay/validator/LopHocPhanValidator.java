@@ -3,8 +3,8 @@ package org.example.trungcapphuongnam.module.giangDay.validator;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocGocRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocRepository;
+import org.example.trungcapphuongnam.module.daoTao.entity.KhungKy;
+import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyRepository;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.LopHocPhanRequest;
 import org.example.trungcapphuongnam.module.giangDay.enums.LoaiLopHocPhan;
@@ -18,9 +18,8 @@ public class LopHocPhanValidator {
 
     private final LopHocPhanRepository lopHocPhanRepository;
     private final ChuongTrinhMonRepository chuongTrinhMonRepository;
-    private final SyllabusMonHocRepository syllabusMonHocRepository;
-    private final SyllabusMonHocGocRepository syllabusMonHocGocRepository;
     private final LopHocPhanChuongTrinhMonRepository lopHocPhanChuongTrinhMonRepository;
+    private final KhungKyRepository khungKyRepository;
 
     public void validateCreate(LopHocPhanRequest request) {
         validateCommon(request);
@@ -95,6 +94,13 @@ public class LopHocPhanValidator {
             throw new GiangDayException("Ngày kết thúc không được trước ngày bắt đầu");
         }
 
+        // Validate lớp học phần không vượt ngoài thời gian kỳ (khi lớp được gán vào kỳ qua chuongTrinhMon)
+        if (request.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH
+                && request.getChuongTrinhMonId() != null
+                && (request.getNgayBatDau() != null || request.getNgayKetThuc() != null)) {
+            validateNgayTrongKhungKy(request);
+        }
+
         if (request.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH) {
             validateLopChuyenNganh(request);
         }
@@ -115,10 +121,6 @@ public class LopHocPhanValidator {
         if (request.getMonHocId() != null && !request.getMonHocId().equals(chuongTrinhMon.getMonHocId())) {
             throw new GiangDayException("Môn học của lớp không khớp với chương trình môn chuyên ngành");
         }
-
-        if (!syllabusMonHocRepository.existsByChuongTrinhMonId(request.getChuongTrinhMonId())) {
-            throw new GiangDayException("Chương trình môn chưa có syllabus, không thể mở hoặc cập nhật lớp học phần");
-        }
     }
 
     private void validateLopHocChung(LopHocPhanRequest request) {
@@ -126,8 +128,35 @@ public class LopHocPhanValidator {
             throw new GiangDayException("Lớp học chung phải chọn môn học chung");
         }
 
-        if (!syllabusMonHocGocRepository.existsByMonHocId(request.getMonHocId())) {
-            throw new GiangDayException("Môn học chung chưa có syllabus gốc, không thể mở hoặc cập nhật lớp học phần");
+        Integer soBuoiHoc = request.getSoBuoiHoc();
+        if (soBuoiHoc == null || soBuoiHoc < 1) {
+            throw new GiangDayException("Lớp học chung phải cấu hình số buổi học lớn hơn 0");
+        }
+    }
+
+    private void validateNgayTrongKhungKy(LopHocPhanRequest request) {
+        ChuongTrinhMon chuongTrinhMon = chuongTrinhMonRepository.findById(request.getChuongTrinhMonId())
+                .orElse(null);
+        if (chuongTrinhMon == null || chuongTrinhMon.getKhungKyId() == null) {
+            return; // Chưa gán vào kỳ → không cần validate
+        }
+
+        KhungKy khungKy = khungKyRepository.findById(chuongTrinhMon.getKhungKyId())
+                .orElse(null);
+        if (khungKy == null) {
+            return;
+        }
+
+        if (khungKy.getNgayBatDau() != null && request.getNgayBatDau() != null
+                && request.getNgayBatDau().isBefore(khungKy.getNgayBatDau())) {
+            throw new GiangDayException("Ngày bắt đầu lớp học phần không được trước ngày bắt đầu kỳ ("
+                    + khungKy.getNgayBatDau() + ")");
+        }
+
+        if (khungKy.getNgayKetThuc() != null && request.getNgayKetThuc() != null
+                && request.getNgayKetThuc().isAfter(khungKy.getNgayKetThuc())) {
+            throw new GiangDayException("Ngày kết thúc lớp học phần không được sau ngày kết thúc kỳ ("
+                    + khungKy.getNgayKetThuc() + ")");
         }
     }
 

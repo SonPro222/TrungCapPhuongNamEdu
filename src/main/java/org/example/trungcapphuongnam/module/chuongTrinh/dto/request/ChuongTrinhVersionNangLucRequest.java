@@ -11,7 +11,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.enums.LoaiNangLucDauRa;
 public class ChuongTrinhVersionNangLucRequest {
 
     private Long chuongTrinhVersionId;
-    private Long nangLucGocId;
+    private Long nangLucMauId;
     private String ma;
     private LoaiNangLucDauRa loai;
     private String noiDung;

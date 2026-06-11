@@ -12,7 +12,7 @@ public class SyllabusMonHocTaiLieuRequest {
 
     private Long syllabusMonId;
 
-    private Long taiLieuGocId;
+    private Long taiLieuMauId;
     private String ma;
 
     private String ten;

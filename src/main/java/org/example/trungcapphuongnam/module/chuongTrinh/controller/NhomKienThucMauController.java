@@ -3,23 +3,23 @@ package org.example.trungcapphuongnam.module.chuongTrinh.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.ChuongTrinhPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomKienThucGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomKienThucGocResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomKienThucGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NhomKienThucMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NhomKienThucMauResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.NhomKienThucMauService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(ChuongTrinhPath.NHOM_KIEN_THUC_GOC)
+@RequestMapping(ChuongTrinhPath.NHOM_KIEN_THUC_MAU)
 @RequiredArgsConstructor
-public class NhomKienThucGocController {
+public class NhomKienThucMauController {
 
-    private final NhomKienThucGocService service;
+    private final NhomKienThucMauService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<NhomKienThucGocResponse>>> findAll(
+    public ResponseEntity<ApiResponse<Page<NhomKienThucMauResponse>>> findAll(
             Pageable pageable,
             @RequestParam(required = false) String ma,
             @RequestParam(required = false) String loaiNhom,
@@ -29,21 +29,21 @@ public class NhomKienThucGocController {
     }
 
     @GetMapping(ChuongTrinhPath.ID)
-    public ResponseEntity<ApiResponse<NhomKienThucGocResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<NhomKienThucMauResponse>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<NhomKienThucGocResponse>> create(
-            @RequestBody NhomKienThucGocRequest request
+    public ResponseEntity<ApiResponse<NhomKienThucMauResponse>> create(
+            @RequestBody NhomKienThucMauRequest request
     ) {
         return ResponseEntity.status(201).body(ApiResponse.created(service.create(request)));
     }
 
     @PutMapping(ChuongTrinhPath.ID)
-    public ResponseEntity<ApiResponse<NhomKienThucGocResponse>> update(
+    public ResponseEntity<ApiResponse<NhomKienThucMauResponse>> update(
             @PathVariable Long id,
-            @RequestBody NhomKienThucGocRequest request
+            @RequestBody NhomKienThucMauRequest request
     ) {
         return ResponseEntity.ok(ApiResponse.ok(service.update(id, request)));
     }

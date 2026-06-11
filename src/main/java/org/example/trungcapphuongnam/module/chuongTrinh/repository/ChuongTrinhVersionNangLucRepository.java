@@ -11,14 +11,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ChuongTrinhVersionNangLucRepository extends JpaRepository<ChuongTrinhVersionNangLuc, Long>, JpaSpecificationExecutor<ChuongTrinhVersionNangLuc> {
 
     Page<ChuongTrinhVersionNangLuc> findByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable);
-    Page<ChuongTrinhVersionNangLuc> findByNangLucGocId(Long nangLucGocId, Pageable pageable);
+    Page<ChuongTrinhVersionNangLuc> findByNangLucMauId(Long nangLucMauId, Pageable pageable);
 
-    boolean existsByChuongTrinhVersionIdAndNangLucGocId(Long chuongTrinhVersionId, Long nangLucGocId);
+    boolean existsByChuongTrinhVersionIdAndNangLucMauId(Long chuongTrinhVersionId, Long nangLucMauId);
 
-    boolean existsByChuongTrinhVersionIdAndNangLucGocIdAndIdNot(Long chuongTrinhVersionId, Long nangLucGocId, Long id);
+    boolean existsByChuongTrinhVersionIdAndNangLucMauIdAndIdNot(Long chuongTrinhVersionId, Long nangLucMauId, Long id);
 
 
     void deleteByChuongTrinhVersionId(Long chuongTrinhVersionId);
 
-    void deleteByNangLucGocId(Long nangLucGocId);
+    void deleteByNangLucMauId(Long nangLucMauId);
 }

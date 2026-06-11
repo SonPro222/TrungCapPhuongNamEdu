@@ -14,7 +14,7 @@ public class TepDinhKemMapper {
 
         return TepDinhKemResponse.builder()
                 .id(entity.getId())
-                .tenGoc(entity.getTenGoc())
+                .tenMau(entity.getTenMau())
                 .tenLuu(entity.getTenLuu())
                 .duongDanTuongDoi(entity.getDuongDanTuongDoi())
                 .duongDanDayDu(entity.getDuongDanDayDu())
@@ -49,7 +49,7 @@ public class TepDinhKemMapper {
                 .lanNop(entity.getLanNop())
                 .syllabusChuongTrinhId(entity.getSyllabusChuongTrinhId())
                 .syllabusMonHocId(entity.getSyllabusMonHocId())
-                .taiLieuGocId(entity.getTaiLieuGocId())
+                .taiLieuMauId(entity.getTaiLieuMauId())
                 .tangNghiepVu(entity.getTangNghiepVu())
                 .duongDanNghiepVu(entity.getDuongDanNghiepVu())
                 .trangThai(entity.getTrangThai())

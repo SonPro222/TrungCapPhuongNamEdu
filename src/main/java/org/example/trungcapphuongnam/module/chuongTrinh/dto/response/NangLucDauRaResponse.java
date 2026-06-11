@@ -12,6 +12,7 @@ public class NangLucDauRaResponse {
 
     private Long id;
 
+    private Long syllabusChuongTrinhId;
     private Long chuongTrinhVersionId;
 
     private String ma;

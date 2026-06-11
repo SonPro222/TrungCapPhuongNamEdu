@@ -40,7 +40,7 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
     @Transactional(readOnly = true)
     public Page<SyllabusMonHocResponse> findAll(
             Long chuongTrinhMonId,
-            Long syllabusMonHocGocId,
+            Long syllabusMonHocMauId,
             Boolean batBuocDuThi,
             String keyword,
             Pageable pageable
@@ -48,7 +48,7 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
         return repository.findAll(
                 LocJpa.<SyllabusMonHoc>empty()
                         .and(LocJpa.eq("chuongTrinhMonId", chuongTrinhMonId))
-                        .and(LocJpa.eq("syllabusMonHocGocId", syllabusMonHocGocId))
+                        .and(LocJpa.eq("syllabusMonHocMauId", syllabusMonHocMauId))
                         .and(LocJpa.eq("batBuocDuThi", batBuocDuThi))
                         .and(LocJpa.keyword(
                                 keyword,
@@ -78,7 +78,7 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
         validator.validateSyllabusMonHoc(request, null);
 
         SyllabusMonHoc entity = repository.save(mapper.toEntity(request));
-        saoChepQuyDoiDiemMauTuSyllabusGoc(entity);
+        saoChepQuyDoiDiemMauTuSyllabusMau(entity);
         return toResponseCoTongGio(entity);
     }
 
@@ -89,12 +89,12 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
         SyllabusMonHoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SyllabusMonHoc không tồn tại: " + id));
 
-        Long oldSyllabusMonHocGocId = entity.getSyllabusMonHocGocId();
+        Long oldSyllabusMonHocMauId = entity.getSyllabusMonHocMauId();
         mapper.updateEntity(entity, request);
         SyllabusMonHoc saved = repository.save(entity);
 
-        if (saved.getSyllabusMonHocGocId() != null && !saved.getSyllabusMonHocGocId().equals(oldSyllabusMonHocGocId)) {
-            saoChepQuyDoiDiemMauTuSyllabusGoc(saved);
+        if (saved.getSyllabusMonHocMauId() != null && !saved.getSyllabusMonHocMauId().equals(oldSyllabusMonHocMauId)) {
+            saoChepQuyDoiDiemMauTuSyllabusMau(saved);
         }
 
         return toResponseCoTongGio(saved);
@@ -109,16 +109,16 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
         xoaChuongTrinhCascadeService.xoaTheoSyllabusMonHocId(id);
     }
 
-    private void saoChepQuyDoiDiemMauTuSyllabusGoc(SyllabusMonHoc syllabusMonHoc) {
-        if (syllabusMonHoc == null || syllabusMonHoc.getId() == null || syllabusMonHoc.getSyllabusMonHocGocId() == null) {
+    private void saoChepQuyDoiDiemMauTuSyllabusMau(SyllabusMonHoc syllabusMonHoc) {
+        if (syllabusMonHoc == null || syllabusMonHoc.getId() == null || syllabusMonHoc.getSyllabusMonHocMauId() == null) {
             return;
         }
 
         List<QuyDoiDiemMau> danhSachMau = quyDoiDiemMauRepository
-                .findBySyllabusMonHocGocIdOrderByThuTuAscIdAsc(syllabusMonHoc.getSyllabusMonHocGocId());
+                .findBySyllabusMonHocMauIdOrderByThuTuAscIdAsc(syllabusMonHoc.getSyllabusMonHocMauId());
 
-        for (QuyDoiDiemMau mau : danhSachMau) {
-            String ten = mau.getTen() == null ? mau.getMa() : mau.getTen();
+        for (QuyDoiDiemMau Mau : danhSachMau) {
+            String ten = Mau.getTen() == null ? Mau.getMa() : Mau.getTen();
             if (ten == null || ten.isBlank()) {
                 continue;
             }
@@ -130,19 +130,19 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
             QuyDoiDiem quyDoiDiem = QuyDoiDiem.builder()
                     .chuongTrinhMonId(syllabusMonHoc.getChuongTrinhMonId())
                     .syllabusMonHocId(syllabusMonHoc.getId())
-                    .ma(mau.getMa())
-                    .ten(mau.getTen())
-                    .nguongTu(mau.getNguongTu())
-                    .nguongDen(mau.getNguongDen())
-                    .diemQuyDoi(mau.getDiemQuyDoi())
-                    .ketQua(mau.getKetQua() == null ? null : mau.getKetQua().getValue())
-                    .congThuc(mau.getCongThuc())
-                    .ghiChu(mau.getGhiChu())
-                    .loaiMau(mau.getLoaiMau())
-                    .tyLe(mau.getTyLe())
-                    .diemToiDa(mau.getDiemToiDa())
-                    .thuTu(mau.getThuTu())
-                    .batBuoc(mau.getBatBuoc())
+                    .ma(Mau.getMa())
+                    .ten(Mau.getTen())
+                    .nguongTu(Mau.getNguongTu())
+                    .nguongDen(Mau.getNguongDen())
+                    .diemQuyDoi(Mau.getDiemQuyDoi())
+                    .ketQua(Mau.getKetQua() == null ? null : Mau.getKetQua().getValue())
+                    .congThuc(Mau.getCongThuc())
+                    .ghiChu(Mau.getGhiChu())
+                    .loaiMau(Mau.getLoaiMau())
+                    .tyLe(Mau.getTyLe())
+                    .diemToiDa(Mau.getDiemToiDa())
+                    .thuTu(Mau.getThuTu())
+                    .batBuoc(Mau.getBatBuoc())
                     .build();
 
             quyDoiDiemRepository.save(quyDoiDiem);

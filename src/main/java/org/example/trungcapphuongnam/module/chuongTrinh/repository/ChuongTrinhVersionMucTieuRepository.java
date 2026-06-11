@@ -11,14 +11,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ChuongTrinhVersionMucTieuRepository extends JpaRepository<ChuongTrinhVersionMucTieu, Long>, JpaSpecificationExecutor<ChuongTrinhVersionMucTieu> {
 
     Page<ChuongTrinhVersionMucTieu> findByChuongTrinhVersionId(Long chuongTrinhVersionId, Pageable pageable);
-    Page<ChuongTrinhVersionMucTieu> findByMucTieuGocId(Long mucTieuGocId, Pageable pageable);
+    Page<ChuongTrinhVersionMucTieu> findByMucTieuMauId(Long mucTieuMauId, Pageable pageable);
 
-    boolean existsByChuongTrinhVersionIdAndMucTieuGocId(Long chuongTrinhVersionId, Long mucTieuGocId);
+    boolean existsByChuongTrinhVersionIdAndMucTieuMauId(Long chuongTrinhVersionId, Long mucTieuMauId);
 
-    boolean existsByChuongTrinhVersionIdAndMucTieuGocIdAndIdNot(Long chuongTrinhVersionId, Long mucTieuGocId, Long id);
+    boolean existsByChuongTrinhVersionIdAndMucTieuMauIdAndIdNot(Long chuongTrinhVersionId, Long mucTieuMauId, Long id);
 
 
     void deleteByChuongTrinhVersionId(Long chuongTrinhVersionId);
 
-    void deleteByMucTieuGocId(Long mucTieuGocId);
+    void deleteByMucTieuMauId(Long mucTieuMauId);
 }

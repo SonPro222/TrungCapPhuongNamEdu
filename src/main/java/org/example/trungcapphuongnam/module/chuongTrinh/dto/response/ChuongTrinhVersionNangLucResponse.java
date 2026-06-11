@@ -13,7 +13,7 @@ public class ChuongTrinhVersionNangLucResponse {
 
     private Long id;
     private Long chuongTrinhVersionId;
-    private Long nangLucGocId;
+    private Long nangLucMauId;
     private String ma;
     private LoaiNangLucDauRa loai;
     private String noiDung;

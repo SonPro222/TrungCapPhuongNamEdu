@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.giangDay.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.GiangDayPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
-import org.example.trungcapphuongnam.module.giangDay.GiangDayNotFoundException;
+import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.entity.NgayNghi;
 import org.example.trungcapphuongnam.module.giangDay.repository.NgayNghiRepository;
 import org.springframework.data.domain.Page;
@@ -27,78 +27,40 @@ public class NgayNghiController {
             @RequestParam(defaultValue = "ngay") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
         return ResponseEntity.ok(ApiResponse.ok(
-                ngayNghiRepository.findAll(taoPageRequest(page, size, sortBy, sortDir))
+                ngayNghiRepository.findAll(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 500), Sort.by(direction, sortBy)))
         ));
     }
 
     @GetMapping(GiangDayPath.ID)
     public ResponseEntity<ApiResponse<NgayNghi>> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(timTheoId(id)));
+        return ResponseEntity.ok(ApiResponse.ok(findById(id)));
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<NgayNghi>> create(@RequestBody NgayNghi request) {
-        kiemTraHopLe(request, null);
         request.setId(null);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.created(ngayNghiRepository.save(request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(ngayNghiRepository.save(request)));
     }
 
     @PutMapping(GiangDayPath.ID)
-    public ResponseEntity<ApiResponse<NgayNghi>> update(
-            @PathVariable Long id,
-            @RequestBody NgayNghi request
-    ) {
-        NgayNghi entity = timTheoId(id);
-        kiemTraHopLe(request, id);
-
+    public ResponseEntity<ApiResponse<NgayNghi>> update(@PathVariable Long id, @RequestBody NgayNghi request) {
+        NgayNghi entity = findById(id);
         entity.setNgay(request.getNgay());
         entity.setTenNgayNghi(request.getTenNgayNghi());
         entity.setGhiChu(request.getGhiChu());
-
         return ResponseEntity.ok(ApiResponse.ok(ngayNghiRepository.save(entity)));
     }
 
     @DeleteMapping(GiangDayPath.ID)
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-        NgayNghi entity = timTheoId(id);
-        ngayNghiRepository.delete(entity);
+        ngayNghiRepository.delete(findById(id));
         return ResponseEntity.ok(ApiResponse.deleted());
     }
 
-    private NgayNghi timTheoId(Long id) {
+    private NgayNghi findById(Long id) {
         return ngayNghiRepository.findById(id)
-                .orElseThrow(() -> new GiangDayNotFoundException("Không tìm thấy ngày nghỉ"));
-    }
-
-    private void kiemTraHopLe(NgayNghi request, Long idDangCapNhat) {
-        if (request.getNgay() == null) {
-            throw new IllegalArgumentException("Phải chọn ngày nghỉ");
-        }
-
-        boolean trungNgay = ngayNghiRepository.findAll().stream()
-                .anyMatch(item -> item.getNgay().equals(request.getNgay())
-                        && (idDangCapNhat == null || !item.getId().equals(idDangCapNhat)));
-
-        if (trungNgay) {
-            throw new IllegalArgumentException("Ngày nghỉ này đã tồn tại");
-        }
-    }
-
-    private PageRequest taoPageRequest(int page, int size, String sortBy, String sortDir) {
-        int pageSafe = Math.max(page, 0);
-        int sizeSafe = Math.min(Math.max(size, 1), 1000);
-
-        String sortField = switch (sortBy) {
-            case "ngay", "tenNgayNghi", "createdAt", "updatedAt" -> sortBy;
-            default -> "id";
-        };
-
-        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir)
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
-
-        return PageRequest.of(pageSafe, sizeSafe, Sort.by(direction, sortField));
+                .orElseThrow(() -> new GiangDayException("Ngày nghỉ không tồn tại"));
     }
 }

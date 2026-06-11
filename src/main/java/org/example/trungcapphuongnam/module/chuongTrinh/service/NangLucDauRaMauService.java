@@ -2,16 +2,16 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NangLucDauRaGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NangLucDauRaGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.NangLucDauRaMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.NangLucDauRaMauResponse;
 
-public interface NangLucDauRaGocService {
-    Page<NangLucDauRaGocResponse> findAll(Long chuongTrinhId, String ma, String loai, String keyword, Pageable pageable);
-    NangLucDauRaGocResponse findById(Long id);
+public interface NangLucDauRaMauService {
+    Page<NangLucDauRaMauResponse> findAll(Long syllabusChuongTrinhMauId, String ma, String loai, String keyword, Pageable pageable);
+    NangLucDauRaMauResponse findById(Long id);
 
-    NangLucDauRaGocResponse create(NangLucDauRaGocRequest request);
+    NangLucDauRaMauResponse create(NangLucDauRaMauRequest request);
 
-    NangLucDauRaGocResponse update(Long id, NangLucDauRaGocRequest request);
+    NangLucDauRaMauResponse update(Long id, NangLucDauRaMauRequest request);
 
     void delete(Long id);
 }

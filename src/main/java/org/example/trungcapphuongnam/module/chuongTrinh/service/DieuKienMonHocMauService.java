@@ -6,7 +6,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienMon
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface DieuKienMonHocmauService {
+public interface DieuKienMonHocMauService {
 
     Page<DieuKienMonHocMauResponse> findAll(String ma, String loai, String keyword, Pageable pageable);
 

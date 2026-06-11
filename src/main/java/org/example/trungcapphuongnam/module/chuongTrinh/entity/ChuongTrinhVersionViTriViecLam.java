@@ -20,8 +20,8 @@ public class ChuongTrinhVersionViTriViecLam {
 
     @Column(name = "chuong_trinh_version_id", nullable = false)
     private Long chuongTrinhVersionId;
-    @Column(name = "vi_tri_goc_id", nullable = false)
-    private Long viTriGocId;
+    @Column(name = "vi_tri_mau_id", nullable = false)
+    private Long viTriMauId;
 
     @Column(name = "ma", length = 50)
     private String ma;

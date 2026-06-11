@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class KhungKyGocResponse {
+public class KhungKyMauResponse {
 
     private Long id;
 

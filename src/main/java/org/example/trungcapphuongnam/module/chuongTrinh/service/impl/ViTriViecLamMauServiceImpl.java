@@ -8,18 +8,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLamMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ViTriViecLamMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ViTriViecLamGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ViTriViecLamMauService;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
+public class ViTriViecLamMauServiceImpl implements ViTriViecLamMauService {
     private final ChuongTrinhNghiepVuValidator validator;
     private final ViTriViecLamMauRepository repository;
     private final ViTriViecLamMauMapper mapper;
@@ -27,10 +27,10 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ViTriViecLamGocResponse> findAll(Long chuongTrinhId, String ma, String keyword, Pageable pageable) {
+    public Page<ViTriViecLamMauResponse> findAll(Long syllabusChuongTrinhMauId, String ma, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<ViTriViecLamMau>empty()
-                    .and(LocJpa.eq("chuongTrinhId", chuongTrinhId))
+                    .and(LocJpa.eq("syllabusChuongTrinhMauId", syllabusChuongTrinhMauId))
                     .and(LocJpa.like("ma", ma))
                     .and(LocJpa.keyword(keyword, "ma", "ten", "moTa", "ghiChu")),
                 pageable
@@ -39,24 +39,24 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public ViTriViecLamGocResponse findById(Long id) {
+    public ViTriViecLamMauResponse findById(Long id) {
         return repository.findById(id)
                 .map(mapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Vi Tri Viec Lam Goc không tồn tại: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Vi Tri Viec Lam Mau không tồn tại: " + id));
     }
 
     @Override
-    public ViTriViecLamGocResponse create(ViTriViecLamGocRequest request) {
-        validator.validateViTriViecLamGoc(request, null);
+    public ViTriViecLamMauResponse create(ViTriViecLamMauRequest request) {
+        validator.validateViTriViecLamMau(request, null);
         ViTriViecLamMau entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
 
     @Override
-    public ViTriViecLamGocResponse update(Long id, ViTriViecLamGocRequest request) {
+    public ViTriViecLamMauResponse update(Long id, ViTriViecLamMauRequest request) {
         ViTriViecLamMau entity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Vi Tri Viec Lam Goc không tồn tại: " + id));
-        validator.validateViTriViecLamGoc(request, id);
+                .orElseThrow(() -> new ResourceNotFoundException("Vi Tri Viec Lam Mau không tồn tại: " + id));
+        validator.validateViTriViecLamMau(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -64,10 +64,10 @@ public class ViTriViecLamGocServiceImpl implements ViTriViecLamGocService {
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Vi Tri Viec Lam Goc không tồn tại: " + id);
+            throw new ResourceNotFoundException("Vi Tri Viec Lam Mau không tồn tại: " + id);
         }
 
-        xoaChuongTrinhCascadeService.xoaTheoViTriGocId(id);
+        xoaChuongTrinhCascadeService.xoaTheoViTriMauId(id);
 
         repository.deleteById(id);
     }

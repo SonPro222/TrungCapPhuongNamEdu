@@ -19,8 +19,8 @@ public class CauHinhDanhGiaMau {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "syllabus_mon_hoc_goc_id", nullable = false)
-    private Long syllabusMonHocGocId;
+    @Column(name = "syllabus_mon_hoc_mau_id", nullable = false)
+    private Long syllabusMonHocMauId;
 
     @Column(name = "ten_cot_diem", nullable = false)
     private String tenCotDiem;

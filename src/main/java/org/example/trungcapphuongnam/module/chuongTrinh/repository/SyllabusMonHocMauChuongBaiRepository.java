@@ -9,24 +9,24 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SyllabusMonHocGocChuongBaiRepository
+public interface SyllabusMonHocMauChuongBaiRepository
         extends JpaRepository<SyllabusMonHocMauChuongBai, Long>, JpaSpecificationExecutor<SyllabusMonHocMauChuongBai> {
 
-    boolean existsBySyllabusMonHocGocIdAndThuTu(Long syllabusMonHocGocId, Integer thuTu);
+    boolean existsBySyllabusMonHocMauIdAndThuTu(Long syllabusMonHocMauId, Integer thuTu);
 
-    boolean existsBySyllabusMonHocGocIdAndThuTuAndIdNot(Long syllabusMonHocGocId, Integer thuTu, Long id);
+    boolean existsBySyllabusMonHocMauIdAndThuTuAndIdNot(Long syllabusMonHocMauId, Integer thuTu, Long id);
 
-    void deleteBySyllabusMonHocGocId(@Param("syllabusMonHocGocId") Long syllabusMonHocGocId);
+    void deleteBySyllabusMonHocMauId(@Param("syllabusMonHocMauId") Long syllabusMonHocMauId);
 
-    @Query("select coalesce(sum(cb.tongGio), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocGocId = :syllabusMonHocGocId")
-    java.math.BigDecimal tongGioTheoSyllabusMonHocGocId(@Param("syllabusMonHocGocId") Long syllabusMonHocGocId);
+    @Query("select coalesce(sum(cb.tongGio), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocMauId = :syllabusMonHocMauId")
+    java.math.BigDecimal tongGioTheoSyllabusMonHocMauId(@Param("syllabusMonHocMauId") Long syllabusMonHocMauId);
 
-    @Query("select coalesce(sum(cb.gioLyThuyet), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocGocId = :syllabusMonHocGocId")
-    java.math.BigDecimal tongGioLyThuyetTheoSyllabusMonHocGocId(@Param("syllabusMonHocGocId") Long syllabusMonHocGocId);
+    @Query("select coalesce(sum(cb.gioLyThuyet), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocMauId = :syllabusMonHocMauId")
+    java.math.BigDecimal tongGioLyThuyetTheoSyllabusMonHocMauId(@Param("syllabusMonHocMauId") Long syllabusMonHocMauId);
 
-    @Query("select coalesce(sum(cb.gioThucHanh), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocGocId = :syllabusMonHocGocId")
-    java.math.BigDecimal tongGioThucHanhTheoSyllabusMonHocGocId(@Param("syllabusMonHocGocId") Long syllabusMonHocGocId);
+    @Query("select coalesce(sum(cb.gioThucHanh), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocMauId = :syllabusMonHocMauId")
+    java.math.BigDecimal tongGioThucHanhTheoSyllabusMonHocMauId(@Param("syllabusMonHocMauId") Long syllabusMonHocMauId);
 
-    @Query("select coalesce(sum(cb.gioKiemTra), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocGocId = :syllabusMonHocGocId")
-    java.math.BigDecimal tongGioKiemTraTheoSyllabusMonHocGocId(@Param("syllabusMonHocGocId") Long syllabusMonHocGocId);
+    @Query("select coalesce(sum(cb.gioKiemTra), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocMauId = :syllabusMonHocMauId")
+    java.math.BigDecimal tongGioKiemTraTheoSyllabusMonHocMauId(@Param("syllabusMonHocMauId") Long syllabusMonHocMauId);
 }

@@ -6,41 +6,41 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamGocResponse;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.ViTriViecLamGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamMauResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ViTriViecLamMauService;
 
 @RestController
-@RequestMapping("/api/chuongTrinh/vi-tri-viec-lam-goc")
+@RequestMapping("/api/chuongTrinh/vi-tri-viec-lam-mau")
 @RequiredArgsConstructor
-public class ViTriViecLamGocController {
+public class ViTriViecLamMauController {
 
-    private final ViTriViecLamGocService service;
+    private final ViTriViecLamMauService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ViTriViecLamGocResponse>>> findAll(
+    public ResponseEntity<ApiResponse<Page<ViTriViecLamMauResponse>>> findAll(
             Pageable pageable,
-            @RequestParam(required = false) Long chuongTrinhId,
+            @RequestParam(required = false) Long syllabusChuongTrinhMauId,
             @RequestParam(required = false) String ma,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhId, ma, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusChuongTrinhMauId, ma, keyword, pageable)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ViTriViecLamGocResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ViTriViecLamMauResponse>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ViTriViecLamGocResponse>> create(@RequestBody ViTriViecLamGocRequest request) {
+    public ResponseEntity<ApiResponse<ViTriViecLamMauResponse>> create(@RequestBody ViTriViecLamMauRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(service.create(request)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ViTriViecLamGocResponse>> update(
+    public ResponseEntity<ApiResponse<ViTriViecLamMauResponse>> update(
             @PathVariable Long id,
-            @RequestBody ViTriViecLamGocRequest request
+            @RequestBody ViTriViecLamMauRequest request
     ) {
         return ResponseEntity.ok(ApiResponse.ok(service.update(id, request)));
     }

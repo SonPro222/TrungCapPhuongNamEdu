@@ -3,6 +3,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.TrangThaiChuongTrinhVersion;
 
 @Getter
 @Setter
@@ -45,8 +46,19 @@ public class ChuongTrinhVersionResponse {
 
     private Boolean laHienHanh;
 
+    private TrangThaiChuongTrinhVersion trangThai;
+
+    private Boolean conHieuLucTheoNgay;
+
+    private Boolean duocPhepChinhSua;
+
+    private Boolean duocPhepVanHanh;
+
+    private String lyDoTrangThai;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
 
 }

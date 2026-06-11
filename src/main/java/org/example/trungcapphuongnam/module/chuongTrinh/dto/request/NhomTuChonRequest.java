@@ -13,7 +13,7 @@ public class NhomTuChonRequest {
 
     @NotNull(message = "chuong_trinh_version_id không được để trống")
     private Long chuongTrinhVersionId;
-    private Long nhomTuChonGocId;
+    private Long nhomTuChonMauId;
     @NotBlank(message = "ten không được để trống")
     private String ten;
 

@@ -4,13 +4,13 @@ package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.spec.LocJpa;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.TaiLieuGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.TaiLieuGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.TaiLieuMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.TaiLieuMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.TaiLieuMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.TaiLieuMauMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.TaiLieuMauRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
-import org.example.trungcapphuongnam.module.chuongTrinh.service.TaiLieuGocService;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.TaiLieuMauService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class TaiLieuGocServiceImpl implements TaiLieuGocService {
+public class TaiLieuMauServiceImpl implements TaiLieuMauService {
     private final ChuongTrinhNghiepVuValidator validator;
     private final TaiLieuMauRepository repository;
     private final TaiLieuMauMapper mapper;
@@ -28,7 +28,7 @@ public class TaiLieuGocServiceImpl implements TaiLieuGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TaiLieuGocResponse> findAll(String ma, String loai, String keyword, Pageable pageable) {
+    public Page<TaiLieuMauResponse> findAll(String ma, String loai, String keyword, Pageable pageable) {
         return repository.findAll(
                 LocJpa.<TaiLieuMau>empty()
                         .and(LocJpa.like("ma", ma))
@@ -40,25 +40,25 @@ public class TaiLieuGocServiceImpl implements TaiLieuGocService {
 
     @Override
     @Transactional(readOnly = true)
-    public TaiLieuGocResponse findById(Long id) {
+    public TaiLieuMauResponse findById(Long id) {
         return repository.findById(id)
                 .map(mapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Tài liệu gốc không tồn tại: " + id));
     }
 
     @Override
-    public TaiLieuGocResponse create(TaiLieuGocRequest request) {
-        validator.validateTaiLieuGoc(request, null);
+    public TaiLieuMauResponse create(TaiLieuMauRequest request) {
+        validator.validateTaiLieuMau(request, null);
         TaiLieuMau entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
 
     @Override
-    public TaiLieuGocResponse update(Long id, TaiLieuGocRequest request) {
+    public TaiLieuMauResponse update(Long id, TaiLieuMauRequest request) {
         TaiLieuMau entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tài liệu gốc không tồn tại: " + id));
 
-        validator.validateTaiLieuGoc(request, id);
+        validator.validateTaiLieuMau(request, id);
 
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
@@ -70,7 +70,7 @@ public class TaiLieuGocServiceImpl implements TaiLieuGocService {
             throw new ResourceNotFoundException("Tài liệu gốc không tồn tại: " + id);
         }
 
-        xoaChuongTrinhCascadeService.xoaTheoTaiLieuGocId(id);
+        xoaChuongTrinhCascadeService.xoaTheoTaiLieuMauId(id);
 
         repository.deleteById(id);
     }

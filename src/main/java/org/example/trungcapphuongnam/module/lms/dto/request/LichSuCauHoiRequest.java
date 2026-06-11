@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class LichSuCauHoiRequest {
-    private Long cauHoiGocId;
+    private Long cauHoiMauId;
 
     private Long cauHoiVersionId;
 

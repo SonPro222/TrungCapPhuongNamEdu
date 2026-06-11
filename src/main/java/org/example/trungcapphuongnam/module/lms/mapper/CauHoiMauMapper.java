@@ -1,15 +1,15 @@
 package org.example.trungcapphuongnam.module.lms.mapper;
 
-import org.example.trungcapphuongnam.module.lms.dto.request.CauHoiGocRequest;
-import org.example.trungcapphuongnam.module.lms.dto.response.CauHoiGocResponse;
-import org.example.trungcapphuongnam.module.lms.entity.CauHoiGoc;
+import org.example.trungcapphuongnam.module.lms.dto.request.CauHoiMauRequest;
+import org.example.trungcapphuongnam.module.lms.dto.response.CauHoiMauResponse;
+import org.example.trungcapphuongnam.module.lms.entity.CauHoiMau;
 
-public final class CauHoiGocMapper {
-    private CauHoiGocMapper() {}
+public final class CauHoiMauMapper {
+    private CauHoiMauMapper() {}
 
-    public static CauHoiGocResponse toResponse(CauHoiGoc entity) {
+    public static CauHoiMauResponse toResponse(CauHoiMau entity) {
         if (entity == null) return null;
-        return CauHoiGocResponse.builder()
+        return CauHoiMauResponse.builder()
             .id(entity.getId())
             .monHocId(entity.getMonHocId())
             .maCauHoi(entity.getMaCauHoi())
@@ -21,9 +21,9 @@ public final class CauHoiGocMapper {
             .build();
     }
 
-    public static CauHoiGoc toEntity(CauHoiGocRequest request) {
+    public static CauHoiMau toEntity(CauHoiMauRequest request) {
         if (request == null) return null;
-        return CauHoiGoc.builder()
+        return CauHoiMau.builder()
             .monHocId(request.getMonHocId())
             .maCauHoi(request.getMaCauHoi())
             .nguoiTaoTaiKhoanId(request.getNguoiTaoTaiKhoanId())
@@ -32,7 +32,7 @@ public final class CauHoiGocMapper {
             .build();
     }
 
-    public static void updateEntity(CauHoiGoc entity, CauHoiGocRequest request) {
+    public static void updateEntity(CauHoiMau entity, CauHoiMauRequest request) {
         if (entity == null || request == null) return;
         entity.setMonHocId(request.getMonHocId());
         entity.setMaCauHoi(request.getMaCauHoi());

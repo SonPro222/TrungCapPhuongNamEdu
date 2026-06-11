@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.DaoTaoPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGoiYResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyRequest;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyResponse;
 import org.example.trungcapphuongnam.module.daoTao.service.KhungKyService;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(DaoTaoPath.KHUNG_KY)
@@ -33,6 +36,22 @@ public class KhungKyController {
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
                 service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}/goi-y")
+    public ResponseEntity<ApiResponse<KhungKyGoiYResponse>> goiYTheoVersion(
+            @PathVariable Long chuongTrinhVersionId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.goiYTheoVersion(chuongTrinhVersionId)));
+    }
+
+    @PostMapping("/theo-version/{chuongTrinhVersionId}/tao-du-ky-con-thieu")
+    public ResponseEntity<ApiResponse<List<KhungKyResponse>>> taoCacKyConThieuTheoVersion(
+            @PathVariable Long chuongTrinhVersionId
+    ) {
+        return ResponseEntity.status(201).body(ApiResponse.created(
+                service.taoCacKyConThieuTheoVersion(chuongTrinhVersionId)
         ));
     }
 

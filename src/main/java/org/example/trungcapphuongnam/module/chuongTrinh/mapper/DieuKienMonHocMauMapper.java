@@ -1,15 +1,15 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.mapper;
 
 
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.DieuKienMonHocGocRequest;
-import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienMonHocGocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.DieuKienMonHocMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienMonHocMauResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.DieuKienMonHocMau;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DieuKienMonHocGocMapper {
+public class DieuKienMonHocMauMapper {
 
-    public DieuKienMonHocMau toEntity(DieuKienMonHocGocRequest request) {
+    public DieuKienMonHocMau toEntity(DieuKienMonHocMauRequest request) {
         if (request == null) {
             return null;
         }
@@ -22,7 +22,7 @@ public class DieuKienMonHocGocMapper {
                 .build();
     }
 
-    public void updateEntity(DieuKienMonHocMau entity, DieuKienMonHocGocRequest request) {
+    public void updateEntity(DieuKienMonHocMau entity, DieuKienMonHocMauRequest request) {
         if (entity == null || request == null) {
             return;
         }
@@ -33,12 +33,12 @@ public class DieuKienMonHocGocMapper {
         entity.setGhiChu(request.getGhiChu());
     }
 
-    public DieuKienMonHocGocResponse toResponse(DieuKienMonHocMau entity) {
+    public DieuKienMonHocMauResponse toResponse(DieuKienMonHocMau entity) {
         if (entity == null) {
             return null;
         }
 
-        return DieuKienMonHocGocResponse.builder()
+        return DieuKienMonHocMauResponse.builder()
                 .id(entity.getId())
                 .ma(entity.getMa())
                 .loai(entity.getLoai())

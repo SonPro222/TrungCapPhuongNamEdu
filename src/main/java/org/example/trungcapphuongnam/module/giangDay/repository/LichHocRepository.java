@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface LichHocRepository extends JpaRepository<LichHoc, Long>, JpaSpecificationExecutor<LichHoc> {
@@ -67,6 +68,21 @@ public interface LichHocRepository extends JpaRepository<LichHoc, Long>, JpaSpec
             Long phongHocId,
             LocalDate ngayHoc,
             Long caHocId,
+            TrangThaiLichHoc trangThai,
+            Long id
+    );
+
+
+
+    List<LichHoc> findByGiaoVienIdAndNgayHocAndTrangThaiNot(
+            Long giaoVienId,
+            LocalDate ngayHoc,
+            TrangThaiLichHoc trangThai
+    );
+
+    List<LichHoc> findByGiaoVienIdAndNgayHocAndTrangThaiNotAndIdNot(
+            Long giaoVienId,
+            LocalDate ngayHoc,
             TrangThaiLichHoc trangThai,
             Long id
     );

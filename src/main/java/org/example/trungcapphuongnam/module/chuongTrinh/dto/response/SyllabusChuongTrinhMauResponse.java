@@ -9,9 +9,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusChuongTrinhGocResponse {
+public class SyllabusChuongTrinhMauResponse {
 
     private Long id;
+
+    private Long chuongTrinhId;
 
     private String ma;
 

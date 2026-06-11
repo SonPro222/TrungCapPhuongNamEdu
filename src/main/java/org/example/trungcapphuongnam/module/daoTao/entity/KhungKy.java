@@ -3,6 +3,7 @@ package org.example.trungcapphuongnam.module.daoTao.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,12 +34,6 @@ public class KhungKy {
     @Column(name = "chuong_trinh_version_id", nullable = false)
     private Long chuongTrinhVersionId;
 
-    @Column(name = "loai_chuong_trinh_id")
-    private Long loaiChuongTrinhId;
-
-    @Column(name = "khung_ky_goc_id")
-    private Long khungKyGocId;
-
     @Column(name = "ma_ky", nullable = false, length = 50)
     private String maKy;
 
@@ -50,6 +45,12 @@ public class KhungKy {
 
     @Column(name = "mo_ta", columnDefinition = "TEXT")
     private String moTa;
+
+    @Column(name = "ngay_bat_dau")
+    private LocalDate ngayBatDau;
+
+    @Column(name = "ngay_ket_thuc")
+    private LocalDate ngayKetThuc;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

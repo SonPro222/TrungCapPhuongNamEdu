@@ -60,7 +60,7 @@ public class TepDinhKemRequest {
 
     private Long syllabusMonHocId;
 
-    private Long taiLieuGocId;
+    private Long taiLieuMauId;
 
     private String tangNghiepVu;
 }

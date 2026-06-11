@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface NhomTuChonGocRepository
+public interface NhomTuChonMauRepository
         extends JpaRepository<NhomTuChonMau, Long>, JpaSpecificationExecutor<NhomTuChonMau> {
 
     boolean existsByMa(String ma);

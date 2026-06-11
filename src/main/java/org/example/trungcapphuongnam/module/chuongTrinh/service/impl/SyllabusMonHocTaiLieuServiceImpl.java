@@ -28,14 +28,14 @@ public class SyllabusMonHocTaiLieuServiceImpl implements SyllabusMonHocTaiLieuSe
     @Transactional(readOnly = true)
     public Page<SyllabusMonHocTaiLieuResponse> findAll(
             Long syllabusMonId,
-            Long taiLieuGocId,
+            Long taiLieuMauId,
             String keyword,
             Pageable pageable
     ) {
         return repository.findAll(
                 LocJpa.<SyllabusMonHocTaiLieu>empty()
                         .and(LocJpa.eq("syllabusMonId", syllabusMonId))
-                        .and(LocJpa.eq("taiLieuGocId", taiLieuGocId))
+                        .and(LocJpa.eq("taiLieuMauId", taiLieuMauId))
                         .and(LocJpa.keyword(keyword, "ghiChu")),
                 pageable
         ).map(mapper::toResponse);

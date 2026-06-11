@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface KhungKyRepository extends JpaRepository<KhungKy, Long> {
@@ -14,6 +16,15 @@ public interface KhungKyRepository extends JpaRepository<KhungKy, Long> {
             Long chuongTrinhVersionId,
             Pageable pageable
     );
+
+    List<KhungKy> findByChuongTrinhVersionIdOrderByThuTuAsc(Long chuongTrinhVersionId);
+
+    Optional<KhungKy> findByChuongTrinhVersionIdAndThuTu(
+            Long chuongTrinhVersionId,
+            Integer thuTu
+    );
+
+    long countByChuongTrinhVersionId(Long chuongTrinhVersionId);
 
     boolean existsByChuongTrinhVersionIdAndMaKy(
             Long chuongTrinhVersionId,
@@ -36,16 +47,4 @@ public interface KhungKyRepository extends JpaRepository<KhungKy, Long> {
             Integer thuTu,
             Long id
     );
-    boolean existsByChuongTrinhVersionIdAndKhungKyGocId(
-            Long chuongTrinhVersionId,
-            Long khungKyGocId
-    );
-
-    boolean existsByChuongTrinhVersionIdAndKhungKyGocIdAndIdNot(
-            Long chuongTrinhVersionId,
-            Long khungKyGocId,
-            Long id
-    );
-
-    Page<KhungKy> findByKhungKyGocId(Long khungKyGocId, Pageable pageable);
 }

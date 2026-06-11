@@ -9,7 +9,7 @@ public final class LmsPath {
     public static final String NGAN_HANG_CAU_HOI = BASE + "/ngan-hang-cau-hoi";
     public static final String DAP_AN_CAU_HOI = BASE + "/dap-an-cau-hoi";
 
-    public static final String CAU_HOI_GOC = BASE + "/cau-hoi-goc";
+    public static final String CAU_HOI_MAU = BASE + "/cau-hoi-MAU";
     public static final String CAU_HOI_VERSION = BASE + "/cau-hoi-version";
     public static final String DAP_AN_CAU_HOI_VERSION = BASE + "/dap-an-cau-hoi-version";
     public static final String CAU_HOI_AP_DUNG = BASE + "/cau-hoi-ap-dung";

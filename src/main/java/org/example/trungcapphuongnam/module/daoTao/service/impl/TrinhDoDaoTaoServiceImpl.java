@@ -15,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -27,6 +30,12 @@ public class TrinhDoDaoTaoServiceImpl implements TrinhDoDaoTaoService {
     @Transactional(readOnly = true)
     public Page<TrinhDoDaoTaoResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TrinhDoDaoTaoResponse> findOptions() {
+        return repository.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
 
     @Override

@@ -19,8 +19,8 @@ public class ChuongTrinhVersionDieuKienTotNghiep {
 
     @Column(name = "chuong_trinh_version_id", nullable = false)
     private Long chuongTrinhVersionId;
-    @Column(name = "dieu_kien_goc_id", nullable = false)
-    private Long dieuKienGocId;
+    @Column(name = "dieu_kien_mau_id", nullable = false)
+    private Long dieuKienMauId;
     @Column(name = "thu_tu", nullable = true)
     private Integer thuTu;
     @Column(name = "ghi_chu", nullable = true, columnDefinition = "TEXT")

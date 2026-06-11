@@ -15,7 +15,7 @@ public class SyllabusMonHocDieuKienMapper {
 
         return SyllabusMonHocDieuKien.builder()
                 .syllabusMonId(request.getSyllabusMonId())
-                .dieuKienGocId(request.getDieuKienGocId())
+                .dieuKienMauId(request.getDieuKienMauId())
                 .thuTu(request.getThuTu())
                 .ghiChu(request.getGhiChu())
                 .build();
@@ -27,7 +27,7 @@ public class SyllabusMonHocDieuKienMapper {
         }
 
         entity.setSyllabusMonId(request.getSyllabusMonId());
-        entity.setDieuKienGocId(request.getDieuKienGocId());
+        entity.setDieuKienMauId(request.getDieuKienMauId());
         entity.setThuTu(request.getThuTu());
         entity.setGhiChu(request.getGhiChu());
     }
@@ -40,7 +40,7 @@ public class SyllabusMonHocDieuKienMapper {
         return SyllabusMonHocDieuKienResponse.builder()
                 .id(entity.getId())
                 .syllabusMonId(entity.getSyllabusMonId())
-                .dieuKienGocId(entity.getDieuKienGocId())
+                .dieuKienMauId(entity.getDieuKienMauId())
                 .thuTu(entity.getThuTu())
                 .ghiChu(entity.getGhiChu())
                 .createdAt(entity.getCreatedAt())

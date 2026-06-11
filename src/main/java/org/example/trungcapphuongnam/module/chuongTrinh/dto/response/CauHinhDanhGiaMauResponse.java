@@ -14,7 +14,7 @@ public class CauHinhDanhGiaMauResponse {
 
     private Long id;
 
-    private Long syllabusMonHocGocId;
+    private Long syllabusMonHocMauId;
 
     /** Deprecated: luôn null ở flow mới. */
     private Long chuongTrinhMonId;

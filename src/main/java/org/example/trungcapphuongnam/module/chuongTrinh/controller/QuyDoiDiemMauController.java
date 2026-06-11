@@ -20,12 +20,12 @@ public class QuyDoiDiemMauController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<QuyDoiDiemMauResponse>>> findAll(
             Pageable pageable,
-            @RequestParam(required = false) Long syllabusMonHocGocId,
+            @RequestParam(required = false) Long syllabusMonHocMauId,
             @RequestParam(required = false) String ma,
             @RequestParam(required = false) String ketQua,
             @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusMonHocGocId, ma, ketQua, keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusMonHocMauId, ma, ketQua, keyword, pageable)));
     }
 
     @GetMapping("/{id}")

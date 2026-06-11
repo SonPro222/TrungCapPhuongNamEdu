@@ -28,14 +28,14 @@ public class NhomTuChonServiceImpl implements NhomTuChonService {
     @Transactional(readOnly = true)
     public Page<NhomTuChonResponse> findAll(
             Long chuongTrinhVersionId,
-            Long nhomTuChonGocId,
+            Long nhomTuChonMauId,
             String keyword,
             Pageable pageable
     ) {
         return repository.findAll(
                 LocJpa.<NhomTuChon>empty()
                         .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                        .and(LocJpa.eq("nhomTuChonGocId", nhomTuChonGocId))
+                        .and(LocJpa.eq("nhomTuChonMauId", nhomTuChonMauId))
                         .and(LocJpa.keyword(keyword, "ten", "ghiChu")),
                 pageable
         ).map(mapper::toResponse);

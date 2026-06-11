@@ -22,8 +22,8 @@ public class SyllabusMonHocTaiLieu {
     @Column(name = "syllabus_mon_id", nullable = false)
     private Long syllabusMonId;
 
-    @Column(name = "tai_lieu_goc_id", nullable = false)
-    private Long taiLieuGocId;
+    @Column(name = "tai_lieu_mau_id", nullable = false)
+    private Long taiLieuMauId;
 
 
     @Column(name = "ma", length = 100)

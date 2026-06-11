@@ -14,7 +14,7 @@ public class ChuongTrinhVersionViTriViecLamMapper {
         }
         ChuongTrinhVersionViTriViecLam entity = new ChuongTrinhVersionViTriViecLam();
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setViTriGocId(request.getViTriGocId());
+        entity.setViTriMauId(request.getViTriMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
@@ -28,7 +28,7 @@ public class ChuongTrinhVersionViTriViecLamMapper {
             return;
         }
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
-        entity.setViTriGocId(request.getViTriGocId());
+        entity.setViTriMauId(request.getViTriMauId());
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setMoTa(request.getMoTa());
@@ -43,7 +43,7 @@ public class ChuongTrinhVersionViTriViecLamMapper {
         return ChuongTrinhVersionViTriViecLamResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
-                .viTriGocId(entity.getViTriGocId())
+                .viTriMauId(entity.getViTriMauId())
                 .ma(entity.getMa())
                 .ten(entity.getTen())
                 .moTa(entity.getMoTa())

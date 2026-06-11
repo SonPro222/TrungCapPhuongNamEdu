@@ -7,18 +7,18 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SyllabusMonHocGocTaiLieuRepository
+public interface SyllabusMonHocMauTaiLieuRepository
         extends JpaRepository<SyllabusMonHocMauTaiLieu, Long>, JpaSpecificationExecutor<SyllabusMonHocMauTaiLieu> {
 
-    boolean existsBySyllabusMonHocGocIdAndTaiLieuGocId(Long syllabusMonHocGocId, Long taiLieuGocId);
+    boolean existsBySyllabusMonHocMauIdAndTaiLieuMauId(Long syllabusMonHocMauId, Long taiLieuMauId);
 
-    boolean existsBySyllabusMonHocGocIdAndTaiLieuGocIdAndIdNot(Long syllabusMonHocGocId, Long taiLieuGocId, Long id);
+    boolean existsBySyllabusMonHocMauIdAndTaiLieuMauIdAndIdNot(Long syllabusMonHocMauId, Long taiLieuMauId, Long id);
 
-    boolean existsBySyllabusMonHocGocIdAndThuTu(Long syllabusMonHocGocId, Integer thuTu);
+    boolean existsBySyllabusMonHocMauIdAndThuTu(Long syllabusMonHocMauId, Integer thuTu);
 
-    boolean existsBySyllabusMonHocGocIdAndThuTuAndIdNot(Long syllabusMonHocGocId, Integer thuTu, Long id);
+    boolean existsBySyllabusMonHocMauIdAndThuTuAndIdNot(Long syllabusMonHocMauId, Integer thuTu, Long id);
 
-    void deleteBySyllabusMonHocGocId(Long syllabusMonHocGocId);
+    void deleteBySyllabusMonHocMauId(Long syllabusMonHocMauId);
 
-    void deleteByTaiLieuGocId(Long taiLieuGocId);
+    void deleteByTaiLieuMauId(Long taiLieuMauId);
 }

@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(name = "uq_smhg_mon_hoc_ten", columnNames = {"mon_hoc_id", "ten"})
         }
 )
-public class SyllabusMonHocGoc {
+public class SyllabusMonHocMau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

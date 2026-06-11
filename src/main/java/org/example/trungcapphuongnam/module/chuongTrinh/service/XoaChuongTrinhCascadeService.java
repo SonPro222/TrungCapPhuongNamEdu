@@ -18,25 +18,24 @@ public interface XoaChuongTrinhCascadeService {
 
 
     //Mới thêm
-    void xoaTheoSyllabusMonHocGocId(Long syllabusMonHocGocId);
+    void xoaTheoSyllabusMonHocMauId(Long syllabusMonHocMauId);
 
-    void xoaTheoKhungKyGocId(Long khungKyGocId);
 
-    void xoaTheoNhomKienThucGocId(Long nhomKienThucGocId);
+    void xoaTheoNhomKienThucMauId(Long nhomKienThucMauId);
 
-    void xoaTheoNhomTuChonGocId(Long nhomTuChonGocId);
+    void xoaTheoNhomTuChonMauId(Long nhomTuChonMauId);
 
-    void xoaTheoMucTieuGocId(Long mucTieuGocId);
+    void xoaTheoMucTieuMauId(Long mucTieuMauId);
 
-    void xoaTheoNangLucGocId(Long nangLucGocId);
+    void xoaTheoNangLucMauId(Long nangLucMauId);
 
-    void xoaTheoViTriGocId(Long viTriGocId);
+    void xoaTheoViTriMauId(Long viTriMauId);
 
-    void xoaTheoDieuKienTotNghiepGocId(Long dieuKienGocId);
+    void xoaTheoDieuKienTotNghiepMauId(Long dieuKienMauId);
 
     void xoaTheoQuyDoiDiemMauId(Long quyDoiDiemMauId);
 
-    void xoaTheoDieuKienMonHocGocId(Long dieuKienGocId);
+    void xoaTheoDieuKienMonHocMauId(Long dieuKienMauId);
 
-    void xoaTheoTaiLieuGocId(Long taiLieuGocId);
+    void xoaTheoTaiLieuMauId(Long taiLieuMauId);
 }

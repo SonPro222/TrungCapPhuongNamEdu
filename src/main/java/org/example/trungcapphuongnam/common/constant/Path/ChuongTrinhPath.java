@@ -13,7 +13,7 @@ public final class ChuongTrinhPath {
     public static final String VERSION = CHUONG_TRINH_VERSION;
     public static final String MON_HOC = BASE + "/mon-hoc";
     public static final String DIEU_KIEN_MON_HOC = BASE + "/dieu-kien-mon-hoc";
-    public static final String DIEU_KIEN_MON_HOC_GOC = BASE + "/dieu-kien-mon-hoc-goc";
+    public static final String DIEU_KIEN_MON_HOC_MAU = BASE + "/dieu-kien-mon-hoc-mau";
     public static final String SYLLABUS_MON_HOC_DIEU_KIEN = BASE + "/syllabus-mon-hoc-dieu-kien";
     public static final String DIEU_KIEN_TOT_NGHIEP = BASE + "/dieu-kien-tot-nghiep";
     public static final String MON_TIEN_QUYET = BASE + "/mon-tien-quyet";
@@ -28,15 +28,15 @@ public final class ChuongTrinhPath {
     public static final String SYLLABUS_MON_HOC = BASE + "/syllabus-mon-hoc";
     public static final String SYLLABUS_TAI_LIEU = BASE + "/syllabus-tai-lieu";
     public static final String VI_TRI_VIEC_LAM = BASE + "/vi-tri-viec-lam";
-    public static final String TAI_LIEU_GOC = BASE + "/tai-lieu-goc";
+    public static final String TAI_LIEU_MAU = BASE + "/tai-lieu-mau";
     public static final String SYLLABUS_MON_HOC_TAI_LIEU = BASE + "/syllabus-mon-hoc-tai-lieu";
-    public static final String SYLLABUS_MON_HOC_GOC = BASE + "/syllabus-mon-hoc-goc";
-    public static final String SYLLABUS_MON_HOC_GOC_CHUONG_BAI = BASE + "/syllabus-mon-hoc-goc-chuong-bai";
-    public static final String SYLLABUS_MON_HOC_GOC_DIEU_KIEN = BASE + "/syllabus-mon-hoc-goc-dieu-kien";
-    public static final String SYLLABUS_MON_HOC_GOC_TAI_LIEU = BASE + "/syllabus-mon-hoc-goc-tai-lieu";
-    public static final String SYLLABUS_CHUONG_TRINH_GOC = BASE + "/syllabus-chuong-trinh-goc";
-    public static final String NHOM_KIEN_THUC_GOC = BASE + "/nhom-kien-thuc-goc";
-    public static final String NHOM_TU_CHON_GOC = BASE + "/nhom-tu-chon-goc";
+    public static final String SYLLABUS_MON_HOC_MAU = BASE + "/syllabus-mon-hoc-mau";
+    public static final String SYLLABUS_MON_HOC_MAU_CHUONG_BAI = BASE + "/syllabus-mon-hoc-mau-chuong-bai";
+    public static final String SYLLABUS_MON_HOC_MAU_DIEU_KIEN = BASE + "/syllabus-mon-hoc-mau-dieu-kien";
+    public static final String SYLLABUS_MON_HOC_MAU_TAI_LIEU = BASE + "/syllabus-mon-hoc-mau-tai-lieu";
+    public static final String SYLLABUS_CHUONG_TRINH_MAU = BASE + "/syllabus-chuong-trinh-mau";
+    public static final String NHOM_KIEN_THUC_MAU = BASE + "/nhom-kien-thuc-mau";
+    public static final String NHOM_TU_CHON_MAU = BASE + "/nhom-tu-chon-mau";
     public static final String CAU_HINH_DANH_GIA_MAU = BASE + "/cau-hinh-danh-gia-mau";
     public static final String ID = "/{id}";
 }

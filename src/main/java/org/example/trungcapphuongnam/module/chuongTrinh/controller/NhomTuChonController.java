@@ -23,11 +23,11 @@ public class NhomTuChonController {
     public ResponseEntity<ApiResponse<Page<NhomTuChonResponse>>> findAll(
             Pageable pageable,
             @RequestParam(required = false) Long chuongTrinhVersionId,
-            @RequestParam(required = false) Long nhomTuChonGocId,
+            @RequestParam(required = false) Long nhomTuChonMauId,
             @RequestParam(required = false) String keyword
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
-                service.findAll(chuongTrinhVersionId, nhomTuChonGocId, keyword, pageable)
+                service.findAll(chuongTrinhVersionId, nhomTuChonMauId, keyword, pageable)
         ));
     }
     @GetMapping(ChuongTrinhPath.ID)

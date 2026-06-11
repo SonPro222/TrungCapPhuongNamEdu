@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,19 +24,25 @@ public interface SyllabusChuongTrinhRepository extends JpaRepository<SyllabusChu
 
     boolean existsByChuongTrinhVersionIdAndIdNot(Long chuongTrinhVersionId, Long id);
 
-    boolean existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocId(
+    boolean existsByChuongTrinhVersionIdAndSyllabusChuongTrinhMauId(
             Long chuongTrinhVersionId,
-            Long syllabusChuongTrinhGocId
+            Long syllabusChuongTrinhMauId
     );
 
-    boolean existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocIdAndIdNot(
+    boolean existsByChuongTrinhVersionIdAndSyllabusChuongTrinhMauIdAndIdNot(
             Long chuongTrinhVersionId,
-            Long syllabusChuongTrinhGocId,
+            Long syllabusChuongTrinhMauId,
             Long id
     );
 
-    Optional<SyllabusChuongTrinh> findByChuongTrinhVersionIdAndSyllabusChuongTrinhGocId(
+    Optional<SyllabusChuongTrinh> findByChuongTrinhVersionIdAndSyllabusChuongTrinhMauId(
             Long chuongTrinhVersionId,
-            Long syllabusChuongTrinhGocId
+            Long syllabusChuongTrinhMauId
     );
+
+    Optional<SyllabusChuongTrinh> findFirstByChuongTrinhVersionIdOrderByIdDesc(Long chuongTrinhVersionId);
+
+    List<SyllabusChuongTrinh> findByChuongTrinhVersionIdOrderByIdDesc(Long chuongTrinhVersionId);
+
+    boolean existsBySyllabusChuongTrinhMauId(Long syllabusChuongTrinhMauId);
 }

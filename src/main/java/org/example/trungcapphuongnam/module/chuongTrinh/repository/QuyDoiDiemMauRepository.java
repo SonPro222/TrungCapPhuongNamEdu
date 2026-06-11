@@ -17,9 +17,9 @@ public interface QuyDoiDiemMauRepository extends JpaRepository<QuyDoiDiemMau, Lo
 
     boolean existsByMaAndIdNot(String ma, Long id);
 
-    boolean existsBySyllabusMonHocGocIdAndMa(Long syllabusMonHocGocId, String ma);
+    boolean existsBySyllabusMonHocMauIdAndMa(Long syllabusMonHocMauId, String ma);
 
-    boolean existsBySyllabusMonHocGocIdAndMaAndIdNot(Long syllabusMonHocGocId, String ma, Long id);
+    boolean existsBySyllabusMonHocMauIdAndMaAndIdNot(Long syllabusMonHocMauId, String ma, Long id);
 
-    List<QuyDoiDiemMau> findBySyllabusMonHocGocIdOrderByThuTuAscIdAsc(Long syllabusMonHocGocId);
+    List<QuyDoiDiemMau> findBySyllabusMonHocMauIdOrderByThuTuAscIdAsc(Long syllabusMonHocMauId);
 }

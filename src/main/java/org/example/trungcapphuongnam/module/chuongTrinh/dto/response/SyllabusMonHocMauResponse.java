@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyllabusMonHocGocResponse {
+public class SyllabusMonHocMauResponse {
 
     private Long id;
 

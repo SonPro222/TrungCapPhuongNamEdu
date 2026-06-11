@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class KhungKyGocRequest {
+public class KhungKyMauRequest {
 
     @NotBlank(message = "maKy không được để trống")
     private String maKy;

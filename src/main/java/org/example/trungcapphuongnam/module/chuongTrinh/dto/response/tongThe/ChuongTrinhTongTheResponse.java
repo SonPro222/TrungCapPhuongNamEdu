@@ -33,6 +33,10 @@ public class ChuongTrinhTongTheResponse {
 
     private Long versionDangXemId;
 
+    private Long syllabusChuongTrinhId;
+
+    private Long syllabusChuongTrinhGocId;
+
     private Integer tongSoKy;
 
     private Integer tongSoMon;

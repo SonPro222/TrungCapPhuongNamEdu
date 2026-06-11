@@ -7,14 +7,16 @@ import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.*;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersion;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.NangLucDauRaGoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.NangLucDauRaMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomKienThuc;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NhomTuChon;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLamGoc;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLamMau;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKy;
+import org.example.trungcapphuongnam.module.daoTao.entity.NganhHeDaoTao;
 import org.example.trungcapphuongnam.module.daoTao.entity.NganhLoaiChuongTrinh;
 import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyRepository;
+import org.example.trungcapphuongnam.module.daoTao.repository.NganhHeDaoTaoRepository;
 import org.example.trungcapphuongnam.module.daoTao.repository.NganhLoaiChuongTrinhRepository;
 import org.example.trungcapphuongnam.module.daoTao.repository.NganhTrinhDoDaoTaoRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,8 +31,9 @@ import java.util.List;
 public class ChuongTrinhNghiepVuValidator {
 
     private final NganhLoaiChuongTrinhRepository nganhLoaiChuongTrinhRepository;
+    private final NganhHeDaoTaoRepository nganhHeDaoTaoRepository;
     private final NganhTrinhDoDaoTaoRepository nganhTrinhDoDaoTaoRepository;
-    private final SyllabusChuongTrinhGocRepository syllabusChuongTrinhGocRepository;
+    private final SyllabusChuongTrinhMauRepository syllabusChuongTrinhMauRepository;
     private final KhungKyRepository khungKyRepository;
 
     private final ChuongTrinhRepository chuongTrinhRepository;
@@ -57,31 +60,31 @@ public class ChuongTrinhNghiepVuValidator {
     private final ViTriViecLamRepository viTriViecLamRepository;
     private final DieuKienTotNghiepRepository dieuKienTotNghiepRepository;
 
-    private final MucTieuChuongTrinhGocRepository mucTieuChuongTrinhGocRepository;
-    private final NangLucDauRaGocRepository nangLucDauRaGocRepository;
-    private final ViTriViecLamGocRepository viTriViecLamGocRepository;
-    private final DieuKienTotNghiepGocRepository dieuKienTotNghiepGocRepository;
+    private final MucTieuChuongTrinhMauRepository mucTieuChuongTrinhMauRepository;
+    private final NangLucDauRaMauRepository nangLucDauRaMauRepository;
+    private final ViTriViecLamMauRepository viTriViecLamMauRepository;
+    private final DieuKienTotNghiepMauRepository dieuKienTotNghiepMauRepository;
 
     private final ChuongTrinhVersionMucTieuRepository chuongTrinhVersionMucTieuRepository;
     private final ChuongTrinhVersionNangLucRepository chuongTrinhVersionNangLucRepository;
     private final ChuongTrinhVersionViTriViecLamRepository chuongTrinhVersionViTriViecLamRepository;
     private final ChuongTrinhVersionDieuKienTotNghiepRepository chuongTrinhVersionDieuKienTotNghiepRepository;
 
-    private final DieuKienMonHocGocRepository dieuKienMonHocGocRepository;
-    private final TaiLieuGocRepository taiLieuGocRepository;
+    private final DieuKienMonHocMauRepository dieuKienMonHocMauRepository;
+    private final TaiLieuMauRepository taiLieuMauRepository;
 
-    private final SyllabusMonHocGocRepository syllabusMonHocGocRepository;
-    private final SyllabusMonHocGocChuongBaiRepository syllabusMonHocGocChuongBaiRepository;
-    private final SyllabusMonHocGocDieuKienRepository syllabusMonHocGocDieuKienRepository;
-    private final SyllabusMonHocGocTaiLieuRepository syllabusMonHocGocTaiLieuRepository;
+    private final SyllabusMonHocMauRepository syllabusMonHocMauRepository;
+    private final SyllabusMonHocMauChuongBaiRepository syllabusMonHocMauChuongBaiRepository;
+    private final SyllabusMonHocMauDieuKienRepository syllabusMonHocMauDieuKienRepository;
+    private final SyllabusMonHocMauTaiLieuRepository syllabusMonHocMauTaiLieuRepository;
     private final SyllabusMonHocDieuKienRepository syllabusMonHocDieuKienRepository;
     private final SyllabusMonHocTaiLieuRepository syllabusMonHocTaiLieuRepository;
 
-    private final NhomKienThucGocRepository nhomKienThucGocRepository;
-    private final NhomTuChonGocRepository nhomTuChonGocRepository;
+    private final NhomKienThucMauRepository nhomKienThucMauRepository;
+    private final NhomTuChonMauRepository nhomTuChonMauRepository;
 
 
-    public void validateNhomKienThucGoc(NhomKienThucGocRequest request, Long id) {
+    public void validateNhomKienThucMau(NhomKienThucMauRequest request, Long id) {
         notNull(request, "Dữ liệu nhóm kiến thức gốc không hợp lệ");
 
         String ma = trimRequired(request.getMa(), "Mã nhóm kiến thức gốc");
@@ -92,50 +95,42 @@ public class ChuongTrinhNghiepVuValidator {
             throw new BadRequestException("Loại nhóm kiến thức gốc không hợp lệ: " + loaiNhom);
         }
 
-        if (id == null && nhomKienThucGocRepository.existsByMa(ma)) {
+        if (id == null && nhomKienThucMauRepository.existsByMa(ma)) {
             throw new DuplicateResourceException("Mã nhóm kiến thức gốc đã tồn tại: " + ma);
         }
 
-        if (id != null && nhomKienThucGocRepository.existsByMaAndIdNot(ma, id)) {
+        if (id != null && nhomKienThucMauRepository.existsByMaAndIdNot(ma, id)) {
             throw new DuplicateResourceException("Mã nhóm kiến thức gốc đã tồn tại: " + ma);
         }
     }
 
-    public void validateNhomTuChonGoc(NhomTuChonGocRequest request, Long id) {
+    public void validateNhomTuChonMau(NhomTuChonMauRequest request, Long id) {
         notNull(request, "Dữ liệu nhóm tự chọn gốc không hợp lệ");
 
         String ma = trimRequired(request.getMa(), "Mã nhóm tự chọn gốc");
         trimRequired(request.getTen(), "Tên nhóm tự chọn gốc");
 
-        if (id == null && nhomTuChonGocRepository.existsByMa(ma)) {
+        if (id == null && nhomTuChonMauRepository.existsByMa(ma)) {
             throw new DuplicateResourceException("Mã nhóm tự chọn gốc đã tồn tại: " + ma);
         }
 
-        if (id != null && nhomTuChonGocRepository.existsByMaAndIdNot(ma, id)) {
+        if (id != null && nhomTuChonMauRepository.existsByMaAndIdNot(ma, id)) {
             throw new DuplicateResourceException("Mã nhóm tự chọn gốc đã tồn tại: " + ma);
         }
     }
     public void validateChuongTrinh(ChuongTrinhRequest request, Long id) {
         notNull(request, "Dữ liệu chương trình không hợp lệ");
 
-        Long nganhLoaiChuongTrinhId = requireId(request.getNganhLoaiChuongTrinhId(), "nganhLoaiChuongTrinhId");
-
         String ma = trimRequired(request.getMaChuongTrinh(), "Mã chương trình");
         trimRequired(request.getTenChuongTrinh(), "Tên chương trình");
 
-        NganhLoaiChuongTrinh nganhLoai = nganhLoaiChuongTrinhRepository.findById(nganhLoaiChuongTrinhId)
-                .orElseThrow(() -> new ResourceNotFoundException("Loại chương trình theo ngành không tồn tại: " + nganhLoaiChuongTrinhId));
+        Long nganhHeDaoTaoId = request.getNganhHeDaoTaoId();
+        if (nganhHeDaoTaoId == null) {
+            throw new BadRequestException("nganhHeDaoTaoId không được để trống");
+        }
 
-        if (request.getTrinhDoId() != null) {
-            Long trinhDoId = request.getTrinhDoId();
-            boolean daGanTrinhDoVaoNganh = nganhTrinhDoDaoTaoRepository.existsByNganhIdAndTrinhDoId(
-                    nganhLoai.getNganhId(),
-                    trinhDoId
-            );
-
-            if (!daGanTrinhDoVaoNganh) {
-                throw new ResourceNotFoundException("Trình độ đào tạo chưa được gán vào ngành này: " + trinhDoId);
-            }
+        if (!nganhHeDaoTaoRepository.existsById(nganhHeDaoTaoId)) {
+            throw new ResourceNotFoundException("Ngành hệ đào tạo không tồn tại: " + nganhHeDaoTaoId);
         }
 
         if (id == null && chuongTrinhRepository.existsByMaChuongTrinh(ma)) {
@@ -146,17 +141,21 @@ public class ChuongTrinhNghiepVuValidator {
             throw new DuplicateResourceException("Mã chương trình đã tồn tại: " + ma);
         }
     }
-    public void validateSyllabusChuongTrinhGoc(SyllabusChuongTrinhGocRequest request, Long id) {
+    public void validateSyllabusChuongTrinhMau(SyllabusChuongTrinhMauRequest request, Long id) {
         notNull(request, "Dữ liệu syllabus chương trình gốc không hợp lệ");
 
         String ma = trimRequired(request.getMa(), "Mã syllabus chương trình gốc");
         trimRequired(request.getTen(), "Tên syllabus chương trình gốc");
 
-        if (id == null && syllabusChuongTrinhGocRepository.existsByMa(ma)) {
+        if (request.getChuongTrinhId() != null) {
+            requireExists(chuongTrinhRepository, request.getChuongTrinhId(), "Chương trình đào tạo");
+        }
+
+        if (id == null && syllabusChuongTrinhMauRepository.existsByMa(ma)) {
             throw new DuplicateResourceException("Mã syllabus chương trình gốc đã tồn tại: " + ma);
         }
 
-        if (id != null && syllabusChuongTrinhGocRepository.existsByMaAndIdNot(ma, id)) {
+        if (id != null && syllabusChuongTrinhMauRepository.existsByMaAndIdNot(ma, id)) {
             throw new DuplicateResourceException("Mã syllabus chương trình gốc đã tồn tại: " + ma);
         }
     }
@@ -197,23 +196,23 @@ public class ChuongTrinhNghiepVuValidator {
         notNull(request, "Dữ liệu gán điều kiện môn học vào syllabus không hợp lệ");
 
         Long syllabusMonId = requireId(request.getSyllabusMonId(), "syllabusMonId");
-        Long dieuKienGocId = requireId(request.getDieuKienGocId(), "dieuKienGocId");
+        Long dieuKienMauId = requireId(request.getDieuKienMauId(), "dieuKienMauId");
 
         requireExists(syllabusMonHocRepository, syllabusMonId, "Syllabus môn học");
-        requireExists(dieuKienMonHocGocRepository, dieuKienGocId, "Điều kiện môn học gốc");
+        requireExists(dieuKienMonHocMauRepository, dieuKienMauId, "Điều kiện môn học gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự điều kiện môn học");
 
-        if (id == null && syllabusMonHocDieuKienRepository.existsBySyllabusMonIdAndDieuKienGocId(
+        if (id == null && syllabusMonHocDieuKienRepository.existsBySyllabusMonIdAndDieuKienMauId(
                 syllabusMonId,
-                dieuKienGocId
+                dieuKienMauId
         )) {
             throw new DuplicateResourceException("Điều kiện môn học gốc đã được gán cho syllabus này");
         }
 
-        if (id != null && syllabusMonHocDieuKienRepository.existsBySyllabusMonIdAndDieuKienGocIdAndIdNot(
+        if (id != null && syllabusMonHocDieuKienRepository.existsBySyllabusMonIdAndDieuKienMauIdAndIdNot(
                 syllabusMonId,
-                dieuKienGocId,
+                dieuKienMauId,
                 id
         )) {
             throw new DuplicateResourceException("Điều kiện môn học gốc đã được gán cho syllabus này");
@@ -240,23 +239,23 @@ public class ChuongTrinhNghiepVuValidator {
         notNull(request, "Dữ liệu gán tài liệu gốc vào syllabus không hợp lệ");
 
         Long syllabusMonId = requireId(request.getSyllabusMonId(), "syllabusMonId");
-        Long taiLieuGocId = requireId(request.getTaiLieuGocId(), "taiLieuGocId");
+        Long taiLieuMauId = requireId(request.getTaiLieuMauId(), "taiLieuMauId");
 
         requireExists(syllabusMonHocRepository, syllabusMonId, "Syllabus môn học");
-        requireExists(taiLieuGocRepository, taiLieuGocId, "Tài liệu gốc");
+        requireExists(taiLieuMauRepository, taiLieuMauId, "Tài liệu gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự tài liệu syllabus");
 
-        if (id == null && syllabusMonHocTaiLieuRepository.existsBySyllabusMonIdAndTaiLieuGocId(
+        if (id == null && syllabusMonHocTaiLieuRepository.existsBySyllabusMonIdAndTaiLieuMauId(
                 syllabusMonId,
-                taiLieuGocId
+                taiLieuMauId
         )) {
             throw new DuplicateResourceException("Tài liệu gốc đã được gán cho syllabus này");
         }
 
-        if (id != null && syllabusMonHocTaiLieuRepository.existsBySyllabusMonIdAndTaiLieuGocIdAndIdNot(
+        if (id != null && syllabusMonHocTaiLieuRepository.existsBySyllabusMonIdAndTaiLieuMauIdAndIdNot(
                 syllabusMonId,
-                taiLieuGocId,
+                taiLieuMauId,
                 id
         )) {
             throw new DuplicateResourceException("Tài liệu gốc đã được gán cho syllabus này");
@@ -371,21 +370,21 @@ public class ChuongTrinhNghiepVuValidator {
                 throw new DuplicateResourceException("Thứ tự nhóm kiến thức đã tồn tại trong version: " + request.getThuTu());
             }
         }
-        if (request.getNhomKienThucGocId() != null) {
+        if (request.getNhomKienThucMauId() != null) {
             requireExists(
-                    nhomKienThucGocRepository,
-                    request.getNhomKienThucGocId(),
+                    nhomKienThucMauRepository,
+                    request.getNhomKienThucMauId(),
                     "Nhóm kiến thức gốc"
             );
         }
-        if (request.getNhomKienThucGocId() != null) {
-            Long gocId = request.getNhomKienThucGocId();
+        if (request.getNhomKienThucMauId() != null) {
+            Long MauId = request.getNhomKienThucMauId();
 
-            if (id == null && nhomKienThucRepository.existsByChuongTrinhVersionIdAndNhomKienThucGocId(versionId, gocId)) {
+            if (id == null && nhomKienThucRepository.existsByChuongTrinhVersionIdAndNhomKienThucMauId(versionId, MauId)) {
                 throw new DuplicateResourceException("Nhóm kiến thức gốc đã được gán vào version này");
             }
 
-            if (id != null && nhomKienThucRepository.existsByChuongTrinhVersionIdAndNhomKienThucGocIdAndIdNot(versionId, gocId, id)) {
+            if (id != null && nhomKienThucRepository.existsByChuongTrinhVersionIdAndNhomKienThucMauIdAndIdNot(versionId, MauId, id)) {
                 throw new DuplicateResourceException("Nhóm kiến thức gốc đã được gán vào version này");
             }
         }
@@ -417,21 +416,21 @@ public class ChuongTrinhNghiepVuValidator {
         if (id != null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndTenAndIdNot(versionId, ten, id)) {
             throw new DuplicateResourceException("Tên nhóm tự chọn đã tồn tại trong version: " + ten);
         }
-        if (request.getNhomTuChonGocId() != null) {
+        if (request.getNhomTuChonMauId() != null) {
             requireExists(
-                    nhomTuChonGocRepository,
-                    request.getNhomTuChonGocId(),
+                    nhomTuChonMauRepository,
+                    request.getNhomTuChonMauId(),
                     "Nhóm tự chọn gốc"
             );
         }
-        if (request.getNhomTuChonGocId() != null) {
-            Long gocId = request.getNhomTuChonGocId();
+        if (request.getNhomTuChonMauId() != null) {
+            Long MauId = request.getNhomTuChonMauId();
 
-            if (id == null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndNhomTuChonGocId(versionId, gocId)) {
+            if (id == null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndNhomTuChonMauId(versionId, MauId)) {
                 throw new DuplicateResourceException("Nhóm tự chọn gốc đã được gán vào version này");
             }
 
-            if (id != null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndNhomTuChonGocIdAndIdNot(versionId, gocId, id)) {
+            if (id != null && nhomTuChonRepository.existsByChuongTrinhVersionIdAndNhomTuChonMauIdAndIdNot(versionId, MauId, id)) {
                 throw new DuplicateResourceException("Nhóm tự chọn gốc đã được gán vào version này");
             }
         }
@@ -643,16 +642,16 @@ public class ChuongTrinhNghiepVuValidator {
         if (id != null && syllabusMonHocRepository.existsByChuongTrinhMonIdAndIdNot(chuongTrinhMonId, id)) {
             throw new DuplicateResourceException("Môn trong chương trình này đã có syllabus môn học");
         }
-        if (request.getSyllabusMonHocGocId() != null) {
+        if (request.getSyllabusMonHocMauId() != null) {
             requireExists(
-                    syllabusMonHocGocRepository,
-                    request.getSyllabusMonHocGocId(),
+                    syllabusMonHocMauRepository,
+                    request.getSyllabusMonHocMauId(),
                     "Syllabus môn học gốc"
             );
         }
     }
 
-    public void validateDieuKienMonHocGoc(DieuKienMonHocGocRequest request, Long id) {
+    public void validateDieuKienMonHocMau(DieuKienMonHocMauRequest request, Long id) {
         notNull(request, "Dữ liệu điều kiện môn học gốc không hợp lệ");
 
         String ma = trimRequired(request.getMa(), "Mã điều kiện môn học gốc");
@@ -663,16 +662,16 @@ public class ChuongTrinhNghiepVuValidator {
 
         trimRequired(request.getNoiDung(), "Nội dung điều kiện môn học gốc");
 
-        if (id == null && dieuKienMonHocGocRepository.existsByMa(ma)) {
+        if (id == null && dieuKienMonHocMauRepository.existsByMa(ma)) {
             throw new DuplicateResourceException("Mã điều kiện môn học gốc đã tồn tại: " + ma);
         }
 
-        if (id != null && dieuKienMonHocGocRepository.existsByMaAndIdNot(ma, id)) {
+        if (id != null && dieuKienMonHocMauRepository.existsByMaAndIdNot(ma, id)) {
             throw new DuplicateResourceException("Mã điều kiện môn học gốc đã tồn tại: " + ma);
         }
     }
 
-    public void validateTaiLieuGoc(TaiLieuGocRequest request, Long id) {
+    public void validateTaiLieuMau(TaiLieuMauRequest request, Long id) {
         notNull(request, "Dữ liệu tài liệu gốc không hợp lệ");
 
         String ma = trimRequired(request.getMa(), "Mã tài liệu gốc");
@@ -685,15 +684,15 @@ public class ChuongTrinhNghiepVuValidator {
             }
         }
 
-        if (id == null && taiLieuGocRepository.existsByMa(ma)) {
+        if (id == null && taiLieuMauRepository.existsByMa(ma)) {
             throw new DuplicateResourceException("Mã tài liệu gốc đã tồn tại: " + ma);
         }
 
-        if (id != null && taiLieuGocRepository.existsByMaAndIdNot(ma, id)) {
+        if (id != null && taiLieuMauRepository.existsByMaAndIdNot(ma, id)) {
             throw new DuplicateResourceException("Mã tài liệu gốc đã tồn tại: " + ma);
         }
     }
-    public void validateSyllabusMonHocGoc(SyllabusMonHocGocRequest request, Long id) {
+    public void validateSyllabusMonHocMau(SyllabusMonHocMauRequest request, Long id) {
         notNull(request, "Dữ liệu syllabus môn học gốc không hợp lệ");
 
         Long monHocId = requireId(request.getMonHocId(), "monHocId");
@@ -718,29 +717,29 @@ public class ChuongTrinhNghiepVuValidator {
                 new BigDecimal("100")
         );
 
-        if (id == null && syllabusMonHocGocRepository.existsByMa(ma)) {
+        if (id == null && syllabusMonHocMauRepository.existsByMa(ma)) {
             throw new DuplicateResourceException("Mã syllabus môn học gốc đã tồn tại: " + ma);
         }
 
-        if (id != null && syllabusMonHocGocRepository.existsByMaAndIdNot(ma, id)) {
+        if (id != null && syllabusMonHocMauRepository.existsByMaAndIdNot(ma, id)) {
             throw new DuplicateResourceException("Mã syllabus môn học gốc đã tồn tại: " + ma);
         }
 
-        if (id == null && syllabusMonHocGocRepository.existsByMonHocIdAndTen(monHocId, ten)) {
+        if (id == null && syllabusMonHocMauRepository.existsByMonHocIdAndTen(monHocId, ten)) {
             throw new DuplicateResourceException("Tên syllabus gốc đã tồn tại trong môn học này: " + ten);
         }
 
-        if (id != null && syllabusMonHocGocRepository.existsByMonHocIdAndTenAndIdNot(monHocId, ten, id)) {
+        if (id != null && syllabusMonHocMauRepository.existsByMonHocIdAndTenAndIdNot(monHocId, ten, id)) {
             throw new DuplicateResourceException("Tên syllabus gốc đã tồn tại trong môn học này: " + ten);
         }
     }
-    public void validateSyllabusMonHocGocChuongBai(SyllabusMonHocGocChuongBaiRequest request, Long id) {
+    public void validateSyllabusMonHocMauChuongBai(SyllabusMonHocMauChuongBaiRequest request, Long id) {
         notNull(request, "Dữ liệu chương bài syllabus gốc không hợp lệ");
 
-        Long syllabusGocId = requireId(request.getSyllabusMonHocGocId(), "syllabusMonHocGocId");
+        Long syllabusMauId = requireId(request.getSyllabusMonHocMauId(), "syllabusMonHocMauId");
 
         trimRequired(request.getTen(), "Tên chương bài syllabus gốc");
-        requireExists(syllabusMonHocGocRepository, syllabusGocId, "Syllabus môn học gốc");
+        requireExists(syllabusMonHocMauRepository, syllabusMauId, "Syllabus môn học gốc");
 
         positiveOrZero(request.getTongGio(), "Tổng giờ chương bài gốc");
         positiveOrZero(request.getGioLyThuyet(), "Giờ lý thuyết chương bài gốc");
@@ -757,15 +756,15 @@ public class ChuongTrinhNghiepVuValidator {
         );
 
         if (request.getThuTu() != null) {
-            if (id == null && syllabusMonHocGocChuongBaiRepository.existsBySyllabusMonHocGocIdAndThuTu(
-                    syllabusGocId,
+            if (id == null && syllabusMonHocMauChuongBaiRepository.existsBySyllabusMonHocMauIdAndThuTu(
+                    syllabusMauId,
                     request.getThuTu()
             )) {
                 throw new DuplicateResourceException("Thứ tự chương bài gốc đã tồn tại trong syllabus gốc");
             }
 
-            if (id != null && syllabusMonHocGocChuongBaiRepository.existsBySyllabusMonHocGocIdAndThuTuAndIdNot(
-                    syllabusGocId,
+            if (id != null && syllabusMonHocMauChuongBaiRepository.existsBySyllabusMonHocMauIdAndThuTuAndIdNot(
+                    syllabusMauId,
                     request.getThuTu(),
                     id
             )) {
@@ -774,42 +773,42 @@ public class ChuongTrinhNghiepVuValidator {
         }
     }
 
-    public void validateSyllabusMonHocGocDieuKien(SyllabusMonHocGocDieuKienRequest request, Long id) {
+    public void validateSyllabusMonHocMauDieuKien(SyllabusMonHocMauDieuKienRequest request, Long id) {
         notNull(request, "Dữ liệu gán điều kiện vào syllabus gốc không hợp lệ");
 
-        Long syllabusGocId = requireId(request.getSyllabusMonHocGocId(), "syllabusMonHocGocId");
-        Long dieuKienGocId = requireId(request.getDieuKienGocId(), "dieuKienGocId");
+        Long syllabusMauId = requireId(request.getSyllabusMonHocMauId(), "syllabusMonHocMauId");
+        Long dieuKienMauId = requireId(request.getDieuKienMauId(), "dieuKienMauId");
 
-        requireExists(syllabusMonHocGocRepository, syllabusGocId, "Syllabus môn học gốc");
-        requireExists(dieuKienMonHocGocRepository, dieuKienGocId, "Điều kiện môn học gốc");
+        requireExists(syllabusMonHocMauRepository, syllabusMauId, "Syllabus môn học gốc");
+        requireExists(dieuKienMonHocMauRepository, dieuKienMauId, "Điều kiện môn học gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự điều kiện trong syllabus gốc");
 
-        if (id == null && syllabusMonHocGocDieuKienRepository.existsBySyllabusMonHocGocIdAndDieuKienGocId(
-                syllabusGocId,
-                dieuKienGocId
+        if (id == null && syllabusMonHocMauDieuKienRepository.existsBySyllabusMonHocMauIdAndDieuKienMauId(
+                syllabusMauId,
+                dieuKienMauId
         )) {
             throw new DuplicateResourceException("Điều kiện gốc đã được gán cho syllabus gốc này");
         }
 
-        if (id != null && syllabusMonHocGocDieuKienRepository.existsBySyllabusMonHocGocIdAndDieuKienGocIdAndIdNot(
-                syllabusGocId,
-                dieuKienGocId,
+        if (id != null && syllabusMonHocMauDieuKienRepository.existsBySyllabusMonHocMauIdAndDieuKienMauIdAndIdNot(
+                syllabusMauId,
+                dieuKienMauId,
                 id
         )) {
             throw new DuplicateResourceException("Điều kiện gốc đã được gán cho syllabus gốc này");
         }
 
         if (request.getThuTu() != null) {
-            if (id == null && syllabusMonHocGocDieuKienRepository.existsBySyllabusMonHocGocIdAndThuTu(
-                    syllabusGocId,
+            if (id == null && syllabusMonHocMauDieuKienRepository.existsBySyllabusMonHocMauIdAndThuTu(
+                    syllabusMauId,
                     request.getThuTu()
             )) {
                 throw new DuplicateResourceException("Thứ tự điều kiện đã tồn tại trong syllabus gốc");
             }
 
-            if (id != null && syllabusMonHocGocDieuKienRepository.existsBySyllabusMonHocGocIdAndThuTuAndIdNot(
-                    syllabusGocId,
+            if (id != null && syllabusMonHocMauDieuKienRepository.existsBySyllabusMonHocMauIdAndThuTuAndIdNot(
+                    syllabusMauId,
                     request.getThuTu(),
                     id
             )) {
@@ -817,42 +816,42 @@ public class ChuongTrinhNghiepVuValidator {
             }
         }
     }
-    public void validateSyllabusMonHocGocTaiLieu(SyllabusMonHocGocTaiLieuRequest request, Long id) {
+    public void validateSyllabusMonHocMauTaiLieu(SyllabusMonHocMauTaiLieuRequest request, Long id) {
         notNull(request, "Dữ liệu gán tài liệu vào syllabus gốc không hợp lệ");
 
-        Long syllabusGocId = requireId(request.getSyllabusMonHocGocId(), "syllabusMonHocGocId");
-        Long taiLieuGocId = requireId(request.getTaiLieuGocId(), "taiLieuGocId");
+        Long syllabusMauId = requireId(request.getSyllabusMonHocMauId(), "syllabusMonHocMauId");
+        Long taiLieuMauId = requireId(request.getTaiLieuMauId(), "taiLieuMauId");
 
-        requireExists(syllabusMonHocGocRepository, syllabusGocId, "Syllabus môn học gốc");
-        requireExists(taiLieuGocRepository, taiLieuGocId, "Tài liệu gốc");
+        requireExists(syllabusMonHocMauRepository, syllabusMauId, "Syllabus môn học gốc");
+        requireExists(taiLieuMauRepository, taiLieuMauId, "Tài liệu gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự tài liệu trong syllabus gốc");
 
-        if (id == null && syllabusMonHocGocTaiLieuRepository.existsBySyllabusMonHocGocIdAndTaiLieuGocId(
-                syllabusGocId,
-                taiLieuGocId
+        if (id == null && syllabusMonHocMauTaiLieuRepository.existsBySyllabusMonHocMauIdAndTaiLieuMauId(
+                syllabusMauId,
+                taiLieuMauId
         )) {
             throw new DuplicateResourceException("Tài liệu gốc đã được gán cho syllabus gốc này");
         }
 
-        if (id != null && syllabusMonHocGocTaiLieuRepository.existsBySyllabusMonHocGocIdAndTaiLieuGocIdAndIdNot(
-                syllabusGocId,
-                taiLieuGocId,
+        if (id != null && syllabusMonHocMauTaiLieuRepository.existsBySyllabusMonHocMauIdAndTaiLieuMauIdAndIdNot(
+                syllabusMauId,
+                taiLieuMauId,
                 id
         )) {
             throw new DuplicateResourceException("Tài liệu gốc đã được gán cho syllabus gốc này");
         }
 
         if (request.getThuTu() != null) {
-            if (id == null && syllabusMonHocGocTaiLieuRepository.existsBySyllabusMonHocGocIdAndThuTu(
-                    syllabusGocId,
+            if (id == null && syllabusMonHocMauTaiLieuRepository.existsBySyllabusMonHocMauIdAndThuTu(
+                    syllabusMauId,
                     request.getThuTu()
             )) {
                 throw new DuplicateResourceException("Thứ tự tài liệu đã tồn tại trong syllabus gốc");
             }
 
-            if (id != null && syllabusMonHocGocTaiLieuRepository.existsBySyllabusMonHocGocIdAndThuTuAndIdNot(
-                    syllabusGocId,
+            if (id != null && syllabusMonHocMauTaiLieuRepository.existsBySyllabusMonHocMauIdAndThuTuAndIdNot(
+                    syllabusMauId,
                     request.getThuTu(),
                     id
             )) {
@@ -868,10 +867,10 @@ public class ChuongTrinhNghiepVuValidator {
 
         requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
 
-        if (request.getSyllabusChuongTrinhGocId() != null) {
+        if (request.getSyllabusChuongTrinhMauId() != null) {
             requireExists(
-                    syllabusChuongTrinhGocRepository,
-                    request.getSyllabusChuongTrinhGocId(),
+                    syllabusChuongTrinhMauRepository,
+                    request.getSyllabusChuongTrinhMauId(),
                     "Syllabus chương trình gốc"
             );
         }
@@ -884,14 +883,14 @@ public class ChuongTrinhNghiepVuValidator {
             throw new DuplicateResourceException("Phiên bản chương trình này đã có syllabus chương trình");
         }
 
-        if (request.getSyllabusChuongTrinhGocId() != null) {
-            Long gocId = request.getSyllabusChuongTrinhGocId();
+        if (request.getSyllabusChuongTrinhMauId() != null) {
+            Long MauId = request.getSyllabusChuongTrinhMauId();
 
-            if (id == null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocId(versionId, gocId)) {
+            if (id == null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionIdAndSyllabusChuongTrinhMauId(versionId, MauId)) {
                 throw new DuplicateResourceException("Syllabus chương trình gốc đã được áp dụng cho version này");
             }
 
-            if (id != null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionIdAndSyllabusChuongTrinhGocIdAndIdNot(versionId, gocId, id)) {
+            if (id != null && syllabusChuongTrinhRepository.existsByChuongTrinhVersionIdAndSyllabusChuongTrinhMauIdAndIdNot(versionId, MauId, id)) {
                 throw new DuplicateResourceException("Syllabus chương trình gốc đã được áp dụng cho version này");
             }
         }
@@ -994,7 +993,7 @@ public class ChuongTrinhNghiepVuValidator {
     public void validateQuyDoiDiemMau(QuyDoiDiemMauRequest request, Long id) {
         notNull(request, "Dữ liệu quy đổi điểm mẫu không hợp lệ");
 
-        requireId(request.getSyllabusMonHocGocId(), "syllabusMonHocGocId");
+        requireId(request.getSyllabusMonHocMauId(), "syllabusMonHocMauId");
         trimRequired(request.getMa(), "Mã quy đổi điểm mẫu");
         trimRequired(request.getTen(), "Tên quy đổi điểm mẫu");
 
@@ -1059,62 +1058,98 @@ public class ChuongTrinhNghiepVuValidator {
     public void validateMucTieuChuongTrinh(MucTieuChuongTrinhRequest request, Long id) {
         notNull(request, "Dữ liệu mục tiêu chương trình không hợp lệ");
 
-        Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
+        Long syllabusChuongTrinhId = requireId(request.getSyllabusChuongTrinhId(), "syllabusChuongTrinhId");
 
         trimRequired(request.getLoai(), "Loại mục tiêu");
         trimRequired(request.getNoiDung(), "Nội dung mục tiêu");
 
-        requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
-        validateThuTuTheoVersion(mucTieuChuongTrinhRepository, versionId, request.getThuTu(), id, "mục tiêu chương trình");
+        requireExists(syllabusChuongTrinhRepository, syllabusChuongTrinhId, "Syllabus chương trình");
+        positiveOrZeroInt(request.getThuTu(), "Thứ tự mục tiêu chương trình");
+
+        if (request.getThuTu() != null) {
+            if (id == null && mucTieuChuongTrinhRepository.existsBySyllabusChuongTrinhIdAndThuTu(syllabusChuongTrinhId, request.getThuTu())) {
+                throw new DuplicateResourceException("Thứ tự mục tiêu chương trình đã tồn tại trong syllabus chương trình");
+            }
+            if (id != null && mucTieuChuongTrinhRepository.existsBySyllabusChuongTrinhIdAndThuTuAndIdNot(syllabusChuongTrinhId, request.getThuTu(), id)) {
+                throw new DuplicateResourceException("Thứ tự mục tiêu chương trình đã tồn tại trong syllabus chương trình");
+            }
+        }
     }
 
     public void validateNangLucDauRa(NangLucDauRaRequest request, Long id) {
         notNull(request, "Dữ liệu năng lực đầu ra không hợp lệ");
 
-        Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
+        Long syllabusChuongTrinhId = requireId(request.getSyllabusChuongTrinhId(), "syllabusChuongTrinhId");
         String ma = trimRequired(request.getMa(), "Mã năng lực đầu ra");
 
         trimRequired(request.getLoai(), "Loại năng lực đầu ra");
         trimRequired(request.getNoiDung(), "Nội dung năng lực đầu ra");
 
-        requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
+        requireExists(syllabusChuongTrinhRepository, syllabusChuongTrinhId, "Syllabus chương trình");
 
-        if (id == null && nangLucDauRaRepository.existsByChuongTrinhVersionIdAndMa(versionId, ma)) {
-            throw new DuplicateResourceException("Mã năng lực đầu ra đã tồn tại trong version: " + ma);
+        if (id == null && nangLucDauRaRepository.existsBySyllabusChuongTrinhIdAndMa(syllabusChuongTrinhId, ma)) {
+            throw new DuplicateResourceException("Mã năng lực đầu ra đã tồn tại trong syllabus chương trình: " + ma);
         }
 
-        if (id != null && nangLucDauRaRepository.existsByChuongTrinhVersionIdAndMaAndIdNot(versionId, ma, id)) {
-            throw new DuplicateResourceException("Mã năng lực đầu ra đã tồn tại trong version: " + ma);
+        if (id != null && nangLucDauRaRepository.existsBySyllabusChuongTrinhIdAndMaAndIdNot(syllabusChuongTrinhId, ma, id)) {
+            throw new DuplicateResourceException("Mã năng lực đầu ra đã tồn tại trong syllabus chương trình: " + ma);
         }
 
-        validateThuTuTheoVersion(nangLucDauRaRepository, versionId, request.getThuTu(), id, "năng lực đầu ra");
+        positiveOrZeroInt(request.getThuTu(), "Thứ tự năng lực đầu ra");
+
+        if (request.getThuTu() != null) {
+            if (id == null && nangLucDauRaRepository.existsBySyllabusChuongTrinhIdAndThuTu(syllabusChuongTrinhId, request.getThuTu())) {
+                throw new DuplicateResourceException("Thứ tự năng lực đầu ra đã tồn tại trong syllabus chương trình");
+            }
+            if (id != null && nangLucDauRaRepository.existsBySyllabusChuongTrinhIdAndThuTuAndIdNot(syllabusChuongTrinhId, request.getThuTu(), id)) {
+                throw new DuplicateResourceException("Thứ tự năng lực đầu ra đã tồn tại trong syllabus chương trình");
+            }
+        }
     }
 
     public void validateViTriViecLam(ViTriViecLamRequest request, Long id) {
         notNull(request, "Dữ liệu vị trí việc làm không hợp lệ");
 
-        Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
+        Long syllabusChuongTrinhId = requireId(request.getSyllabusChuongTrinhId(), "syllabusChuongTrinhId");
 
         trimRequired(request.getTen(), "Tên vị trí việc làm");
-        requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
+        requireExists(syllabusChuongTrinhRepository, syllabusChuongTrinhId, "Syllabus chương trình");
+        positiveOrZeroInt(request.getThuTu(), "Thứ tự vị trí việc làm");
 
-        validateThuTuTheoVersion(viTriViecLamRepository, versionId, request.getThuTu(), id, "vị trí việc làm");
+        if (request.getThuTu() != null) {
+            if (id == null && viTriViecLamRepository.existsBySyllabusChuongTrinhIdAndThuTu(syllabusChuongTrinhId, request.getThuTu())) {
+                throw new DuplicateResourceException("Thứ tự vị trí việc làm đã tồn tại trong syllabus chương trình");
+            }
+            if (id != null && viTriViecLamRepository.existsBySyllabusChuongTrinhIdAndThuTuAndIdNot(syllabusChuongTrinhId, request.getThuTu(), id)) {
+                throw new DuplicateResourceException("Thứ tự vị trí việc làm đã tồn tại trong syllabus chương trình");
+            }
+        }
     }
 
     public void validateDieuKienTotNghiep(DieuKienTotNghiepRequest request, Long id) {
         notNull(request, "Dữ liệu điều kiện tốt nghiệp không hợp lệ");
 
-        Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
+        Long syllabusChuongTrinhId = requireId(request.getSyllabusChuongTrinhId(), "syllabusChuongTrinhId");
 
         trimRequired(request.getNoiDung(), "Nội dung điều kiện tốt nghiệp");
-        requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
+        requireExists(syllabusChuongTrinhRepository, syllabusChuongTrinhId, "Syllabus chương trình");
+        positiveOrZeroInt(request.getThuTu(), "Thứ tự điều kiện tốt nghiệp");
 
-        validateThuTuTheoVersion(dieuKienTotNghiepRepository, versionId, request.getThuTu(), id, "điều kiện tốt nghiệp");
+        if (request.getThuTu() != null) {
+            if (id == null && dieuKienTotNghiepRepository.existsBySyllabusChuongTrinhIdAndThuTu(syllabusChuongTrinhId, request.getThuTu())) {
+                throw new DuplicateResourceException("Thứ tự điều kiện tốt nghiệp đã tồn tại trong syllabus chương trình");
+            }
+            if (id != null && dieuKienTotNghiepRepository.existsBySyllabusChuongTrinhIdAndThuTuAndIdNot(syllabusChuongTrinhId, request.getThuTu(), id)) {
+                throw new DuplicateResourceException("Thứ tự điều kiện tốt nghiệp đã tồn tại trong syllabus chương trình");
+            }
+        }
     }
 
-    public void validateMucTieuChuongTrinhGoc(MucTieuChuongTrinhGocRequest request, Long id) {
+    public void validateMucTieuChuongTrinhMau(MucTieuChuongTrinhMauRequest request, Long id) {
         notNull(request, "Dữ liệu mục tiêu gốc không hợp lệ");
 
+        Long syllabusMauId = requireId(request.getSyllabusChuongTrinhMauId(), "syllabusChuongTrinhMauId");
+        requireExists(syllabusChuongTrinhMauRepository, syllabusMauId, "Syllabus chương trình mẫu");
         String ma = trimRequired(request.getMa(), "Mã mục tiêu gốc");
 
         if (request.getLoai() == null) {
@@ -1122,15 +1157,19 @@ public class ChuongTrinhNghiepVuValidator {
         }
 
         trimRequired(request.getNoiDung(), "Nội dung mục tiêu gốc");
-        checkMaGoc(mucTieuChuongTrinhGocRepository, ma, id, "Mã mục tiêu gốc");
+        if (id == null && mucTieuChuongTrinhMauRepository.existsBySyllabusChuongTrinhMauIdAndMa(syllabusMauId, ma)) {
+            throw new DuplicateResourceException("Mã mục tiêu gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
+        }
+        if (id != null && mucTieuChuongTrinhMauRepository.existsBySyllabusChuongTrinhMauIdAndMaAndIdNot(syllabusMauId, ma, id)) {
+            throw new DuplicateResourceException("Mã mục tiêu gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
+        }
     }
 
-    public void validateNangLucDauRaGoc(NangLucDauRaGocRequest request, Long id) {
+    public void validateNangLucDauRaMau(NangLucDauRaMauRequest request, Long id) {
         notNull(request, "Dữ liệu năng lực gốc không hợp lệ");
 
-        Long chuongTrinhId = requireId(request.getChuongTrinhId(), "chuongTrinhId");
-        requireExists(chuongTrinhRepository, chuongTrinhId, "Chương trình");
-
+        Long syllabusMauId = requireId(request.getSyllabusChuongTrinhMauId(), "syllabusChuongTrinhMauId");
+        requireExists(syllabusChuongTrinhMauRepository, syllabusMauId, "Syllabus chương trình mẫu");
         String ma = trimRequired(request.getMa(), "Mã năng lực gốc");
 
         if (request.getLoai() == null) {
@@ -1139,57 +1178,63 @@ public class ChuongTrinhNghiepVuValidator {
 
         trimRequired(request.getNoiDung(), "Nội dung năng lực gốc");
 
-        if (id == null && nangLucDauRaGocRepository.existsByChuongTrinhIdAndMa(chuongTrinhId, ma)) {
-            throw new DuplicateResourceException("Mã năng lực gốc đã tồn tại trong chương trình này: " + ma);
+        if (id == null && nangLucDauRaMauRepository.existsBySyllabusChuongTrinhMauIdAndMa(syllabusMauId, ma)) {
+            throw new DuplicateResourceException("Mã năng lực gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
         }
 
-        if (id != null && nangLucDauRaGocRepository.existsByChuongTrinhIdAndMaAndIdNot(chuongTrinhId, ma, id)) {
-            throw new DuplicateResourceException("Mã năng lực gốc đã tồn tại trong chương trình này: " + ma);
+        if (id != null && nangLucDauRaMauRepository.existsBySyllabusChuongTrinhMauIdAndMaAndIdNot(syllabusMauId, ma, id)) {
+            throw new DuplicateResourceException("Mã năng lực gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
         }
     }
 
-    public void validateViTriViecLamGoc(ViTriViecLamGocRequest request, Long id) {
+    public void validateViTriViecLamMau(ViTriViecLamMauRequest request, Long id) {
         notNull(request, "Dữ liệu vị trí việc làm gốc không hợp lệ");
 
-        Long chuongTrinhId = requireId(request.getChuongTrinhId(), "chuongTrinhId");
-        requireExists(chuongTrinhRepository, chuongTrinhId, "Chương trình");
-
+        Long syllabusMauId = requireId(request.getSyllabusChuongTrinhMauId(), "syllabusChuongTrinhMauId");
+        requireExists(syllabusChuongTrinhMauRepository, syllabusMauId, "Syllabus chương trình mẫu");
         String ma = trimRequired(request.getMa(), "Mã vị trí việc làm gốc");
 
         trimRequired(request.getTen(), "Tên vị trí việc làm gốc");
 
-        if (id == null && viTriViecLamGocRepository.existsByChuongTrinhIdAndMa(chuongTrinhId, ma)) {
-            throw new DuplicateResourceException("Mã vị trí việc làm gốc đã tồn tại trong chương trình này: " + ma);
+        if (id == null && viTriViecLamMauRepository.existsBySyllabusChuongTrinhMauIdAndMa(syllabusMauId, ma)) {
+            throw new DuplicateResourceException("Mã vị trí việc làm gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
         }
 
-        if (id != null && viTriViecLamGocRepository.existsByChuongTrinhIdAndMaAndIdNot(chuongTrinhId, ma, id)) {
-            throw new DuplicateResourceException("Mã vị trí việc làm gốc đã tồn tại trong chương trình này: " + ma);
+        if (id != null && viTriViecLamMauRepository.existsBySyllabusChuongTrinhMauIdAndMaAndIdNot(syllabusMauId, ma, id)) {
+            throw new DuplicateResourceException("Mã vị trí việc làm gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
         }
     }
 
-    public void validateDieuKienTotNghiepGoc(DieuKienTotNghiepGocRequest request, Long id) {
+    public void validateDieuKienTotNghiepMau(DieuKienTotNghiepMauRequest request, Long id) {
         notNull(request, "Dữ liệu điều kiện tốt nghiệp gốc không hợp lệ");
 
+        Long syllabusMauId = requireId(request.getSyllabusChuongTrinhMauId(), "syllabusChuongTrinhMauId");
+        requireExists(syllabusChuongTrinhMauRepository, syllabusMauId, "Syllabus chương trình mẫu");
         String ma = trimRequired(request.getMa(), "Mã điều kiện tốt nghiệp gốc");
 
         trimRequired(request.getNoiDung(), "Nội dung điều kiện tốt nghiệp gốc");
-        checkMaGoc(dieuKienTotNghiepGocRepository, ma, id, "Mã điều kiện tốt nghiệp gốc");
+        if (id == null && dieuKienTotNghiepMauRepository.existsBySyllabusChuongTrinhMauIdAndMa(syllabusMauId, ma)) {
+            throw new DuplicateResourceException("Mã điều kiện tốt nghiệp gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
+        }
+        if (id != null && dieuKienTotNghiepMauRepository.existsBySyllabusChuongTrinhMauIdAndMaAndIdNot(syllabusMauId, ma, id)) {
+            throw new DuplicateResourceException("Mã điều kiện tốt nghiệp gốc đã tồn tại trong syllabus chương trình mẫu: " + ma);
+        }
     }
 
     public void validateChuongTrinhVersionMucTieu(ChuongTrinhVersionMucTieuRequest request, Long id) {
         Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
-        Long gocId = requireId(request.getMucTieuGocId(), "mucTieuGocId");
+        Long MauId = requireId(request.getMucTieuMauId(), "mucTieuMauId");
 
         requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
-        requireExists(mucTieuChuongTrinhGocRepository, gocId, "Mục tiêu gốc");
+        requireExists(mucTieuChuongTrinhMauRepository, MauId, "Mục tiêu gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự mục tiêu gốc trong version");
 
-        if (id == null && chuongTrinhVersionMucTieuRepository.existsByChuongTrinhVersionIdAndMucTieuGocId(versionId, gocId)) {
+        if (id == null && chuongTrinhVersionMucTieuRepository.existsByChuongTrinhVersionIdAndMucTieuMauId(versionId, MauId)) {
             throw new DuplicateResourceException("Mục tiêu gốc đã được gán cho version này");
         }
 
-        if (id != null && chuongTrinhVersionMucTieuRepository.existsByChuongTrinhVersionIdAndMucTieuGocIdAndIdNot(versionId, gocId, id)) {
+        if (id != null && chuongTrinhVersionMucTieuRepository.existsByChuongTrinhVersionIdAndMucTieuMauIdAndIdNot(versionId, MauId, id)) {
             throw new DuplicateResourceException("Mục tiêu gốc đã được gán cho version này");
         }
     }
@@ -1198,70 +1243,54 @@ public class ChuongTrinhNghiepVuValidator {
         notNull(request, "Dữ liệu gán năng lực gốc vào version không hợp lệ");
 
         Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
-        Long gocId = requireId(request.getNangLucGocId(), "nangLucGocId");
+        Long MauId = requireId(request.getNangLucMauId(), "nangLucMauId");
 
-        ChuongTrinhVersion version = chuongTrinhVersionRepository.findById(versionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Phiên bản chương trình không tồn tại: " + versionId));
-
-        NangLucDauRaGoc nangLucGoc = nangLucDauRaGocRepository.findById(gocId)
-                .orElseThrow(() -> new ResourceNotFoundException("Năng lực gốc không tồn tại: " + gocId));
-
-        if (version.getChuongTrinhId() == null || nangLucGoc.getChuongTrinhId() == null
-                || !version.getChuongTrinhId().equals(nangLucGoc.getChuongTrinhId())) {
-            throw new BadRequestException("Không được gán năng lực gốc của chương trình khác vào version này");
-        }
+        requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
+        requireExists(nangLucDauRaMauRepository, MauId, "Năng lực gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự năng lực gốc trong version");
 
-        if (id == null && chuongTrinhVersionNangLucRepository.existsByChuongTrinhVersionIdAndNangLucGocId(versionId, gocId)) {
+        if (id == null && chuongTrinhVersionNangLucRepository.existsByChuongTrinhVersionIdAndNangLucMauId(versionId, MauId)) {
             throw new DuplicateResourceException("Năng lực gốc đã được gán cho version này");
         }
 
-        if (id != null && chuongTrinhVersionNangLucRepository.existsByChuongTrinhVersionIdAndNangLucGocIdAndIdNot(versionId, gocId, id)) {
+        if (id != null && chuongTrinhVersionNangLucRepository.existsByChuongTrinhVersionIdAndNangLucMauIdAndIdNot(versionId, MauId, id)) {
             throw new DuplicateResourceException("Năng lực gốc đã được gán cho version này");
         }
     }
 
     public void validateChuongTrinhVersionViTriViecLam(ChuongTrinhVersionViTriViecLamRequest request, Long id) {
         Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
-        Long gocId = requireId(request.getViTriGocId(), "viTriGocId");
+        Long MauId = requireId(request.getViTriMauId(), "viTriMauId");
 
-        ChuongTrinhVersion version = chuongTrinhVersionRepository.findById(versionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Phiên bản chương trình không tồn tại: " + versionId));
-
-        ViTriViecLamGoc viTriGoc = viTriViecLamGocRepository.findById(gocId)
-                .orElseThrow(() -> new ResourceNotFoundException("Vị trí việc làm gốc không tồn tại: " + gocId));
-
-        if (version.getChuongTrinhId() == null || viTriGoc.getChuongTrinhId() == null
-                || !version.getChuongTrinhId().equals(viTriGoc.getChuongTrinhId())) {
-            throw new BadRequestException("Không được gán vị trí việc làm gốc của chương trình khác vào version này");
-        }
+        requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
+        requireExists(viTriViecLamMauRepository, MauId, "Vị trí việc làm gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự vị trí việc làm gốc trong version");
 
-        if (id == null && chuongTrinhVersionViTriViecLamRepository.existsByChuongTrinhVersionIdAndViTriGocId(versionId, gocId)) {
+        if (id == null && chuongTrinhVersionViTriViecLamRepository.existsByChuongTrinhVersionIdAndViTriMauId(versionId, MauId)) {
             throw new DuplicateResourceException("Vị trí việc làm gốc đã được gán cho version này");
         }
 
-        if (id != null && chuongTrinhVersionViTriViecLamRepository.existsByChuongTrinhVersionIdAndViTriGocIdAndIdNot(versionId, gocId, id)) {
+        if (id != null && chuongTrinhVersionViTriViecLamRepository.existsByChuongTrinhVersionIdAndViTriMauIdAndIdNot(versionId, MauId, id)) {
             throw new DuplicateResourceException("Vị trí việc làm gốc đã được gán cho version này");
         }
     }
 
     public void validateChuongTrinhVersionDieuKienTotNghiep(ChuongTrinhVersionDieuKienTotNghiepRequest request, Long id) {
         Long versionId = requireId(request.getChuongTrinhVersionId(), "chuongTrinhVersionId");
-        Long gocId = requireId(request.getDieuKienGocId(), "dieuKienGocId");
+        Long MauId = requireId(request.getDieuKienMauId(), "dieuKienMauId");
 
         requireExists(chuongTrinhVersionRepository, versionId, "Phiên bản chương trình");
-        requireExists(dieuKienTotNghiepGocRepository, gocId, "Điều kiện tốt nghiệp gốc");
+        requireExists(dieuKienTotNghiepMauRepository, MauId, "Điều kiện tốt nghiệp gốc");
 
         positiveOrZeroInt(request.getThuTu(), "Thứ tự điều kiện tốt nghiệp gốc trong version");
 
-        if (id == null && chuongTrinhVersionDieuKienTotNghiepRepository.existsByChuongTrinhVersionIdAndDieuKienGocId(versionId, gocId)) {
+        if (id == null && chuongTrinhVersionDieuKienTotNghiepRepository.existsByChuongTrinhVersionIdAndDieuKienMauId(versionId, MauId)) {
             throw new DuplicateResourceException("Điều kiện tốt nghiệp gốc đã được gán cho version này");
         }
 
-        if (id != null && chuongTrinhVersionDieuKienTotNghiepRepository.existsByChuongTrinhVersionIdAndDieuKienGocIdAndIdNot(versionId, gocId, id)) {
+        if (id != null && chuongTrinhVersionDieuKienTotNghiepRepository.existsByChuongTrinhVersionIdAndDieuKienMauIdAndIdNot(versionId, MauId, id)) {
             throw new DuplicateResourceException("Điều kiện tốt nghiệp gốc đã được gán cho version này");
         }
     }
@@ -1285,42 +1314,12 @@ public class ChuongTrinhNghiepVuValidator {
         }
     }
 
-    private void validateThuTuTheoVersion(Object repository, Long versionId, Integer thuTu, Long id, String tenBang) {
-        positiveOrZeroInt(thuTu, "Thứ tự " + tenBang);
-
-        if (thuTu == null) return;
-
+    private void checkMaMau(Object repository, String ma, Long id, String label) {
         boolean exists = false;
 
-        if (repository instanceof MucTieuChuongTrinhRepository repo) {
-            exists = id == null
-                    ? repo.existsByChuongTrinhVersionIdAndThuTu(versionId, thuTu)
-                    : repo.existsByChuongTrinhVersionIdAndThuTuAndIdNot(versionId, thuTu, id);
-        } else if (repository instanceof NangLucDauRaRepository repo) {
-            exists = id == null
-                    ? repo.existsByChuongTrinhVersionIdAndThuTu(versionId, thuTu)
-                    : repo.existsByChuongTrinhVersionIdAndThuTuAndIdNot(versionId, thuTu, id);
-        } else if (repository instanceof ViTriViecLamRepository repo) {
-            exists = id == null
-                    ? repo.existsByChuongTrinhVersionIdAndThuTu(versionId, thuTu)
-                    : repo.existsByChuongTrinhVersionIdAndThuTuAndIdNot(versionId, thuTu, id);
-        } else if (repository instanceof DieuKienTotNghiepRepository repo) {
-            exists = id == null
-                    ? repo.existsByChuongTrinhVersionIdAndThuTu(versionId, thuTu)
-                    : repo.existsByChuongTrinhVersionIdAndThuTuAndIdNot(versionId, thuTu, id);
-        }
-
-        if (exists) {
-            throw new DuplicateResourceException("Thứ tự " + tenBang + " đã tồn tại trong version: " + thuTu);
-        }
-    }
-
-    private void checkMaGoc(Object repository, String ma, Long id, String label) {
-        boolean exists = false;
-
-        if (repository instanceof MucTieuChuongTrinhGocRepository repo) {
+        if (repository instanceof MucTieuChuongTrinhMauRepository repo) {
             exists = id == null ? repo.existsByMa(ma) : repo.existsByMaAndIdNot(ma, id);
-        } else if (repository instanceof DieuKienTotNghiepGocRepository repo) {
+        } else if (repository instanceof DieuKienTotNghiepMauRepository repo) {
             exists = id == null ? repo.existsByMa(ma) : repo.existsByMaAndIdNot(ma, id);
         }
 

@@ -13,17 +13,17 @@ import jakarta.persistence.*;
 @Builder
 @Entity
 @Table(name = "syllabus_mon_hoc_mau_dieu_kien")
-public class SyllabusMonHocGocDieuKien {
+public class SyllabusMonHocMauDieuKien {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "syllabus_mon_hoc_goc_id", nullable = false)
-    private Long syllabusMonHocGocId;
+    @Column(name = "syllabus_mon_hoc_mau_id", nullable = false)
+    private Long syllabusMonHocMauId;
 
-    @Column(name = "dieu_kien_goc_id", nullable = false)
-    private Long dieuKienGocId;
+    @Column(name = "dieu_kien_mau_id", nullable = false)
+    private Long dieuKienMauId;
 
     @Column(name = "thu_tu")
     private Integer thuTu;

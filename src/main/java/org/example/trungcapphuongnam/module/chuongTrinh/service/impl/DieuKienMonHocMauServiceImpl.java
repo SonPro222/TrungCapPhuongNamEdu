@@ -52,7 +52,7 @@ public class DieuKienMonHocMauServiceImpl implements DieuKienMonHocMauService {
 
     @Override
     public DieuKienMonHocMauResponse create(DieuKienMonHocMauRequest request) {
-        validator.validateDieuKienMonHocmau(request, null);
+        validator.validateDieuKienMonHocMau(request, null);
         DieuKienMonHocMau entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
     }
@@ -62,7 +62,7 @@ public class DieuKienMonHocMauServiceImpl implements DieuKienMonHocMauService {
         DieuKienMonHocMau entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Điều kiện môn học gốc không tồn tại: " + id));
 
-        validator.validateDieuKienMonHocmau(request, id);
+        validator.validateDieuKienMonHocMau(request, id);
 
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
@@ -74,7 +74,7 @@ public class DieuKienMonHocMauServiceImpl implements DieuKienMonHocMauService {
             throw new ResourceNotFoundException("Điều kiện môn học gốc không tồn tại: " + id);
         }
 
-        xoaChuongTrinhCascadeService.xoaTheoDieuKienMonHocmauId(id);
+        xoaChuongTrinhCascadeService.xoaTheoDieuKienMonHocMauId(id);
 
         repository.deleteById(id);
     }

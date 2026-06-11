@@ -27,7 +27,7 @@ public class NhomKienThucServiceImpl implements NhomKienThucService {
     @Transactional(readOnly = true)
     public Page<NhomKienThucResponse> findAll(
             Long chuongTrinhVersionId,
-            Long nhomKienThucGocId,
+            Long nhomKienThucMauId,
             String loaiNhom,
             String keyword,
             Pageable pageable
@@ -35,7 +35,7 @@ public class NhomKienThucServiceImpl implements NhomKienThucService {
         return repository.findAll(
                 LocJpa.<NhomKienThuc>empty()
                         .and(LocJpa.eq("chuongTrinhVersionId", chuongTrinhVersionId))
-                        .and(LocJpa.eq("nhomKienThucGocId", nhomKienThucGocId))
+                        .and(LocJpa.eq("nhomKienThucMauId", nhomKienThucMauId))
                         .and(LocJpa.like("loaiNhom", loaiNhom))
                         .and(LocJpa.keyword(keyword, "ma", "ten", "loaiNhom", "moTa")),
                 pageable

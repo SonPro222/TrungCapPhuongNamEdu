@@ -8,6 +8,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class KetQuaLopHocPhanMapper {
 
+    public KetQuaLopHocPhan toDefaultEntity(Long sinhVienId, Long lopHocPhanId) {
+        return KetQuaLopHocPhan.builder()
+                .sinhVienId(sinhVienId)
+                .lopHocPhanId(lopHocPhanId)
+                .trangThai("nhap")
+                .build();
+    }
+
     public KetQuaLopHocPhan toEntity(KetQuaLopHocPhanRequest request) {
         if (request == null) return null;
         return KetQuaLopHocPhan.builder()

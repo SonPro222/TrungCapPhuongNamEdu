@@ -6,33 +6,29 @@ import org.example.trungcapphuongnam.module.giangDay.dto.request.LichHocRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocPreviewItemResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.SinhLichHocPreviewResponse;
-import org.example.trungcapphuongnam.module.giangDay.entity.DiemDanh;
 import org.example.trungcapphuongnam.module.giangDay.entity.LichHoc;
-import org.example.trungcapphuongnam.module.giangDay.entity.SinhVienLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiDiemDanh;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLichHoc;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiSinhVienLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.mapper.LichHocMapper;
 import org.example.trungcapphuongnam.module.giangDay.repository.DiemDanhRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LichHocRepository;
-import org.example.trungcapphuongnam.module.giangDay.repository.SinhVienLopHocPhanRepository;
 import org.example.trungcapphuongnam.module.giangDay.validator.LichHocValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class LichHocTuDongTransactionServiceImpl {
+public class LichHocTuDongTransactionService {
 
     private final LichHocRepository lichHocRepository;
     private final LichHocMapper lichHocMapper;
     private final LichHocValidator lichHocValidator;
-    private final SinhVienLopHocPhanRepository sinhVienLopHocPhanRepository;
     private final DiemDanhRepository diemDanhRepository;
 
     /**
@@ -54,22 +50,10 @@ public class LichHocTuDongTransactionServiceImpl {
 
         List<LichHocRequest> requests = new ArrayList<>();
         for (LichHocPreviewItemResponse item : preview.getItems()) {
-            if (item == null) {
-                continue;
+            LichHocRequest request = lichHocMapper.toRequestFromPreviewItem(lopHocPhanId, item);
+            if (request != null) {
+                requests.add(request);
             }
-            LichHocRequest request = LichHocRequest.builder()
-                    .lopHocPhanId(lopHocPhanId)
-                    .giaoVienId(item.getGiaoVienId())
-                    .phongHocId(item.getPhongHocId())
-                    .caHocId(item.getCaHocId())
-                    .caHocIds(item.getCaHocId() == null ? null : List.of(item.getCaHocId()))
-                    .thuTrongTuan(tinhThuTrongTuanLichHoc(item.getNgayHoc()))
-                    .ngayHoc(item.getNgayHoc())
-                    .noiDungBuoiHoc(item.getNoiDungBuoiHoc())
-                    .trangThai(TrangThaiLichHoc.du_kien)
-                    .ghiChu(null)
-                    .build();
-            requests.add(request);
         }
 
         if (requests.isEmpty()) {
@@ -93,54 +77,27 @@ public class LichHocTuDongTransactionServiceImpl {
                 .toList();
     }
 
-    private Integer tinhThuTrongTuanLichHoc(LocalDate ngayHoc) {
-        if (ngayHoc == null) {
-            return null;
-        }
-        int dayOfWeek = ngayHoc.getDayOfWeek().getValue();
-        return dayOfWeek == 7 ? 8 : dayOfWeek + 1;
-    }
-
     private void taoDiemDanhChoCacBuoiHoc(List<LichHoc> lichHocs) {
         if (lichHocs == null || lichHocs.isEmpty()) {
             return;
         }
 
-        List<DiemDanh> diemDanhs = new ArrayList<>();
-        for (LichHoc lichHoc : lichHocs) {
-            if (lichHoc == null || lichHoc.getId() == null || lichHoc.getTrangThai() == TrangThaiLichHoc.nghi) {
-                continue;
-            }
+        List<String> trangThaiSinhVien = List.of(
+                TrangThaiSinhVienLopHocPhan.da_dang_ky.name(),
+                TrangThaiSinhVienLopHocPhan.dang_hoc.name(),
+                TrangThaiSinhVienLopHocPhan.hoc_lai.name()
+        );
 
-            List<SinhVienLopHocPhan> sinhViens = sinhVienLopHocPhanRepository
-                    .findByLopHocPhanIdAndTrangThaiInOrderByIdDesc(
-                            lichHoc.getLopHocPhanId(),
-                            List.of(
-                                    TrangThaiSinhVienLopHocPhan.da_dang_ky,
-                                    TrangThaiSinhVienLopHocPhan.dang_hoc,
-                                    TrangThaiSinhVienLopHocPhan.hoc_lai
-                            )
-                    );
-
-            for (SinhVienLopHocPhan sinhVien : sinhViens) {
-                if (sinhVien.getSinhVienId() == null) {
-                    continue;
-                }
-                if (diemDanhRepository.existsByLichHocIdAndSinhVienId(lichHoc.getId(), sinhVien.getSinhVienId())) {
-                    continue;
-                }
-                diemDanhs.add(DiemDanh.builder()
-                        .lichHocId(lichHoc.getId())
-                        .sinhVienId(sinhVien.getSinhVienId())
-                        .trangThai(TrangThaiDiemDanh.chua_diem_danh)
-                        .thoiGianDiemDanh(null)
-                        .ghiChu(null)
-                        .build());
-            }
-        }
-
-        if (!diemDanhs.isEmpty()) {
-            diemDanhRepository.saveAllAndFlush(diemDanhs);
-        }
+        lichHocs.stream()
+                .filter(Objects::nonNull)
+                .filter(lichHoc -> lichHoc.getId() != null)
+                .filter(lichHoc -> lichHoc.getLopHocPhanId() != null)
+                .filter(lichHoc -> lichHoc.getTrangThai() != TrangThaiLichHoc.nghi)
+                .forEach(lichHoc -> diemDanhRepository.insertMissingDiemDanhForLichHoc(
+                        lichHoc.getId(),
+                        lichHoc.getLopHocPhanId(),
+                        trangThaiSinhVien,
+                        TrangThaiDiemDanh.chua_diem_danh.name()
+                ));
     }
 }

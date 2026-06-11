@@ -1,15 +1,15 @@
 package org.example.trungcapphuongnam.module.daoTao.mapper;
 
 
-import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocRequest;
-import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGocResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyMauRequest;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyMauResponse;
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKyMau;
 import org.springframework.stereotype.Component;
 
 @Component
-public class KhungKyGocMapper {
+public class KhungKyMauMapper {
 
-    public KhungKyMau toEntity(KhungKyGocRequest request) {
+    public KhungKyMau toEntity(KhungKyMauRequest request) {
         if (request == null) {
             return null;
         }
@@ -22,12 +22,12 @@ public class KhungKyGocMapper {
                 .build();
     }
 
-    public KhungKyGocResponse toResponse(KhungKyMau entity) {
+    public KhungKyMauResponse toResponse(KhungKyMau entity) {
         if (entity == null) {
             return null;
         }
 
-        return KhungKyGocResponse.builder()
+        return KhungKyMauResponse.builder()
                 .id(entity.getId())
                 .maKy(entity.getMaKy())
                 .tenKy(entity.getTenKy())
@@ -38,7 +38,7 @@ public class KhungKyGocMapper {
                 .build();
     }
 
-    public void updateEntity(KhungKyMau entity, KhungKyGocRequest request) {
+    public void updateEntity(KhungKyMau entity, KhungKyMauRequest request) {
         if (entity == null || request == null) {
             return;
         }

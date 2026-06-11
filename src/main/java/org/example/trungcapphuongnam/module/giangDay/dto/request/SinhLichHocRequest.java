@@ -12,8 +12,12 @@ public class SinhLichHocRequest {
     private Long giaoVienId;
     private Long phongHocId;
     private Long caHocId;
+    private List<Long> caHocIds;
     private LocalDate tuNgay;
     private LocalDate denNgay;
     private List<Integer> thuTrongTuan;
     private Boolean tuDongGanNoiDungSyllabus = true;
+    private Boolean tuDongChonPhong = false;
+    private Boolean tuDongChonCa = false;
+    private Integer soPhuongAn = 5;
 }
