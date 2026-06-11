@@ -113,7 +113,7 @@
             class="card-nut"
             @click="chonKy(item)"
           >
-            <span class="card-nut__ten">{{ ten(item, ['tenKy', 'maKy', 'tenKhungKyGoc']) }}</span>
+            <span class="card-nut__ten">{{ ten(item, ['tenKy', 'maKy', 'tenKhungKymau']) }}</span>
             <span v-if="item.thuTu" class="card-nut__phu">Thứ tự: {{ item.thuTu }}</span>
           </button>
         </div>
@@ -152,7 +152,7 @@
             <h3 class="khoi__title">Syllabus môn học áp dụng</h3>
             <p v-if="!chiTiet.syllabus" class="trang-thai">Môn này chưa có syllabus áp dụng.</p>
             <p v-else class="khoi__line">
-              {{ ten(chiTiet.syllabus, ['ten', 'tenSyllabusMonHocGoc', 'maSyllabusMonHocGoc', 'mucTieu']) }}
+              {{ ten(chiTiet.syllabus, ['ten', 'tenSyllabusMonHocmau', 'maSyllabusMonHocmau', 'mucTieu']) }}
             </p>
           </section>
 
@@ -177,7 +177,7 @@
             <ul v-else class="ds">
               <li v-for="(tl, i) in danhSachTaiLieu" :key="tl.id || i" class="ds__item ds__item--row">
                 <span class="ds__tl">
-                  <span class="ds__ten">{{ ten(tl, ['ten', 'tenTaiLieuGoc', 'tenFile', 'duongDan']) }}</span>
+                  <span class="ds__ten">{{ ten(tl, ['ten', 'tenTaiLieumau', 'tenFile', 'duongDan']) }}</span>
                   <span v-if="tl.loaiTaiLieu" class="ds__phu">{{ tl.loaiTaiLieu }}</span>
                 </span>
                 <span class="ds__actions">
@@ -193,8 +193,8 @@
             <h3 class="khoi__title">Điều kiện môn học</h3>
             <ul class="ds">
               <li v-for="(dk, i) in chiTiet.dieuKien" :key="dk.id || i" class="ds__item">
-                <span class="ds__ten">{{ ten(dk, ['tenDieuKienGoc', 'loaiDieuKien', 'noiDung', 'ten']) }}</span>
-                <span v-if="dk.noiDung && dk.noiDung !== ten(dk, ['tenDieuKienGoc', 'loaiDieuKien', 'noiDung', 'ten'])" class="ds__phu">
+                <span class="ds__ten">{{ ten(dk, ['tenDieuKienmau', 'loaiDieuKien', 'noiDung', 'ten']) }}</span>
+                <span v-if="dk.noiDung && dk.noiDung !== ten(dk, ['tenDieuKienmau', 'loaiDieuKien', 'noiDung', 'ten'])" class="ds__phu">
                   {{ dk.noiDung }}
                 </span>
               </li>
@@ -259,7 +259,7 @@ const tenChuongTrinh = computed(() =>
 const tenVersion = computed(() =>
   versionChon.value ? ten(versionChon.value, ['tenVersion', 'maVersion', 'namBanHanh']) : ''
 )
-const tenKy = computed(() => (kyChon.value ? ten(kyChon.value, ['tenKy', 'maKy', 'tenKhungKyGoc']) : ''))
+const tenKy = computed(() => (kyChon.value ? ten(kyChon.value, ['tenKy', 'maKy', 'tenKhungKymau']) : ''))
 const tenMon = computed(() => {
   if (chiTiet.value?.monHoc) return ten(chiTiet.value.monHoc, ['tenMon', 'maMon'])
   if (monChon.value) return ten(monChon.value, ['tenMon', 'tenChuongTrinhMon', 'maMonTrongCt'])

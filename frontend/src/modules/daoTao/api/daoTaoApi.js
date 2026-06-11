@@ -34,12 +34,30 @@ function createCrudApi(baseUrl, path) {
 
 export const daoTaoApi = {
     nganh: createCrudApi(DAO_TAO_URL, 'nganh'),
-    trinhDoDaoTao: createCrudApi(DAO_TAO_URL, 'trinh-do-dao-tao'),
-    loaiChuongTrinh: createCrudApi(DAO_TAO_URL, 'loai-chuong-trinh'),
+    trinhDoDaoTao: {
+        ...createCrudApi(DAO_TAO_URL, 'trinh-do-dao-tao'),
+        getOptions() { return apiClient.get(`${DAO_TAO_URL}/trinh-do-dao-tao/options`) }
+    },
+    loaiChuongTrinh: {
+        ...createCrudApi(DAO_TAO_URL, 'loai-chuong-trinh'),
+        getOptions() { return apiClient.get(`${DAO_TAO_URL}/loai-chuong-trinh/options`) }
+    },
     nganhTrinhDoDaoTao: createCrudApi(DAO_TAO_URL, 'nganh-trinh-do-dao-tao'),
     nganhLoaiChuongTrinh: createCrudApi(DAO_TAO_URL, 'nganh-loai-chuong-trinh'),
-    khungKy: createCrudApi(DAO_TAO_URL, 'khung-ky'),
-    khungKyGoc: createCrudApi(DAO_TAO_URL, 'khung-ky-goc'),
+    nganhHeDaoTao: {
+        ...createCrudApi(DAO_TAO_URL, 'nganh-he-dao-tao'),
+        getOptions(nganhId) { return apiClient.get(`${DAO_TAO_URL}/nganh-he-dao-tao/options`, { params: { nganhId } }) }
+    },
+    khungKy: {
+        ...createCrudApi(DAO_TAO_URL, 'khung-ky'),
+        goiYTheoVersion(versionId) {
+            return apiClient.get(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/goi-y`)
+        },
+        taoDuKyConThieu(versionId) {
+            return apiClient.post(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/tao-du-ky-con-thieu`)
+        }
+    },
+    khungKymau: createCrudApi(DAO_TAO_URL, 'khung-ky-mau'),
 
     chuongTrinh: {
         ...createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh'),
@@ -81,20 +99,26 @@ export const daoTaoApi = {
     viTriViecLam: createCrudApi(CHUONG_TRINH_URL, 'vi-tri-viec-lam'),
     dieuKienTotNghiep: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-tot-nghiep'),
 
-    mucTieuChuongTrinhGoc: createCrudApi(CHUONG_TRINH_URL, 'muc-tieu-chuong-trinh-goc'),
-    nangLucDauRaGoc: createCrudApi(CHUONG_TRINH_URL, 'nang-luc-dau-ra-goc'),
-    viTriViecLamGoc: createCrudApi(CHUONG_TRINH_URL, 'vi-tri-viec-lam-goc'),
-    dieuKienTotNghiepGoc: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-tot-nghiep-goc'),
+    mucTieuChuongTrinhmau: createCrudApi(CHUONG_TRINH_URL, 'muc-tieu-chuong-trinh-mau'),
+    nangLucDauRamau: createCrudApi(CHUONG_TRINH_URL, 'nang-luc-dau-ra-mau'),
+    viTriViecLammau: createCrudApi(CHUONG_TRINH_URL, 'vi-tri-viec-lam-mau'),
+    dieuKienTotNghiepmau: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-tot-nghiep-mau'),
 
     chuongTrinhVersionMucTieu: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version-muc-tieu'),
     chuongTrinhVersionNangLuc: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version-nang-luc'),
     chuongTrinhVersionViTriViecLam: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version-vi-tri-viec-lam'),
     chuongTrinhVersionDieuKienTotNghiep: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version-dieu-kien-tot-nghiep'),
 
-    syllabusChuongTrinh: createCrudApi(CHUONG_TRINH_URL, 'syllabus-chuong-trinh'),
-    syllabusChuongTrinhGoc: createCrudApi(CHUONG_TRINH_URL, 'syllabus-chuong-trinh-goc'),
-    nhomKienThucGoc: createCrudApi(CHUONG_TRINH_URL, 'nhom-kien-thuc-goc'),
-    nhomTuChonGoc: createCrudApi(CHUONG_TRINH_URL, 'nhom-tu-chon-goc'),
+    syllabusChuongTrinh: {
+        ...createCrudApi(CHUONG_TRINH_URL, 'syllabus-chuong-trinh'),
+
+        dongBoTuMau(payload) {
+            return apiClient.post(`${CHUONG_TRINH_URL}/syllabus-chuong-trinh/dong-bo-tu-mau`, payload)
+        }
+    },
+    syllabusChuongTrinhmau: createCrudApi(CHUONG_TRINH_URL, 'syllabus-chuong-trinh-mau'),
+    nhomKienThucmau: createCrudApi(CHUONG_TRINH_URL, 'nhom-kien-thuc-mau'),
+    nhomTuChonmau: createCrudApi(CHUONG_TRINH_URL, 'nhom-tu-chon-mau'),
 
     syllabusMonHoc: {
         ...createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc'),
@@ -103,16 +127,16 @@ export const daoTaoApi = {
             return apiClient.get(`${CHUONG_TRINH_URL}/syllabus-mon-hoc/${id}/xem`)
         }
     },
-    syllabusMonHocGoc: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-goc'),
-    syllabusMonHocGocChuongBai: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-goc-chuong-bai'),
-    syllabusMonHocGocDieuKien: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-goc-dieu-kien'),
-    syllabusMonHocGocTaiLieu: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-goc-tai-lieu'),
+    syllabusMonHocmau: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau'),
+    syllabusMonHocmauChuongBai: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau-chuong-bai'),
+    syllabusMonHocmauDieuKien: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau-dieu-kien'),
+    syllabusMonHocmauTaiLieu: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau-tai-lieu'),
 
     dieuKienMonHoc: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-mon-hoc'),
-    dieuKienMonHocGoc: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-mon-hoc-goc'),
+    dieuKienMonHocmau: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-mon-hoc-mau'),
     syllabusMonHocDieuKien: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-dieu-kien'),
 
-    taiLieuGoc: createCrudApi(CHUONG_TRINH_URL, 'tai-lieu-goc'),
+    taiLieumau: createCrudApi(CHUONG_TRINH_URL, 'tai-lieu-mau'),
     syllabusMonHocTaiLieu: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-tai-lieu'),
     syllabusChuongBai: createCrudApi(CHUONG_TRINH_URL, 'syllabus-chuong-bai'),
     syllabusTaiLieu: createCrudApi(CHUONG_TRINH_URL, 'syllabus-tai-lieu')

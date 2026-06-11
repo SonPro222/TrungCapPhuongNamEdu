@@ -86,7 +86,7 @@ async function xoa(q) {
 }
 
 onMounted(async () => {
-  monHocs.value = await lmsDanhMucService.layMonHocGoc()
+  monHocs.value = await lmsDanhMucService.layMonHocmau()
   await taiDuLieu()
 })
 </script>

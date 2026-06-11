@@ -6,7 +6,7 @@ import HeThongLayout from './layouts/HeThongLayout.vue'
 import AdminQuanLyTaiKhoan from './pages/AdminQuanLyTaiKhoan.vue'
 import AdminCapNhatTaiKhoan from './pages/AdminCapNhatTaiKhoan.vue'
 import AdminDoiMatKhauTaiKhoan from './pages/AdminDoiMatKhauTaiKhoan.vue'
-import AdminCrudGocHeThong from './pages/AdminCrudGocHeThong.vue'
+import AdminCrudmauHeThong from './pages/AdminCrudMauHeThong.vue'
 import AdminNhatKyDangNhap from './pages/AdminNhatKyDangNhap.vue'
 import AdminNhatKyHeThong from './pages/AdminNhatKyHeThong.vue'
 import AdminTepDinhKem from './pages/AdminTepDinhKem.vue'
@@ -54,9 +54,9 @@ export const heThongRoutes = [
                 }
             },
             {
-                path: 'crud-goc',
-                name: 'HeThong.CrudGoc',
-                component: AdminCrudGocHeThong,
+                path: 'crud-mau',
+                name: 'HeThong.Crudmau',
+                component: AdminCrudmauHeThong,
                 meta: {
                     title: 'Quản lý CRUD gốc',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]

@@ -31,7 +31,7 @@ export const lmsApi = {
     dapAnCauHoi: crudApi('dap-an-cau-hoi'),
 
     // Ngan hang cau hoi version moi
-    cauHoiGoc: crudApi('cau-hoi-goc'),
+    cauHoimau: crudApi('cau-hoi-mau'),
     cauHoiVersion: crudApi('cau-hoi-version'),
     dapAnCauHoiVersion: crudApi('dap-an-cau-hoi-version'),
     cauHoiApDung: crudApi('cau-hoi-ap-dung'),
@@ -99,7 +99,7 @@ export const lmsApi = {
 }
 
 export const lmsCrudRegistry = {
-    cauHoiGoc: { label: 'Câu hỏi gốc', api: lmsApi.cauHoiGoc },
+    cauHoimau: { label: 'Câu hỏi gốc', api: lmsApi.cauHoimau },
     cauHoiVersion: { label: 'Version câu hỏi', api: lmsApi.cauHoiVersion },
     dapAnCauHoiVersion: { label: 'Đáp án version', api: lmsApi.dapAnCauHoiVersion },
     cauHoiApDung: { label: 'Áp dụng câu hỏi', api: lmsApi.cauHoiApDung },

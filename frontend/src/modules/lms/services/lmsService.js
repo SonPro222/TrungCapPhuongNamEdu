@@ -84,12 +84,12 @@ export const lmsDanhMucService = {
         const list = asList(await lmsApi.danhMuc.chuongTrinhMon.getAll({ size: 1000 }))
         return list.filter(m => !chuongTrinhVersionId || String(m.chuongTrinhVersionId) === String(chuongTrinhVersionId))
     },
-    async layMonHocGoc() {
+    async layMonHocmau() {
         const list = asList(await lmsApi.danhMuc.monHoc.getAll({ size: 1000 }))
         return list.map(m => ({ ...m, maMonHoc: maMonHoc(m), tenMonHoc: tenMonHoc(m) }))
     },
     async layMonHoc(chuongTrinhVersionId) {
-        const [ctms, mons] = await Promise.all([this.layChuongTrinhMon(chuongTrinhVersionId), this.layMonHocGoc()])
+        const [ctms, mons] = await Promise.all([this.layChuongTrinhMon(chuongTrinhVersionId), this.layMonHocmau()])
         return ctms.map(ctm => {
             const mon = byId(mons, ctm.monHocId)
             return { ...ctm, id: ctm.id, chuongTrinhMonId: ctm.id, monHocId: ctm.monHocId, maMonHoc: maMonHoc(mon), tenMonHoc: tenMonHoc(mon) }
@@ -124,7 +124,7 @@ async function loadDanhMucCache() {
         lmsDanhMucService.layChuongTrinh(),
         lmsDanhMucService.layVersion(),
         lmsDanhMucService.layChuongTrinhMon(),
-        lmsDanhMucService.layMonHocGoc(),
+        lmsDanhMucService.layMonHocmau(),
         lmsDanhMucService.layChuDe(),
         lmsDanhMucService.layLopHocPhan(),
         lmsDanhMucService.layCauHinhDanhGia(),
@@ -153,27 +153,27 @@ function enrichTheoCtm(item, dm, chuongTrinhMonId = item.chuongTrinhMonId) {
     }
 }
 
-function enrichCauHoiVersion(item, { dm, gocs = [], apDungs = [], dapAns = [], rubrics = [] }) {
-    const goc = byId(gocs, item.cauHoiGocId) || item.cauHoiGoc || {}
-    const mon = byId(dm.monHoc, goc.monHocId ?? item.monHocId)
+function enrichCauHoiVersion(item, { dm, maus = [], apDungs = [], dapAns = [], rubrics = [] }) {
+    const mau = byId(maus, item.cauHoimauId) || item.cauHoimau || {}
+    const mon = byId(dm.monHoc, mau.monHocId ?? item.monHocId)
     const apps = apDungs.filter(a => String(a.cauHoiVersionId) === String(item.id))
     const firstApp = apps[0] || {}
-    const base = enrichTheoCtm({ ...item, ...goc, cauHoiVersionId: item.id }, dm, firstApp.chuongTrinhMonId)
+    const base = enrichTheoCtm({ ...item, ...mau, cauHoiVersionId: item.id }, dm, firstApp.chuongTrinhMonId)
     return {
         ...base,
         id: item.id,
         cauHoiVersionId: item.id,
-        cauHoiGocId: item.cauHoiGocId,
-        monHocId: mon?.id ?? goc.monHocId,
+        cauHoimauId: item.cauHoimauId,
+        monHocId: mon?.id ?? mau.monHocId,
         tenMonHoc: item.tenMonHoc || tenMonHoc(mon),
         maMonHoc: item.maMonHoc || maMonHoc(mon),
-        maCauHoi: goc.maCauHoi || `CH-${item.cauHoiGocId || item.id}`,
-        trangThaiGoc: goc.trangThai,
+        maCauHoi: mau.maCauHoi || `CH-${item.cauHoimauId || item.id}`,
+        trangThaimau: mau.trangThai,
         apDungs: apps,
         soVersionApDung: apps.length,
         dapAns: dapAns.filter(d => String(d.cauHoiVersionId) === String(item.id)).sort((a, b) => (a.thuTu || 0) - (b.thuTu || 0)),
         rubrics: rubrics.filter(d => String(d.cauHoiVersionId) === String(item.id)).sort((a, b) => (a.thuTu || 0) - (b.thuTu || 0)),
-        cauHoiGoc: goc,
+        cauHoimau: mau,
     }
 }
 
@@ -205,15 +205,15 @@ function enrichBaiTapLop(item, dm, baiTapOnlineList = []) {
 }
 
 async function layTatCaCauHoiNguon() {
-    const [versions, gocs, apDungs, dapAns, rubrics, dm] = await Promise.all([
+    const [versions, maus, apDungs, dapAns, rubrics, dm] = await Promise.all([
         apiPage(() => lmsApi.cauHoiVersion.getAll({ size: 1000 })),
-        apiPage(() => lmsApi.cauHoiGoc.getAll({ size: 1000 })),
+        apiPage(() => lmsApi.cauHoimau.getAll({ size: 1000 })),
         apiPage(() => lmsApi.cauHoiApDung.getAll({ size: 1000 })),
         apiPage(() => lmsApi.dapAnCauHoiVersion.getAll({ size: 2000 })),
         apiPage(() => lmsApi.rubricCauHoiVersion.getAll({ size: 1000 })),
         loadDanhMucCache(),
     ])
-    return { versions: versions.content, gocs: gocs.content, apDungs: apDungs.content, dapAns: dapAns.content, rubrics: rubrics.content, dm }
+    return { versions: versions.content, maus: maus.content, apDungs: apDungs.content, dapAns: dapAns.content, rubrics: rubrics.content, dm }
 }
 
 async function replaceChildren(api, oldRows, newRows) {
@@ -266,15 +266,15 @@ export const cauHoiVersionService = {
         return item ? enrichCauHoiVersion(item, src) : null
     },
     async tao(payload) {
-        const goc = unwrap(await lmsApi.cauHoiGoc.create({
+        const mau = unwrap(await lmsApi.cauHoimau.create({
             monHocId: Number(payload.monHocId),
             maCauHoi: payload.maCauHoi || null,
             nguoiTaoTaiKhoanId: Number(payload.nguoiTaoTaiKhoanId || 1),
-            trangThai: payload.trangThaiGoc || 'dang_su_dung',
+            trangThai: payload.trangThaimau || 'dang_su_dung',
             donViSoHuuId: payload.donViSoHuuId || null,
         }))
         const version = unwrap(await lmsApi.cauHoiVersion.create({
-            cauHoiGocId: goc.id,
+            cauHoimauId: mau.id,
             versionNo: 1,
             noiDung: payload.noiDung,
             loaiCauHoi: payload.loaiCauHoi,
@@ -306,16 +306,16 @@ export const cauHoiVersionService = {
         if (!current) throw new Error('Không tìm thấy câu hỏi version')
         const taoVersionMoi = Boolean(payload.taoVersionMoi || current.isLocked)
         if (payload.monHocId || payload.maCauHoi) {
-            await lmsApi.cauHoiGoc.update(current.cauHoiGocId, {
-                ...current.cauHoiGoc,
+            await lmsApi.cauHoimau.update(current.cauHoimauId, {
+                ...current.cauHoimau,
                 monHocId: Number(payload.monHocId || current.monHocId),
                 maCauHoi: payload.maCauHoi || current.maCauHoi,
-                trangThai: payload.trangThaiGoc || current.trangThaiGoc || 'dang_su_dung',
-                nguoiTaoTaiKhoanId: payload.nguoiTaoTaiKhoanId || current.cauHoiGoc?.nguoiTaoTaiKhoanId || 1,
+                trangThai: payload.trangThaimau || current.trangThaimau || 'dang_su_dung',
+                nguoiTaoTaiKhoanId: payload.nguoiTaoTaiKhoanId || current.cauHoimau?.nguoiTaoTaiKhoanId || 1,
             }).catch(() => null)
         }
         const basePayload = {
-            cauHoiGocId: current.cauHoiGocId,
+            cauHoimauId: current.cauHoimauId,
             versionNo: taoVersionMoi ? Number(current.versionNo || 1) + 1 : Number(current.versionNo || 1),
             noiDung: payload.noiDung,
             loaiCauHoi: payload.loaiCauHoi,

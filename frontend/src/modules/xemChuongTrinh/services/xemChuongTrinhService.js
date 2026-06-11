@@ -87,36 +87,36 @@ export const xemChuongTrinhService = {
     let dieuKien = []
 
     if (syllabusMonId) {
-      const [chuongBaiRes, taiLieuData, dieuKienTrucTiep, syllabusDieuKien, dieuKienGoc] =
+      const [chuongBaiRes, taiLieuData, dieuKienTrucTiep, syllabusDieuKien, dieuKienmau] =
         await Promise.all([
           daoTaoXemChuongTrinhService.syllabusChuongBai.getAll({ size: 200, syllabusMonId }),
           this.layTaiLieuTheoSyllabusMon(syllabusMonId),
           daoTaoXemChuongTrinhService.dieuKienMonHoc.getAll({ size: 200, syllabusMonId }),
           daoTaoXemChuongTrinhService.syllabusMonHocDieuKien.getAll({ size: 200, syllabusMonId }),
-          daoTaoXemChuongTrinhService.dieuKienMonHocGoc.getAll({ size: 200 })
+          daoTaoXemChuongTrinhService.dieuKienMonHocmau.getAll({ size: 200 })
         ])
 
       chuongBai = layItems(chuongBaiRes)
       taiLieuTrucTiep = taiLieuData.syllabusTaiLieu
 
-      const goc = taiLieuData.taiLieuGoc
+      const mau = taiLieuData.taiLieumau
       taiLieuNoiMap = taiLieuData.syllabusMonHocTaiLieu.map(item => {
-        const g = goc.find(x => String(x.id || '') === String(item.taiLieuGocId || '')) || {}
+        const g = mau.find(x => String(x.id || '') === String(item.taiLieumauId || '')) || {}
         return {
           ...item,
-          tenTaiLieuGoc: item.tenTaiLieuGoc || g.ten || g.tenTaiLieuGoc || g.tenFile,
+          tenTaiLieumau: item.tenTaiLieumau || g.ten || g.tenTaiLieumau || g.tenFile,
           loaiTaiLieu: item.loaiTaiLieu || g.loaiTaiLieu,
           duongDan: item.duongDan || g.duongDan
         }
       })
 
       const dkTrucTiep = layItems(dieuKienTrucTiep)
-      const dkGoc = layItems(dieuKienGoc)
+      const dkmau = layItems(dieuKienmau)
       const dkNoi = layItems(syllabusDieuKien).map(item => {
-        const g = dkGoc.find(x => String(x.id || '') === String(item.dieuKienMonHocGocId || '')) || {}
+        const g = dkmau.find(x => String(x.id || '') === String(item.dieuKienMonHocmauId || '')) || {}
         return {
           ...item,
-          tenDieuKienGoc: item.tenDieuKienGoc || g.ten || g.tenDieuKien || g.noiDung,
+          tenDieuKienmau: item.tenDieuKienmau || g.ten || g.tenDieuKien || g.noiDung,
           noiDung: item.noiDung || g.noiDung
         }
       })
@@ -252,7 +252,7 @@ export const xemChuongTrinhService = {
       syllabusChuongBai,
       dieuKienMonHoc,
       syllabusMonHocDieuKien,
-      dieuKienMonHocGoc
+      dieuKienMonHocmau
     ] = await Promise.all([
       this.layMonHocTheoChuongTrinhMon(chuongTrinhMonId),
       daoTaoXemChuongTrinhService.monTienQuyet.getAll({ size: 200, monId: chuongTrinhMonId, chuongTrinhMonId }),
@@ -263,7 +263,7 @@ export const xemChuongTrinhService = {
       daoTaoXemChuongTrinhService.syllabusChuongBai.getAll({ size: 200, syllabusMonId }),
       daoTaoXemChuongTrinhService.dieuKienMonHoc.getAll({ size: 200, syllabusMonId }),
       daoTaoXemChuongTrinhService.syllabusMonHocDieuKien.getAll({ size: 200, syllabusMonId }),
-      daoTaoXemChuongTrinhService.dieuKienMonHocGoc.getAll({ size: 200 })
+      daoTaoXemChuongTrinhService.dieuKienMonHocmau.getAll({ size: 200 })
     ])
 
     return {
@@ -276,15 +276,15 @@ export const xemChuongTrinhService = {
       syllabusChuongBai: layItems(syllabusChuongBai),
       dieuKienMonHoc: layItems(dieuKienMonHoc),
       syllabusMonHocDieuKien: layItems(syllabusMonHocDieuKien),
-      dieuKienMonHocGoc: layItems(dieuKienMonHocGoc)
+      dieuKienMonHocmau: layItems(dieuKienMonHocmau)
     }
   },
 
   async layTaiLieuTheoSyllabusMon(syllabusMonId) {
-    const [syllabusTaiLieu, syllabusMonHocTaiLieu, taiLieuGoc] = await Promise.all([
+    const [syllabusTaiLieu, syllabusMonHocTaiLieu, taiLieumau] = await Promise.all([
       daoTaoXemChuongTrinhService.syllabusTaiLieu.getAll({ size: 200, syllabusMonId }),
       daoTaoXemChuongTrinhService.syllabusMonHocTaiLieu.getAll({ size: 200, syllabusMonId }),
-      daoTaoXemChuongTrinhService.taiLieuGoc.getAll({ size: 200 })
+      daoTaoXemChuongTrinhService.taiLieumau.getAll({ size: 200 })
     ])
 
     return {
@@ -294,7 +294,7 @@ export const xemChuongTrinhService = {
       syllabusMonHocTaiLieu: layItems(syllabusMonHocTaiLieu).filter(
         item => String(item.syllabusMonId || '') === String(syllabusMonId || '')
       ),
-      taiLieuGoc: layItems(taiLieuGoc)
+      taiLieumau: layItems(taiLieumau)
     }
   }
 }

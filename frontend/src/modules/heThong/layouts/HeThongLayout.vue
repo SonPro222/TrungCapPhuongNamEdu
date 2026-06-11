@@ -60,8 +60,8 @@
 
           <div v-show="openGroups.cauHinh" class="section-body">
             <RouterLink
-                :to="{ name: 'HeThong.CrudGoc' }"
-                :class="['menu-link', { active: isActive(['HeThong.CrudGoc']) }]"
+                :to="{ name: 'HeThong.Crudmau' }"
+                :class="['menu-link', { active: isActive(['HeThong.Crudmau']) }]"
             >
               <span class="dot"></span>
               <span class="nav-text">Quản lý CRUD gốc</span>

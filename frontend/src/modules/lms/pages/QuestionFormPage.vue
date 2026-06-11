@@ -12,7 +12,7 @@
           <div class="form-grid">
             <label><span>Môn học gốc *</span><select v-model="form.monHocId" class="fi"><option value="">-- Chọn môn --</option><option v-for="m in monHocs" :key="m.id" :value="m.id">{{ m.maMonHoc }} - {{ m.tenMonHoc }}</option></select></label>
             <label><span>Mã câu hỏi</span><input v-model.trim="form.maCauHoi" class="fi" placeholder="VD: DCB-CH001" /></label>
-            <label><span>Trạng thái gốc</span><select v-model="form.trangThaiGoc" class="fi"><option v-for="(label,key) in TRANG_THAI_CAU_HOI_GOC" :key="key" :value="key">{{ label }}</option></select></label>
+            <label><span>Trạng thái gốc</span><select v-model="form.trangThaimau" class="fi"><option v-for="(label,key) in TRANG_THAI_CAU_HOI_mau" :key="key" :value="key">{{ label }}</option></select></label>
           </div>
         </div>
 
@@ -83,7 +83,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { nganHangCauHoiService, lmsDanhMucService } from '../services/lmsService'
-import { LOAI_CAU_HOI, MUC_DO, TRANG_THAI_CAU_HOI_GOC, TRANG_THAI_CAU_HOI_VERSION, TRANG_THAI_CAU_HOI_AP_DUNG } from '../services/lmsEnum'
+import { LOAI_CAU_HOI, MUC_DO, TRANG_THAI_CAU_HOI_mau, TRANG_THAI_CAU_HOI_VERSION, TRANG_THAI_CAU_HOI_AP_DUNG } from '../services/lmsEnum'
 
 const route = useRoute(), router = useRouter()
 const isEdit = computed(() => !!route.params.id)
@@ -91,7 +91,7 @@ const dangLuu = ref(false)
 const itemCu = ref(null)
 const monHocs = ref([]), versions = ref([]), chuongTrinhMons = ref([]), chuDes = ref([])
 const form = ref({
-  monHocId: '', maCauHoi: '', trangThaiGoc: 'dang_su_dung',
+  monHocId: '', maCauHoi: '', trangThaimau: 'dang_su_dung',
   noiDung: '', loaiCauHoi: 'trac_nghiem_1_dap_an', mucDo: 'trung_binh', diemMacDinh: 1, trangThai: 'nhap', giaiThichDapAn: '', taoVersionMoi: false,
   dapAns: [{ noiDung: '', laDapAnDung: true }, { noiDung: '', laDapAnDung: false }], rubrics: [{ tieuChi: 'Đúng nội dung', diemToiDa: 10, moTa: '' }],
   chuongTrinhVersionId: '', chuongTrinhMonId: '', syllabusChuongBaiId: '', trangThaiApDung: 'can_ra_soat', ghiChuApDung: '', nguoiTaoTaiKhoanId: 1,
@@ -116,12 +116,12 @@ function validate(){ if(!form.value.monHocId) return 'Chưa chọn môn học g�
 async function luu(){ const err=validate(); if(err){alert(err);return} dangLuu.value=true; try{ if(isEdit.value) await nganHangCauHoiService.capNhat(route.params.id, form.value); else await nganHangCauHoiService.tao(form.value); router.push({name:'Lms.NganHangCauHoi'}) } finally{ dangLuu.value=false } }
 
 onMounted(async()=>{
-  ;[monHocs.value, versions.value] = await Promise.all([lmsDanhMucService.layMonHocGoc(), lmsDanhMucService.layVersion()])
+  ;[monHocs.value, versions.value] = await Promise.all([lmsDanhMucService.layMonHocmau(), lmsDanhMucService.layVersion()])
   if(isEdit.value){
     const item = await nganHangCauHoiService.layTheoId(route.params.id); itemCu.value=item
     if(item){
       const app = item.apDungs?.[0] || {}
-      form.value = { ...form.value, ...item, monHocId:item.monHocId, maCauHoi:item.maCauHoi, trangThaiGoc:item.trangThaiGoc||'dang_su_dung', cauHoiGocId:item.cauHoiGocId, dapAns:item.dapAns?.length?item.dapAns:form.value.dapAns, rubrics:item.rubrics?.length?item.rubrics:form.value.rubrics, chuongTrinhMonId:app.chuongTrinhMonId||'', syllabusChuongBaiId:app.syllabusChuongBaiId||'', trangThaiApDung:app.trangThai||'can_ra_soat', ghiChuApDung:app.ghiChu||'', taoVersionMoi:!!item.isLocked }
+      form.value = { ...form.value, ...item, monHocId:item.monHocId, maCauHoi:item.maCauHoi, trangThaimau:item.trangThaimau||'dang_su_dung', cauHoimauId:item.cauHoimauId, dapAns:item.dapAns?.length?item.dapAns:form.value.dapAns, rubrics:item.rubrics?.length?item.rubrics:form.value.rubrics, chuongTrinhMonId:app.chuongTrinhMonId||'', syllabusChuongBaiId:app.syllabusChuongBaiId||'', trangThaiApDung:app.trangThai||'can_ra_soat', ghiChuApDung:app.ghiChu||'', taoVersionMoi:!!item.isLocked }
       await loadCtm(); await loadChuDe()
     }
   }

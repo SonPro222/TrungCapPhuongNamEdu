@@ -223,7 +223,7 @@
           <td>{{ item.id }}</td>
           <td>
             <div class="file-cell">
-              <strong>{{ item.tenGoc || item.tenFile || '-' }}</strong>
+              <strong>{{ item.tenmau || item.tenFile || '-' }}</strong>
               <span>{{ item.contentType || '-' }}</span>
             </div>
           </td>
@@ -414,7 +414,7 @@ async function xoaTep(item) {
     return
   }
 
-  const ok = window.confirm(`Xóa tệp "${item.tenGoc || item.tenFile || item.id}"?`)
+  const ok = window.confirm(`Xóa tệp "${item.tenmau || item.tenFile || item.id}"?`)
   if (!ok) {
     return
   }

@@ -518,7 +518,7 @@ const tabs = [
     roles: [ROLES.ADMIN, ROLES.DAO_TAO],
     columns: [
       { key: 'id', label: 'ID' },
-      { key: 'tenGoc', label: 'Tên gốc' },
+      { key: 'tenmau', label: 'Tên gốc' },
       { key: 'module', label: 'Module' },
       { key: 'nghiepVu', label: 'Nghiệp vụ' },
       { key: 'doiTuongId', label: 'Đối tượng ID' },

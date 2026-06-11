@@ -43,6 +43,45 @@
       </div>
 
       <template v-for="bang in group.tables" :key="bang.key">
+
+        <!-- Panel gợi ý khung kỳ (tầng 6) -->
+        <div
+            v-if="tangHienTai === 6 && bang.key === 'khungKy' && selected.chuongTrinhVersion"
+            class="khung-ky-goi-y-panel"
+        >
+          <div v-if="dangLayGoiY" class="goi-y-loading">Đang tải gợi ý kỳ học...</div>
+          <template v-else-if="khungKyGoiY">
+            <div :class="['goi-y-status', khungKyGoiY.daTaoDuKy ? 'goi-y-ok' : 'goi-y-warn']">
+              <span class="goi-y-msg">{{ khungKyGoiY.message }}</span>
+              <span class="goi-y-count">
+                {{ khungKyGoiY.soKyDaTao }}/{{ khungKyGoiY.soKy }} kỳ
+                ({{ khungKyGoiY.soThang }} tháng)
+              </span>
+            </div>
+            <div v-if="!khungKyGoiY.daTaoDuKy && khungKyGoiY.kyTiepTheoGoiY" class="goi-y-next">
+              <span>Kỳ tiếp theo cần tạo:</span>
+              <strong>{{ khungKyGoiY.kyTiepTheoGoiY.tenKy }} ({{ khungKyGoiY.kyTiepTheoGoiY.maKy }})</strong>
+              — từ <strong>{{ khungKyGoiY.kyTiepTheoGoiY.ngayBatDauGoiY }}</strong>
+              đến <strong>{{ khungKyGoiY.kyTiepTheoGoiY.ngayKetThucGoiY }}</strong>
+              <button
+                  type="button"
+                  class="btn small primary"
+                  :disabled="dangTaoDuKy"
+                  @click="taoDuKyConThieu"
+              >{{ dangTaoDuKy ? 'Đang tạo...' : `Tạo đủ ${khungKyGoiY.soKyConThieu} kỳ còn thiếu` }}</button>
+            </div>
+            <div class="goi-y-list">
+              <span
+                  v-for="item in khungKyGoiY.danhSachKy"
+                  :key="item.thuTu"
+                  :class="['goi-y-ky-badge', item.daTonTai ? 'da-tao' : 'chua-tao']"
+                  :title="item.daTonTai ? `${item.ngayBatDauHienTai} → ${item.ngayKetThucHienTai}` : `Gợi ý: ${item.ngayBatDauGoiY} → ${item.ngayKetThucGoiY}`"
+              >{{ item.maKy }}</span>
+            </div>
+          </template>
+        </div>
+        <!-- End panel gợi ý -->
+
         <div
             v-if="tangHienTai === 7 && bang.key === 'monHoc'"
             class="mon-hoc-tang-7-filter"
@@ -60,18 +99,18 @@
         </div>
 
         <div
-            v-if="tangHienTai === 8 && bang.key === 'syllabusMonHocGoc'"
+            v-if="tangHienTai === 8 && bang.key === 'syllabusMonHocmau'"
             class="mon-hoc-tang-7-filter"
         >
           <label>
-            <span>Lọc syllabus môn học gốc</span>
+            <span>Lọc syllabus môn học mẫu</span>
             <input
-                v-model="tuKhoaLocSyllabusGocTang8"
+                v-model="tuKhoaLocSyllabusmauTang8"
                 type="text"
                 placeholder="Nhập mã, tên syllabus hoặc tên môn học..."
             >
           </label>
-          <small>Lọc theo mã syllabus, tên syllabus hoặc tên môn học gốc.</small>
+          <small>Lọc theo mã syllabus, tên syllabus hoặc tên môn học mẫu.</small>
         </div>
         <div
             :class="[
@@ -120,120 +159,114 @@
               @view="xemDongBang(bang, $event)"
               @file-view="xemTepTrongCotFileDaLuu(bang, $event)"
               @toggle-save="luuDongBang(bang, $event)"
-              @saved="sauKhiLuu(bang.key, $event)"
-              @deleted="sauKhiXoa(bang.key, $event)"
+              @saved="sauKhiLuuVaCapNhatGoiY(bang.key, $event)"
+              @deleted="sauKhiXoaVaCapNhatGoiY(bang.key, $event)"
               @notify="xuLyThongBaoBang(bang, $event)"
           />
         </div>
-        <div v-if="tangHienTai === 2 && bang.key === 'trinhDoDaoTao'" class="bang-da-gan-tang-2">
-          <div class="bang-da-gan-head">
-            <div>
-              <h4>2.1.1. Trình độ đào tạo theo ngành</h4>
-              <p>Danh sách trình độ đào tạo đã được gán cho ngành đang xem.</p>
-            </div>
-            <button type="button" class="btn tiny" @click="taiDuLieuCoSanTatCaBang">Tải lại</button>
-          </div>
-
-          <div v-if="tableMessages.nganhTrinhDoDaoTao?.message"
-               :class="['table-message', tableMessages.nganhTrinhDoDaoTao.type]">
-            {{ tableMessages.nganhTrinhDoDaoTao.message }}
-          </div>
-
-          <div class="table-wrap mini-scroll">
-            <table>
-              <thead>
-              <tr>
-                <th>Ngành</th>
-                <th>Mã trình độ</th>
-                <th>Trình độ đào tạo</th>
-                <th>Mô tả trình độ</th>
-                <th>Trạng thái</th>
-                <th>Ghi chú</th>
-                <th>Ngày tạo</th>
-                <th>Ngày cập nhật</th>
-                <th class="col-action">Thao tác</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-if="!cauHinhTrinhDoTheoNganh.length">
-                <td colspan="9" class="empty-cell">Chưa có trình độ đào tạo nào được gán cho ngành này.</td>
-              </tr>
-              <tr v-for="item in cauHinhTrinhDoTheoNganh" :key="`nganh-trinh-do-${item.id}`">
-                <td>{{ item.tenNganh || selected.nganh?.tenNganh || item.nganhId }}</td>
-                <td>{{ item.maTrinhDo || maTrinhDoTheoId(item.trinhDoId) }}</td>
-                <td>{{ item.tenTrinhDo || tenTrinhDoTheoId(item.trinhDoId) }}</td>
-                <td>{{ item.moTaTrinhDo || '-' }}</td>
-                <td>{{ item.trangThai || '-' }}</td>
-                <td>{{ item.ghiChu || '-' }}</td>
-                <td>{{ item.createdAt || '-' }}</td>
-                <td>{{ item.updatedAt || '-' }}</td>
-                <td class="actions-cell">
-                  <button type="button" class="btn tiny view-btn" @click="xemTrinhDoTheoNganh(item)">Xem</button>
-                  <button type="button" class="btn tiny danger" @click="xoaTrinhDoTheoNganh(item)">Xóa</button>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div v-if="tangHienTai === 2 && bang.key === 'loaiChuongTrinh'" class="bang-da-gan-tang-2">
-          <div class="bang-da-gan-head">
-            <div>
-              <h4>Loại chương trình theo ngành</h4>
-              <p>Danh sách loại chương trình đã được gán cho ngành đang xem.</p>
-            </div>
-            <button type="button" class="btn tiny" @click="taiDuLieuCoSanTatCaBang">Tải lại</button>
-          </div>
-
-          <div v-if="tableMessages.nganhLoaiChuongTrinh?.message"
-               :class="['table-message', tableMessages.nganhLoaiChuongTrinh.type]">
-            {{ tableMessages.nganhLoaiChuongTrinh.message }}
-          </div>
-
-          <div class="table-wrap mini-scroll">
-            <table>
-              <thead>
-              <tr>
-                <th>Ngành</th>
-                <th>Mã loại</th>
-                <th>Loại chương trình</th>
-                <th>Số tháng</th>
-                <th>Số kỳ</th>
-                <th>Mô tả loại</th>
-                <th>Trạng thái</th>
-                <th>Ghi chú</th>
-                <th>Ngày tạo</th>
-                <th>Ngày cập nhật</th>
-                <th class="col-action">Thao tác</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-if="!cauHinhLoaiChuongTrinhTheoNganh.length">
-                <td colspan="11" class="empty-cell">Chưa có loại chương trình nào được gán cho ngành này.</td>
-              </tr>
-              <tr v-for="item in cauHinhLoaiChuongTrinhTheoNganh" :key="`nganh-loai-ct-${item.id}`">
-                <td>{{ item.tenNganh || selected.nganh?.tenNganh || item.nganhId }}</td>
-                <td>{{ item.maLoai || maLoaiChuongTrinhTheoId(item.loaiChuongTrinhId) }}</td>
-                <td>{{ item.tenLoaiChuongTrinh || tenLoaiChuongTrinhTheoId(item.loaiChuongTrinhId) }}</td>
-                <td>{{ item.soThang || '-' }}</td>
-                <td>{{ item.soKy || '-' }}</td>
-                <td>{{ item.moTaLoai || '-' }}</td>
-                <td>{{ item.trangThai || '-' }}</td>
-                <td>{{ item.ghiChu || '-' }}</td>
-                <td>{{ item.createdAt || '-' }}</td>
-                <td>{{ item.updatedAt || '-' }}</td>
-                <td class="actions-cell">
-                  <button type="button" class="btn tiny view-btn" @click="xemLoaiChuongTrinhTheoNganh(item)">Xem
-                  </button>
-                  <button type="button" class="btn tiny danger" @click="xoaLoaiChuongTrinhTheoNganh(item)">Xóa</button>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
       </template>
+    </section>
+
+    <!-- Bảng 3 tầng 2: Ngành hệ đào tạo theo ngành -->
+    <section v-if="tangHienTai === 2 && selected.nganh" class="flow-group mau-tim">
+      <div class="group-title">
+        <h3>Bảng 3: Ngành hệ đào tạo theo ngành — {{ selected.nganh.tenNganh }}</h3>
+        <p>Mỗi dòng là một hệ đào tạo (Ngành + Trình độ + Loại chương trình). Bấm "Xem chương trình" để vào tầng 3.</p>
+      </div>
+
+      <div class="bang-da-gan-tang-2">
+        <div class="bang-da-gan-head">
+          <h4>Thêm ngành hệ đào tạo</h4>
+          <button type="button" class="btn tiny" @click="taiDuLieuCoSanTatCaBang">Tải lại</button>
+        </div>
+
+        <div v-if="thongBaoNganhHe" :class="['table-message', loaiThongBaoNganhHe === 'error' ? 'error' : 'success']">
+          {{ thongBaoNganhHe }}
+        </div>
+
+        <form class="form-nganh-he" @submit.prevent="luuNganhHe">
+          <label>
+            <span>Trình độ *</span>
+            <select v-model="formNganhHe.trinhDoId" required>
+              <option :value="null">— Chọn —</option>
+              <option v-for="td in duLieu.trinhDoDaoTao" :key="td.id" :value="td.id">
+                {{ td.maTrinhDo }} – {{ td.tenTrinhDo }}
+              </option>
+            </select>
+          </label>
+          <label>
+            <span>Loại chương trình *</span>
+            <select v-model="formNganhHe.loaiChuongTrinhId" required>
+              <option :value="null">— Chọn —</option>
+              <option v-for="lct in duLieu.loaiChuongTrinh" :key="lct.id" :value="lct.id">
+                {{ lct.maLoai }} – {{ lct.tenLoai }}
+              </option>
+            </select>
+          </label>
+          <label>
+            <span>Số tháng</span>
+            <input v-model.number="formNganhHe.soThang" type="number" min="1" placeholder="24">
+          </label>
+          <label>
+            <span>Số kỳ</span>
+            <input v-model.number="formNganhHe.soKy" type="number" min="1" placeholder="4">
+          </label>
+          <label>
+            <span>Mã hệ <small>(tự sinh nếu để trống)</small></span>
+            <input v-model.trim="formNganhHe.maHe" placeholder="VD: TC_CQ">
+          </label>
+          <label>
+            <span>Tên hệ <small>(tự sinh nếu để trống)</small></span>
+            <input v-model.trim="formNganhHe.tenHe" placeholder="VD: Trung cấp chính quy">
+          </label>
+          <div class="hang-nut-nganh-he">
+            <button type="submit" class="btn primary" :disabled="dangLuuNganhHe">
+              {{ formNganhHe.id ? 'Cập nhật' : 'Thêm' }}
+            </button>
+            <button type="button" class="btn" @click="resetFormNganhHe">
+              {{ formNganhHe.id ? 'Hủy sửa' : 'Làm mới' }}
+            </button>
+          </div>
+        </form>
+
+        <div class="table-wrap mini-scroll" style="margin-top:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>Trình độ</th>
+                <th>Loại chương trình</th>
+                <th>Tháng / Kỳ</th>
+                <th>Mã hệ</th>
+                <th>Tên hệ</th>
+                <th>Trạng thái</th>
+                <th class="col-action">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!nganhHeDaoTaoTheoNganh.length">
+                <td colspan="7" class="empty-cell">Chưa có ngành hệ đào tạo nào cho ngành này.</td>
+              </tr>
+              <tr v-for="item in nganhHeDaoTaoTheoNganh" :key="`nhe-${item.id}`">
+                <td>{{ item.maTrinhDo || item.trinhDoId }} – {{ item.tenTrinhDo || '' }}</td>
+                <td>{{ item.maLoai || item.loaiChuongTrinhId }} – {{ item.tenLoai || '' }}</td>
+                <td>{{ item.soThang ? item.soThang + ' tháng' : '-' }} / {{ item.soKy ? item.soKy + ' kỳ' : '-' }}</td>
+                <td>{{ item.maHe || '-' }}</td>
+                <td>{{ item.tenHe || '-' }}</td>
+                <td>
+                  <span :class="item.trangThai === 'dang_su_dung' ? 'trang-thai-on' : 'trang-thai-off'">
+                    {{ item.trangThai === 'dang_su_dung' ? 'Đang dùng' : 'Ngừng' }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button type="button" class="btn tiny view-btn" @click="xemChuongTrinhTuNganhHe(item)">Xem chương trình</button>
+                  <button type="button" class="btn tiny" @click="suaNganhHe(item)">Sửa</button>
+                  <button type="button" class="btn tiny danger" @click="xoaNganhHe(item.id)">Xóa</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <div v-if="cacNutDieuHuongTang.length && tangHienTai !== 1 && tangHienTai !== 2 && tangHienTai !== 3 && tangHienTai !== 4 && tangHienTai !== 6 && tangHienTai !== 7 && tangHienTai !== 8 && tangHienTai !== 9"
@@ -275,7 +308,7 @@ const {
   selected,
   viewed,
   duLieu,
-  quyDoiDiemMauGocRows,
+  quyDoiDiemMaumauRows,
   lookups,
   services,
   baoTin,
@@ -289,7 +322,65 @@ const {
   sauKhiXoa,
   lamMoiLuon,
   luuChuongTrinhTong
-} = useDaoTaoXemChuongTrinh()
+} = useDaoTaoXemChuongTrinh({
+  autoLoad: true
+})
+
+// ===== KHUNG KỲ GỢI Ý =====
+const khungKyGoiY = ref(null)
+const dangLayGoiY = ref(false)
+const dangTaoDuKy = ref(false)
+
+async function layGoiYKhungKy(versionId) {
+  if (!versionId) { khungKyGoiY.value = null; return }
+  dangLayGoiY.value = true
+  try {
+    const res = await services.khungKy.goiYTheoVersion(versionId)
+    khungKyGoiY.value = res?.data ?? res
+  } catch {
+    khungKyGoiY.value = null
+  } finally {
+    dangLayGoiY.value = false
+  }
+}
+
+async function taoDuKyConThieu() {
+  const versionId = selected.chuongTrinhVersion?.id
+  if (!versionId) return
+  dangTaoDuKy.value = true
+  try {
+    const res = await services.khungKy.taoDuKyConThieu(versionId)
+    const list = res?.data ?? res
+    if (Array.isArray(list)) {
+      // Cập nhật rawData thông qua sauKhiLuu cho từng kỳ mới tạo
+      for (const row of list) {
+        sauKhiLuu('khungKy', row)
+      }
+    }
+    await layGoiYKhungKy(versionId)
+    baoTin('Đã tạo đủ kỳ còn thiếu.')
+  } catch (e) {
+    baoTin(e?.message || 'Tạo kỳ thất bại.', 'error')
+  } finally {
+    dangTaoDuKy.value = false
+  }
+}
+
+watch(
+    () => selected.chuongTrinhVersion?.id,
+    (versionId) => layGoiYKhungKy(versionId),
+    {immediate: true}
+)
+function sauKhiLuuVaCapNhatGoiY(key, saved) {
+  sauKhiLuu(key, saved)
+  if (key === 'khungKy') layGoiYKhungKy(selected.chuongTrinhVersion?.id)
+}
+
+function sauKhiXoaVaCapNhatGoiY(key, id) {
+  sauKhiXoa(key, id)
+  if (key === 'khungKy') layGoiYKhungKy(selected.chuongTrinhVersion?.id)
+}
+// ===== END KHUNG KỲ GỢI Ý =====
 
 const cotDiemMauDaTichChonIds = ref([])
 const dangGanCotDiemMau = ref(false)
@@ -332,26 +423,28 @@ const chuongTrinhTrinhDoDangChon = computed(() => {
   return null
 })
 
-const chuongTrinhParent = computed(() => {
+const nganhHeDaoTaoIdTheoChon = computed(() => {
+  // Tìm nganhHeDaoTao phù hợp từ dữ liệu đã load
   const nganhLoai = chuongTrinhNganhLoaiDangChon.value
   const trinhDo = chuongTrinhTrinhDoDangChon.value
-
-  return {
-    nganhLoaiChuongTrinhId: nganhLoai?.id || null,
-    nganhId: nganhLoai?.nganhId || selected.nganh?.id || route.params.nganhId || null,
-    trinhDoId: trinhDo?.id || null,
-    loaiChuongTrinhId: nganhLoai?.loaiChuongTrinhId || selected.loaiChuongTrinh?.id || route.query.loaiChuongTrinhId || null
-  }
+  if (!nganhLoai?.nganhId || !trinhDo?.id || !nganhLoai?.loaiChuongTrinhId) return null
+  const match = (duLieu.value.nganhHeDaoTao || []).find(item =>
+    String(item.nganhId) === String(nganhLoai.nganhId) &&
+    String(item.trinhDoId) === String(trinhDo.id) &&
+    String(item.loaiChuongTrinhId) === String(nganhLoai.loaiChuongTrinhId)
+  )
+  return match?.id || null
 })
 
-const chuongTrinhParentText = computed(() => {
-  const nganhLoai = chuongTrinhNganhLoaiDangChon.value
-  const trinhDo = chuongTrinhTrinhDoDangChon.value
-  const tenNganh = selected.nganh?.tenNganh || nganhLoai?.tenNganh || '-'
-  const tenTrinhDo = trinhDo?.tenTrinhDo || trinhDo?.ten || '-'
-  const tenLoai = selected.loaiChuongTrinh?.tenLoai || nganhLoai?.tenLoaiChuongTrinh || '-'
+const chuongTrinhParent = computed(() => ({
+  nganhHeDaoTaoId: selected.nganhHeDaoTao?.id || null,
+  nganhId: selected.nganhHeDaoTao?.nganhId || selected.nganh?.id || route.params.nganhId || null,
+}))
 
-  return `Đang chọn: Ngành ${tenNganh} | Trình độ ${tenTrinhDo} | Loại chương trình ${tenLoai}`
+const chuongTrinhParentText = computed(() => {
+  const he = selected.nganhHeDaoTao
+  if (!he) return 'Chưa chọn ngành hệ đào tạo'
+  return `Ngành hệ: ${he.tenHe || he.maHe || he.id} (${he.tenTrinhDo || '-'} / ${he.tenLoai || '-'})`
 })
 
 const cauHinhTrinhDoTheoNganh = computed(() => {
@@ -430,42 +523,160 @@ const versionParentText = computed(() => {
 
 const syllabusChuongTrinhParent = computed(() => ({
   chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
-  syllabusChuongTrinhGocId: selected.syllabusChuongTrinhGoc?.id || null
+  syllabusChuongTrinhmauId: selected.syllabusChuongTrinhmau?.id || null
 }))
 
 const syllabusChuongTrinhParentText = computed(() => {
-  return `${versionParentText.value} | Syllabus chương trình gốc ${selected.syllabusChuongTrinhGoc?.ma || '-'} - ${selected.syllabusChuongTrinhGoc?.ten || '-'}`
+  return `${versionParentText.value} | Syllabus chương trình mẫu ${selected.syllabusChuongTrinhmau?.ma || '-'} - ${selected.syllabusChuongTrinhmau?.ten || '-'}`
 })
+
+
+const syllabusChuongTrinhApDungTheoVersion = computed(() => {
+  const versionId = selected.chuongTrinhVersion?.id || route.params.versionId || null
+  if (!versionId) return null
+
+  return (duLieu.value.syllabusChuongTrinh || [])
+      .find((row) => String(row.chuongTrinhVersionId || '') === String(versionId || '')) || null
+})
+
+const syllabusChuongTrinhIdDangGan = computed(() => syllabusChuongTrinhApDungTheoVersion.value?.id || null)
+
+const syllabusChuongTrinhMauIdDangGan = computed(() => {
+  return syllabusChuongTrinhApDungTheoVersion.value?.syllabusChuongTrinhmauId
+      || syllabusChuongTrinhApDungTheoVersion.value?.syllabusChuongTrinhMauId
+      || null
+})
+
+const syllabusChuongTrinhMauDangGanTheoVersion = computed(() => {
+  const mauId = syllabusChuongTrinhMauIdDangGan.value
+  if (!mauId) return null
+
+  return (duLieu.value.syllabusChuongTrinhmau || [])
+      .find((row) => String(row.id || '') === String(mauId || '')) || null
+})
+
+const rowsSyllabusChuongTrinhMauTheoVersion = computed(() => {
+  const chuongTrinhId = selected.chuongTrinh?.id || route.params.chuongTrinhId || null
+  if (!chuongTrinhId) return []
+
+  return (duLieu.value.syllabusChuongTrinhmau || [])
+      .filter((row) => String(row.chuongTrinhId || '') === String(chuongTrinhId || ''))
+})
+
+const rowsSyllabusChuongTrinhApDungTheoVersion = computed(() => {
+  const row = syllabusChuongTrinhApDungTheoVersion.value
+  return row ? [row] : []
+})
+
+function locRowsTheoSyllabusChuongTrinhMau(rows = []) {
+  const mauId = syllabusChuongTrinhMauIdDangGan.value
+  if (!mauId) return []
+
+  return (rows || []).filter((row) => {
+    const rowMauId = row.syllabusChuongTrinhMauId || row.syllabusChuongTrinhmauId
+    return String(rowMauId || '') === String(mauId || '')
+  })
+}
+
+function locRowsTheoSyllabusChuongTrinhApDung(rows = []) {
+  const syllabusId = syllabusChuongTrinhIdDangGan.value
+  if (!syllabusId) return []
+
+  return (rows || []).filter((row) => {
+    const rowSyllabusId = row.syllabusChuongTrinhId || row.syllabusChuongTrinhID
+    return String(rowSyllabusId || '') === String(syllabusId || '')
+  })
+}
+
+function taoThuTuKeTiep(rows = []) {
+  const max = (rows || []).reduce((value, row) => Math.max(value, Number(row?.thuTu || 0)), 0)
+  return max + 1
+}
+
+function layMaBangMau(item = {}) {
+  return String(item.ma || '').trim()
+}
+
+function timDongDaCopyTheoMa(key, item = {}) {
+  const syllabusId = syllabusChuongTrinhIdDangGan.value
+  const ma = layMaBangMau(item)
+  if (!syllabusId || !ma) return null
+
+  return (duLieu.value[key] || []).find((row) => {
+    const rowSyllabusId = row.syllabusChuongTrinhId || row.syllabusChuongTrinhID
+    return String(rowSyllabusId || '') === String(syllabusId || '')
+        && String(row.ma || '').trim() === ma
+  }) || null
+}
+
+function buildPayloadApDungTuMau(key, item = {}) {
+  const syllabusChuongTrinhId = syllabusChuongTrinhIdDangGan.value
+  const rowsHienCo = locRowsTheoSyllabusChuongTrinhApDung(duLieu.value[key] || [])
+  const base = {
+    syllabusChuongTrinhId,
+    ma: item.ma || null,
+    thuTu: item.thuTu ?? taoThuTuKeTiep(rowsHienCo),
+    ghiChu: item.ghiChu || null
+  }
+
+  if (key === 'mucTieuChuongTrinh') {
+    return {
+      ...base,
+      loai: item.loai || 'chung',
+      noiDung: item.noiDung || ''
+    }
+  }
+
+  if (key === 'nangLucDauRa') {
+    return {
+      ...base,
+      loai: item.loai || 'co_ban',
+      noiDung: item.noiDung || ''
+    }
+  }
+
+  if (key === 'viTriViecLam') {
+    return {
+      ...base,
+      ten: item.ten || '',
+      moTa: item.moTa || null
+    }
+  }
+
+  if (key === 'dieuKienTotNghiep') {
+    return {
+      ...base,
+      noiDung: item.noiDung || ''
+    }
+  }
+
+  return base
+}
 
 const nhomKienThucParent = computed(() => ({
   chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
-  nhomKienThucGocId: selected.nhomKienThucGoc?.id || null
+  nhomKienThucmauId: selected.nhomKienThucmau?.id || null
 }))
 
 const nhomKienThucParentText = computed(() => {
-  return `${versionParentText.value} | Nhóm kiến thức gốc ${selected.nhomKienThucGoc?.ma || '-'} - ${selected.nhomKienThucGoc?.ten || '-'}`
+  return `${versionParentText.value} | Nhóm kiến thức mẫu ${selected.nhomKienThucmau?.ma || '-'} - ${selected.nhomKienThucmau?.ten || '-'}`
 })
 
 const nhomTuChonParent = computed(() => ({
   chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
-  nhomTuChonGocId: selected.nhomTuChonGoc?.id || null
+  nhomTuChonmauId: selected.nhomTuChonmau?.id || null
 }))
 
 const nhomTuChonParentText = computed(() => {
-  return `${versionParentText.value} | Nhóm tự chọn gốc ${selected.nhomTuChonGoc?.ma || '-'} - ${selected.nhomTuChonGoc?.ten || '-'}`
+  return `${versionParentText.value} | Nhóm tự chọn mẫu ${selected.nhomTuChonmau?.ma || '-'} - ${selected.nhomTuChonmau?.ten || '-'}`
 })
 
 const khungKyParent = computed(() => ({
-  chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
-  loaiChuongTrinhId: selected.loaiChuongTrinh?.id || selected.chuongTrinh?.loaiChuongTrinhId || null,
-  khungKyGocId: selected.khungKyGoc?.id || null,
-  maKy: selected.khungKyGoc?.maKy || '',
-  tenKy: selected.khungKyGoc?.tenKy || '',
-  thuTu: selected.khungKyGoc?.thuTu || null
+  chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null
 }))
 
 const khungKyParentText = computed(() => {
-  return `${versionParentText.value} | Loại CT ${selected.loaiChuongTrinh?.tenLoai || selected.chuongTrinh?.tenLoaiChuongTrinh || selected.chuongTrinh?.loaiChuongTrinhId || '-'} | Khung kỳ gốc ${selected.khungKyGoc?.maKy || '-'} - ${selected.khungKyGoc?.tenKy || '-'}`
+  return `${versionParentText.value} | Loại CT ${selected.nganhHeDaoTao?.tenLoai || selected.loaiChuongTrinh?.tenLoai || '-'}`
 })
 
 
@@ -475,6 +686,24 @@ const khungKyDangChonText = computed(() => {
       : 'Chưa chọn kỳ học'
 })
 
+// defaultForm cho khungKy lấy từ gợi ý BE (chỉ áp dụng khi tạo mới)
+const khungKyDefaultFormGoiY = computed(() => {
+  const base = {
+    chuongTrinhVersionId: null,
+    maKy: '', tenKy: '', thuTu: null, ngayBatDau: null, ngayKetThuc: null
+  }
+  const next = khungKyGoiY.value?.kyTiepTheoGoiY
+  if (!next || khungKyGoiY.value?.daTaoDuKy) return base
+  return {
+    ...base,
+    maKy: next.maKy || '',
+    tenKy: next.tenKy || '',
+    thuTu: next.thuTu || null,
+    ngayBatDau: next.ngayBatDauGoiY || null,
+    ngayKetThuc: next.ngayKetThucGoiY || null
+  }
+})
+
 
 function layGiaTriHienThi(...values) {
   const value = values.find((item) => item !== null && item !== undefined && item !== '')
@@ -482,10 +711,10 @@ function layGiaTriHienThi(...values) {
 }
 
 function taoOThongTinNhomTheoKy(loaiNhom) {
-  const nhomGocLabel = loaiNhom === 'tuChon' ? 'Nhóm tự chọn' : 'Nhóm KT gốc'
-  const nhomGocValue = loaiNhom === 'tuChon'
-      ? layGiaTriHienThi(selected.nhomTuChonGoc?.ten, selected.nhomTuChonGoc?.ma)
-      : layGiaTriHienThi(selected.nhomKienThucGoc?.ten, selected.nhomKienThucGoc?.ma)
+  const nhommauLabel = loaiNhom === 'tuChon' ? 'Nhóm tự chọn' : 'Nhóm KT mẫu'
+  const nhommauValue = loaiNhom === 'tuChon'
+      ? layGiaTriHienThi(selected.nhomTuChonmau?.ten, selected.nhomTuChonmau?.ma)
+      : layGiaTriHienThi(selected.nhomKienThucmau?.ten, selected.nhomKienThucmau?.ma)
 
   return [
     {
@@ -494,14 +723,9 @@ function taoOThongTinNhomTheoKy(loaiNhom) {
       value: layGiaTriHienThi(selected.nganh?.tenNganh, selected.chuongTrinh?.tenNganh)
     },
     {
-      key: 'infoTrinhDo',
-      label: 'Trình độ',
-      value: layGiaTriHienThi(selected.trinhDoDaoTao?.tenTrinhDo, selected.chuongTrinh?.tenTrinhDo)
-    },
-    {
-      key: 'infoLoaiChuongTrinh',
-      label: 'Loại CT',
-      value: layGiaTriHienThi(selected.loaiChuongTrinh?.tenLoai, selected.chuongTrinh?.tenLoaiChuongTrinh)
+      key: 'infoNganhHeDaoTao',
+      label: 'Hệ đào tạo',
+      value: layGiaTriHienThi(selected.nganhHeDaoTao?.tenHe, selected.nganhHeDaoTao?.maHe)
     },
     {
       key: 'infoChuongTrinh',
@@ -519,9 +743,9 @@ function taoOThongTinNhomTheoKy(loaiNhom) {
       value: layGiaTriHienThi(selected.khungKy?.tenKy, selected.khungKy?.maKy)
     },
     {
-      key: 'infoNhomGoc',
-      label: nhomGocLabel,
-      value: nhomGocValue
+      key: 'infoNhommau',
+      label: nhommauLabel,
+      value: nhommauValue
     }
   ]
 }
@@ -539,32 +763,32 @@ const viTriHienTaiText = computed(() => {
 })
 
 const monHocParentText = computed(() => {
-  return `Đang chọn: Version ${selected.chuongTrinhVersion?.tenVersion || '-'} | Tạo môn học gốc trước khi tạo Chương trình môn`
+  return `Đang chọn: Version ${selected.chuongTrinhVersion?.tenVersion || '-'} | Tạo môn học mẫu trước khi tạo Chương trình môn`
 })
 
-const syllabusMonHocGocParent = computed(() => ({
+const syllabusMonHocmauParent = computed(() => ({
   monHocId: selected.chuongTrinhMon?.monHocId || selected.monHoc?.id || null
 }))
 
-const syllabusMonHocGocFilter = computed(() => ({
+const syllabusMonHocmauFilter = computed(() => ({
   monHocId: dongDangDung('monHoc')?.id || null
 }))
 
-const syllabusMonHocGocParentText = computed(() => {
+const syllabusMonHocmauParentText = computed(() => {
   const monHocDangChon = selected.chuongTrinhMon || selected.monHoc || {}
-  return `Đang chọn: Môn học gốc ${monHocDangChon.maMon || monHocDangChon.maMonTrongCt || '-'} - ${monHocDangChon.tenMon || '-'}`
+  return `Đang chọn: Môn học mẫu ${monHocDangChon.maMon || monHocDangChon.maMonTrongCt || '-'} - ${monHocDangChon.tenMon || '-'}`
 })
 
-const syllabusMonHocGocChiTietParent = computed(() => ({
-  syllabusMonHocGocId: selected.syllabusMonHocGoc?.id || null
+const syllabusMonHocmauChiTietParent = computed(() => ({
+  syllabusMonHocMauId: selected.syllabusMonHocmau?.id || null
 }))
 
-const syllabusMonHocGocChiTietFilter = computed(() => ({
-  syllabusMonHocGocId: dongDangDung('syllabusMonHocGoc')?.id || null
+const syllabusMonHocmauChiTietFilter = computed(() => ({
+  syllabusMonHocMauId: dongDangDung('syllabusMonHocmau')?.id || null
 }))
 
-const syllabusMonHocGocChiTietText = computed(() => {
-  return `Đang chọn: Syllabus môn học gốc ${selected.syllabusMonHocGoc?.ma || '-'} - ${selected.syllabusMonHocGoc?.ten || '-'}`
+const syllabusMonHocmauChiTietText = computed(() => {
+  return `Đang chọn: Syllabus môn học mẫu ${selected.syllabusMonHocmau?.ma || '-'} - ${selected.syllabusMonHocmau?.ten || '-'}`
 })
 
 const chuongTrinhMonParent = computed(() => ({
@@ -579,13 +803,13 @@ const chuongTrinhMonTheoKyFilter = computed(() => ({
   khungKyId: selected.khungKy?.id || null
 }))
 const tuKhoaLocMonHocTang7 = ref('')
-const tuKhoaLocSyllabusGocTang8 = ref('')
+const tuKhoaLocSyllabusmauTang8 = ref('')
 
-const danhSachSyllabusGocTang8DaLoc = computed(() => {
-  const tuKhoa = chuanHoaTuKhoaTimKiem(tuKhoaLocSyllabusGocTang8.value)
+const danhSachSyllabusmauTang8DaLoc = computed(() => {
+  const tuKhoa = chuanHoaTuKhoaTimKiem(tuKhoaLocSyllabusmauTang8.value)
   const monHocId = selected.chuongTrinhMon?.monHocId || selected.monHoc?.id || null
 
-  let danhSach = duLieu.value.syllabusMonHocGoc || []
+  let danhSach = duLieu.value.syllabusMonHocmau || []
 
   if (monHocId) {
     danhSach = danhSach.filter((row) => String(row.monHocId || '') === String(monHocId || ''))
@@ -626,7 +850,7 @@ const danhSachMonHocTang7DaLoc = computed(() => {
   const tuKhoa = chuanHoaTuKhoaTimKiem(tuKhoaLocMonHocTang7.value)
   const chuongTrinhVersionId = selected.chuongTrinhVersion?.id
 
-  // Tầng 7 chỉ dùng MÔN ĐÃ NẰM TRONG VERSION (đã copy vào version), không dùng toàn bộ môn gốc.
+  // Tầng 7 chỉ dùng MÔN ĐÃ NẰM TRONG VERSION (đã copy vào version), không dùng toàn bộ môn mẫu.
   const monHocIdTrongVersion = new Set(
       (duLieu.value.chuongTrinhMon || [])
           .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
@@ -674,7 +898,7 @@ const syllabusMonHocApDungParent = computed(() => ({
       route.query.chuongTrinhMonId ||
       route.params.chuongTrinhMonId ||
       null,
-  syllabusMonHocGocId: selected.syllabusMonHocGoc?.id || null
+  syllabusMonHocMauId: selected.syllabusMonHocmau?.id || null
 }))
 
 const chuongTrinhMonOnlyParentText = computed(() => {
@@ -698,9 +922,9 @@ function taoOThongTinSyllabusMonHoc() {
       label: 'Syllabus',
       value: layGiaTriHienThi(
           selected.syllabusMonHoc?.ten,
-          selected.syllabusMonHoc?.tenSyllabusMonHocGoc,
+          selected.syllabusMonHoc?.tenSyllabusMonHocmau,
           selected.syllabusMonHoc?.ma,
-          selected.syllabusMonHoc?.maSyllabusMonHocGoc
+          selected.syllabusMonHoc?.maSyllabusMonHocmau
       )
     },
     {
@@ -728,7 +952,7 @@ function tachDanhSachDuongDanTaiLieuCu(duongDan) {
               if (typeof item === 'string') {
                 return {
                   id: null,
-                  tenGoc: '',
+                  tenmau: '',
                   tenHienThi: '',
                   duongDan: item,
                   contentType: '',
@@ -738,8 +962,8 @@ function tachDanhSachDuongDanTaiLieuCu(duongDan) {
 
               return {
                 id: item?.id || item?.tepDinhKemId || null,
-                tenGoc: item?.tenGoc || item?.fileName || '',
-                tenHienThi: item?.tenHienThi || item?.tenGoc || item?.fileName || '',
+                tenmau: item?.tenmau || item?.fileName || '',
+                tenHienThi: item?.tenHienThi || item?.tenmau || item?.fileName || '',
                 duongDan: item?.duongDan || '',
                 contentType: item?.contentType || '',
                 dungLuong: item?.dungLuong || 0
@@ -750,7 +974,7 @@ function tachDanhSachDuongDanTaiLieuCu(duongDan) {
     } catch (error) {
       return [{
         id: null,
-        tenGoc: '',
+        tenmau: '',
         tenHienThi: '',
         duongDan: text,
         contentType: '',
@@ -761,7 +985,7 @@ function tachDanhSachDuongDanTaiLieuCu(duongDan) {
 
   return [{
     id: null,
-    tenGoc: '',
+    tenmau: '',
     tenHienThi: '',
     duongDan: text,
     contentType: '',
@@ -841,7 +1065,7 @@ async function uploadFileTaiLieu({file, files, payload, field}) {
     monHocId,
     chuongTrinhMonId,
     syllabusMonHocId: syllabusMonId,
-    taiLieuGocId: payload?.taiLieuGocId || null,
+    taiLieumauId: payload?.taiLieumauId || null,
     tangNghiepVu: field?.tangNghiepVu || 'tang-10-chi-tiet-syllabus-ap-dung'
   })
 
@@ -849,7 +1073,7 @@ async function uploadFileTaiLieu({file, files, payload, field}) {
 
   const danhSachDuongDanMoi = danhSachFileInfo.map((fileInfo, index) => ({
     id: fileInfo?.id || fileInfo?.tepDinhKemId || null,
-    tenGoc: fileInfo?.tenGoc || fileInfo?.fileName || danhSachFile[index]?.name || '',
+    tenmau: fileInfo?.tenmau || fileInfo?.fileName || danhSachFile[index]?.name || '',
     tenHienThi: fileInfo?.tenHienThi || danhSachFile[index]?.webkitRelativePath || danhSachFile[index]?.name || '',
     duongDan: tepDinhKemUploadService.taoDuongDanTaiFile(fileInfo),
     contentType: fileInfo?.contentType || danhSachFile[index]?.type || '',
@@ -886,17 +1110,17 @@ async function uploadFileSyllabusChuongTrinh({file, files, payload, field, editi
       selected.syllabusChuongTrinh?.id ||
       null
 
-  const syllabusChuongTrinhGocId =
-      payload?.syllabusChuongTrinhGocId ||
-      selected.syllabusChuongTrinhGoc?.id ||
-      (field?.tepNguon === 'syllabusChuongTrinhGoc' ? editingId : null) ||
+  const syllabusChuongTrinhmauId =
+      payload?.syllabusChuongTrinhmauId ||
+      selected.syllabusChuongTrinhmau?.id ||
+      (field?.tepNguon === 'syllabusChuongTrinhmau' ? editingId : null) ||
       null
 
   const danhSachFileInfo = await tepDinhKemUploadService.uploadMany({
     files: danhSachFile,
     module: 'dao-tao',
     nghiepVu: field?.nghiepVu || 'syllabus_chuong_trinh',
-    doiTuongId: syllabusChuongTrinhId || syllabusChuongTrinhGocId || versionId || 0,
+    doiTuongId: syllabusChuongTrinhId || syllabusChuongTrinhmauId || versionId || 0,
     nguoiGuiLoai: 'DAO_TAO',
     nguoiGuiId: 1,
     nguoiGuiTen: 'Đào tạo',
@@ -921,9 +1145,9 @@ async function uploadFileSyllabusChuongTrinh({file, files, payload, field, editi
             ? syllabusChuongTrinhId
             : null,
 
-    taiLieuGocId:
-        field?.tepNguon === 'syllabusChuongTrinhGoc'
-            ? syllabusChuongTrinhGocId
+    taiLieumauId:
+        field?.tepNguon === 'syllabusChuongTrinhmau'
+            ? syllabusChuongTrinhmauId
             : null,
 
     tangNghiepVu: field?.tangNghiepVu || 'tang-5-syllabus-chuong-trinh'
@@ -933,7 +1157,7 @@ async function uploadFileSyllabusChuongTrinh({file, files, payload, field, editi
 
   const danhSachDuongDanMoi = danhSachFileInfo.map((fileInfo, index) => ({
     id: fileInfo?.id || fileInfo?.tepDinhKemId || null,
-    tenGoc: fileInfo?.tenGoc || fileInfo?.fileName || danhSachFile[index]?.name || '',
+    tenmau: fileInfo?.tenmau || fileInfo?.fileName || danhSachFile[index]?.name || '',
     tenHienThi: fileInfo?.tenHienThi || danhSachFile[index]?.webkitRelativePath || danhSachFile[index]?.name || '',
     duongDan: tepDinhKemUploadService.taoDuongDanTaiFile(fileInfo),
     contentType: fileInfo?.contentType || danhSachFile[index]?.type || '',
@@ -959,9 +1183,9 @@ const syllabusMonParent = computed(() => ({
 const syllabusMonParentText = computed(() => {
   const tenSyllabus =
       selected.syllabusMonHoc?.ten ||
-      selected.syllabusMonHoc?.tenSyllabusMonHocGoc ||
+      selected.syllabusMonHoc?.tenSyllabusMonHocmau ||
       selected.syllabusMonHoc?.ma ||
-      selected.syllabusMonHoc?.maSyllabusMonHocGoc ||
+      selected.syllabusMonHoc?.maSyllabusMonHocmau ||
       selected.syllabusMonHoc?.mucTieu ||
       '-'
 
@@ -972,9 +1196,14 @@ function dongDangDung(key) {
   return viewed[key] || selected[key] || null
 }
 
-const chuongTrinhFilter = computed(() => ({
-  nganhLoaiChuongTrinhId: dongDangDung('nganhLoaiChuongTrinh')?.id || route.query.nganhLoaiChuongTrinhId || null
-}))
+const chuongTrinhFilter = computed(() => {
+  const nganhHeDaoTaoId =
+    selected.nganhHeDaoTao?.id ||
+    viewed.nganhHeDaoTao?.id ||
+    route.query.nganhHeDaoTaoId ||
+    null
+  return { nganhHeDaoTaoId }
+})
 
 const chuongTrinhVersionFilter = computed(() => ({
   chuongTrinhId: dongDangDung('chuongTrinh')?.id || null
@@ -1018,58 +1247,58 @@ function laMauQuyDoiKetQua(row) {
 }
 
 function laySyllabusNguonCotDiemId() {
-  return selected.syllabusMonHoc?.syllabusMonHocGocId
+  return selected.syllabusMonHoc?.syllabusMonHocMauId
       || selected.syllabusMonHoc?.syllabusMonHocNguonId
-      || selected.syllabusMonHocGoc?.id
+      || selected.syllabusMonHocmau?.id
       || null
 }
-function laySyllabusGocDangChon(row = {}) {
-  const syllabusMonHocGocId = row?.syllabusMonHocGocId
-      || row?.syllabusMonHocGoc?.id
+function laySyllabusmauDangChon(row = {}) {
+  const syllabusMonHocMauId = row?.syllabusMonHocMauId
+      || row?.syllabusMonHocmau?.id
       || laySyllabusNguonCotDiemId()
 
-  if (!syllabusMonHocGocId) return null
+  if (!syllabusMonHocMauId) return null
 
-  const trongDanhSach = (duLieu.value.syllabusMonHocGoc || []).find((item) => {
-    return String(item.id || '') === String(syllabusMonHocGocId || '')
+  const trongDanhSach = (duLieu.value.syllabusMonHocmau || []).find((item) => {
+    return String(item.id || '') === String(syllabusMonHocMauId || '')
   })
 
   if (trongDanhSach) return trongDanhSach
 
-  if (String(selected.syllabusMonHocGoc?.id || '') === String(syllabusMonHocGocId || '')) {
-    return selected.syllabusMonHocGoc
+  if (String(selected.syllabusMonHocmau?.id || '') === String(syllabusMonHocMauId || '')) {
+    return selected.syllabusMonHocmau
   }
 
   return null
 }
 
-function layTenSyllabusGocHienThi(row = {}) {
-  const syllabusGoc = laySyllabusGocDangChon(row)
-  const syllabusMonHocGocId = row?.syllabusMonHocGocId
-      || row?.syllabusMonHocGoc?.id
+function layTenSyllabusmauHienThi(row = {}) {
+  const syllabusmau = laySyllabusmauDangChon(row)
+  const syllabusMonHocMauId = row?.syllabusMonHocMauId
+      || row?.syllabusMonHocmau?.id
       || laySyllabusNguonCotDiemId()
 
-  return row?.tenSyllabusMonHocGoc
-      || row?.tenSyllabusGoc
-      || syllabusGoc?.ten
-      || selected.syllabusMonHoc?.tenSyllabusMonHocGoc
+  return row?.tenSyllabusMonHocmau
+      || row?.tenSyllabusmau
+      || syllabusmau?.ten
+      || selected.syllabusMonHoc?.tenSyllabusMonHocmau
       || row?.tenSyllabusMonHoc
       || row?.tenSyllabus
-      || syllabusGoc?.ma
-      || selected.syllabusMonHoc?.maSyllabusMonHocGoc
-      || (syllabusMonHocGocId ? `Syllabus gốc #${syllabusMonHocGocId}` : '-')
+      || syllabusmau?.ma
+      || selected.syllabusMonHoc?.maSyllabusMonHocmau
+      || (syllabusMonHocMauId ? `Syllabus mẫu #${syllabusMonHocMauId}` : '-')
 }
-const cotDiemSyllabusGocRows = computed(() => {
+const cotDiemSyllabusmauRows = computed(() => {
   const sourceSyllabusId = laySyllabusNguonCotDiemId()
 
   if (!sourceSyllabusId) return []
 
   return (duLieu.value.cauHinhDanhGiaMau || [])
-      .filter((row) => String(row.syllabusMonHocGocId || '') === String(sourceSyllabusId || ''))
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(sourceSyllabusId || ''))
       .map((row) => ({
         ...row,
 
-        tenSyllabusGocHienThi: layTenSyllabusGocHienThi(row)
+        tenSyllabusmauHienThi: layTenSyllabusmauHienThi(row)
       }))
 })
 const cotDiemSyllabusApDungRows = computed(() => {
@@ -1085,7 +1314,7 @@ const cotDiemSyllabusApDungRows = computed(() => {
       .map((row) => ({
         ...row,
 
-        tenSyllabusGocHienThi: layTenSyllabusGocHienThi(row)
+        tenSyllabusmauHienThi: layTenSyllabusmauHienThi(row)
       }))
 })
 watch(
@@ -1097,12 +1326,12 @@ watch(
 
 
 const quyDoiKetQuaDungChungRows = computed(() => {
-  const syllabusMonHocGocId = selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null
-  if (!syllabusMonHocGocId) return []
+  const syllabusMonHocMauId = selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null
+  if (!syllabusMonHocMauId) return []
 
-  return (quyDoiDiemMauGocRows.value || [])
+  return (quyDoiDiemMaumauRows.value || [])
       .filter(laMauQuyDoiKetQua)
-      .filter((row) => String(row.syllabusMonHocGocId || '') === String(syllabusMonHocGocId || ''))
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
 })
 
 const mauQuyDoiKetQuaDaGanSyllabusRows = computed(() => {
@@ -1115,28 +1344,28 @@ const mauQuyDoiKetQuaDaGanSyllabusRows = computed(() => {
 })
 
 
-const dieuKienMonHocGocTheoSyllabus = computed(() => {
-  const syllabusMonHocGocId = selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null
-  if (!syllabusMonHocGocId) return []
+const dieuKienMonHocmauTheoSyllabus = computed(() => {
+  const syllabusMonHocMauId = selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null
+  if (!syllabusMonHocMauId) return []
 
-  const dieuKienGocMap = new Map((duLieu.value.dieuKienMonHocGoc || []).map((row) => [String(row.id || ''), row]))
+  const dieuKienmauMap = new Map((duLieu.value.dieuKienMonHocmau || []).map((row) => [String(row.id || ''), row]))
 
-  return (duLieu.value.syllabusMonHocGocDieuKien || [])
-      .filter((row) => String(row.syllabusMonHocGocId || '') === String(syllabusMonHocGocId || ''))
+  return (duLieu.value.syllabusMonHocmauDieuKien || [])
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
       .map((row) => {
-        const goc = dieuKienGocMap.get(String(row.dieuKienGocId || '')) || {}
+        const mau = dieuKienmauMap.get(String(row.dieuKienmauId || '')) || {}
         return {
-          ...goc,
+          ...mau,
           ...row,
-          id: row.dieuKienGocId || goc.id || row.id,
-          dieuKienGocId: row.dieuKienGocId || goc.id || null,
-          syllabusMonHocGocDieuKienId: row.id,
-          ma: row.ma || goc.ma || '',
-          loai: row.loai || goc.loai || '',
-          noiDung: row.noiDung || goc.noiDung || '',
-          ghiChu: row.ghiChu || goc.ghiChu || '',
-          createdAt: row.createdAt || goc.createdAt || null,
-          updatedAt: row.updatedAt || goc.updatedAt || null
+          id: row.dieuKienmauId || mau.id || row.id,
+          dieuKienmauId: row.dieuKienmauId || mau.id || null,
+          syllabusMonHocmauDieuKienId: row.id,
+          ma: row.ma || mau.ma || '',
+          loai: row.loai || mau.loai || '',
+          noiDung: row.noiDung || mau.noiDung || '',
+          ghiChu: row.ghiChu || mau.ghiChu || '',
+          createdAt: row.createdAt || mau.createdAt || null,
+          updatedAt: row.updatedAt || mau.updatedAt || null
         }
       })
       .sort((a, b) => Number(a.thuTu || 0) - Number(b.thuTu || 0))
@@ -1179,79 +1408,68 @@ function laySelectedIdsTheoBang(key, allRows = [], rows = [], parentValues = {},
     return []
   }
 
-  const bangGocNoiVersion = {
-    nangLucDauRaGoc: {joinKey: 'chuongTrinhVersionNangLuc', gocIdKey: 'nangLucGocId'},
-    viTriViecLamGoc: {joinKey: 'chuongTrinhVersionViTriViecLam', gocIdKey: 'viTriGocId'},
+  const bangMauConSyllabus = {
+    mucTieuChuongTrinhmau: {apDungKey: 'mucTieuChuongTrinh'},
+    nangLucDauRamau: {apDungKey: 'nangLucDauRa'},
+    viTriViecLammau: {apDungKey: 'viTriViecLam'},
+    dieuKienTotNghiepmau: {apDungKey: 'dieuKienTotNghiep'}
   }
-  if (key === 'mucTieuChuongTrinhGoc') {
-    const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
-    if (!chuongTrinhVersionId) return []
+
+  if (bangMauConSyllabus[key]) {
+    const syllabusId = syllabusChuongTrinhIdDangGan.value
+    const mauId = syllabusChuongTrinhMauIdDangGan.value
+    if (!syllabusId || !mauId) return []
 
     const maDaLuu = new Set(
-        (duLieu.value.mucTieuChuongTrinh || [])
-            .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-            .map((row) => String(row.ma || ''))
+        (duLieu.value[bangMauConSyllabus[key].apDungKey] || [])
+            .filter((row) => String(row.syllabusChuongTrinhId || '') === String(syllabusId || ''))
+            .map((row) => String(row.ma || '').trim())
             .filter(Boolean)
     )
 
-    return (duLieu.value.mucTieuChuongTrinhGoc || [])
-        .filter((row) => maDaLuu.has(String(row.ma || '')))
+    return (duLieu.value[key] || [])
+        .filter((row) => String(row.syllabusChuongTrinhMauId || row.syllabusChuongTrinhmauId || '') === String(mauId || ''))
+        .filter((row) => maDaLuu.has(String(row.ma || '').trim()))
         .map((row) => row.id)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
-  if (key === 'dieuKienTotNghiepGoc') {
-    const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
-    if (!chuongTrinhVersionId) return []
-
-    const maDaLuu = new Set(
-        (duLieu.value.dieuKienTotNghiep || [])
-            .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-            .map((row) => String(row.ma || ''))
-            .filter(Boolean)
-    )
-
-    return (duLieu.value.dieuKienTotNghiepGoc || [])
-        .filter((row) => maDaLuu.has(String(row.ma || '')))
-        .map((row) => row.id)
-        .filter((id) => id !== null && id !== undefined && id !== '')
-  }
-  if (key === 'syllabusChuongTrinhGoc') {
+  if (key === 'syllabusChuongTrinhmau') {
     const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
     if (!chuongTrinhVersionId) return []
     return (duLieu.value.syllabusChuongTrinh || [])
         .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-        .map((row) => row.syllabusChuongTrinhGocId)
+        .map((row) => row.syllabusChuongTrinhmauId)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'khungKyGoc') {
+  if (key === 'khungKymau') {
     const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
     if (!chuongTrinhVersionId) return []
     return (duLieu.value.khungKy || [])
         .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-        .map((row) => row.khungKyGocId)
+        .map((row) => row.khungKymauId)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'nhomKienThucGoc') {
+  if (key === 'nhomKienThucmau') {
     const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
     if (!chuongTrinhVersionId) return []
     return (duLieu.value.nhomKienThuc || [])
         .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-        .map((row) => row.nhomKienThucGocId)
+        .map((row) => row.nhomKienThucmauId)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'nhomTuChonGoc') {
+  if (key === 'nhomTuChonmau') {
     const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
     if (!chuongTrinhVersionId) return []
     return (duLieu.value.nhomTuChon || [])
         .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-        .map((row) => row.nhomTuChonGocId)
+        .map((row) => row.nhomTuChonmauId)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'dieuKienMonHocGoc') {
+  if (key === 'dieuKienMonHocmau') {
     const syllabusMonId = filterValues.syllabusMonId || parentValues.syllabusMonId || selected.syllabusMonHoc?.id
     if (!syllabusMonId) return []
 
@@ -1262,13 +1480,13 @@ function laySelectedIdsTheoBang(key, allRows = [], rows = [], parentValues = {},
             .filter(Boolean)
     )
 
-    return (duLieu.value.dieuKienMonHocGoc || [])
+    return (duLieu.value.dieuKienMonHocmau || [])
         .filter((row) => maDaLuu.has(String(row.ma || '')))
         .map((row) => row.id)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'taiLieuGoc') {
+  if (key === 'taiLieumau') {
     const syllabusMonId = filterValues.syllabusMonId || parentValues.syllabusMonId || selected.syllabusMonHoc?.id
     if (!syllabusMonId) return []
 
@@ -1279,13 +1497,13 @@ function laySelectedIdsTheoBang(key, allRows = [], rows = [], parentValues = {},
             .filter(Boolean)
     )
 
-    return (duLieu.value.taiLieuGoc || [])
+    return (duLieu.value.taiLieumau || [])
         .filter((row) => maDaLuu.has(String(row.ma || '')))
         .map((row) => row.id)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'syllabusMonHocGocChuongBai') {
+  if (key === 'syllabusMonHocmauChuongBai') {
     const syllabusMonId = filterValues.syllabusMonId || parentValues.syllabusMonId || selected.syllabusMonHoc?.id
     if (!syllabusMonId) return []
 
@@ -1303,7 +1521,7 @@ function laySelectedIdsTheoBang(key, allRows = [], rows = [], parentValues = {},
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'syllabusMonHocGocTaiLieu') {
+  if (key === 'syllabusMonHocmauTaiLieu') {
     const syllabusMonId = filterValues.syllabusMonId || parentValues.syllabusMonId || selected.syllabusMonHoc?.id
     if (!syllabusMonId) return []
 
@@ -1313,34 +1531,23 @@ function laySelectedIdsTheoBang(key, allRows = [], rows = [], parentValues = {},
           if (String(item.syllabusMonId || '') !== String(syllabusMonId || '')) return false
           const cungMa = row.ma && item.ma && String(item.ma || '') === String(row.ma || '')
           const cungTen = row.ten && item.ten && String(item.ten || '') === String(row.ten || '')
-          const cungTaiLieuGoc = row.taiLieuGocId && item.taiLieuGocId && String(item.taiLieuGocId || '') === String(row.taiLieuGocId || '')
-          return cungMa || cungTen || cungTaiLieuGoc
+          const cungTaiLieumau = row.taiLieumauId && item.taiLieumauId && String(item.taiLieumauId || '') === String(row.taiLieumauId || '')
+          return cungMa || cungTen || cungTaiLieumau
         }))
         .map((row) => row.id)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (key === 'syllabusMonHocGoc') {
+  if (key === 'syllabusMonHocmau') {
     const chuongTrinhMonId = filterValues.chuongTrinhMonId || parentValues.chuongTrinhMonId || selected.chuongTrinhMon?.id
     if (!chuongTrinhMonId) return []
 
     return (duLieu.value.syllabusMonHoc || [])
         .filter((row) => String(row.chuongTrinhMonId || '') === String(chuongTrinhMonId || ''))
-        .map((row) => row.syllabusMonHocGocId)
+        .map((row) => row.syllabusMonHocMauId)
         .filter((id) => id !== null && id !== undefined && id !== '')
   }
 
-  if (bangGocNoiVersion[key]) {
-    const config = bangGocNoiVersion[key]
-    const chuongTrinhVersionId = filterValues.chuongTrinhVersionId || parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
-
-    if (!chuongTrinhVersionId) return []
-
-    return (duLieu.value[config.joinKey] || [])
-        .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-        .map((row) => row[config.gocIdKey])
-        .filter((id) => id !== null && id !== undefined && id !== '')
-  }
 
   if (key === 'quyDoiDiemMau') {
     const syllabusMonHocId = filterValues.syllabusMonHocId || parentValues.syllabusMonHocId || selected.syllabusMonHoc?.id
@@ -1420,24 +1627,24 @@ const bangXuongSongKeys = new Set([
 
 
 const bangDocLapKhongLocTheoCha = new Set([
-  // Các bảng gốc/kho mẫu dùng chung phải luôn hiện toàn bộ dữ liệu từ API gốc.
+  // Các bảng mẫu/kho mẫu dùng chung phải luôn hiện toàn bộ dữ liệu từ API mẫu.
   // Việc chọn Chương trình môn chỉ dùng cho nút Lưu để gắn qua bảng nối, không được làm mất dữ liệu mẫu.
   'quyDoiDiemMau'
 ])
 
-const bangGocMauKeys = new Set([
-  'mucTieuChuongTrinhGoc',
-  'nangLucDauRaGoc',
-  'viTriViecLamGoc',
-  'dieuKienTotNghiepGoc',
-  'syllabusChuongTrinhGoc',
-  'khungKyGoc',
-  'nhomKienThucGoc',
-  'nhomTuChonGoc',
+const bangmauMauKeys = new Set([
+  'mucTieuChuongTrinhmau',
+  'nangLucDauRamau',
+  'viTriViecLammau',
+  'dieuKienTotNghiepmau',
+  'syllabusChuongTrinhmau',
+  'khungKymau',
+  'nhomKienThucmau',
+  'nhomTuChonmau',
   'monHoc',
-  'syllabusMonHocGoc',
-  'dieuKienMonHocGoc',
-  'taiLieuGoc',
+  'syllabusMonHocmau',
+  'dieuKienMonHocmau',
+  'taiLieumau',
   'quyDoiDiemMau'
 ])
 
@@ -1445,7 +1652,7 @@ const nhanNutXemTheoBang = {
   nganh: 'Xem chương trình',
   chuongTrinh: 'Xem version',
   chuongTrinhVersion: 'Xem chi tiết version',
-  monHoc: 'Xem syllabus gốc',
+  monHoc: 'Xem syllabus mẫu',
   chuongTrinhMon: 'Xem syllabus áp dụng',
   syllabusMonHoc: 'Xem chi tiết syllabus',
   nhomKienThuc: 'Xem môn trong nhóm',
@@ -1453,57 +1660,52 @@ const nhanNutXemTheoBang = {
 }
 
 const bangKhongCanChon = new Set([
-  'syllabusChuongTrinh',
   'chuongTrinhVersionMucTieu',
-  'mucTieuChuongTrinh',
   'chuongTrinhVersionNangLuc',
-  'nangLucDauRa',
   'chuongTrinhVersionViTriViecLam',
-  'viTriViecLam',
   'chuongTrinhVersionDieuKienTotNghiep',
-  'dieuKienTotNghiep',
   'monTuChon',
   'monTienQuyet',
   'chuongTrinhMonQuyDoiDiemMau',
   'cauHinhDanhGiaMau',
   'cauHinhDanhGia',
   'quyDoiDiem',
-  'syllabusMonHocGocChuongBai',
-  'syllabusMonHocGocDieuKien',
-  'syllabusMonHocGocTaiLieu',
+  'syllabusMonHocmauChuongBai',
+  'syllabusMonHocmauDieuKien',
+  'syllabusMonHocmauTaiLieu',
   'syllabusMonHocDieuKien',
   'syllabusMonHocTaiLieu',
 ])
 
 const bangChiLuuGanKhongChon = new Set([
-  'syllabusChuongTrinhGoc',
-  'mucTieuChuongTrinhGoc',
-  'nangLucDauRaGoc',
-  'viTriViecLamGoc',
-  'dieuKienTotNghiepGoc',
-  'khungKyGoc',
-  'nhomKienThucGoc',
-  'nhomTuChonGoc',
+  'syllabusChuongTrinhmau',
+  'mucTieuChuongTrinhmau',
+  'nangLucDauRamau',
+  'viTriViecLammau',
+  'dieuKienTotNghiepmau',
+  'khungKymau',
+  'nhomKienThucmau',
+  'nhomTuChonmau',
   'monHoc',
-  'syllabusMonHocGoc',
+  'syllabusMonHocmau',
   'quyDoiDiemMau',
-  'dieuKienMonHocGoc',
-  'taiLieuGoc'
+  'dieuKienMonHocmau',
+  'taiLieumau'
 ])
 
 const bangCoNutLuuBoLuuMacDinh = new Set([
-  'syllabusChuongTrinhGoc',
-  'mucTieuChuongTrinhGoc',
-  'nangLucDauRaGoc',
-  'viTriViecLamGoc',
-  'dieuKienTotNghiepGoc',
-  'khungKyGoc',
-  'nhomKienThucGoc',
-  'nhomTuChonGoc',
-  'syllabusMonHocGoc',
+  'syllabusChuongTrinhmau',
+  'mucTieuChuongTrinhmau',
+  'nangLucDauRamau',
+  'viTriViecLammau',
+  'dieuKienTotNghiepmau',
+  'khungKymau',
+  'nhomKienThucmau',
+  'nhomTuChonmau',
+  'syllabusMonHocmau',
   'quyDoiDiemMau',
-  'dieuKienMonHocGoc',
-  'taiLieuGoc'
+  'dieuKienMonHocmau',
+  'taiLieumau'
 ])
 
 const bangChiHienTrangThaiDaLuuMacDinh = new Set([
@@ -1517,24 +1719,19 @@ const bangChiHienTrangThaiDaLuuMacDinh = new Set([
   'monHoc',
   'chuongTrinhMon',
   'syllabusMonHoc',
-  'syllabusChuongTrinh',
   'chuongTrinhVersionMucTieu',
-  'mucTieuChuongTrinh',
   'chuongTrinhVersionNangLuc',
-  'nangLucDauRa',
   'chuongTrinhVersionViTriViecLam',
-  'viTriViecLam',
   'chuongTrinhVersionDieuKienTotNghiep',
-  'dieuKienTotNghiep',
   'monTuChon',
   'monTienQuyet',
   'chuongTrinhMonQuyDoiDiemMau',
   'cauHinhDanhGiaMau',
   'cauHinhDanhGia',
   'quyDoiDiem',
-  'syllabusMonHocGocChuongBai',
-  'syllabusMonHocGocDieuKien',
-  'syllabusMonHocGocTaiLieu',
+  'syllabusMonHocmauChuongBai',
+  'syllabusMonHocmauDieuKien',
+  'syllabusMonHocmauTaiLieu',
   'syllabusChuongBai',
   'syllabusMonHocDieuKien',
   'dieuKienMonHoc',
@@ -1591,7 +1788,10 @@ function xemDongBang(bang, item) {
   if (bang.key === 'chuongTrinh') {
     router.push({
       name: 'DaoTao.XemChuongTrinh.Version',
-      params: {nganhId: item.nganhId || selected.nganh?.id, chuongTrinhId: item.id}
+      params: {nganhId: item.nganhId || selected.nganh?.id, chuongTrinhId: item.id},
+      query: {
+        nganhHeDaoTaoId: item.nganhHeDaoTaoId || selected.nganhHeDaoTao?.id || undefined
+      }
     })
     return
   }
@@ -1646,7 +1846,7 @@ function xemDongBang(bang, item) {
 
   if (bang.key === 'monHoc') {
     router.push({
-      name: 'DaoTao.XemChuongTrinh.SyllabusGoc',
+      name: 'DaoTao.XemChuongTrinh.Syllabusmau',
       params: {
         nganhId: selected.nganh?.id,
         chuongTrinhId: selected.chuongTrinh?.id,
@@ -1660,7 +1860,7 @@ function xemDongBang(bang, item) {
   if (bang.key === 'chuongTrinhMon') {
     chonMonHocTheoChuongTrinhMon(item)
     router.push({
-      name: 'DaoTao.XemChuongTrinh.SyllabusGoc',
+      name: 'DaoTao.XemChuongTrinh.Syllabusmau',
       params: {
         nganhId: selected.nganh?.id,
         chuongTrinhId: selected.chuongTrinh?.id,
@@ -1675,7 +1875,7 @@ function xemDongBang(bang, item) {
 }
 
 function xemTepTrongCotFileDaLuu(bang, payload) {
-  if (!['taiLieuGoc', 'syllabusTaiLieu', 'syllabusChuongTrinhGoc', 'syllabusChuongTrinh'].includes(bang?.key)) return
+  if (!['taiLieumau', 'syllabusTaiLieu', 'syllabusChuongTrinhmau', 'syllabusChuongTrinh'].includes(bang?.key)) return
 
   const item = payload?.item || payload || {}
 
@@ -1684,11 +1884,11 @@ function xemTepTrongCotFileDaLuu(bang, payload) {
     return
   }
 
-  if (!['syllabusChuongTrinhGoc', 'syllabusChuongTrinh'].includes(bang.key)) {
+  if (!['syllabusChuongTrinhmau', 'syllabusChuongTrinh'].includes(bang.key)) {
     selectEntity(bang.key, item)
   }
 
-  if (['syllabusChuongTrinhGoc', 'syllabusChuongTrinh'].includes(bang.key)) {
+  if (['syllabusChuongTrinhmau', 'syllabusChuongTrinh'].includes(bang.key)) {
     router.push({
       name: 'DaoTao.XemChuongTrinh.SyllabusTep',
       params: taoParamsTangSau({
@@ -1699,7 +1899,7 @@ function xemTepTrongCotFileDaLuu(bang, payload) {
       }),
       query: taoParamsTangSau({
         tepNguon: bang.key,
-        syllabusChuongTrinhGocId: bang.key === 'syllabusChuongTrinhGoc' ? item.id : null,
+        syllabusChuongTrinhmauId: bang.key === 'syllabusChuongTrinhmau' ? item.id : null,
         syllabusChuongTrinhId: bang.key === 'syllabusChuongTrinh' ? item.id : null
       })
     })
@@ -1729,8 +1929,8 @@ function xemTepTrongCotFileDaLuu(bang, payload) {
     khungKyId: selected.khungKy?.id || selected.chuongTrinhMon?.khungKyId || route.query.khungKyId
   }
 
-  if (bang.key === 'taiLieuGoc') {
-    query.taiLieuGocId = item.id
+  if (bang.key === 'taiLieumau') {
+    query.taiLieumauId = item.id
   }
 
   if (bang.key === 'syllabusTaiLieu') {
@@ -1750,22 +1950,22 @@ function xemTepTrongCotFileDaLuu(bang, payload) {
 }
 
 const bangCoNutLuuLienKet = new Set([
-  'syllabusChuongTrinhGoc',
-  'khungKyGoc',
-  'nhomKienThucGoc',
-  'nhomTuChonGoc',
-  'syllabusMonHocGoc',
-  'mucTieuChuongTrinhGoc',
-  'nangLucDauRaGoc',
-  'viTriViecLamGoc',
-  'dieuKienTotNghiepGoc',
+  'syllabusChuongTrinhmau',
+  'khungKymau',
+  'nhomKienThucmau',
+  'nhomTuChonmau',
+  'syllabusMonHocmau',
+  'mucTieuChuongTrinhmau',
+  'nangLucDauRamau',
+  'viTriViecLammau',
+  'dieuKienTotNghiepmau',
   'monHoc',
   'chuongTrinhMon',
   'monTienQuyet',
   'quyDoiDiemMau',
   'cauHinhDanhGiaMau',
-  'dieuKienMonHocGoc',
-  'taiLieuGoc',
+  'dieuKienMonHocmau',
+  'taiLieumau',
   'dieuKienMonHoc',
   'syllabusChuongBai',
   'syllabusTaiLieu'
@@ -1860,10 +2060,10 @@ function layDuLieuPhanHoiLuu(result) {
   return result?.data?.data || result?.data || result || null
 }
 
-function taoPayloadSyllabusMonHocTuGoc(item, chuongTrinhMonId) {
+function taoPayloadSyllabusMonHocTumau(item, chuongTrinhMonId) {
   return {
     chuongTrinhMonId,
-    syllabusMonHocGocId: item.id,
+    syllabusMonHocMauId: item.id,
     monHocId: item.monHocId || selected.monHoc?.id || selected.chuongTrinhMon?.monHocId || null,
     ma: item.ma || '',
     ten: item.ten || '',
@@ -1893,30 +2093,30 @@ function taoMaChuongTuDong(row, index) {
   return `CH-${soThuTu}`
 }
 
-function layTenDieuKienTuGoc(dieuKienGoc) {
-  const ma = String(dieuKienGoc?.ma || '').trim()
-  const noiDung = String(dieuKienGoc?.noiDung || '').trim()
+function layTenDieuKienTumau(dieuKienmau) {
+  const ma = String(dieuKienmau?.ma || '').trim()
+  const noiDung = String(dieuKienmau?.noiDung || '').trim()
   if (ma && noiDung) return `${ma} - ${noiDung}`.slice(0, 250)
-  return (noiDung || ma || 'Điều kiện gốc').slice(0, 250)
+  return (noiDung || ma || 'Điều kiện mẫu').slice(0, 250)
 }
 
-async function copyChiTietSyllabusGocSangSyllabusMon({syllabusMonId, syllabusMonHocGocId, force = false}) {
-  if (!syllabusMonId || !syllabusMonHocGocId) return
+async function copyChiTietSyllabusmauSangSyllabusMon({syllabusMonId, syllabusMonHocMauId, force = false}) {
+  if (!syllabusMonId || !syllabusMonHocMauId) return
 
   const serviceChuongBai = services.syllabusChuongBai
   const serviceDieuKien = services.dieuKienMonHoc
   const serviceTaiLieu = services.syllabusTaiLieu
 
-  const chuongBaiGoc = (duLieu.value.syllabusMonHocGocChuongBai || [])
-      .filter((row) => String(row.syllabusMonHocGocId || '') === String(syllabusMonHocGocId || ''))
+  const chuongBaimau = (duLieu.value.syllabusMonHocmauChuongBai || [])
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
       .sort((a, b) => Number(a.thuTu ?? 999999) - Number(b.thuTu ?? 999999))
 
-  const ganDieuKienGoc = (duLieu.value.syllabusMonHocGocDieuKien || [])
-      .filter((row) => String(row.syllabusMonHocGocId || '') === String(syllabusMonHocGocId || ''))
+  const ganDieuKienmau = (duLieu.value.syllabusMonHocmauDieuKien || [])
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
       .sort((a, b) => Number(a.thuTu ?? 999999) - Number(b.thuTu ?? 999999))
 
-  const ganTaiLieuGoc = (duLieu.value.syllabusMonHocGocTaiLieu || [])
-      .filter((row) => String(row.syllabusMonHocGocId || '') === String(syllabusMonHocGocId || ''))
+  const ganTaiLieumau = (duLieu.value.syllabusMonHocmauTaiLieu || [])
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
       .sort((a, b) => Number(a.thuTu ?? 999999) - Number(b.thuTu ?? 999999))
 
   const chuongBaiDaCo = (duLieu.value.syllabusChuongBai || [])
@@ -1932,8 +2132,8 @@ async function copyChiTietSyllabusGocSangSyllabusMon({syllabusMonId, syllabusMon
   let soDieuKien = 0
   let soTaiLieu = 0
 
-  if (serviceChuongBai?.create && chuongBaiGoc.length && (force || !chuongBaiDaCo.length)) {
-    for (const [index, row] of chuongBaiGoc.entries()) {
+  if (serviceChuongBai?.create && chuongBaimau.length && (force || !chuongBaiDaCo.length)) {
+    for (const [index, row] of chuongBaimau.entries()) {
       await serviceChuongBai.create({
         syllabusMonId,
         maChuong: row.maChuong || taoMaChuongTuDong(row, index),
@@ -1951,46 +2151,46 @@ async function copyChiTietSyllabusGocSangSyllabusMon({syllabusMonId, syllabusMon
     }
   }
 
-  if (serviceDieuKien?.create && ganDieuKienGoc.length && (force || !dieuKienDaCo.length)) {
-    for (const [index, gan] of ganDieuKienGoc.entries()) {
-      const dieuKienGoc = (duLieu.value.dieuKienMonHocGoc || [])
-          .find((row) => String(row.id || '') === String(gan.dieuKienGocId || ''))
+  if (serviceDieuKien?.create && ganDieuKienmau.length && (force || !dieuKienDaCo.length)) {
+    for (const [index, gan] of ganDieuKienmau.entries()) {
+      const dieuKienmau = (duLieu.value.dieuKienMonHocmau || [])
+          .find((row) => String(row.id || '') === String(gan.dieuKienmauId || ''))
 
-      if (!dieuKienGoc) continue
+      if (!dieuKienmau) continue
 
       await serviceDieuKien.create({
         syllabusMonId,
-        loai: dieuKienGoc.loai || 'khac',
-        ten: layTenDieuKienTuGoc(dieuKienGoc),
-        noiDung: dieuKienGoc.noiDung || layTenDieuKienTuGoc(dieuKienGoc),
-        soLuong: dieuKienGoc.soLuong ?? null,
-        yeuCau: dieuKienGoc.yeuCau || null,
+        loai: dieuKienmau.loai || 'khac',
+        ten: layTenDieuKienTumau(dieuKienmau),
+        noiDung: dieuKienmau.noiDung || layTenDieuKienTumau(dieuKienmau),
+        soLuong: dieuKienmau.soLuong ?? null,
+        yeuCau: dieuKienmau.yeuCau || null,
         thuTu: gan.thuTu ?? index + 1,
-        ghiChu: [gan.ghiChu, dieuKienGoc.ghiChu].filter(Boolean).join(' | ') || null
+        ghiChu: [gan.ghiChu, dieuKienmau.ghiChu].filter(Boolean).join(' | ') || null
       })
       soDieuKien += 1
     }
   }
 
-  if (serviceTaiLieu?.create && ganTaiLieuGoc.length && (force || !taiLieuDaCo.length)) {
-    for (const [index, gan] of ganTaiLieuGoc.entries()) {
-      const taiLieuGoc = (duLieu.value.taiLieuGoc || [])
-          .find((row) => String(row.id || '') === String(gan.taiLieuGocId || ''))
+  if (serviceTaiLieu?.create && ganTaiLieumau.length && (force || !taiLieuDaCo.length)) {
+    for (const [index, gan] of ganTaiLieumau.entries()) {
+      const taiLieumau = (duLieu.value.taiLieumau || [])
+          .find((row) => String(row.id || '') === String(gan.taiLieumauId || ''))
 
-      if (!taiLieuGoc) continue
+      if (!taiLieumau) continue
 
       await serviceTaiLieu.create({
         syllabusMonId,
-        ma: taiLieuGoc.ma || `TL-${syllabusMonId}-${index + 1}`,
-        ten: taiLieuGoc.ten || `Tài liệu ${index + 1}`,
-        loai: taiLieuGoc.loai || null,
-        tacGia: taiLieuGoc.tacGia || null,
-        nhaXuatBan: taiLieuGoc.nhaXuatBan || null,
-        namXuatBan: taiLieuGoc.namXuatBan ?? null,
-        duongDan: taiLieuGoc.duongDan || null,
+        ma: taiLieumau.ma || `TL-${syllabusMonId}-${index + 1}`,
+        ten: taiLieumau.ten || `Tài liệu ${index + 1}`,
+        loai: taiLieumau.loai || null,
+        tacGia: taiLieumau.tacGia || null,
+        nhaXuatBan: taiLieumau.nhaXuatBan || null,
+        namXuatBan: taiLieumau.namXuatBan ?? null,
+        duongDan: taiLieumau.duongDan || null,
         batBuoc: Boolean(gan.batBuoc),
         thuTu: gan.thuTu ?? index + 1,
-        ghiChu: [gan.ghiChu, taiLieuGoc.ghiChu].filter(Boolean).join(' | ') || null
+        ghiChu: [gan.ghiChu, taiLieumau.ghiChu].filter(Boolean).join(' | ') || null
       })
       soTaiLieu += 1
     }
@@ -1999,13 +2199,13 @@ async function copyChiTietSyllabusGocSangSyllabusMon({syllabusMonId, syllabusMon
   if (soChuongBai || soDieuKien || soTaiLieu) {
     datThongBaoBang(
         'syllabusMonHoc',
-        `Đã copy chi tiết từ syllabus gốc: ${soChuongBai} chương/bài, ${soTaiLieu} tài liệu, ${soDieuKien} điều kiện.`,
+        `Đã copy chi tiết từ syllabus mẫu: ${soChuongBai} chương/bài, ${soTaiLieu} tài liệu, ${soDieuKien} điều kiện.`,
         'success'
     )
   } else {
     datThongBaoBang(
         'syllabusMonHoc',
-        'Đã gán syllabus. Chi tiết chương/bài, tài liệu, điều kiện không copy thêm vì bảng áp dụng đã có dữ liệu hoặc syllabus gốc chưa có chi tiết.',
+        'Đã gán syllabus. Chi tiết chương/bài, tài liệu, điều kiện không copy thêm vì bảng áp dụng đã có dữ liệu hoặc syllabus mẫu chưa có chi tiết.',
         'success'
     )
   }
@@ -2072,7 +2272,7 @@ const soCotDiemMauChuaGan = computed(() => {
   const syllabusMonHocId = syllabusMonHocScopeParent.value.syllabusMonHocId
   if (!syllabusMonHocId) return 0
 
-  return (cotDiemSyllabusGocRows.value || [])
+  return (cotDiemSyllabusmauRows.value || [])
       .filter((row) => !timCotDiemSyllabusTuMau(row, syllabusMonHocId))
       .length
 })
@@ -2085,7 +2285,7 @@ const cotDiemMauDaTichChonRows = computed(() => {
   const selectedIds = new Set(cotDiemMauDaTichChonIds.value.map((id) => String(id)))
   if (!selectedIds.size) return []
 
-  return (cotDiemSyllabusGocRows.value || []).filter((row) => selectedIds.has(String(row.id)))
+  return (cotDiemSyllabusmauRows.value || []).filter((row) => selectedIds.has(String(row.id)))
 })
 
 const coTheGanCotDiemMauDaTichChon = computed(() => {
@@ -2161,7 +2361,7 @@ async function ganTatCaCotDiemMauVaoSyllabus() {
     return
   }
 
-  const rowsCanCopy = (cotDiemSyllabusGocRows.value || [])
+  const rowsCanCopy = (cotDiemSyllabusmauRows.value || [])
       .filter((row) => !timCotDiemSyllabusTuMau(row, syllabusMonHocId))
 
   if (!rowsCanCopy.length) {
@@ -2217,98 +2417,98 @@ async function ganCotDiemMauVaoSyllabus(item) {
   }
 }
 
-async function ganSyllabusGocVaoSyllabusMonHocApDung(item, {boGanNeuDaGan = false} = {}) {
+async function ganSyllabusmauVaoSyllabusMonHocApDung(item, {boGanNeuDaGan = false} = {}) {
   if (!item?.id) {
-    datThongBaoBang('syllabusMonHocGoc', 'Không tìm thấy syllabus gốc để gán.', 'error')
+    datThongBaoBang('syllabusMonHocmau', 'Không tìm thấy syllabus mẫu để gán.', 'error')
     return
   }
 
   const chuongTrinhMonId = selected.chuongTrinhMon?.id || route.query.chuongTrinhMonId || route.params.chuongTrinhMonId || null
   if (!chuongTrinhMonId) {
-    datThongBaoBang('syllabusMonHocGoc', 'Cần chọn Môn trong chương trình ở tầng 7 trước khi gán syllabus gốc.', 'error')
+    datThongBaoBang('syllabusMonHocmau', 'Cần chọn Môn trong chương trình ở tầng 7 trước khi gán syllabus mẫu.', 'error')
     return
   }
 
   const service = services.syllabusMonHoc
   if (!service?.create) {
-    datThongBaoBang('syllabusMonHocGoc', 'Chưa khai báo API tạo syllabus_mon_hoc.', 'error')
+    datThongBaoBang('syllabusMonHocmau', 'Chưa khai báo API tạo syllabus_mon_hoc.', 'error')
     return
   }
 
-  const existingCungGoc = (duLieu.value.syllabusMonHoc || []).find((row) => {
+  const existingCungmau = (duLieu.value.syllabusMonHoc || []).find((row) => {
     return String(row.chuongTrinhMonId || '') === String(chuongTrinhMonId || '')
-        && String(row.syllabusMonHocGocId || '') === String(item.id || '')
+        && String(row.syllabusMonHocMauId || '') === String(item.id || '')
   })
 
-  if (existingCungGoc?.id) {
+  if (existingCungmau?.id) {
     if (boGanNeuDaGan) {
       if (!service?.delete) {
-        datThongBaoBang('syllabusMonHocGoc', 'Chưa khai báo API xóa syllabus_mon_hoc để bỏ chọn syllabus gốc.', 'error')
+        datThongBaoBang('syllabusMonHocmau', 'Chưa khai báo API xóa syllabus_mon_hoc để bỏ chọn syllabus mẫu.', 'error')
         return
       }
 
       try {
-        await service.delete(existingCungGoc.id)
-        selectEntity('syllabusMonHocGoc', null)
+        await service.delete(existingCungmau.id)
+        selectEntity('syllabusMonHocmau', null)
         selectEntity('syllabusMonHoc', null)
         await taiDuLieuCoSanTatCaBang()
-        datThongBaoBang('syllabusMonHocGoc', 'Đã bỏ chọn syllabus gốc khỏi môn trong chương trình.', 'success')
+        datThongBaoBang('syllabusMonHocmau', 'Đã bỏ chọn syllabus mẫu khỏi môn trong chương trình.', 'success')
         datThongBaoBang('syllabusMonHoc', 'Bảng Syllabus đã gán vào môn trong chương trình đã được cập nhật.', 'success')
       } catch (error) {
-        datThongBaoBang('syllabusMonHocGoc', layThongBaoLoi(error, 'Không bỏ chọn được syllabus gốc khỏi môn trong chương trình.'), 'error')
+        datThongBaoBang('syllabusMonHocmau', layThongBaoLoi(error, 'Không bỏ chọn được syllabus mẫu khỏi môn trong chương trình.'), 'error')
       }
       return
     }
 
-    selectEntity('syllabusMonHocGoc', item)
-    selectEntity('syllabusMonHoc', existingCungGoc)
+    selectEntity('syllabusMonHocmau', item)
+    selectEntity('syllabusMonHoc', existingCungmau)
     try {
-      await copyChiTietSyllabusGocSangSyllabusMon({
-        syllabusMonId: existingCungGoc.id,
-        syllabusMonHocGocId: item.id,
+      await copyChiTietSyllabusmauSangSyllabusMon({
+        syllabusMonId: existingCungmau.id,
+        syllabusMonHocMauId: item.id,
         force: false
       })
     } catch (error) {
-      datThongBaoBang('syllabusMonHoc', layThongBaoLoi(error, 'Syllabus đã gán, nhưng không copy bổ sung được chi tiết từ syllabus gốc.'), 'error')
+      datThongBaoBang('syllabusMonHoc', layThongBaoLoi(error, 'Syllabus đã gán, nhưng không copy bổ sung được chi tiết từ syllabus mẫu.'), 'error')
     }
-    datThongBaoBang('syllabusMonHocGoc', 'Syllabus gốc này đã được gán vào môn trong chương trình. Đã chọn dòng áp dụng bên dưới.', 'success')
+    datThongBaoBang('syllabusMonHocmau', 'Syllabus mẫu này đã được gán vào môn trong chương trình. Đã chọn dòng áp dụng bên dưới.', 'success')
     return
   }
 
-  const existingKhacGoc = (duLieu.value.syllabusMonHoc || []).find((row) => {
+  const existingKhacmau = (duLieu.value.syllabusMonHoc || []).find((row) => {
     return String(row.chuongTrinhMonId || '') === String(chuongTrinhMonId || '')
   })
 
-  const payload = taoPayloadSyllabusMonHocTuGoc(item, chuongTrinhMonId)
+  const payload = taoPayloadSyllabusMonHocTumau(item, chuongTrinhMonId)
 
   try {
     let savedId = null
 
-    if (existingKhacGoc?.id && service.update) {
-      const saved = await service.update(existingKhacGoc.id, payload)
+    if (existingKhacmau?.id && service.update) {
+      const saved = await service.update(existingKhacmau.id, payload)
       const row = layDuLieuPhanHoiLuu(saved)
-      savedId = row?.id || existingKhacGoc.id
-      datThongBaoBang('syllabusMonHocGoc', 'Đã thay syllabus gốc cũ bằng syllabus gốc đang chọn cho môn trong chương trình.', 'success')
-    } else if (existingKhacGoc?.id && service.delete) {
-      await service.delete(existingKhacGoc.id)
+      savedId = row?.id || existingKhacmau.id
+      datThongBaoBang('syllabusMonHocmau', 'Đã thay syllabus mẫu cũ bằng syllabus mẫu đang chọn cho môn trong chương trình.', 'success')
+    } else if (existingKhacmau?.id && service.delete) {
+      await service.delete(existingKhacmau.id)
       const saved = await service.create(payload)
       const row = layDuLieuPhanHoiLuu(saved)
       savedId = row?.id || null
-      datThongBaoBang('syllabusMonHocGoc', 'Đã thay syllabus gốc cũ bằng syllabus gốc đang chọn cho môn trong chương trình.', 'success')
+      datThongBaoBang('syllabusMonHocmau', 'Đã thay syllabus mẫu cũ bằng syllabus mẫu đang chọn cho môn trong chương trình.', 'success')
     } else {
       const saved = await service.create(payload)
       const row = layDuLieuPhanHoiLuu(saved)
       savedId = row?.id || null
-      datThongBaoBang('syllabusMonHocGoc', 'Đã gán syllabus gốc vào bảng Syllabus đã gán vào môn trong chương trình.', 'success')
+      datThongBaoBang('syllabusMonHocmau', 'Đã gán syllabus mẫu vào bảng Syllabus đã gán vào môn trong chương trình.', 'success')
     }
 
-    selectEntity('syllabusMonHocGoc', item)
+    selectEntity('syllabusMonHocmau', item)
 
     if (savedId) {
-      await copyChiTietSyllabusGocSangSyllabusMon({
+      await copyChiTietSyllabusmauSangSyllabusMon({
         syllabusMonId: savedId,
-        syllabusMonHocGocId: item.id,
-        force: !existingKhacGoc?.id
+        syllabusMonHocMauId: item.id,
+        force: !existingKhacmau?.id
       })
     }
 
@@ -2317,7 +2517,7 @@ async function ganSyllabusGocVaoSyllabusMonHocApDung(item, {boGanNeuDaGan = fals
     const rowDaGan = (duLieu.value.syllabusMonHoc || []).find((row) => {
       if (savedId && String(row.id || '') === String(savedId || '')) return true
       return String(row.chuongTrinhMonId || '') === String(chuongTrinhMonId || '')
-          && String(row.syllabusMonHocGocId || '') === String(item.id || '')
+          && String(row.syllabusMonHocMauId || '') === String(item.id || '')
     })
 
     if (rowDaGan) {
@@ -2325,16 +2525,107 @@ async function ganSyllabusGocVaoSyllabusMonHocApDung(item, {boGanNeuDaGan = fals
       datThongBaoBang('syllabusMonHoc', 'Bảng Syllabus đã gán vào môn trong chương trình đã được cập nhật. Bấm Xem chi tiết syllabus để sang tầng chi tiết.', 'success')
     }
   } catch (error) {
-    const message = layThongBaoLoi(error, 'Không gán được syllabus gốc vào môn trong chương trình.')
-    datThongBaoBang('syllabusMonHocGoc', message, 'error')
+    const message = layThongBaoLoi(error, 'Không gán được syllabus mẫu vào môn trong chương trình.')
+    datThongBaoBang('syllabusMonHocmau', message, 'error')
+  }
+}
+
+
+async function ganSyllabusChuongTrinhMauVaoVersion(item) {
+  const chuongTrinhVersionId = selected.chuongTrinhVersion?.id || route.params.versionId || null
+  if (!chuongTrinhVersionId) {
+    datThongBaoBang('syllabusChuongTrinhmau', 'Cần chọn Version trước khi gán syllabus chương trình mẫu.', 'error')
+    return
+  }
+
+  if (!item?.id) {
+    datThongBaoBang('syllabusChuongTrinhmau', 'Không tìm thấy syllabus chương trình mẫu để gán.', 'error')
+    return
+  }
+
+  try {
+    const existing = syllabusChuongTrinhApDungTheoVersion.value
+    const existingMauId = existing?.syllabusChuongTrinhmauId || existing?.syllabusChuongTrinhMauId || null
+
+    if (existing?.id && String(existingMauId || '') === String(item.id || '')) {
+      await services.syllabusChuongTrinh.delete(existing.id)
+      await taiDuLieuCoSanTatCaBang()
+      datThongBaoBang('syllabusChuongTrinhmau', 'Đã hủy gán syllabus chương trình khỏi Version. Dữ liệu mẫu vẫn được giữ nguyên.', 'success')
+      return
+    }
+
+    await services.syllabusChuongTrinh.dongBoTuMau({
+      chuongTrinhVersionId,
+      syllabusChuongTrinhMauId: item.id
+    })
+
+    selectEntity('syllabusChuongTrinhmau', item)
+    await taiDuLieuCoSanTatCaBang()
+    datThongBaoBang('syllabusChuongTrinhmau', 'Đã copy syllabus chương trình mẫu và các bảng con vào Version.', 'success')
+  } catch (error) {
+    datThongBaoBang('syllabusChuongTrinhmau', layThongBaoLoi(error, 'Không gán được syllabus chương trình mẫu vào Version.'), 'error')
+  }
+}
+
+async function ganBangConSyllabusMauVaoVersion(mauKey, apDungKey, item) {
+  const syllabusChuongTrinhId = syllabusChuongTrinhIdDangGan.value
+  if (!syllabusChuongTrinhId) {
+    datThongBaoBang(mauKey, 'Version này chưa có Syllabus chương trình đã lưu. Cần gán Syllabus chương trình mẫu trước.', 'error')
+    return
+  }
+
+  if (!item?.id) {
+    datThongBaoBang(mauKey, 'Không tìm thấy dòng mẫu để gán.', 'error')
+    return
+  }
+
+  try {
+    const existing = timDongDaCopyTheoMa(apDungKey, item)
+    if (existing?.id) {
+      await services[apDungKey].delete(existing.id)
+      await taiDuLieuCoSanTatCaBang()
+      datThongBaoBang(mauKey, 'Đã bỏ gán dòng mẫu khỏi Version.', 'success')
+      return
+    }
+
+    await services[apDungKey].create(buildPayloadApDungTuMau(apDungKey, item))
+    await taiDuLieuCoSanTatCaBang()
+    datThongBaoBang(mauKey, 'Đã copy dòng mẫu vào Syllabus chương trình của Version.', 'success')
+  } catch (error) {
+    datThongBaoBang(mauKey, layThongBaoLoi(error, 'Không copy được dòng mẫu vào Version.'), 'error')
   }
 }
 
 function luuDongBang(bang, item) {
   const parentValues = bang.linkParentValues || bang.parentValues || {}
 
-  if (bang.key === 'syllabusMonHocGoc') {
-    ganSyllabusGocVaoSyllabusMonHocApDung(item, {boGanNeuDaGan: true})
+  if (bang.key === 'syllabusMonHocmau') {
+    ganSyllabusmauVaoSyllabusMonHocApDung(item, {boGanNeuDaGan: true})
+    return
+  }
+
+  if (bang.key === 'syllabusChuongTrinhmau') {
+    ganSyllabusChuongTrinhMauVaoVersion(item)
+    return
+  }
+
+  if (bang.key === 'mucTieuChuongTrinhmau') {
+    ganBangConSyllabusMauVaoVersion('mucTieuChuongTrinhmau', 'mucTieuChuongTrinh', item)
+    return
+  }
+
+  if (bang.key === 'nangLucDauRamau') {
+    ganBangConSyllabusMauVaoVersion('nangLucDauRamau', 'nangLucDauRa', item)
+    return
+  }
+
+  if (bang.key === 'viTriViecLammau') {
+    ganBangConSyllabusMauVaoVersion('viTriViecLammau', 'viTriViecLam', item)
+    return
+  }
+
+  if (bang.key === 'dieuKienTotNghiepmau') {
+    ganBangConSyllabusMauVaoVersion('dieuKienTotNghiepmau', 'dieuKienTotNghiep', item)
     return
   }
 
@@ -2369,19 +2660,19 @@ function luuDongBang(bang, item) {
 }
 
 const bangPhuHienDuLieuDayDu = new Set([
-  'mucTieuChuongTrinhGoc',
-  'nangLucDauRaGoc',
-  'viTriViecLamGoc',
-  'dieuKienTotNghiepGoc',
-  'syllabusChuongTrinhGoc',
-  'khungKyGoc',
-  'nhomKienThucGoc',
-  'nhomTuChonGoc',
+  'mucTieuChuongTrinhmau',
+  'nangLucDauRamau',
+  'viTriViecLammau',
+  'dieuKienTotNghiepmau',
+  'syllabusChuongTrinhmau',
+  'khungKymau',
+  'nhomKienThucmau',
+  'nhomTuChonmau',
   'syllabusChuongTrinh',
   'monTienQuyet',
   'quyDoiDiemMau',
-  'dieuKienMonHocGoc',
-  'taiLieuGoc',
+  'dieuKienMonHocmau',
+  'taiLieumau',
   'dieuKienMonHoc',
   'syllabusChuongBai',
   'syllabusTaiLieu'
@@ -2466,20 +2757,22 @@ function taoBang(key, options = {}) {
   const linkParentValues = options.linkParentValues || parentValues
   const filterValues = options.filterValues || parentValues
   const allRows = key === 'quyDoiDiemMau'
-      ? (quyDoiDiemMauGocRows.value || [])
+      ? (quyDoiDiemMaumauRows.value || [])
       : (duLieu.value[key] || [])
 
-  const loaiBang = bangGocMauKeys.has(key) ? 'goc-mau' : (bangXuongSongKeys.has(key) ? 'xuong-song' : 'phu')
+  const loaiBang = bangmauMauKeys.has(key) ? 'mau-mau' : (bangXuongSongKeys.has(key) ? 'xuong-song' : 'phu')
   const hienDayDuBangPhu = loaiBang === 'phu' && bangPhuHienDuLieuDayDu.has(key) && !options.forceFilter
-  const hienDayDuBangGocMau = loaiBang === 'goc-mau'
+  const hienDayDuBangmauMau = loaiBang === 'mau-mau'
   const khongLocTheoCha = bangDocLapKhongLocTheoCha.has(key)
 
-  const rowsChuaSapXep = khongLocTheoCha || hienDayDuBangGocMau || hienDayDuBangPhu ? allRows : locDongTheoCha(allRows, filterValues)
+  const rowsChuaSapXep = khongLocTheoCha || hienDayDuBangmauMau || hienDayDuBangPhu ? allRows : locDongTheoCha(allRows, filterValues)
   const rowsDaSapXep = sapXepBangTheoThuTu(key, rowsChuaSapXep)
   const rows = Array.isArray(options.displayRows) ? options.displayRows : rowsDaSapXep
   const coNutLuuBoLuu = options.canToggleSave === undefined ? bangCoNutLuuBoLuuMacDinh.has(key) : Boolean(options.canToggleSave)
   const coNutChon = options.canSelect === undefined ? !bangKhongCanChon.has(key) && !bangChiLuuGanKhongChon.has(key) : Boolean(options.canSelect)
-  const coHienTrangThaiDaLuu = Boolean(options.canShowSavedStatus) || coNutLuuBoLuu || bangChiHienTrangThaiDaLuuMacDinh.has(key)
+  const coHienTrangThaiDaLuu = options.canShowSavedStatus === undefined
+      ? (coNutLuuBoLuu || bangChiHienTrangThaiDaLuuMacDinh.has(key))
+      : Boolean(options.canShowSavedStatus)
   const idsDaLuuTheoNguCanh = Array.isArray(options.savedIds)
       ? options.savedIds
       : (coHienTrangThaiDaLuu ? laySavedIdsTheoBang(key, allRows, rows, linkParentValues, linkParentValues) : [])
@@ -2496,6 +2789,7 @@ function taoBang(key, options = {}) {
       ...configs[key],
       ...(options.fields ? {fields: options.fields} : {}),
       ...(options.columns ? {columns: options.columns} : {}),
+      ...(options.defaultForm ? {defaultForm: options.defaultForm} : {}),
       title: options.title || configs[key]?.title,
       description: options.description || configs[key]?.description,
       canView: Boolean(options.canView),
@@ -2575,9 +2869,9 @@ const cacTangDaoTao = [
   },
   {
     so: 8,
-    ten: 'Gán syllabus gốc vào môn',
-    route: 'DaoTao.XemChuongTrinh.SyllabusGoc',
-    moTa: 'Chọn syllabus gốc/mẫu và gán vào môn trong chương trình.'
+    ten: 'Gán syllabus mẫu vào môn',
+    route: 'DaoTao.XemChuongTrinh.Syllabusmau',
+    moTa: 'Chọn syllabus mẫu/mẫu và gán vào môn trong chương trình.'
   },
   {
     so: 9,
@@ -2590,7 +2884,7 @@ const cacTangDaoTao = [
 const tangHienTai = computed(() => {
   if (route.name === 'DaoTao.XemChuongTrinh.KhungCauTruc') return 6
   if (route.name === 'DaoTao.XemChuongTrinh.Mon') return 7
-  if (route.name === 'DaoTao.XemChuongTrinh.SyllabusGoc') return 8
+  if (route.name === 'DaoTao.XemChuongTrinh.Syllabusmau') return 8
   if (route.name === 'DaoTao.XemChuongTrinh.SyllabusApDung') return 9
 
   return cacTangDaoTao.find((tang) => tang.route === route.name)?.so || 1
@@ -2598,7 +2892,7 @@ const tangHienTai = computed(() => {
 const thongTinTangHienTai = computed(() => cacTangDaoTao.find((tang) => tang.so === tangHienTai.value) || cacTangDaoTao[0])
 
 const coTheVeTangTongQuan = computed(() => Boolean(selected.nganh?.id && selected.chuongTrinh?.id && selected.chuongTrinhVersion?.id))
-const coTheTiepTucTang2 = computed(() => Boolean(selected.nganh?.id && (selected.trinhDoDaoTao?.id || selected.loaiChuongTrinh?.id)))
+const coTheTiepTucTang2 = computed(() => Boolean(selected.nganh?.id && selected.nganhHeDaoTao?.id))
 const coTheTiepTucTang6 = computed(() => coTheVeTangTongQuan.value)
 const hienNutTiepTucChung = computed(() => tangHienTai.value === 2 || tangHienTai.value === 6)
 const tieuDeNutTiepTuc = computed(() => tangHienTai.value === 2 ? 'Tiếp tục xem Chương trình' : 'Tiếp tục xem Môn trong chương trình')
@@ -2606,8 +2900,8 @@ const coTheBamNutTiepTuc = computed(() => tangHienTai.value === 2 ? coTheTiepTuc
 const moTaNutTiepTuc = computed(() => {
   if (tangHienTai.value === 2) {
     return coTheTiepTucTang2.value
-        ? 'Đã có dữ liệu theo ngành. Bấm Xem ở bảng đã gán để chuyển sang tầng Chương trình.'
-        : 'Cần gán ít nhất một trình độ đào tạo hoặc một loại chương trình cho ngành.'
+        ? 'Đã chọn ngành hệ đào tạo. Có thể bấm Tiếp tục để chuyển sang tầng Chương trình.'
+        : 'Cần bấm Xem chương trình ở một hệ đào tạo trong bảng bên dưới.'
   }
 
   return coTheTiepTucTang6.value
@@ -2625,17 +2919,9 @@ const tomTatDieuHuong = computed(() => [
     enabled: Boolean(selected.nganh?.id) || tangHienTai.value === 1
   },
   {
-    key: 'trinhDoDaoTao',
-    label: 'Trình độ',
-    value: selected.trinhDoDaoTao?.tenTrinhDo || '',
-    tang: 2,
-    tenTang: 'Tầng 2 - Cấu hình chương trình',
-    enabled: Boolean(selected.nganh?.id)
-  },
-  {
-    key: 'loaiChuongTrinh',
-    label: 'Loại CT',
-    value: selected.loaiChuongTrinh?.tenLoai || '',
+    key: 'nganhHeDaoTao',
+    label: 'Hệ đào tạo',
+    value: selected.nganhHeDaoTao?.tenHe || selected.nganhHeDaoTao?.maHe || '',
     tang: 2,
     tenTang: 'Tầng 2 - Cấu hình chương trình',
     enabled: Boolean(selected.nganh?.id)
@@ -2685,12 +2971,12 @@ const tomTatDieuHuong = computed(() => [
     label: 'Syllabus môn',
     value:
         selected.syllabusMonHoc?.ten ||
-        selected.syllabusMonHoc?.tenSyllabusMonHocGoc ||
+        selected.syllabusMonHoc?.tenSyllabusMonHocmau ||
         selected.syllabusMonHoc?.ma ||
-        selected.syllabusMonHoc?.maSyllabusMonHocGoc ||
+        selected.syllabusMonHoc?.maSyllabusMonHocmau ||
         '',
     tang: 8,
-    tenTang: 'Tầng 8 - Gán syllabus gốc vào môn',
+    tenTang: 'Tầng 8 - Gán syllabus mẫu vào môn',
     enabled: Boolean(coTheVeTangTongQuan.value && selected.chuongTrinhMon?.id)
   },
   {
@@ -2749,14 +3035,14 @@ const cacNutDieuHuongTang = computed(() => {
   ]
   if (so === 7) return [
     taoNut('ve-ky-hoc', '← Về Kỳ học', 6, coTheVeTangTongQuan.value),
-    taoNut('gan-syllabus-goc', 'Gán syllabus gốc cho môn →', 8, coTheVeTang8.value, true)
+    taoNut('gan-syllabus-mau', 'Gán syllabus mẫu cho môn →', 8, coTheVeTang8.value, true)
   ]
   if (so === 8) return [
     taoNut('ve-mon', '← Về Môn trong kỳ', 7, coTheVeTangTongQuan.value),
     taoNut('xem-chi-tiet-syllabus', 'Xem chi tiết syllabus →', 9, coTheVeTang9.value, true)
   ]
   return [
-    taoNut('ve-syllabus-goc', '← Về Syllabus gốc', 8, coTheVeTangTongQuan.value),
+    taoNut('ve-syllabus-mau', '← Về Syllabus mẫu', 8, coTheVeTangTongQuan.value),
     taoNut('ve-mon', '← Về Môn trong kỳ', 7, coTheVeTangTongQuan.value)
   ]
 })
@@ -2838,18 +3124,22 @@ function napLuaChonTheoRoute() {
   const nganh = timDongTheoId('nganh', route.params.nganhId)
   if (nganh && String(selected.nganh?.id || '') !== String(nganh.id)) selectEntity('nganh', nganh)
 
+  const nganhHeDaoTao = timDongTheoId('nganhHeDaoTao', route.query.nganhHeDaoTaoId)
+  if (nganhHeDaoTao && String(selected.nganhHeDaoTao?.id || '') !== String(nganhHeDaoTao.id)) {
+    selectEntity('nganhHeDaoTao', nganhHeDaoTao)
+  }
+
   const chuongTrinh = timDongTheoId('chuongTrinh', route.params.chuongTrinhId)
   if (chuongTrinh && String(selected.chuongTrinh?.id || '') !== String(chuongTrinh.id)) {
     selectEntity('chuongTrinh', chuongTrinh)
 
-    const trinhDo = timDongTheoId('trinhDoDaoTao', chuongTrinh.trinhDoId)
-    if (trinhDo) selectEntity('trinhDoDaoTao', trinhDo)
-
-    const loai = timDongTheoId('loaiChuongTrinh', chuongTrinh.loaiChuongTrinhId)
-    if (loai) selectEntity('loaiChuongTrinh', loai)
-
     const nganhLoai = timDongTheoId('nganhLoaiChuongTrinh', chuongTrinh.nganhLoaiChuongTrinhId)
     if (nganhLoai) selectEntity('nganhLoaiChuongTrinh', nganhLoai)
+  }
+  // Khôi phục nganhHeDaoTao từ chuongTrinh nếu chưa có (F5 trên Tầng 4+)
+  if (!selected.nganhHeDaoTao?.id && chuongTrinh?.nganhHeDaoTaoId) {
+    const nhdt = timDongTheoId('nganhHeDaoTao', chuongTrinh.nganhHeDaoTaoId)
+    if (nhdt) selectEntity('nganhHeDaoTao', nhdt)
   }
   const khungKyTheoQuery = timDongTheoId('khungKy', route.query.khungKyId)
   if (khungKyTheoQuery && String(selected.khungKy?.id || '') !== String(khungKyTheoQuery.id)) {
@@ -2937,6 +3227,7 @@ function veTang(soTang) {
       name: 'DaoTao.XemChuongTrinh.ChuongTrinh',
       params: {nganhId: selected.nganh.id},
       query: {
+        nganhHeDaoTaoId: selected.nganhHeDaoTao?.id || selected.chuongTrinh?.nganhHeDaoTaoId || route.query.nganhHeDaoTaoId || undefined,
         trinhDoId: selected.trinhDoDaoTao?.id || undefined,
         loaiChuongTrinhId: selected.loaiChuongTrinh?.id || undefined
       }
@@ -2947,7 +3238,10 @@ function veTang(soTang) {
   if (soTang === 4 && selected.nganh?.id && selected.chuongTrinh?.id) {
     router.push({
       name: 'DaoTao.XemChuongTrinh.Version',
-      params: {nganhId: selected.nganh.id, chuongTrinhId: selected.chuongTrinh.id}
+      params: {nganhId: selected.nganh.id, chuongTrinhId: selected.chuongTrinh.id},
+      query: {
+        nganhHeDaoTaoId: selected.nganhHeDaoTao?.id || selected.chuongTrinh?.nganhHeDaoTaoId || undefined
+      }
     })
     return
   }
@@ -2995,7 +3289,7 @@ function veTang(soTang) {
   if (soTang === 8 && coTheVeTangTongQuan.value) {
     const monHocId = selected.monHoc?.id || selected.chuongTrinhMon?.monHocId || selected.chuongTrinhMon?.monId || null
     router.push({
-      name: 'DaoTao.XemChuongTrinh.SyllabusGoc',
+      name: 'DaoTao.XemChuongTrinh.Syllabusmau',
       params: taoParamsTangSau({
         nganhId: selected.nganh.id,
         chuongTrinhId: selected.chuongTrinh.id,
@@ -3127,6 +3421,103 @@ async function xoaLoaiChuongTrinhTheoNganh(item) {
   }
 }
 
+// ===== Bảng 3 tầng 2: Ngành hệ đào tạo theo ngành =====
+
+const nganhHeDaoTaoTheoNganh = computed(() => {
+  const nganhId = selected.nganh?.id || route.params.nganhId || null
+  if (!nganhId) return []
+  return (duLieu.value.nganhHeDaoTao || [])
+      .filter(item => String(item.nganhId || '') === String(nganhId || ''))
+})
+
+const thongBaoNganhHe = ref('')
+const loaiThongBaoNganhHe = ref('success')
+const dangLuuNganhHe = ref(false)
+
+const defaultFormNganhHe = () => ({
+  id: null,
+  trinhDoId: null,
+  loaiChuongTrinhId: null,
+  soThang: null,
+  soKy: null,
+  maHe: '',
+  tenHe: ''
+})
+const formNganhHe = ref(defaultFormNganhHe())
+
+function resetFormNganhHe() {
+  formNganhHe.value = defaultFormNganhHe()
+}
+
+function hienThongBaoNganhHe(msg, loai = 'success') {
+  thongBaoNganhHe.value = msg
+  loaiThongBaoNganhHe.value = loai
+  setTimeout(() => { if (thongBaoNganhHe.value === msg) thongBaoNganhHe.value = '' }, 4000)
+}
+
+async function luuNganhHe() {
+  const nganhId = selected.nganh?.id || null
+  if (!nganhId) { hienThongBaoNganhHe('Cần chọn ngành trước.', 'error'); return }
+  if (!formNganhHe.value.trinhDoId) { hienThongBaoNganhHe('Cần chọn trình độ.', 'error'); return }
+  if (!formNganhHe.value.loaiChuongTrinhId) { hienThongBaoNganhHe('Cần chọn loại chương trình.', 'error'); return }
+
+  const payload = {
+    nganhId,
+    trinhDoId: formNganhHe.value.trinhDoId,
+    loaiChuongTrinhId: formNganhHe.value.loaiChuongTrinhId,
+    soThang: formNganhHe.value.soThang || null,
+    soKy: formNganhHe.value.soKy || null,
+    maHe: formNganhHe.value.maHe || null,
+    tenHe: formNganhHe.value.tenHe || null,
+    trangThai: 'dang_su_dung'
+  }
+
+  dangLuuNganhHe.value = true
+  try {
+    if (formNganhHe.value.id) {
+      await services.nganhHeDaoTao.update(formNganhHe.value.id, payload)
+      hienThongBaoNganhHe('Đã cập nhật ngành hệ đào tạo.')
+    } else {
+      await services.nganhHeDaoTao.create(payload)
+      hienThongBaoNganhHe('Đã thêm ngành hệ đào tạo.')
+    }
+    resetFormNganhHe()
+    await taiDuLieuCoSanTatCaBang()
+  } catch (error) {
+    hienThongBaoNganhHe(layThongBaoLoi(error, 'Không lưu được ngành hệ đào tạo.'), 'error')
+  } finally {
+    dangLuuNganhHe.value = false
+  }
+}
+
+function suaNganhHe(item) {
+  formNganhHe.value = {
+    id: item.id,
+    trinhDoId: item.trinhDoId,
+    loaiChuongTrinhId: item.loaiChuongTrinhId,
+    soThang: item.soThang || null,
+    soKy: item.soKy || null,
+    maHe: item.maHe || '',
+    tenHe: item.tenHe || ''
+  }
+}
+
+async function xoaNganhHe(id) {
+  if (!confirm('Xóa ngành hệ đào tạo này?')) return
+  try {
+    await services.nganhHeDaoTao.delete(id)
+    hienThongBaoNganhHe('Đã xóa.')
+    await taiDuLieuCoSanTatCaBang()
+  } catch (error) {
+    hienThongBaoNganhHe(layThongBaoLoi(error, 'Không xóa được ngành hệ đào tạo.'), 'error')
+  }
+}
+
+function xemChuongTrinhTuNganhHe(item) {
+  selectEntity('nganhHeDaoTao', item)
+  veTang(3)
+}
+
 const groups = computed(() => {
   if (tangHienTai.value === 1) {
     return [{
@@ -3139,38 +3530,7 @@ const groups = computed(() => {
   }
 
   if (tangHienTai.value === 2) {
-    return [{
-      key: 'tang-2-cau-hinh',
-      title: 'Tầng 2: Cấu hình chương trình',
-      description: 'Hai bảng 2.1 và 2.2 là dữ liệu gốc. Bấm Gán vào để lưu từng dữ liệu vào ngành; bảng theo ngành nằm ngay bên dưới từng bảng gốc.',
-      mau: 'mau-tim',
-      tables: [
-        taoBang('trinhDoDaoTao', {
-          canView: false,
-          canSelect: false,
-          canToggleSave: true,
-          canShowSavedStatus: true,
-          toggleSaveLabel: 'Gán vào',
-          toggleSavedLabel: 'Đã gán',
-          statusSavedLabel: '✓ Đã gán',
-          statusUnsavedLabel: '+ Chưa gán',
-          saveStatusText: 'Bảng gốc Trình độ đào tạo. Bấm Gán vào để lưu trình độ này cho ngành đang xem.',
-          parentText: `Ngành đang xem: ${selected.nganh?.tenNganh || '-'}`
-        }),
-        taoBang('loaiChuongTrinh', {
-          canView: false,
-          canSelect: false,
-          canToggleSave: true,
-          canShowSavedStatus: true,
-          toggleSaveLabel: 'Gán vào',
-          toggleSavedLabel: 'Đã gán',
-          statusSavedLabel: '✓ Đã gán',
-          statusUnsavedLabel: '+ Chưa gán',
-          saveStatusText: 'Bảng gốc Loại chương trình. Bấm Gán vào để lưu loại chương trình này cho ngành đang xem.',
-          parentText: `Ngành đang xem: ${selected.nganh?.tenNganh || '-'}`
-        })
-      ]
-    }]
+    return []
   }
 
   if (tangHienTai.value === 3) {
@@ -3185,8 +3545,8 @@ const groups = computed(() => {
           filterValues: chuongTrinhFilter.value,
           parentText: chuongTrinhParentText.value,
           canView: true,
-          disabled: !selected.nganhLoaiChuongTrinh,
-          disabledText: 'Cần bấm Xem ở bảng 2.2.1 Loại chương trình theo ngành trước.'
+          disabled: !selected.nganhHeDaoTao,
+          disabledText: 'Cần bấm Xem chương trình ở bảng Ngành hệ đào tạo trước.'
         })
       ]
     }]
@@ -3215,112 +3575,173 @@ const groups = computed(() => {
     return [{
       key: 'tang-5-tong-quan',
       title: 'Tầng 5: Thông tin tổng quan version',
-      description: 'Các bảng gốc dùng chung và bảng áp dụng vào version. Dữ liệu được lọc theo version đang chọn.',
+      description: 'Mẫu thuộc chương trình để tái sử dụng; Version chỉ lưu bản copy độc lập.',
       mau: 'mau-hong',
       tables: [
-        taoBang('syllabusChuongTrinhGoc', {
+        taoBang('syllabusChuongTrinhmau', {
+          displayRows: rowsSyllabusChuongTrinhMauTheoVersion.value,
           linkParentValues: versionParent.value,
-          parentText: `${versionParentText.value} | Kho syllabus chương trình gốc dùng chung. Click dòng gốc để tạo/lưu syllabus_chuong_trinh cho Version hiện tại.`,
+          parentText: `${chuongTrinhVersionParentText.value} | Chỉ hiển thị syllabus chương trình mẫu thuộc Chương trình đang chọn. Bảng mẫu tại tầng 5 chỉ gán/hủy gán, không CRUD.`,
+          readOnly: true,
+          canSelect: false,
+          canToggleSave: true,
+          canShowSavedStatus: true,
+          toggleSaveLabel: 'Gán vào',
+          toggleSavedLabel: 'Đã gán',
+          statusSavedLabel: '✓ Đã gán',
+          statusUnsavedLabel: '+ Chưa gán',
+          saveStatusText: 'Bảng mẫu chỉ dùng để gán/hủy gán vào Version hiện tại. Bấm Đã gán lần nữa để hủy gán.',
           disabled: !selected.chuongTrinhVersion,
           disabledText: 'Cần chọn Version trước.',
+          emptyText: 'Chương trình này chưa có syllabus chương trình mẫu.',
           uploadFile: uploadFileSyllabusChuongTrinh
         }),
         taoBang('syllabusChuongTrinh', {
+          displayRows: rowsSyllabusChuongTrinhApDungTheoVersion.value,
           parentValues: versionParent.value,
           filterValues: versionFilter.value,
           forceFilter: true,
           readOnly: false,
           canSelect: false,
           canToggleSave: false,
+          canShowSavedStatus: false,
           title: 'Syllabus chương trình đã lưu vào Version',
-          description: 'Chỉ hiển thị syllabus chương trình đã lưu từ bảng gốc vào Version hiện tại.',
+          description: 'Chỉ hiển thị syllabus chương trình đã được copy/gán từ bảng mẫu vào Version hiện tại.',
           tableTitle: 'Syllabus chương trình đã lưu/gắn vào Version',
           parentText: versionParentText.value,
           disabled: !selected.chuongTrinhVersion,
           uploadFile: uploadFileSyllabusChuongTrinh,
-          disabledText: 'Cần chọn Version trước.'
+          disabledText: 'Cần chọn Version trước.',
+          emptyText: 'Version này chưa có syllabus chương trình đã lưu.'
         }),
-        taoBang('mucTieuChuongTrinhGoc', {
-          linkParentValues: versionParent.value,
-          parentText: `${versionParentText.value} | Kho mục tiêu gốc dùng chung. Bấm Gán vào để copy mục tiêu gốc sang bảng Mục tiêu chương trình đã lưu vào Version.`,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
+        taoBang('mucTieuChuongTrinhmau', {
+          displayRows: locRowsTheoSyllabusChuongTrinhMau(duLieu.value.mucTieuChuongTrinhmau || []),
+          linkParentValues: {syllabusChuongTrinhMauId: syllabusChuongTrinhMauIdDangGan.value},
+          parentText: `${syllabusChuongTrinhParentText.value} | Chỉ hiển thị mục tiêu mẫu thuộc syllabus chương trình mẫu đang gán. Bảng mẫu tại tầng 5 chỉ gán/hủy gán, không CRUD.`,
+          readOnly: true,
+          canSelect: false,
+          canToggleSave: true,
+          canShowSavedStatus: true,
+          toggleSaveLabel: 'Gán vào',
+          toggleSavedLabel: 'Đã gán',
+          statusSavedLabel: '✓ Đã gán',
+          statusUnsavedLabel: '+ Chưa gán',
+          saveStatusText: 'Bấm Gán vào để copy mục tiêu mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
         taoBang('mucTieuChuongTrinh', {
-          parentValues: versionParent.value,
-          filterValues: versionFilter.value,
+          displayRows: locRowsTheoSyllabusChuongTrinhApDung(duLieu.value.mucTieuChuongTrinh || []),
+          parentValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
+          filterValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
           forceFilter: true,
           readOnly: false,
           canSelect: false,
           canToggleSave: false,
+          canShowSavedStatus: false,
           title: '10. Mục tiêu chương trình đã lưu vào Version',
-          description: 'Chỉ hiển thị mục tiêu chương trình đã được copy từ bảng gốc/mẫu vào Version.',
+          description: 'Chỉ hiển thị mục tiêu đã copy từ mục tiêu mẫu thuộc syllabus chương trình mẫu đang gán.',
           tableTitle: 'Mục tiêu chương trình đã lưu vào Version',
-          parentText: versionParentText.value,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
+          parentText: syllabusChuongTrinhParentText.value,
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
-        taoBang('nangLucDauRaGoc', {
-          linkParentValues: versionParent.value,
-          parentText: `${versionParentText.value} | Kho năng lực gốc dùng chung. Click dòng gốc để lưu vào chuong_trinh_version_nang_luc.`,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
+        taoBang('nangLucDauRamau', {
+          displayRows: locRowsTheoSyllabusChuongTrinhMau(duLieu.value.nangLucDauRamau || []),
+          linkParentValues: {syllabusChuongTrinhMauId: syllabusChuongTrinhMauIdDangGan.value},
+          parentText: `${syllabusChuongTrinhParentText.value} | Chỉ hiển thị năng lực đầu ra mẫu thuộc syllabus chương trình mẫu đang gán. Bảng mẫu tại tầng 5 chỉ gán/hủy gán, không CRUD.`,
+          readOnly: true,
+          canSelect: false,
+          canToggleSave: true,
+          canShowSavedStatus: true,
+          toggleSaveLabel: 'Gán vào',
+          toggleSavedLabel: 'Đã gán',
+          statusSavedLabel: '✓ Đã gán',
+          statusUnsavedLabel: '+ Chưa gán',
+          saveStatusText: 'Bấm Gán vào để copy năng lực mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
-        taoBang('chuongTrinhVersionNangLuc', {
-          parentValues: versionParent.value,
-          filterValues: versionFilter.value,
+        taoBang('nangLucDauRa', {
+          displayRows: locRowsTheoSyllabusChuongTrinhApDung(duLieu.value.nangLucDauRa || []),
+          parentValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
+          filterValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
           forceFilter: true,
           readOnly: false,
           canSelect: false,
           canToggleSave: false,
+          canShowSavedStatus: false,
           title: '13. Năng lực đầu ra đã lưu vào Version',
-          description: 'Thay cho bảng nhập riêng. Chỉ hiển thị các năng lực gốc đã được lưu qua bảng chuong_trinh_version_nang_luc.',
+          description: 'Chỉ hiển thị năng lực đầu ra đã copy từ năng lực mẫu thuộc syllabus chương trình mẫu đang gán.',
           tableTitle: 'Năng lực đầu ra đã lưu/gắn vào Version',
-          parentText: versionParentText.value,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
+          parentText: syllabusChuongTrinhParentText.value,
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
-        taoBang('viTriViecLamGoc', {
-          linkParentValues: versionParent.value,
-          parentText: `${versionParentText.value} | Kho vị trí việc làm gốc dùng chung. Click dòng gốc để lưu vào chuong_trinh_version_vi_tri_viec_lam.`,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
+        taoBang('viTriViecLammau', {
+          displayRows: locRowsTheoSyllabusChuongTrinhMau(duLieu.value.viTriViecLammau || []),
+          linkParentValues: {syllabusChuongTrinhMauId: syllabusChuongTrinhMauIdDangGan.value},
+          parentText: `${syllabusChuongTrinhParentText.value} | Chỉ hiển thị vị trí việc làm mẫu thuộc syllabus chương trình mẫu đang gán. Bảng mẫu tại tầng 5 chỉ gán/hủy gán, không CRUD.`,
+          readOnly: true,
+          canSelect: false,
+          canToggleSave: true,
+          canShowSavedStatus: true,
+          toggleSaveLabel: 'Gán vào',
+          toggleSavedLabel: 'Đã gán',
+          statusSavedLabel: '✓ Đã gán',
+          statusUnsavedLabel: '+ Chưa gán',
+          saveStatusText: 'Bấm Gán vào để copy vị trí mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
-        taoBang('chuongTrinhVersionViTriViecLam', {
-          parentValues: versionParent.value,
-          filterValues: versionFilter.value,
+        taoBang('viTriViecLam', {
+          displayRows: locRowsTheoSyllabusChuongTrinhApDung(duLieu.value.viTriViecLam || []),
+          parentValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
+          filterValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
           forceFilter: true,
           readOnly: false,
           canSelect: false,
           canToggleSave: false,
+          canShowSavedStatus: false,
           title: '16. Vị trí việc làm đã lưu vào Version',
-          description: 'Thay cho bảng nhập riêng. Chỉ hiển thị các vị trí gốc đã được lưu qua bảng chuong_trinh_version_vi_tri_viec_lam.',
+          description: 'Chỉ hiển thị vị trí việc làm đã copy từ vị trí mẫu thuộc syllabus chương trình mẫu đang gán.',
           tableTitle: 'Vị trí việc làm đã lưu/gắn vào Version',
-          parentText: versionParentText.value,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
+          parentText: syllabusChuongTrinhParentText.value,
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
-        taoBang('dieuKienTotNghiepGoc', {
-          linkParentValues: versionParent.value,
-          parentText: `${versionParentText.value} | Kho điều kiện tốt nghiệp gốc dùng chung. Bấm Gán vào để copy điều kiện tốt nghiệp gốc sang bảng Điều kiện tốt nghiệp đã lưu vào Version.`,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
+        taoBang('dieuKienTotNghiepmau', {
+          displayRows: locRowsTheoSyllabusChuongTrinhMau(duLieu.value.dieuKienTotNghiepmau || []),
+          linkParentValues: {syllabusChuongTrinhMauId: syllabusChuongTrinhMauIdDangGan.value},
+          parentText: `${syllabusChuongTrinhParentText.value} | Chỉ hiển thị điều kiện tốt nghiệp mẫu thuộc syllabus chương trình mẫu đang gán. Bảng mẫu tại tầng 5 chỉ gán/hủy gán, không CRUD.`,
+          readOnly: true,
+          canSelect: false,
+          canToggleSave: true,
+          canShowSavedStatus: true,
+          toggleSaveLabel: 'Gán vào',
+          toggleSavedLabel: 'Đã gán',
+          statusSavedLabel: '✓ Đã gán',
+          statusUnsavedLabel: '+ Chưa gán',
+          saveStatusText: 'Bấm Gán vào để copy điều kiện mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
         taoBang('dieuKienTotNghiep', {
-          parentValues: versionParent.value,
-          filterValues: versionFilter.value,
+          displayRows: locRowsTheoSyllabusChuongTrinhApDung(duLieu.value.dieuKienTotNghiep || []),
+          parentValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
+          filterValues: {syllabusChuongTrinhId: syllabusChuongTrinhIdDangGan.value},
           forceFilter: true,
           readOnly: false,
           canSelect: false,
           canToggleSave: false,
+          canShowSavedStatus: false,
           title: '19. Điều kiện tốt nghiệp đã lưu vào Version',
-          description: 'Chỉ hiển thị điều kiện tốt nghiệp đã được copy từ bảng gốc/mẫu vào Version.',
+          description: 'Chỉ hiển thị điều kiện tốt nghiệp đã copy từ điều kiện mẫu thuộc syllabus chương trình mẫu đang gán.',
           tableTitle: 'Điều kiện tốt nghiệp đã lưu vào Version',
-          parentText: versionParentText.value,
-          disabled: !selected.chuongTrinhVersion,
-          disabledText: 'Cần chọn Version trước.'
-        })
-      ]
+          parentText: syllabusChuongTrinhParentText.value,
+          disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhIdDangGan.value,
+          disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
+        })      ]
     }]
   }
 
@@ -3331,9 +3752,9 @@ const groups = computed(() => {
       description: 'Tạo/chọn kỳ học của Version trước. Bấm Xem môn trong kỳ để gán môn trực tiếp vào kỳ.',
       mau: 'mau-vang',
       tables: [
-        taoBang('khungKyGoc', {
+        taoBang('khungKymau', {
           linkParentValues: khungKyParent.value,
-          parentText: `${versionParentText.value} | Kho khung kỳ gốc dùng chung.`,
+          parentText: `${versionParentText.value} | Kho khung kỳ mẫu dùng chung.`,
           disabled: !selected.chuongTrinhVersion,
           disabledText: 'Cần chọn Version trước.'
         }),
@@ -3341,6 +3762,7 @@ const groups = computed(() => {
           parentValues: khungKyParent.value,
           filterValues: khungKyFilter.value,
           parentText: khungKyParentText.value,
+          defaultForm: khungKyDefaultFormGoiY.value,
           canView: true,
           viewLabel: 'Xem môn trong kỳ',
           disabled: !selected.chuongTrinhVersion,
@@ -3356,7 +3778,7 @@ const groups = computed(() => {
       key: 'tang-7-mon-trong-ky',
       title: 'Tầng 7: Môn trong kỳ',
       description: 'Gán môn học trực tiếp vào kỳ qua bảng chương trình môn.',
-      mau: 'mau-ngoc',
+      mau: 'mau-nmau',
       tables: [
         taoBang('monHoc', {
           parentValues: {},
@@ -3404,15 +3826,15 @@ const groups = computed(() => {
     return [{
       key: 'tang-8-gan-syllabus-mon',
       title: 'Tầng 8: Gán syllabus áp dụng cho môn trong chương trình',
-      description: 'Tầng này chỉ chọn/copy syllabus gốc vào môn trong chương trình. Điểm và quy đổi kết quả không CRUD trực tiếp tại môn nữa.',
+      description: 'Tầng này chỉ chọn/copy syllabus mẫu vào môn trong chương trình. Điểm và quy đổi kết quả không CRUD trực tiếp tại môn nữa.',
       mau: 'mau-troi',
       tables: [
-        taoBang('syllabusMonHocGoc', {
-          parentValues: syllabusMonHocGocParent.value,
-          filterValues: syllabusMonHocGocFilter.value,
-          displayRows: danhSachSyllabusGocTang8DaLoc.value,
+        taoBang('syllabusMonHocmau', {
+          parentValues: syllabusMonHocmauParent.value,
+          filterValues: syllabusMonHocmauFilter.value,
+          displayRows: danhSachSyllabusmauTang8DaLoc.value,
           linkParentValues: syllabusMonHocApDungParent.value,
-          parentText: `${chuongTrinhMonOnlyParentText.value} | Chỉ hiện syllabus gốc đúng môn. Bảng này không CRUD tại tầng 8; bấm Chọn để xem dòng gốc, bấm Chọn + copy để tạo/cập nhật bảng Syllabus đã gán vào môn trong chương trình bên dưới.`,
+          parentText: `${chuongTrinhMonOnlyParentText.value} | Chỉ hiện syllabus mẫu đúng môn. Bảng này không CRUD tại tầng 8; bấm Chọn để xem dòng mẫu, bấm Chọn + copy để tạo/cập nhật bảng Syllabus đã gán vào môn trong chương trình bên dưới.`,
           readOnly: true,
           canSelect: true,
           canToggleSave: true,
@@ -3421,10 +3843,10 @@ const groups = computed(() => {
           toggleSavedLabel: 'Bỏ chọn',
           statusSavedLabel: '✓ Đã chọn/gán vào môn',
           statusUnsavedLabel: '+ Chưa chọn',
-          title: 'Syllabus môn học gốc - TÁI SỬ DỤNG',
-          description: 'Kho syllabus gốc theo môn chỉ để xem và tái sử dụng tại tầng 8. CRUD syllabus gốc thực hiện ở tab Syllabus môn học gốc ngoài ngành/chương trình; tại đây chỉ chọn/copy xuống syllabus áp dụng.',
-          tableTitle: 'Chọn syllabus gốc đúng môn để gán/copy',
-          emptyText: 'Môn này chưa có syllabus gốc. Hãy tạo ở tab Syllabus môn học gốc trước.',
+          title: 'Syllabus môn học mẫu - TÁI SỬ DỤNG',
+          description: 'Kho syllabus mẫu theo môn chỉ để xem và tái sử dụng tại tầng 8. CRUD syllabus mẫu thực hiện ở tab Syllabus môn học mẫu ngoài ngành/chương trình; tại đây chỉ chọn/copy xuống syllabus áp dụng.',
+          tableTitle: 'Chọn syllabus mẫu đúng môn để gán/copy',
+          emptyText: 'Môn này chưa có syllabus mẫu. Hãy tạo ở tab Syllabus môn học mẫu trước.',
           disabled: !selected.chuongTrinhMon,
           disabledText: 'Cần chọn Môn trong chương trình ở tầng 7 trước.'
         }),
@@ -3432,7 +3854,7 @@ const groups = computed(() => {
           parentValues: chuongTrinhMonOnlyParent.value,
           filterValues: chuongTrinhMonOnlyFilter.value,
           forceFilter: true,
-          parentText: `${chuongTrinhMonOnlyParentText.value} | Đây là dữ liệu syllabus_mon_hoc đã gán/copy từ syllabus gốc. Bấm Xem chi tiết syllabus để sang tầng 9 quản lý cột điểm và quy đổi kết quả.`,
+          parentText: `${chuongTrinhMonOnlyParentText.value} | Đây là dữ liệu syllabus_mon_hoc đã gán/copy từ syllabus mẫu. Bấm Xem chi tiết syllabus để sang tầng 9 quản lý cột điểm và quy đổi kết quả.`,
           readOnly: false,
           canSelect: true,
           canToggleSave: false,
@@ -3456,10 +3878,10 @@ const groups = computed(() => {
     mau: 'mau-xam',
     tables: [
       taoBang('cauHinhDanhGiaMau', {
-        displayRows: cotDiemSyllabusGocRows.value,
+        displayRows: cotDiemSyllabusmauRows.value,
         linkParentValues: syllabusMonHocScopeParent.value,
-        savedIds: layIdsCotDiemMauDaGanSyllabus(cotDiemSyllabusGocRows.value, syllabusMonHocScopeParent.value.syllabusMonHocId),
-        parentText: `${syllabusMonParentText.value} | Đây là cột điểm lấy từ syllabus gốc. Tích chọn nhiều dòng rồi bấm Gán cột điểm đã tích chọn, hoặc bấm Gán vào syllabus trên từng dòng để copy thành Cột điểm của syllabus áp dụng.`,
+        savedIds: layIdsCotDiemMauDaGanSyllabus(cotDiemSyllabusmauRows.value, syllabusMonHocScopeParent.value.syllabusMonHocId),
+        parentText: `${syllabusMonParentText.value} | Đây là cột điểm lấy từ syllabus mẫu. Tích chọn nhiều dòng rồi bấm Gán cột điểm đã tích chọn, hoặc bấm Gán vào syllabus trên từng dòng để copy thành Cột điểm của syllabus áp dụng.`,
         readOnly: true,
         canSelect: true,
         multiSelect: true,
@@ -3473,14 +3895,14 @@ const groups = computed(() => {
         toggleSavedLabel: 'Bỏ gán',
         statusSavedLabel: '✓ Đã gán',
         statusUnsavedLabel: '+ Chưa gán',
-        title: '1. Cột điểm của syllabus gốc',
-        description: 'Nguồn cột điểm lấy từ cau_hinh_danh_gia_mau của syllabus gốc, không lấy từ bảng quy_doi_diem_mau.',
-        tableTitle: 'Cột điểm của syllabus gốc',
-        emptyText: 'Syllabus gốc chưa có cột điểm để copy.',
+        title: '1. Cột điểm của syllabus mẫu',
+        description: 'Nguồn cột điểm lấy từ cau_hinh_danh_gia_mau của syllabus mẫu, không lấy từ bảng quy_doi_diem_mau.',
+        tableTitle: 'Cột điểm của syllabus mẫu',
+        emptyText: 'Syllabus mẫu chưa có cột điểm để copy.',
         disabled: !selected.syllabusMonHoc,
         disabledText: 'Cần chọn Syllabus môn học áp dụng ở tầng 9 trước.',
         columns: [
-          {key: 'tenSyllabusGocHienThi', label: 'Syllabus gốc'},
+          {key: 'tenSyllabusmauHienThi', label: 'Syllabus mẫu'},
           {key: 'tenCotDiem', label: 'Tên cột điểm'},
           {key: 'loaiDiem', label: 'Loại điểm'},
           {key: 'tyLe', label: 'Tỷ lệ %'},
@@ -3508,7 +3930,7 @@ const groups = computed(() => {
         disabled: !selected.syllabusMonHoc,
         disabledText: 'Cần chọn Syllabus môn học áp dụng ở tầng 9 trước.',
         columns: [
-          {key: 'tenSyllabusGocHienThi', label: 'Syllabus gốc'},
+          {key: 'tenSyllabusmauHienThi', label: 'Syllabus mẫu'},
           {key: 'tenCotDiem', label: 'Tên cột điểm'},
           {key: 'loaiDiem', label: 'Loại điểm'},
           {key: 'tyLe', label: 'Tỷ lệ %'},
@@ -3521,7 +3943,7 @@ const groups = computed(() => {
       taoBang('quyDoiDiemMau', {
         displayRows: quyDoiKetQuaDungChungRows.value,
         linkParentValues: syllabusMonHocScopeParent.value,
-        parentText: `${syllabusMonParentText.value} | Đây là mẫu quy đổi kết quả thuộc syllabus gốc của syllabus đang chọn. BE chỉ trả dữ liệu theo syllabusMonHocGocId, không trả toàn ngành.`,
+        parentText: `${syllabusMonParentText.value} | Đây là mẫu quy đổi kết quả thuộc syllabus mẫu của syllabus đang chọn. BE chỉ trả dữ liệu theo syllabusMonHocMauId, không trả toàn ngành.`,
         readOnly: false,
         canSelect: false,
         canToggleSave: true,
@@ -3530,10 +3952,10 @@ const groups = computed(() => {
         toggleSavedLabel: 'Bỏ gán',
         statusSavedLabel: '✓ Đã gán',
         statusUnsavedLabel: '+ Chưa gán',
-        title: '3. Mẫu quy đổi kết quả theo syllabus gốc',
-        description: 'Mẫu quy đổi kết quả thuộc syllabus gốc đang chọn. Mẫu này dùng để quy đổi điểm tổng kết sau khi đã tính từ cột điểm.',
-        tableTitle: 'Mẫu quy đổi kết quả theo syllabus gốc',
-        emptyText: 'Chưa có mẫu quy đổi kết quả cho syllabus gốc của syllabus đang chọn.',
+        title: '3. Mẫu quy đổi kết quả theo syllabus mẫu',
+        description: 'Mẫu quy đổi kết quả thuộc syllabus mẫu đang chọn. Mẫu này dùng để quy đổi điểm tổng kết sau khi đã tính từ cột điểm.',
+        tableTitle: 'Mẫu quy đổi kết quả theo syllabus mẫu',
+        emptyText: 'Chưa có mẫu quy đổi kết quả cho syllabus mẫu của syllabus đang chọn.',
         disabled: !selected.syllabusMonHoc,
         disabledText: 'Cần chọn Syllabus môn học áp dụng ở tầng 9 trước.'
       }),
@@ -3554,14 +3976,14 @@ const groups = computed(() => {
         disabled: !selected.syllabusMonHoc,
         disabledText: 'Cần chọn Syllabus môn học áp dụng ở tầng 9 trước.'
       }),
-      taoBang('syllabusMonHocGocChuongBai', {
+      taoBang('syllabusMonHocmauChuongBai', {
         linkParentValues: syllabusMonParent.value,
-        parentValues: {syllabusMonHocGocId: selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null},
-        filterValues: {syllabusMonHocGocId: selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null},
-        parentText: `${syllabusMonParentText.value} | Chỉ hiển thị chương/bài gốc thuộc đúng syllabus gốc của môn đang chọn.`,
-        title: 'Chương/bài gốc của syllabus - TÁI SỬ DỤNG',
-        description: 'Dữ liệu gốc chỉ để chọn/copy xuống chương/bài áp dụng. CRUD chương/bài gốc thực hiện ở tab Syllabus môn học gốc.',
-        tableTitle: 'Chương/bài gốc của syllabus - TÁI SỬ DỤNG',
+        parentValues: {syllabusMonHocMauId: selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null},
+        filterValues: {syllabusMonHocMauId: selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null},
+        parentText: `${syllabusMonParentText.value} | Chỉ hiển thị chương/bài mẫu thuộc đúng syllabus mẫu của môn đang chọn.`,
+        title: 'Chương/bài mẫu của syllabus - TÁI SỬ DỤNG',
+        description: 'Dữ liệu mẫu chỉ để chọn/copy xuống chương/bài áp dụng. CRUD chương/bài mẫu thực hiện ở tab Syllabus môn học mẫu.',
+        tableTitle: 'Chương/bài mẫu của syllabus - TÁI SỬ DỤNG',
         toggleSaveLabel: 'Gán vào',
         toggleSavedLabel: 'Bỏ gán',
         statusSavedLabel: '✓ Đã gán',
@@ -3579,21 +4001,21 @@ const groups = computed(() => {
         forceFilter: true,
         parentText: syllabusMonParentText.value,
         title: 'Chương/bài đã lưu trong syllabus áp dụng',
-        description: 'Bảng hứng chương/bài đã copy từ chương/bài gốc, được lưu riêng cho syllabus môn học áp dụng và có thể chỉnh nhẹ theo chương trình.',
+        description: 'Bảng hứng chương/bài đã copy từ chương/bài mẫu, được lưu riêng cho syllabus môn học áp dụng và có thể chỉnh nhẹ theo chương trình.',
         tableTitle: 'Chương/bài đã lưu trong syllabus áp dụng',
-        emptyText: 'Chưa có chương/bài nào trong syllabus này. Hãy bấm Gán vào ở bảng chương/bài gốc phía trên.',
+        emptyText: 'Chưa có chương/bài nào trong syllabus này. Hãy bấm Gán vào ở bảng chương/bài mẫu phía trên.',
         disabled: !selected.syllabusMonHoc,
         disabledText: 'Cần chọn Syllabus môn học áp dụng ở tầng 9 trước.'
       }),
-      taoBang('dieuKienMonHocGoc', {
+      taoBang('dieuKienMonHocmau', {
         linkParentValues: syllabusMonParent.value,
-        parentValues: {syllabusMonHocGocId: selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null},
-        filterValues: {syllabusMonHocGocId: selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null},
-        displayRows: dieuKienMonHocGocTheoSyllabus.value,
-        parentText: `${syllabusMonParentText.value} | Chỉ hiển thị điều kiện gốc thuộc đúng syllabus gốc của môn đang chọn.`,
-        title: 'Điều kiện môn học gốc / mẫu - TÁI SỬ DỤNG',
-        description: 'Dữ liệu gốc chỉ để chọn/copy xuống điều kiện áp dụng. CRUD điều kiện gốc thực hiện ở tab Syllabus môn học gốc.',
-        tableTitle: 'Điều kiện môn học gốc / mẫu - TÁI SỬ DỤNG',
+        parentValues: {syllabusMonHocMauId: selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null},
+        filterValues: {syllabusMonHocMauId: selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null},
+        displayRows: dieuKienMonHocmauTheoSyllabus.value,
+        parentText: `${syllabusMonParentText.value} | Chỉ hiển thị điều kiện mẫu thuộc đúng syllabus mẫu của môn đang chọn.`,
+        title: 'Điều kiện môn học mẫu - TÁI SỬ DỤNG',
+        description: 'Dữ liệu mẫu chỉ để chọn/copy xuống điều kiện áp dụng. CRUD điều kiện mẫu thực hiện ở tab Syllabus môn học mẫu.',
+        tableTitle: 'Điều kiện môn học mẫu - TÁI SỬ DỤNG',
         toggleSaveLabel: 'Gán vào',
         toggleSavedLabel: 'Bỏ gán',
         statusSavedLabel: '✓ Đã gán',
@@ -3624,14 +4046,14 @@ const groups = computed(() => {
         disabled: !selected.syllabusMonHoc,
         disabledText: 'Cần chọn Syllabus môn học áp dụng ở tầng 9 trước.'
       }),
-      taoBang('syllabusMonHocGocTaiLieu', {
+      taoBang('syllabusMonHocmauTaiLieu', {
         linkParentValues: syllabusMonParent.value,
-        parentValues: {syllabusMonHocGocId: selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null},
-        filterValues: {syllabusMonHocGocId: selected.syllabusMonHoc?.syllabusMonHocGocId || selected.syllabusMonHocGoc?.id || null},
-        parentText: `${syllabusMonParentText.value} | Chỉ hiển thị tài liệu gốc thuộc đúng syllabus gốc của môn đang chọn.`,
-        title: 'Tài liệu gốc của syllabus - TÁI SỬ DỤNG',
-        description: 'Dữ liệu gốc chỉ để chọn/copy xuống tài liệu áp dụng. CRUD tài liệu gốc thực hiện ở tab Syllabus môn học gốc.',
-        tableTitle: 'Tài liệu gốc của syllabus - TÁI SỬ DỤNG',
+        parentValues: {syllabusMonHocMauId: selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null},
+        filterValues: {syllabusMonHocMauId: selected.syllabusMonHoc?.syllabusMonHocMauId || selected.syllabusMonHocmau?.id || null},
+        parentText: `${syllabusMonParentText.value} | Chỉ hiển thị tài liệu mẫu thuộc đúng syllabus mẫu của môn đang chọn.`,
+        title: 'Tài liệu mẫu của syllabus - TÁI SỬ DỤNG',
+        description: 'Dữ liệu mẫu chỉ để chọn/copy xuống tài liệu áp dụng. CRUD tài liệu mẫu thực hiện ở tab Syllabus môn học mẫu.',
+        tableTitle: 'Tài liệu mẫu của syllabus - TÁI SỬ DỤNG',
         toggleSaveLabel: 'Gán vào',
         toggleSavedLabel: 'Bỏ gán',
         statusSavedLabel: '✓ Đã gán',
@@ -3721,44 +4143,26 @@ const configs = {
   chuongTrinh: {
     title: 'Chương trình đào tạo',
     defaultForm: {
+      nganhHeDaoTaoId: null,
       nganhLoaiChuongTrinhId: null,
       nganhId: null,
-      trinhDoId: null,
-      loaiChuongTrinhId: null,
       maChuongTrinh: '',
       tenChuongTrinh: '',
       doiTuongTuyenSinh: '',
       thoiGianDaoTao: ''
     },
     fields: [
-      {key: 'nganhLoaiChuongTrinhId', required: true, hidden: true},
       {
-        key: 'nganhId',
+        key: 'nganhHeDaoTaoId',
+        label: 'Ngành hệ đào tạo',
         required: true,
-        label: 'Ngành',
         type: 'select',
-        lookup: 'nganh',
-        labelKey: ['maNganh', 'tenNganh'],
+        lookup: 'nganhHeDaoTao',
+        labelKey: ['tenHe', 'label'],
         locked: true
       },
-      {
-        key: 'trinhDoId',
-        required: false,
-        label: 'Trình độ',
-        type: 'select',
-        lookup: 'trinhDoDaoTao',
-        labelKey: ['maTrinhDo', 'tenTrinhDo'],
-        locked: true
-      },
-      {
-        key: 'loaiChuongTrinhId',
-        required: true,
-        label: 'Loại CT',
-        type: 'select',
-        lookup: 'loaiChuongTrinh',
-        labelKey: ['maLoai', 'tenLoai'],
-        locked: true
-      },
+      {key: 'nganhLoaiChuongTrinhId', required: false, hidden: true},
+      {key: 'nganhId', required: false, hidden: true},
       {key: 'maChuongTrinh', label: 'Mã CTĐT', required: true},
       {key: 'tenChuongTrinh', label: 'Tên CTĐT', required: true},
       {key: 'doiTuongTuyenSinh', label: 'Đối tượng tuyển sinh'},
@@ -3771,8 +4175,7 @@ const configs = {
       {key: 'maChuongTrinh', label: 'Mã CTĐT'},
       {key: 'tenChuongTrinh', label: 'Tên chương trình'},
       {key: 'tenNganh', label: 'Ngành'},
-      {key: 'tenTrinhDo', label: 'Trình độ'},
-      {key: 'tenLoaiChuongTrinh', label: 'Loại CT'}
+      {key: 'tenHe', label: 'Ngành hệ đào tạo'}
     ]
   },
   chuongTrinhVersion: {
@@ -3807,17 +4210,31 @@ const configs = {
       },
       {key: 'maVersion', label: 'Mã version', required: true},
       {key: 'tenVersion', label: 'Tên version', required: true},
-      {key: 'ngayApDung', label: 'Ngày áp dụng', type: 'date'},
-      {key: 'ngayHetHieuLuc', label: 'Ngày hết hiệu lực', type: 'date'},
+      {
+        key: 'ngayApDung', label: 'Ngày áp dụng', type: 'date',
+        validate: (value, form) => {
+          if (value && form.ngayHetHieuLuc && value > form.ngayHetHieuLuc)
+            return 'Ngày áp dụng không được sau ngày hết hiệu lực.'
+          return null
+        }
+      },
+      {
+        key: 'ngayHetHieuLuc', label: 'Ngày hết hiệu lực', type: 'date',
+        validate: (value, form) => {
+          if (value && form.ngayApDung && value < form.ngayApDung)
+            return 'Ngày hết hiệu lực không được trước ngày áp dụng.'
+          return null
+        }
+      },
       {key: 'soQuyetDinh', label: 'Số quyết định'},
       {key: 'ngayQuyetDinh', label: 'Ngày quyết định', type: 'date'},
       {key: 'nguoiKy', label: 'Người ký'},
       {key: 'coQuanBanHanh', label: 'Cơ quan ban hành'},
-      {key: 'tongTinChi', label: 'Tổng tín chỉ', type: 'number', max: 9999.9, step: 0.1},
-      {key: 'tongSoGio', label: 'Tổng giờ', type: 'number', max: 999999.9, step: 0.1},
-      {key: 'tongGioLyThuyet', label: 'Giờ LT', type: 'number', max: 999999.9, step: 0.1},
-      {key: 'tongGioThucHanh', label: 'Giờ TH', type: 'number', max: 999999.9, step: 0.1},
-      {key: 'tongGioKiemTra', label: 'Giờ KT', type: 'number', max: 999999.9, step: 0.1},
+      {key: 'tongTinChi', label: 'Tổng tín chỉ', type: 'number', max: 9999.9, step: 0.1, locked: true},
+      {key: 'tongSoGio', label: 'Tổng giờ', type: 'number', max: 999999.9, step: 0.1, locked: true},
+      {key: 'tongGioLyThuyet', label: 'Giờ LT', type: 'number', max: 999999.9, step: 0.1, locked: true},
+      {key: 'tongGioThucHanh', label: 'Giờ TH', type: 'number', max: 999999.9, step: 0.1, locked: true},
+      {key: 'tongGioKiemTra', label: 'Giờ KT', type: 'number', max: 999999.9, step: 0.1, locked: true},
       {key: 'laHienHanh', label: 'Hiện hành', type: 'boolean'}
     ],
     uniqueRules: [
@@ -3828,13 +4245,18 @@ const configs = {
       {key: 'tenVersion', label: 'Tên version'},
       {key: 'tenChuongTrinh', label: 'Chương trình'},
       {key: 'ngayApDung', label: 'Ngày áp dụng'},
+      {key: 'ngayHetHieuLuc', label: 'Ngày hết hiệu lực'},
       {key: 'tongTinChi', label: 'Tín chỉ'},
+      {key: 'tongSoGio', label: 'Tổng giờ'},
+      {key: 'tongGioLyThuyet', label: 'Giờ LT'},
+      {key: 'tongGioThucHanh', label: 'Giờ TH'},
+      {key: 'tongGioKiemTra', label: 'Giờ KT'},
       {key: 'laHienHanh', label: 'Hiện hành'}
     ]
   },
-  mucTieuChuongTrinhGoc: {
-    title: 'Mục tiêu chương trình gốc / mẫu',
-    description: 'Kho mục tiêu gốc dùng chung. Khi bấm ✓, hệ thống gán mục tiêu gốc vào Version qua bảng chuong_trinh_version_muc_tieu.',
+  mucTieuChuongTrinhmau: {
+    title: 'Mục tiêu chương trình mẫu',
+    description: 'Kho mục tiêu mẫu dùng chung. Khi bấm ✓, hệ thống gán mục tiêu mẫu vào Version qua bảng chuong_trinh_version_muc_tieu.',
     defaultForm: {ma: '', loai: 'chung', noiDung: '', ghiChu: ''},
     fields: [
       {key: 'ma', label: 'Mã mục tiêu', required: true},
@@ -3843,7 +4265,7 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     uniqueRules: [
-      {field: 'ma', message: 'Mã mục tiêu gốc đã tồn tại.'}
+      {field: 'ma', message: 'Mã mục tiêu mẫu đã tồn tại.'}
     ],
     columns: [
       {key: 'ma', label: 'Mã'},
@@ -3874,7 +4296,7 @@ const configs = {
         labelKey: ['maVersion', 'tenVersion'],
         locked: true
       },
-      {key: 'ma', label: 'Mã mục tiêu gốc'},
+      {key: 'ma', label: 'Mã mục tiêu mẫu'},
       {key: 'loai', label: 'Loại', type: 'select', lookup: 'loaiMucTieu', required: true},
       {key: 'noiDung', label: 'Nội dung', type: 'textarea', required: true, wide: true},
       {key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1},
@@ -3882,21 +4304,17 @@ const configs = {
     ],
     columns: [
       {key: 'tenVersion', label: 'Version'},
-      {key: 'ma', label: 'Mã mục tiêu gốc'},
+      {key: 'ma', label: 'Mã mục tiêu mẫu'},
       {key: 'loai', label: 'Loại'},
       {key: 'noiDung', label: 'Nội dung'},
-      {key: 'tongGio', label: 'Tổng giờ'},
-      {key: 'gioLyThuyet', label: 'Giờ lý thuyết'},
-      {key: 'gioThucHanh', label: 'Giờ thực hành'},
-      {key: 'gioKiemTra', label: 'Giờ kiểm tra'},
       {key: 'ghiChu', label: 'Ghi chú'},
       {key: 'createdAt', label: 'Ngày tạo'},
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
   },
-  nangLucDauRaGoc: {
-    title: ' Năng lực đầu ra gốc / mẫu',
-    description: 'Kho năng lực gốc dùng chung. Khi bấm ✓, hệ thống gán năng lực gốc vào Version qua bảng chuong_trinh_version_nang_luc.',
+  nangLucDauRamau: {
+    title: ' Năng lực đầu ra mẫu',
+    description: 'Kho năng lực mẫu dùng chung. Khi bấm ✓, hệ thống gán năng lực mẫu vào Version qua bảng chuong_trinh_version_nang_luc.',
     defaultForm: {ma: '', loai: 'co_ban', noiDung: '', ghiChu: ''},
     fields: [
       {key: 'ma', label: 'Mã năng lực', required: true},
@@ -3905,7 +4323,7 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     uniqueRules: [
-      {field: 'ma', scopeKeys: ['loai'], message: 'Mã năng lực gốc đã tồn tại với loại năng lực này.'},
+      {field: 'ma', scopeKeys: ['loai'], message: 'Mã năng lực mẫu đã tồn tại với loại năng lực này.'},
       {field: 'loai', scopeKeys: ['ma'], message: 'Loại năng lực đã tồn tại với mã năng lực này.'}
     ],
     columns: [
@@ -3922,8 +4340,8 @@ const configs = {
     ]
   },
   nangLucDauRa: {
-    title: ' Năng lực đầu ra nhập riêng - KHÔNG XÀI GỐC',
-    description: 'Bảng nhập riêng trực tiếp theo Version/chương trình, không lấy từ bảng gốc và không dùng cơ chế tái sử dụng.',
+    title: ' Năng lực đầu ra nhập riêng - KHÔNG XÀI mẫu',
+    description: 'Bảng nhập riêng trực tiếp theo Version/chương trình, không lấy từ bảng mẫu và không dùng cơ chế tái sử dụng.',
     defaultForm: {chuongTrinhVersionId: null, ma: '', loai: 'co_ban', noiDung: '', thuTu: null, ghiChu: ''},
     fields: [
       {
@@ -3948,9 +4366,9 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
   },
-  viTriViecLamGoc: {
-    title: 'Vị trí việc làm gốc / mẫu',
-    description: 'Kho vị trí việc làm gốc dùng chung. Khi bấm ✓, hệ thống gán vị trí vào Version qua bảng chuong_trinh_version_vi_tri_viec_lam.',
+  viTriViecLammau: {
+    title: 'Vị trí việc làm mẫu',
+    description: 'Kho vị trí việc làm mẫu dùng chung. Khi bấm ✓, hệ thống gán vị trí vào Version qua bảng chuong_trinh_version_vi_tri_viec_lam.',
     defaultForm: {ma: '', ten: '', moTa: '', ghiChu: ''},
     fields: [
       {key: 'ma', label: 'Mã vị trí', required: true},
@@ -3959,7 +4377,7 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     uniqueRules: [
-      {field: 'ma', message: 'Mã vị trí việc làm gốc đã tồn tại.'}
+      {field: 'ma', message: 'Mã vị trí việc làm mẫu đã tồn tại.'}
     ],
     columns: [
       {key: 'ma', label: 'Mã'},
@@ -4006,9 +4424,9 @@ const configs = {
       {key: 'createdAt', label: 'Ngày tạo'},
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
-  }, dieuKienTotNghiepGoc: {
-    title: 'Điều kiện tốt nghiệp gốc / mẫu',
-    description: 'Kho điều kiện tốt nghiệp gốc dùng chung. Bấm Gán vào để copy điều kiện gốc sang bảng Điều kiện tốt nghiệp đã lưu vào Version.',
+  }, dieuKienTotNghiepmau: {
+    title: 'Điều kiện tốt nghiệp mẫu',
+    description: 'Kho điều kiện tốt nghiệp mẫu dùng chung. Bấm Gán vào để copy điều kiện mẫu sang bảng Điều kiện tốt nghiệp đã lưu vào Version.',
     defaultForm: {
       ma: '',
       noiDung: '',
@@ -4020,7 +4438,7 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     uniqueRules: [
-      {field: 'ma', message: 'Mã điều kiện tốt nghiệp gốc đã tồn tại.'}
+      {field: 'ma', message: 'Mã điều kiện tốt nghiệp mẫu đã tồn tại.'}
     ],
     columns: [
       {key: 'ma', label: 'Mã'},
@@ -4033,7 +4451,7 @@ const configs = {
 
   dieuKienTotNghiep: {
     title: '19. Điều kiện tốt nghiệp đã lưu vào Version',
-    description: 'Bảng điều kiện tốt nghiệp đã được copy từ điều kiện tốt nghiệp gốc/mẫu vào Version.',
+    description: 'Bảng điều kiện tốt nghiệp đã được copy từ điều kiện tốt nghiệp mẫu/mẫu vào Version.',
     defaultForm: {
       chuongTrinhVersionId: null,
       ma: '',
@@ -4050,14 +4468,14 @@ const configs = {
         labelKey: ['maVersion', 'tenVersion'],
         locked: true
       },
-      {key: 'ma', label: 'Mã điều kiện gốc'},
+      {key: 'ma', label: 'Mã điều kiện mẫu'},
       {key: 'noiDung', label: 'Nội dung', type: 'textarea', required: true, wide: true},
       {key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1},
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     columns: [
       {key: 'tenVersion', label: 'Version'},
-      {key: 'ma', label: 'Mã điều kiện gốc'},
+      {key: 'ma', label: 'Mã điều kiện mẫu'},
       {key: 'noiDung', label: 'Nội dung'},
       {key: 'ghiChu', label: 'Ghi chú'},
       {key: 'createdAt', label: 'Ngày tạo'},
@@ -4066,8 +4484,8 @@ const configs = {
   },
   chuongTrinhVersionMucTieu: {
     title: 'Mục tiêu gán vào Version - TÁI SỬ DỤNG',
-    description: 'Bảng nối dùng để chọn mục tiêu gốc và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
-    defaultForm: {chuongTrinhVersionId: null, mucTieuGocId: null, thuTu: null, ghiChu: ''},
+    description: 'Bảng nối dùng để chọn mục tiêu mẫu và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
+    defaultForm: {chuongTrinhVersionId: null, mucTieumauId: null, thuTu: null, ghiChu: ''},
     fields: [{
       key: 'chuongTrinhVersionId',
       label: 'Version',
@@ -4076,10 +4494,10 @@ const configs = {
       labelKey: ['maVersion', 'tenVersion'],
       locked: true
     }, {
-      key: 'mucTieuGocId',
-      label: 'Mục tiêu gốc',
+      key: 'mucTieumauId',
+      label: 'Mục tiêu mẫu',
       type: 'select',
-      lookup: 'mucTieuChuongTrinhGoc',
+      lookup: 'mucTieuChuongTrinhmau',
       labelKey: ['ma', 'noiDung'],
       required: true
     }, {key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1}, {
@@ -4088,15 +4506,15 @@ const configs = {
       type: 'textarea',
       wide: true
     }],
-    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenMucTieuGoc', label: 'Mục tiêu gốc'}, {
+    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenMucTieumau', label: 'Mục tiêu mẫu'}, {
       key: 'thuTu',
       label: 'Thứ tự'
     }, {key: 'ghiChu', label: 'Ghi chú'}]
   },
   chuongTrinhVersionNangLuc: {
     title: 'Năng lực gán vào Version - TÁI SỬ DỤNG',
-    description: 'Bảng nối dùng để chọn năng lực gốc và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
-    defaultForm: {chuongTrinhVersionId: null, nangLucGocId: null, thuTu: null, ghiChu: ''},
+    description: 'Bảng nối dùng để chọn năng lực mẫu và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
+    defaultForm: {chuongTrinhVersionId: null, nangLucmauId: null, thuTu: null, ghiChu: ''},
     fields: [{
       key: 'chuongTrinhVersionId',
       label: 'Version',
@@ -4105,10 +4523,10 @@ const configs = {
       labelKey: ['maVersion', 'tenVersion'],
       locked: true
     }, {
-      key: 'nangLucGocId',
-      label: 'Năng lực gốc',
+      key: 'nangLucmauId',
+      label: 'Năng lực mẫu',
       type: 'select',
-      lookup: 'nangLucDauRaGoc',
+      lookup: 'nangLucDauRamau',
       labelKey: ['ma', 'noiDung'],
       required: true
     }, {key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1}, {
@@ -4117,15 +4535,15 @@ const configs = {
       type: 'textarea',
       wide: true
     }],
-    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenNangLucGoc', label: 'Năng lực gốc'}, {
+    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenNangLucmau', label: 'Năng lực mẫu'}, {
       key: 'thuTu',
       label: 'Thứ tự'
     }, {key: 'ghiChu', label: 'Ghi chú'}]
   },
   chuongTrinhVersionViTriViecLam: {
     title: 'Vị trí việc làm gán vào Version - TÁI SỬ DỤNG',
-    description: 'Bảng nối dùng để chọn vị trí việc làm gốc và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
-    defaultForm: {chuongTrinhVersionId: null, viTriGocId: null, thuTu: null, ghiChu: ''},
+    description: 'Bảng nối dùng để chọn vị trí việc làm mẫu và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
+    defaultForm: {chuongTrinhVersionId: null, viTrimauId: null, thuTu: null, ghiChu: ''},
     fields: [{
       key: 'chuongTrinhVersionId',
       label: 'Version',
@@ -4134,10 +4552,10 @@ const configs = {
       labelKey: ['maVersion', 'tenVersion'],
       locked: true
     }, {
-      key: 'viTriGocId',
-      label: 'Vị trí gốc',
+      key: 'viTrimauId',
+      label: 'Vị trí mẫu',
       type: 'select',
-      lookup: 'viTriViecLamGoc',
+      lookup: 'viTriViecLammau',
       labelKey: ['ma', 'ten'],
       required: true
     }, {key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1}, {
@@ -4146,15 +4564,15 @@ const configs = {
       type: 'textarea',
       wide: true
     }],
-    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenViTriGoc', label: 'Vị trí gốc'}, {
+    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenViTrimau', label: 'Vị trí mẫu'}, {
       key: 'thuTu',
       label: 'Thứ tự'
     }, {key: 'ghiChu', label: 'Ghi chú'}]
   },
   chuongTrinhVersionDieuKienTotNghiep: {
     title: 'Điều kiện tốt nghiệp gán vào Version - TÁI SỬ DỤNG',
-    description: 'Bảng nối dùng để chọn điều kiện tốt nghiệp gốc và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
-    defaultForm: {chuongTrinhVersionId: null, dieuKienGocId: null, thuTu: null, ghiChu: ''},
+    description: 'Bảng nối dùng để chọn điều kiện tốt nghiệp mẫu và gán/tái sử dụng vào Version, không phải bảng nhập riêng.',
+    defaultForm: {chuongTrinhVersionId: null, dieuKienmauId: null, thuTu: null, ghiChu: ''},
     fields: [{
       key: 'chuongTrinhVersionId',
       label: 'Version',
@@ -4163,10 +4581,10 @@ const configs = {
       labelKey: ['maVersion', 'tenVersion'],
       locked: true
     }, {
-      key: 'dieuKienGocId',
-      label: 'Điều kiện gốc',
+      key: 'dieuKienmauId',
+      label: 'Điều kiện mẫu',
       type: 'select',
-      lookup: 'dieuKienTotNghiepGoc',
+      lookup: 'dieuKienTotNghiepmau',
       labelKey: ['ma', 'noiDung'],
       required: true
     }, {key: 'thuTu', label: 'Thứ tự', type: 'number', step: 1}, {
@@ -4175,14 +4593,14 @@ const configs = {
       type: 'textarea',
       wide: true
     }],
-    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenDieuKienGoc', label: 'Điều kiện gốc'}, {
+    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenDieuKienmau', label: 'Điều kiện mẫu'}, {
       key: 'thuTu',
       label: 'Thứ tự'
     }, {key: 'ghiChu', label: 'Ghi chú'}]
   },
-  syllabusChuongTrinhGoc: {
-    title: 'Syllabus chương trình gốc / mẫu',
-    description: 'Bảng gốc/mẫu dùng chung để chọn, tái sử dụng.',
+  syllabusChuongTrinhmau: {
+    title: 'Syllabus chương trình mẫu',
+    description: 'Bảng mẫu/mẫu dùng chung để chọn, tái sử dụng.',
     defaultForm: {
       ma: '',
       ten: '',
@@ -4218,13 +4636,13 @@ const configs = {
     },
       {
         key: '__fileTaiLieu',
-        label: 'File syllabus chương trình gốc',
+        label: 'File syllabus chương trình mẫu',
         type: 'file',
         themNhieuO: true,
         accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp,.mp4,.mov,.avi,.mkv,.webm,.mp3,.wav,.m4a,.ogg,.zip,.rar,.7z',
-        nghiepVu: 'syllabus_chuong_trinh_goc',
-        tangNghiepVu: 'tang-5-syllabus-chuong-trinh-goc',
-        tepNguon: 'syllabusChuongTrinhGoc'
+        nghiepVu: 'syllabus_chuong_trinh_mau',
+        tangNghiepVu: 'tang-5-syllabus-chuong-trinh-mau',
+        tepNguon: 'syllabusChuongTrinhmau'
       },
       {key: 'duongDan', label: 'Đường dẫn đã lưu', locked: true, openFile: true},
       {key: 'huongDanThucHien', label: 'Hướng dẫn thực hiện', type: 'textarea', wide: true}, {
@@ -4233,7 +4651,7 @@ const configs = {
         type: 'textarea',
         wide: true
       }],
-    uniqueRules: [{field: 'ma', message: 'Mã syllabus chương trình gốc đã tồn tại.'}],
+    uniqueRules: [{field: 'ma', message: 'Mã syllabus chương trình mẫu đã tồn tại.'}],
 
     columns: [
       {key: 'ma', label: 'Mã'},
@@ -4257,7 +4675,7 @@ const configs = {
     description: 'Bảng lưu/áp dụng đã gắn vào Version thật.',
     defaultForm: {
       chuongTrinhVersionId: null,
-      syllabusChuongTrinhGocId: null,
+      syllabusChuongTrinhmauId: null,
       ma: '',
       ten: '',
       mucTieu: '',
@@ -4284,10 +4702,10 @@ const configs = {
         locked: true
       },
       {
-        key: 'syllabusChuongTrinhGocId',
-        label: 'Syllabus gốc',
+        key: 'syllabusChuongTrinhmauId',
+        label: 'Syllabus mẫu',
         type: 'select',
-        lookup: 'syllabusChuongTrinhGoc',
+        lookup: 'syllabusChuongTrinhmau',
         labelKey: ['ma', 'ten'],
         locked: true
       },
@@ -4319,7 +4737,7 @@ const configs = {
     ],
     columns: [
       {key: 'tenVersion', label: 'Version'},
-      {key: 'tenSyllabusChuongTrinhGoc', label: 'Syllabus gốc'},
+      {key: 'tenSyllabusChuongTrinhmau', label: 'Syllabus mẫu'},
       {key: 'ma', label: 'Mã'},
       {key: 'ten', label: 'Tên'},
       {key: 'mucTieu', label: 'Mục tiêu'},
@@ -4339,13 +4757,13 @@ const configs = {
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
   },
-  nhomKienThucGoc: {
-    title: 'Nhóm kiến thức gốc / mẫu',
-    description: 'Bảng gốc/mẫu dùng chung để chọn, tái sử dụng.',
+  nhomKienThucmau: {
+    title: 'Nhóm kiến thức mẫu',
+    description: 'Bảng mẫu/mẫu dùng chung để chọn, tái sử dụng.',
     defaultForm: {ma: '', ten: '', loaiNhom: 'chung', moTa: ''},
-    fields: [{key: 'ma', label: 'Mã nhóm gốc', required: true}, {
+    fields: [{key: 'ma', label: 'Mã nhóm mẫu', required: true}, {
       key: 'ten',
-      label: 'Tên nhóm gốc',
+      label: 'Tên nhóm mẫu',
       required: true
     }, {key: 'loaiNhom', label: 'Loại nhóm', type: 'select', lookup: 'loaiNhom'}, {
       key: 'moTa',
@@ -4353,18 +4771,18 @@ const configs = {
       type: 'textarea',
       wide: true
     }],
-    uniqueRules: [{field: 'ma', message: 'Mã nhóm kiến thức gốc đã tồn tại.'}],
-    columns: [{key: 'ma', label: 'Mã'}, {key: 'ten', label: 'Tên nhóm gốc'}, {
+    uniqueRules: [{field: 'ma', message: 'Mã nhóm kiến thức mẫu đã tồn tại.'}],
+    columns: [{key: 'ma', label: 'Mã'}, {key: 'ten', label: 'Tên nhóm mẫu'}, {
       key: 'loaiNhom',
       label: 'Loại'
     }, {key: 'moTa', label: 'Mô tả'}, {key: 'createdAt', label: 'Ngày tạo'}, {key: 'updatedAt', label: 'Ngày cập nhật'}]
   },
   nhomKienThuc: {
     title: 'Nhóm kiến thức gán vào Version',
-    description: 'Bảng nhóm kiến thức đã được copy từ nhóm kiến thức gốc/mẫu vào Version.',
+    description: 'Bảng nhóm kiến thức đã được copy từ nhóm kiến thức mẫu/mẫu vào Version.',
     defaultForm: {
       chuongTrinhVersionId: null,
-      nhomKienThucGocId: null,
+      nhomKienThucmauId: null,
       ma: '',
       ten: '',
       thuTu: null,
@@ -4386,10 +4804,10 @@ const configs = {
         locked: true
       },
       {
-        key: 'nhomKienThucGocId',
-        label: 'Nhóm kiến thức gốc',
+        key: 'nhomKienThucmauId',
+        label: 'Nhóm kiến thức mẫu',
         type: 'select',
-        lookup: 'nhomKienThucGoc',
+        lookup: 'nhomKienThucmau',
         labelKey: ['ma', 'ten'],
         locked: true
       },
@@ -4416,14 +4834,14 @@ const configs = {
         message: 'Thứ tự nhóm kiến thức đã tồn tại trong Version đang chọn.'
       },
       {
-        field: 'nhomKienThucGocId',
+        field: 'nhomKienThucmauId',
         scopeKeys: ['chuongTrinhVersionId'],
-        message: 'Nhóm kiến thức gốc này đã được gán vào Version đang chọn.'
+        message: 'Nhóm kiến thức mẫu này đã được gán vào Version đang chọn.'
       }
     ],
     columns: [
       {key: 'tenVersion', label: 'Version'},
-      {key: 'tenNhomKienThucGoc', label: 'Nhóm kiến thức gốc'},
+      {key: 'tenNhomKienThucmau', label: 'Nhóm kiến thức mẫu'},
       {key: 'ma', label: 'Mã'},
       {key: 'ten', label: 'Tên nhóm'},
       {key: 'loaiNhom', label: 'Loại nhóm'},
@@ -4437,27 +4855,27 @@ const configs = {
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
   },
-  nhomTuChonGoc: {
-    title: 'Nhóm tự chọn gốc / mẫu',
-    description: 'Bảng gốc/mẫu dùng chung để chọn, tái sử dụng.',
+  nhomTuChonmau: {
+    title: 'Nhóm tự chọn mẫu',
+    description: 'Bảng mẫu/mẫu dùng chung để chọn, tái sử dụng.',
     defaultForm: {ma: '', ten: '', moTa: ''},
-    fields: [{key: 'ma', label: 'Mã nhóm tự chọn gốc', required: true}, {
+    fields: [{key: 'ma', label: 'Mã nhóm tự chọn mẫu', required: true}, {
       key: 'ten',
-      label: 'Tên nhóm tự chọn gốc',
+      label: 'Tên nhóm tự chọn mẫu',
       required: true
     }, {key: 'moTa', label: 'Mô tả', type: 'textarea', wide: true}],
-    uniqueRules: [{field: 'ma', message: 'Mã nhóm tự chọn gốc đã tồn tại.'}],
-    columns: [{key: 'ma', label: 'Mã'}, {key: 'ten', label: 'Tên nhóm tự chọn gốc'}, {
+    uniqueRules: [{field: 'ma', message: 'Mã nhóm tự chọn mẫu đã tồn tại.'}],
+    columns: [{key: 'ma', label: 'Mã'}, {key: 'ten', label: 'Tên nhóm tự chọn mẫu'}, {
       key: 'moTa',
       label: 'Mô tả'
     }, {key: 'createdAt', label: 'Ngày tạo'}, {key: 'updatedAt', label: 'Ngày cập nhật'}]
   },
   nhomTuChon: {
     title: 'Nhóm tự chọn gán vào Version - TÁI SỬ DỤNG',
-    description: 'Bảng nhóm tự chọn đã được copy từ nhóm tự chọn gốc/mẫu vào Version.',
+    description: 'Bảng nhóm tự chọn đã được copy từ nhóm tự chọn mẫu/mẫu vào Version.',
     defaultForm: {
       chuongTrinhVersionId: null,
-      nhomTuChonGocId: null,
+      nhomTuChonmauId: null,
       ma: '',
       ten: '',
       soMonChon: null,
@@ -4475,10 +4893,10 @@ const configs = {
         locked: true
       },
       {
-        key: 'nhomTuChonGocId',
-        label: 'Nhóm tự chọn gốc',
+        key: 'nhomTuChonmauId',
+        label: 'Nhóm tự chọn mẫu',
         type: 'select',
-        lookup: 'nhomTuChonGoc',
+        lookup: 'nhomTuChonmau',
         labelKey: ['ma', 'ten'],
         locked: true
       },
@@ -4496,14 +4914,14 @@ const configs = {
         message: 'Tên nhóm tự chọn đã tồn tại trong Version đang chọn.'
       },
       {
-        field: 'nhomTuChonGocId',
+        field: 'nhomTuChonmauId',
         scopeKeys: ['chuongTrinhVersionId'],
-        message: 'Nhóm tự chọn gốc này đã được gán vào Version đang chọn.'
+        message: 'Nhóm tự chọn mẫu này đã được gán vào Version đang chọn.'
       }
     ],
     columns: [
       {key: 'tenVersion', label: 'Version'},
-      {key: 'tenNhomTuChonGoc', label: 'Nhóm tự chọn gốc'},
+      {key: 'tenNhomTuChonmau', label: 'Nhóm tự chọn mẫu'},
       {key: 'ma', label: 'Mã'},
       {key: 'ten', label: 'Tên nhóm'},
       {key: 'soMonChon', label: 'Số môn chọn'},
@@ -4514,9 +4932,9 @@ const configs = {
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
   },
-  khungKyGoc: {
-    title: 'Khung kỳ gốc / mẫu',
-    description: 'Bảng gốc/mẫu dùng chung để chọn, tái sử dụng.',
+  khungKymau: {
+    title: 'Khung kỳ mẫu',
+    description: 'Bảng mẫu/mẫu dùng chung để chọn, tái sử dụng.',
     defaultForm: {maKy: '', tenKy: '', thuTu: null, moTa: ''},
     fields: [{key: 'maKy', label: 'Mã kỳ', required: true}, {
       key: 'tenKy',
@@ -4528,9 +4946,9 @@ const configs = {
       type: 'textarea',
       wide: true
     }],
-    uniqueRules: [{field: 'maKy', message: 'Mã kỳ gốc đã tồn tại.'}, {
+    uniqueRules: [{field: 'maKy', message: 'Mã kỳ mẫu đã tồn tại.'}, {
       field: 'thuTu',
-      message: 'Thứ tự kỳ gốc đã tồn tại.'
+      message: 'Thứ tự kỳ mẫu đã tồn tại.'
     }],
     columns: [{key: 'maKy', label: 'Mã kỳ'}, {key: 'tenKy', label: 'Tên kỳ'}, {
       key: 'thuTu',
@@ -4542,11 +4960,11 @@ const configs = {
     description: 'Bảng lưu/áp dụng đã gắn vào Version thật.',
     defaultForm: {
       chuongTrinhVersionId: null,
-      loaiChuongTrinhId: null,
-      khungKyGocId: null,
       maKy: '',
       tenKy: '',
-      thuTu: null
+      thuTu: null,
+      ngayBatDau: null,
+      ngayKetThuc: null
     },
     fields: [{
       key: 'chuongTrinhVersionId',
@@ -4556,25 +4974,33 @@ const configs = {
       labelKey: ['maVersion', 'tenVersion'],
       locked: true
     }, {
-      key: 'loaiChuongTrinhId',
-      label: 'Loại CT',
-      type: 'select',
-      lookup: 'loaiChuongTrinh',
-      labelKey: ['maLoai', 'tenLoai'],
-      locked: true
+      key: 'maKy', label: 'Mã kỳ', required: true
     }, {
-      key: 'khungKyGocId',
-      label: 'Khung kỳ gốc',
-      type: 'select',
-      lookup: 'khungKyGoc',
-      labelKey: ['maKy', 'tenKy'],
-      locked: true
-    }, {key: 'maKy', label: 'Mã kỳ', required: true}, {key: 'tenKy', label: 'Tên kỳ', required: true}, {
+      key: 'tenKy', label: 'Tên kỳ', required: true
+    }, {
       key: 'thuTu',
       label: 'Thứ tự',
       type: 'number',
       step: 1,
       required: true
+    }, {
+      key: 'ngayBatDau',
+      label: 'Ngày bắt đầu',
+      type: 'date',
+      validate: (value, form) => {
+        if (value && form.ngayKetThuc && value > form.ngayKetThuc)
+          return 'Ngày bắt đầu kỳ không được sau ngày kết thúc kỳ.'
+        return null
+      }
+    }, {
+      key: 'ngayKetThuc',
+      label: 'Ngày kết thúc',
+      type: 'date',
+      validate: (value, form) => {
+        if (value && form.ngayBatDau && value < form.ngayBatDau)
+          return 'Ngày kết thúc kỳ không được trước ngày bắt đầu kỳ.'
+        return null
+      }
     }],
     uniqueRules: [{
       field: 'maKy',
@@ -4585,17 +5011,21 @@ const configs = {
       scopeKeys: ['chuongTrinhVersionId'],
       message: 'Thứ tự khung kỳ đã tồn tại trong Version đang chọn.'
     }, {
-      field: 'khungKyGocId',
+      field: 'khungKymauId',
       scopeKeys: ['chuongTrinhVersionId'],
-      message: 'Khung kỳ gốc này đã được gán vào Version đang chọn.'
+      message: 'Khung kỳ mẫu này đã được gán vào Version đang chọn.'
     }],
-    columns: [{key: 'tenVersion', label: 'Version'}, {key: 'tenKhungKyGoc', label: 'Kỳ gốc'}, {
-      key: 'maKy',
-      label: 'Mã kỳ'
-    }, {key: 'tenKy', label: 'Tên kỳ'}, {key: 'thuTu', label: 'Thứ tự'}]
+    columns: [
+      {key: 'tenVersion', label: 'Version'},
+      {key: 'maKy', label: 'Mã kỳ'},
+      {key: 'tenKy', label: 'Tên kỳ'},
+      {key: 'thuTu', label: 'Thứ tự'},
+      {key: 'ngayBatDau', label: 'Ngày bắt đầu'},
+      {key: 'ngayKetThuc', label: 'Ngày kết thúc'}
+    ]
   },
   monHoc: {
-    title: 'Môn học gốc',
+    title: 'Môn học mẫu',
     allowToggleSelect: true,
     defaultForm: {maMon: '', tenMon: '', moTa: ''},
     fields: [
@@ -4604,7 +5034,7 @@ const configs = {
       {key: 'moTa', label: 'Mô tả', type: 'textarea', wide: true}
     ],
     uniqueRules: [
-      {field: 'maMon', message: 'Mã môn học gốc đã tồn tại.'}
+      {field: 'maMon', message: 'Mã môn học mẫu đã tồn tại.'}
     ],
     columns: [
       {key: 'maMon', label: 'Mã môn'},
@@ -4640,7 +5070,7 @@ const configs = {
     ],
     requiredParentKeys: [
       {key: 'chuongTrinhVersionId', label: 'Version chương trình'},
-      {key: 'monHocId', label: 'Môn học gốc'},
+      {key: 'monHocId', label: 'Môn học mẫu'},
       {key: 'khungKyId', label: 'Khung kỳ'}
     ],
     uniqueRules: [
@@ -4763,7 +5193,7 @@ const configs = {
       {key: 'ghiChu', label: 'Tên cột điểm / Ghi chú', type: 'textarea', wide: true}
     ],
     columns: [
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
+      {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
       {key: 'tenCotDiemMau', label: 'Tên cột điểm mẫu'},
       {key: 'loaiMau', label: 'Loại mẫu'},
       {key: 'nguongTu', label: 'Ngưỡng từ'},
@@ -4796,7 +5226,7 @@ const configs = {
       {field: 'tenCotDiem', message: 'Tên cột điểm đã tồn tại trong syllabus.'}
     ],
     columns: [
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
+      {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
       {key: 'tenCotDiem', label: 'Tên cột điểm'},
       {key: 'loaiDiem', label: 'Loại điểm'},
       {key: 'tyLe', label: 'Tỷ lệ %'},
@@ -4805,9 +5235,9 @@ const configs = {
     ]
   },
   cauHinhDanhGiaMau: {
-    title: 'Cột điểm mẫu của syllabus gốc',
+    title: 'Cột điểm mẫu của syllabus mẫu',
     defaultForm: {
-      syllabusMonHocGocId: null,
+      syllabusMonHocMauId: null,
       tenCotDiem: '',
       loaiDiem: 'khac',
       tyLe: null,
@@ -4817,7 +5247,7 @@ const configs = {
       ghiChu: ''
     },
     fields: [
-      {key: 'syllabusMonHocGocId', label: 'Syllabus gốc', hidden: true, required: true},
+      {key: 'syllabusMonHocMauId', label: 'Syllabus mẫu', hidden: true, required: true},
       {key: 'tenCotDiem', label: 'Tên cột điểm', required: true},
       {key: 'loaiDiem', label: 'Loại điểm', type: 'select', lookup: 'loaiDiemDanhGia'},
       {key: 'tyLe', label: 'Tỷ lệ %', type: 'number', max: 100, step: 0.01, required: true},
@@ -4830,7 +5260,7 @@ const configs = {
       {field: 'tenCotDiem', message: 'Tên cột điểm mẫu đã tồn tại.'}
     ],
     columns: [
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
+      {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
       {key: 'tenCotDiem', label: 'Tên cột điểm'},
       {key: 'loaiDiem', label: 'Loại điểm'},
       {key: 'tyLe', label: 'Tỷ lệ %'},
@@ -4841,7 +5271,7 @@ const configs = {
     ]
   },
   quyDoiDiemMau: {
-    title: 'Mẫu quy đổi kết quả theo syllabus gốc',
+    title: 'Mẫu quy đổi kết quả theo syllabus mẫu',
     defaultForm: {
       ma: '',
       ten: '',
@@ -4907,8 +5337,8 @@ const configs = {
     ]
   },
 
-  syllabusMonHocGoc: {
-    title: 'Syllabus môn học gốc - TÁI SỬ DỤNG',
+  syllabusMonHocmau: {
+    title: 'Syllabus môn học mẫu - TÁI SỬ DỤNG',
     defaultForm: {
       monHocId: null,
       ma: '',
@@ -4933,14 +5363,14 @@ const configs = {
     fields: [
       {
         key: 'monHocId',
-        label: 'Môn học gốc',
+        label: 'Môn học mẫu',
         type: 'select',
         lookup: 'monHoc',
         labelKey: ['maMon', 'tenMon'],
         locked: true
       },
-      {key: 'ma', label: 'Mã syllabus gốc', required: true},
-      {key: 'ten', label: 'Tên syllabus gốc', required: true},
+      {key: 'ma', label: 'Mã syllabus mẫu', required: true},
+      {key: 'ten', label: 'Tên syllabus mẫu', required: true},
       {key: 'viTri', label: 'Vị trí', type: 'textarea', wide: true},
       {key: 'tinhChat', label: 'Tính chất', type: 'textarea', wide: true},
       {key: 'soTinChi', label: 'Số tín chỉ', type: 'number', min: 0, step: 0.1},
@@ -4966,11 +5396,11 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     uniqueRules: [
-      {field: 'ma', message: 'Mã syllabus môn học gốc đã tồn tại.'}
+      {field: 'ma', message: 'Mã syllabus môn học mẫu đã tồn tại.'}
     ],
     columns: [
       {key: 'ma', label: 'Mã'},
-      {key: 'ten', label: 'Tên syllabus gốc'},
+      {key: 'ten', label: 'Tên syllabus mẫu'},
       {key: 'tenMonHoc', label: 'Môn học'},
       {key: 'soTinChi', label: 'Số tín chỉ'},
       {key: 'viTri', label: 'Vị trí'},
@@ -4992,10 +5422,10 @@ const configs = {
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
   },
-  syllabusMonHocGocChuongBai: {
-    title: 'Chương/bài của syllabus gốc ',
+  syllabusMonHocmauChuongBai: {
+    title: 'Chương/bài của syllabus mẫu ',
     defaultForm: {
-      syllabusMonHocGocId: null,
+      syllabusMonHocMauId: null,
       maChuong: '',
       ten: '',
       mucTieu: '',
@@ -5009,10 +5439,10 @@ const configs = {
     },
     fields: [
       {
-        key: 'syllabusMonHocGocId',
-        label: 'Syllabus gốc',
+        key: 'syllabusMonHocMauId',
+        label: 'Syllabus mẫu',
         type: 'select',
-        lookup: 'syllabusMonHocGoc',
+        lookup: 'syllabusMonHocmau',
         labelKey: ['ma', 'ten'],
         locked: true
       },
@@ -5028,7 +5458,7 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     columns: [
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
+      {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
       {key: 'maChuong', label: 'Mã chương'},
       {key: 'ten', label: 'Tên chương/bài'},
       {key: 'mucTieu', label: 'Mục tiêu'},
@@ -5040,23 +5470,23 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
   },
-  syllabusMonHocGocDieuKien: {
-    title: 'Điều kiện của syllabus gốc ',
-    defaultForm: {syllabusMonHocGocId: null, dieuKienGocId: null, thuTu: null, ghiChu: ''},
+  syllabusMonHocmauDieuKien: {
+    title: 'Điều kiện của syllabus mẫu ',
+    defaultForm: {syllabusMonHocMauId: null, dieuKienmauId: null, thuTu: null, ghiChu: ''},
     fields: [
       {
-        key: 'syllabusMonHocGocId',
-        label: 'Syllabus gốc',
+        key: 'syllabusMonHocMauId',
+        label: 'Syllabus mẫu',
         type: 'select',
-        lookup: 'syllabusMonHocGoc',
+        lookup: 'syllabusMonHocmau',
         labelKey: ['ma', 'ten'],
         locked: true
       },
       {
-        key: 'dieuKienGocId',
-        label: 'Điều kiện gốc',
+        key: 'dieuKienmauId',
+        label: 'Điều kiện mẫu',
         type: 'select',
-        lookup: 'dieuKienMonHocGoc',
+        lookup: 'dieuKienMonHocmau',
         labelKey: ['ma', 'noiDung'],
         required: true
       },
@@ -5064,17 +5494,17 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     columns: [
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
-      {key: 'tenDieuKienGoc', label: 'Điều kiện gốc'},
+      {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
+      {key: 'tenDieuKienmau', label: 'Điều kiện mẫu'},
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
   },
-  syllabusMonHocGocTaiLieu: {
-    title: 'Tài liệu gốc của syllabus',
-    description: 'Bản tài liệu gốc thuộc đúng syllabus môn học gốc. Ở tầng chương trình chỉ chọn/copy, không CRUD.',
+  syllabusMonHocmauTaiLieu: {
+    title: 'Tài liệu mẫu của syllabus',
+    description: 'Bản tài liệu mẫu thuộc đúng syllabus môn học mẫu. Ở tầng chương trình chỉ chọn/copy, không CRUD.',
     defaultForm: {
-      syllabusMonHocGocId: null,
-      taiLieuGocId: null,
+      syllabusMonHocMauId: null,
+      taiLieumauId: null,
       ma: '',
       ten: '',
       loai: 'GIAO_TRINH',
@@ -5088,10 +5518,10 @@ const configs = {
     },
     fields: [
       {
-        key: 'syllabusMonHocGocId',
-        label: 'Syllabus gốc',
+        key: 'syllabusMonHocMauId',
+        label: 'Syllabus mẫu',
         type: 'select',
-        lookup: 'syllabusMonHocGoc',
+        lookup: 'syllabusMonHocmau',
         labelKey: ['ma', 'ten'],
         locked: true
       },
@@ -5107,7 +5537,7 @@ const configs = {
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
     ],
     columns: [
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
+      {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
       {key: 'ma', label: 'Mã tài liệu'},
       {key: 'ten', label: 'Tên tài liệu'},
       {key: 'loai', label: 'Loại'},
@@ -5125,7 +5555,7 @@ const configs = {
     description: 'Bảng syllabus môn học áp dụng cho môn trong chương trình.',
     defaultForm: {
       chuongTrinhMonId: null,
-      syllabusMonHocGocId: null,
+      syllabusMonHocMauId: null,
       monHocId: null,
       ma: '',
       ten: '',
@@ -5156,16 +5586,16 @@ const configs = {
         locked: true
       },
       {
-        key: 'syllabusMonHocGocId',
-        label: 'Syllabus môn học gốc',
+        key: 'syllabusMonHocMauId',
+        label: 'Syllabus môn học mẫu',
         type: 'select',
-        lookup: 'syllabusMonHocGoc',
+        lookup: 'syllabusMonHocmau',
         labelKey: ['ma', 'ten'],
         locked: true
       },
       {
         key: 'monHocId',
-        label: 'Môn học gốc',
+        label: 'Môn học mẫu',
         type: 'select',
         lookup: 'monHoc',
         labelKey: ['maMon', 'tenMon'],
@@ -5192,10 +5622,10 @@ const configs = {
     ],
     columns: [
       {key: 'tenChuongTrinhMon', label: 'Môn trong CT'},
-      {key: 'tenSyllabusMonHocGoc', label: 'Syllabus gốc'},
+      {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
       {key: 'ma', label: 'Mã'},
       {key: 'ten', label: 'Tên syllabus áp dụng'},
-      {key: 'tenMonHoc', label: 'Môn học gốc'},
+      {key: 'tenMonHoc', label: 'Môn học mẫu'},
       {key: 'soTinChi', label: 'Số tín chỉ'},
       {key: 'tongGio', label: 'Tổng giờ'},
       {key: 'gioLyThuyet', label: 'Giờ lý thuyết'},
@@ -5239,7 +5669,7 @@ const configs = {
         label: 'Syllabus môn',
         type: 'select',
         lookup: 'syllabusMonHoc',
-        labelKey: ['ten', 'tenSyllabusMonHocGoc', 'ma'],
+        labelKey: ['ten', 'tenSyllabusMonHocmau', 'ma'],
         locked: true
       },
       {key: 'loai', label: 'Loại điều kiện', type: 'select', lookup: 'loaiDieuKienMonHoc', required: true},
@@ -5262,8 +5692,8 @@ const configs = {
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
   },
-  dieuKienMonHocGoc: {
-    title: 'Điều kiện môn học gốc / mẫu',
+  dieuKienMonHocmau: {
+    title: 'Điều kiện môn học mẫu',
     description: 'Kho điều kiện thực hiện môn học dùng chung.',
     defaultForm: {
       ma: '',
@@ -5288,7 +5718,7 @@ const configs = {
   },
   syllabusMonHocDieuKien: {
     title: 'Điều kiện gán vào syllabus môn - TÁI SỬ DỤNG',
-    defaultForm: {syllabusMonId: null, dieuKienGocId: null, thuTu: null, ghiChu: ''},
+    defaultForm: {syllabusMonId: null, dieuKienmauId: null, thuTu: null, ghiChu: ''},
     fields: [
       {
         key: 'syllabusMonId',
@@ -5299,10 +5729,10 @@ const configs = {
         locked: true
       },
       {
-        key: 'dieuKienGocId',
-        label: 'Điều kiện gốc',
+        key: 'dieuKienmauId',
+        label: 'Điều kiện mẫu',
         type: 'select',
-        lookup: 'dieuKienMonHocGoc',
+        lookup: 'dieuKienMonHocmau',
         labelKey: ['ma', 'noiDung'],
         required: true
       },
@@ -5311,7 +5741,7 @@ const configs = {
     ],
     uniqueRules: [
       {
-        field: 'dieuKienGocId',
+        field: 'dieuKienmauId',
         scopeKeys: ['syllabusMonId'],
         message: 'Điều kiện này đã được gán vào Syllabus môn đang chọn.'
       },
@@ -5322,7 +5752,7 @@ const configs = {
       }
     ],
     columns: [
-      {key: 'tenDieuKienGoc', label: 'Điều kiện gốc'},
+      {key: 'tenDieuKienmau', label: 'Điều kiện mẫu'},
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
   },
@@ -5348,7 +5778,7 @@ const configs = {
         label: 'Syllabus môn',
         type: 'select',
         lookup: 'syllabusMonHoc',
-        labelKey: ['ten', 'tenSyllabusMonHocGoc', 'ma'],
+        labelKey: ['ten', 'tenSyllabusMonHocmau', 'ma'],
         locked: true
       },
       {key: 'maChuong', label: 'Mã chương', required: true},
@@ -5377,9 +5807,9 @@ const configs = {
       {key: 'updatedAt', label: 'Ngày cập nhật'}
     ]
   },
-  taiLieuGoc: {
-    title: 'Tài liệu gốc / mẫu',
-    description: 'Kho tài liệu gốc dùng chung cho syllabus môn học. Không nhập đường dẫn thủ công, chọn file để hệ thống tự upload và lưu đường dẫn.',
+  taiLieumau: {
+    title: 'Tài liệu mẫu',
+    description: 'Kho tài liệu mẫu dùng chung cho syllabus môn học. Không nhập đường dẫn thủ công, chọn file để hệ thống tự upload và lưu đường dẫn.',
     defaultForm: {
       ma: '',
       ten: '',
@@ -5403,8 +5833,8 @@ const configs = {
         type: 'file',
         themNhieuO: true,
         accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp,.mp4,.mov,.avi,.mkv,.webm,.mp3,.wav,.m4a,.ogg,.zip,.rar,.7z',
-        nghiepVu: 'syllabus_tai_lieu_goc',
-        tangNghiepVu: 'tang-10-tai-lieu-goc-mau'
+        nghiepVu: 'syllabus_tai_lieu_mau',
+        tangNghiepVu: 'tang-10-tai-lieu-mau-mau'
       },
       {key: 'duongDan', label: 'Đường dẫn đã lưu', locked: true, openFile: true},
       {key: 'ghiChu', label: 'Ghi chú', type: 'textarea', wide: true}
@@ -5424,7 +5854,7 @@ const configs = {
   },
   syllabusMonHocTaiLieu: {
     title: 'Tài liệu gán vào syllabus môn - TÁI SỬ DỤNG',
-    defaultForm: {syllabusMonId: null, taiLieuGocId: null, thuTu: null, batBuoc: false, ghiChu: ''},
+    defaultForm: {syllabusMonId: null, taiLieumauId: null, thuTu: null, batBuoc: false, ghiChu: ''},
     fields: [
       {
         key: 'syllabusMonId',
@@ -5435,10 +5865,10 @@ const configs = {
         locked: true
       },
       {
-        key: 'taiLieuGocId',
-        label: 'Tài liệu gốc',
+        key: 'taiLieumauId',
+        label: 'Tài liệu mẫu',
         type: 'select',
-        lookup: 'taiLieuGoc',
+        lookup: 'taiLieumau',
         labelKey: ['ma', 'ten'],
         required: true
       },
@@ -5448,7 +5878,7 @@ const configs = {
     ],
     uniqueRules: [
       {
-        field: 'taiLieuGocId',
+        field: 'taiLieumauId',
         scopeKeys: ['syllabusMonId'],
         message: 'Tài liệu này đã được gán vào Syllabus môn đang chọn.'
       },
@@ -5459,7 +5889,7 @@ const configs = {
       }
     ],
     columns: [
-      {key: 'tenTaiLieuGoc', label: 'Tài liệu gốc'},
+      {key: 'tenTaiLieumau', label: 'Tài liệu mẫu'},
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
   },
@@ -5485,7 +5915,7 @@ const configs = {
         label: 'Syllabus môn',
         type: 'select',
         lookup: 'syllabusMonHoc',
-        labelKey: ['ten', 'tenSyllabusMonHocGoc', 'ma'],
+        labelKey: ['ten', 'tenSyllabusMonHocmau', 'ma'],
         locked: true
       },
       {key: 'ma', label: 'Mã tài liệu', required: true},
@@ -5526,6 +5956,59 @@ const configs = {
 
 </script>
 <style scoped>
+/* ===== KHUNG KỲ GỢI Ý PANEL ===== */
+.khung-ky-goi-y-panel {
+  margin: 8px 0 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #fef9ec;
+  border: 1px solid #f0c040;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.goi-y-loading { color: #888; font-style: italic; }
+.goi-y-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.goi-y-status.goi-y-ok { color: #2a7a2a; }
+.goi-y-status.goi-y-warn { color: #b05e00; }
+.goi-y-msg { font-weight: 500; }
+.goi-y-count {
+  font-size: 12px;
+  background: rgba(0,0,0,.07);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+.goi-y-next {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.goi-y-next .btn.small { padding: 3px 10px; font-size: 12px; margin-left: 6px; }
+.goi-y-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.goi-y-ky-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+}
+.goi-y-ky-badge.da-tao  { background: #d4f5d4; color: #1a6b1a; border: 1px solid #7ec87e; }
+.goi-y-ky-badge.chua-tao { background: #f0f0f0; color: #888; border: 1px dashed #bbb; }
+/* ===== END KHUNG KỲ GỢI Ý PANEL ===== */
+
 .xay-dung-page {
   box-sizing: border-box;
   width: 100%;
@@ -5918,7 +6401,7 @@ const configs = {
   border-color: #fde68a;
 }
 
-.flow-group.mau-ngoc {
+.flow-group.mau-nmau {
   background: #ccfbf1;
   border-color: #99f6e4;
 }
@@ -5940,6 +6423,54 @@ const configs = {
   border-radius: 6px;
   background: #ffffff;
   overflow: hidden;
+}
+
+.form-nganh-he {
+  display: grid;
+  grid-template-columns: 1fr 1fr 80px 80px 1fr 1fr;
+  gap: 8px 10px;
+  padding: 12px 14px 10px;
+  align-items: end;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-nganh-he label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.form-nganh-he input,
+.form-nganh-he select {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 7px;
+  font-size: 13px;
+}
+
+.hang-nut-nganh-he {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  padding-bottom: 1px;
+}
+
+.trang-thai-on {
+  color: #16a34a;
+  font-size: 11px;
+  background: #f0fdf4;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.trang-thai-off {
+  color: #9ca3af;
+  font-size: 11px;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .bang-da-gan-head {
@@ -6163,7 +6694,7 @@ const configs = {
   overflow: visible;
 }
 
-/* Chỉ cuộn vùng dữ liệu bảng môn học gốc, không cắt còn 10 dòng */
+/* Chỉ cuộn vùng dữ liệu bảng môn học mẫu, không cắt còn 10 dòng */
 .bang-mon-hoc-tang-7-scroll :deep(.table-wrap),
 .bang-mon-hoc-tang-7-scroll :deep(.bang-table-wrap),
 .bang-mon-hoc-tang-7-scroll :deep(.data-table-wrap) {

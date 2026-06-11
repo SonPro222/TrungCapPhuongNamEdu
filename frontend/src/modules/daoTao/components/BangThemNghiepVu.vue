@@ -339,7 +339,7 @@ const props = defineProps({
   loaiBang: {
     type: String,
     default: 'phu',
-    validator: (value) => ['xuong-song', 'phu', 'goc-mau'].includes(value)
+    validator: (value) => ['xuong-song', 'phu', 'mau-mau'].includes(value)
   },
   disabled: {type: Boolean, default: false},
   disabledText: {type: String, default: ''},
@@ -365,7 +365,7 @@ const fileInputs = reactive({})
 const fileInputCounts = reactive({})
 
 function canGiuDanhSachKhiPropsRong() {
-  return props.loaiBang === 'goc-mau' && String(props.title || '').includes('Quy đổi điểm mẫu')
+  return props.loaiBang === 'mau-mau' && String(props.title || '').includes('Quy đổi điểm mẫu')
 }
 
 function taoFormWatchKey() {
@@ -392,7 +392,7 @@ const hienThiItems = computed(() => {
 const visibleFields = computed(() => props.fields.filter((field) => !field.hidden))
 const thongBaoBang = computed(() => props.tableMessage?.message || localMessage.value)
 const loaiThongBaoBang = computed(() => props.tableMessage?.type || localMessageType.value)
-const hienCotTrangThai = computed(() => props.canToggleSave || (!props.readOnly && props.canSelect) || props.canShowSavedStatus)
+const hienCotTrangThai = computed(() => props.canToggleSave || props.canShowSavedStatus)
 
 /*
   Luôn giữ cột thao tác khi bảng có cột dữ liệu để đặt nút Xem thêm/Thu gọn.
@@ -659,6 +659,7 @@ function isFieldRequired(field) {
   if (!field || field.hidden) return false
   if (field.locked) return Boolean(field.required)
   if (field.optional === true) return false
+  if (typeof field.requiredIf === 'function') return field.requiredIf(form)
   return field.required !== false
 }
 
@@ -735,6 +736,14 @@ function validateField(field) {
     const hasOption = options.some((option) => String(option[valueKey]) === String(value))
     if (value !== '' && value !== null && value !== undefined && options.length && !hasOption) {
       setFieldError(field.key, `${field.label} không đúng danh sách lựa chọn.`)
+      return false
+    }
+  }
+
+  if (typeof field.validate === 'function') {
+    const error = field.validate(value, form)
+    if (error) {
+      setFieldError(field.key, error)
       return false
     }
   }
@@ -1153,10 +1162,10 @@ async function saveForm() {
   saving.value = true
 
   try {
-    const payloadGoc = preparePayload()
-    if (!payloadGoc) return
+    const payloadmau = preparePayload()
+    if (!payloadmau) return
 
-    const payload = await xuLyUploadFileTruocKhiLuu(payloadGoc)
+    const payload = await xuLyUploadFileTruocKhiLuu(payloadmau)
 
     const saved = editingId.value
         ? await props.service.update(editingId.value, payload)
@@ -1245,29 +1254,29 @@ async function deleteItem(item) {
   background: #f8fafc;
 }
 
-.bang-them-nghiep-vu.bang-goc-mau {
+.bang-them-nghiep-vu.bang-mau-mau {
   background: #f5f3ff;
   border-color: #c4b5fd;
 }
 
-.bang-them-nghiep-vu.bang-goc-mau .bang-head {
+.bang-them-nghiep-vu.bang-mau-mau .bang-head {
   background: #ede9fe;
 }
 
-.bang-them-nghiep-vu.bang-goc-mau .bang-form,
-.bang-them-nghiep-vu.bang-goc-mau .table-title,
-.bang-them-nghiep-vu.bang-goc-mau .table-wrap {
+.bang-them-nghiep-vu.bang-mau-mau .bang-form,
+.bang-them-nghiep-vu.bang-mau-mau .table-title,
+.bang-them-nghiep-vu.bang-mau-mau .table-wrap {
   background: #faf5ff;
 }
 
 /* Tầng 5: cuộn dữ liệu bảng gốc/mẫu, giữ cố định tên cột */
-.bang-them-nghiep-vu.bang-goc-mau .table-wrap {
+.bang-them-nghiep-vu.bang-mau-mau .table-wrap {
   max-height: 360px;
   overflow-y: auto;
   overflow-x: auto;
 }
 
-.bang-them-nghiep-vu.bang-goc-mau .table-wrap thead th {
+.bang-them-nghiep-vu.bang-mau-mau .table-wrap thead th {
   position: sticky;
   top: 0;
   z-index: 4;

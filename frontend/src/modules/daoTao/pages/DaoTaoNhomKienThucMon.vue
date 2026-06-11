@@ -8,7 +8,7 @@
       <div>
         <h2>Quản lý nhóm kiến thức và môn</h2>
         <p>
-          Chọn ngành, chọn version, xem môn học gốc, copy môn gốc vào version, CRUD nhóm kiến thức và gán môn vào nhóm.
+          Chọn ngành, chọn version, xem môn học mẫu, copy môn mẫu vào version, CRUD nhóm kiến thức và gán môn vào nhóm.
         </p>
       </div>
 
@@ -81,21 +81,21 @@
       <section class="the">
         <div class="tieu-de-the">
           <div>
-            <h3>Danh sách môn học gốc</h3>
+            <h3>Danh sách môn học mẫu</h3>
             <p>
-              Môn học gốc dùng chung toàn hệ thống, không thuộc ngành, không thuộc version, không có kỳ.
+              Môn học mẫu dùng chung toàn hệ thống, không thuộc ngành, không thuộc version, không có kỳ.
             </p>
           </div>
         </div>
 
-        <div class="bo-loc-mon-goc">
+        <div class="bo-loc-mon-mau">
           <label>
-            <span>Tìm môn gốc</span>
-            <input v-model.trim="tuKhoaMonGoc" type="text" placeholder="Nhập mã môn hoặc tên môn">
+            <span>Tìm môn mẫu</span>
+            <input v-model.trim="tuKhoaMonmau" type="text" placeholder="Nhập mã môn hoặc tên môn">
           </label>
         </div>
 
-        <div class="bang-boc bang-mon-goc-cuon">
+        <div class="bang-boc bang-mon-mau-cuon">
           <table>
             <thead>
             <tr>
@@ -108,12 +108,12 @@
             </thead>
 
             <tbody>
-            <tr v-if="!danhSachMonHocGocLoc.length">
-              <td colspan="5" class="rong">Không có môn gốc phù hợp.</td>
+            <tr v-if="!danhSachMonHocmauLoc.length">
+              <td colspan="5" class="rong">Không có môn mẫu phù hợp.</td>
             </tr>
 
             <tr
-                v-for="monHoc in danhSachMonHocGocLoc"
+                v-for="monHoc in danhSachMonHocmauLoc"
                 :key="monHoc.id"
                 :class="{ 'dang-chon': daCoMonHocTrongVersion(monHoc.id) }"
             >
@@ -140,7 +140,7 @@
                     type="button"
                     class="nut nho chinh"
                     :disabled="dangLuu || daCoMonHocTrongVersion(monHoc.id)"
-                    @click="copyMonGocVaoVersion(monHoc)"
+                    @click="copyMonmauVaoVersion(monHoc)"
                 >
                   Gán vào version
                 </button>
@@ -188,15 +188,15 @@
 
 
             <label>
-              <span>Nhóm gốc</span>
-              <select v-model="formNhom.nhomKienThucGocId">
+              <span>Nhóm mẫu</span>
+              <select v-model="formNhom.nhomKienThucmauId">
                 <option value="">Không chọn</option>
                 <option
-                    v-for="nhomGoc in danhSachNhomKienThucGoc"
-                    :key="nhomGoc.id"
-                    :value="nhomGoc.id"
+                    v-for="nhommau in danhSachNhomKienThucmau"
+                    :key="nhommau.id"
+                    :value="nhommau.id"
                 >
-                  {{ nhomGoc.ma || nhomGoc.id }} - {{ nhomGoc.ten || nhomGoc.id }}
+                  {{ nhommau.ma || nhommau.id }} - {{ nhommau.ten || nhommau.id }}
                 </option>
               </select>
             </label>
@@ -390,7 +390,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useDaoTaoXemChuongTrinh } from '@/modules/daoTao/composables/useDaoTaoXemChuongTrinh'
 import { layThongBaoLoi } from '@/modules/daoTao/utils/layThongBaoLoi'
 
@@ -407,7 +407,7 @@ const thongBao = ref('')
 const loaiThongBao = ref('success')
 const dangLuu = ref(false)
 const dangTai = ref(false)
-const tuKhoaMonGoc = ref('')
+const tuKhoaMonmau = ref('')
 
 const formNhom = reactive({
   id: null,
@@ -415,7 +415,7 @@ const formNhom = reactive({
   ten: '',
   loaiNhom: 'chung',
   thuTu: '',
-  nhomKienThucGocId: '',
+  nhomKienThucmauId: '',
   moTa: ''
 })
 
@@ -451,8 +451,8 @@ const danhSachNhomKienThucTheoVersion = computed(() => {
       .sort((a, b) => Number(a.thuTu || 9999) - Number(b.thuTu || 9999))
 })
 
-const danhSachNhomKienThucGoc = computed(() => {
-  return [...(duLieu.value.nhomKienThucGoc || [])]
+const danhSachNhomKienThucmau = computed(() => {
+  return [...(duLieu.value.nhomKienThucmau || [])]
       .sort((a, b) => Number(a.thuTu || 9999) - Number(b.thuTu || 9999))
 })
 
@@ -464,17 +464,17 @@ const danhSachMonTheoVersion = computed(() => {
       .sort((a, b) => Number(a.thuTu || 9999) - Number(b.thuTu || 9999))
 })
 
-const danhSachMonHocGoc = computed(() => {
+const danhSachMonHocmau = computed(() => {
   return [...(duLieu.value.monHoc || [])]
       .sort((a, b) => String(a.tenMon || a.ten || '').localeCompare(String(b.tenMon || b.ten || ''), 'vi'))
 })
 
-const danhSachMonHocGocLoc = computed(() => {
-  const keyword = tuKhoaMonGoc.value.trim().toLowerCase()
+const danhSachMonHocmauLoc = computed(() => {
+  const keyword = tuKhoaMonmau.value.trim().toLowerCase()
 
-  if (!keyword) return danhSachMonHocGoc.value
+  if (!keyword) return danhSachMonHocmau.value
 
-  return danhSachMonHocGoc.value.filter((monHoc) => {
+  return danhSachMonHocmau.value.filter((monHoc) => {
     const text = [
       monHoc.maMon,
       monHoc.ma,
@@ -602,7 +602,7 @@ function daCoMonHocTrongVersion(monHocId) {
   })
 }
 
-function taoPayloadCopyMonGocVaoVersion(monHoc) {
+function taoPayloadCopyMonmauVaoVersion(monHoc) {
   return {
     chuongTrinhVersionId: versionIdDangChon.value,
     monHocId: monHoc.id,
@@ -621,14 +621,14 @@ function taoPayloadCopyMonGocVaoVersion(monHoc) {
   }
 }
 
-async function copyMonGocVaoVersion(monHoc) {
+async function copyMonmauVaoVersion(monHoc) {
   if (!versionIdDangChon.value) {
     baoTin('Cần chọn version chương trình.', 'error')
     return
   }
 
   if (!monHoc?.id) {
-    baoTin('Không xác định được môn gốc.', 'error')
+    baoTin('Không xác định được môn mẫu.', 'error')
     return
   }
 
@@ -640,11 +640,11 @@ async function copyMonGocVaoVersion(monHoc) {
   dangLuu.value = true
 
   try {
-    await services.chuongTrinhMon.create(taoPayloadCopyMonGocVaoVersion(monHoc))
+    await services.chuongTrinhMon.create(taoPayloadCopyMonmauVaoVersion(monHoc))
     await taiDuLieuCoSanTatCaBang()
-    baoTin('Đã copy môn gốc vào version. Hãy gán nhóm kiến thức ở bảng "Môn đã nằm trong version".')
+    baoTin('Đã copy môn mẫu vào version. Hãy gán nhóm kiến thức ở bảng "Môn đã nằm trong version".')
   } catch (error) {
-    baoTin(layThongBaoLoi(error, 'Không copy được môn gốc vào version.'), 'error')
+    baoTin(layThongBaoLoi(error, 'Không copy được môn mẫu vào version.'), 'error')
   } finally {
     dangLuu.value = false
   }
@@ -658,7 +658,7 @@ function giaTriSo(value) {
 function taoPayloadNhomKienThuc() {
   return {
     chuongTrinhVersionId: versionIdDangChon.value,
-    nhomKienThucGocId: formNhom.nhomKienThucGocId || null,
+    nhomKienThucmauId: formNhom.nhomKienThucmauId || null,
     ma: formNhom.ma || null,
     ten: formNhom.ten,
     loaiNhom: formNhom.loaiNhom,
@@ -673,7 +673,7 @@ function resetFormNhom() {
   formNhom.ten = ''
   formNhom.loaiNhom = 'chung'
   formNhom.thuTu = ''
-  formNhom.nhomKienThucGocId = ''
+  formNhom.nhomKienThucmauId = ''
   formNhom.moTa = ''
 }
 
@@ -683,7 +683,7 @@ function suaNhomKienThuc(nhom) {
   formNhom.ten = nhom.ten || ''
   formNhom.loaiNhom = nhom.loaiNhom || 'chung'
   formNhom.thuTu = nhom.thuTu ?? ''
-  formNhom.nhomKienThucGocId = nhom.nhomKienThucGocId || ''
+  formNhom.nhomKienThucmauId = nhom.nhomKienThucmauId || ''
   formNhom.moTa = nhom.moTa || ''
 }
 
@@ -885,6 +885,8 @@ async function boGanMonKhoiVersion(mon) {
     dangLuu.value = false
   }
 }
+
+onMounted(taiDuLieu)
 </script>
 
 <style scoped>
@@ -980,7 +982,7 @@ async function boGanMonKhoiVersion(mon) {
 .form-nhom select,
 .form-nhom textarea,
 .form-gan-version select,
-.bo-loc-mon-goc input,
+.bo-loc-mon-mau input,
 .chon-nhanh {
   min-height: 32px;
   border: 1px solid #cbd5e1;
@@ -1099,19 +1101,19 @@ async function boGanMonKhoiVersion(mon) {
   gap: 8px;
 }
 
-.bo-loc-mon-goc {
+.bo-loc-mon-mau {
   display: grid;
   gap: 10px;
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.bo-loc-mon-goc label {
+.bo-loc-mon-mau label {
   display: grid;
   gap: 4px;
 }
 
-.bo-loc-mon-goc span {
+.bo-loc-mon-mau span {
   color: #374151;
   font-size: 12px;
   font-weight: 700;
@@ -1121,7 +1123,7 @@ async function boGanMonKhoiVersion(mon) {
   overflow: auto;
 }
 
-.bang-mon-goc-cuon {
+.bang-mon-mau-cuon {
   max-height: 460px;
   overflow: auto;
 }

@@ -171,7 +171,7 @@
                       <button type="button" @click="diDenTrangKy(chuongTrinh, version)">
                         Xem kỳ
                       </button>
-                      <button type="button" @click="baoChucNangSau('Xem syllabus chương trình')">
+                      <button type="button" @click="diDenSyllabusChuongTrinh(nganhGroup, chuongTrinh, version)">
                         Xem syllabus chương trình
                       </button>
                     </div>
@@ -195,6 +195,7 @@ import { layThongBaoLoi } from '../../utils/layThongBaoLoi.js'
 const router = useRouter()
 
 const TEN_ROUTE_TRANG_KY = 'dao-tao-chuong-trinh-ky'
+const TEN_ROUTE_SYLLABUS_CHUONG_TRINH = 'dao-tao-syllabus-chuong-trinh-xem'
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -411,6 +412,7 @@ function dongMenuVersion() {
 function diDenTrangKy(chuongTrinh, version) {
   if (!chuongTrinh?.chuongTrinhId) {
     thongBao.value = 'Không xác định được chương trình đào tạo để xem kỳ.'
+    menuVersionDangMo.value = null
     return
   }
 
@@ -426,10 +428,52 @@ function diDenTrangKy(chuongTrinh, version) {
     routePayload.query.versionId = version.versionId
   }
 
+  menuVersionDangMo.value = null
+
   router.push(routePayload).catch(() => {
-    thongBao.value = 'Route xem kỳ chưa được cấu hình. Vui lòng hoàn thành phase router trước khi điều hướng.'
+    thongBao.value = 'Route xem kỳ chưa được cấu hình. Vui lòng kiểm tra tongTheRoutes.'
   })
 }
+function diDenSyllabusChuongTrinh(nganhGroup, chuongTrinh, version) {
+  const nganhId = nganhGroup?.nganhId || layId(nganhGroup?.rawNganh)
+  const chuongTrinhId = chuongTrinh?.chuongTrinhId || layId(chuongTrinh?.rawChuongTrinh)
+  const versionId = version?.versionId || layId(version?.rawVersion)
+
+  if (!nganhId) {
+    thongBao.value = 'Không xác định được ngành để xem syllabus chương trình.'
+    menuVersionDangMo.value = null
+    return
+  }
+
+  if (!chuongTrinhId) {
+    thongBao.value = 'Không xác định được chương trình đào tạo để xem syllabus chương trình.'
+    menuVersionDangMo.value = null
+    return
+  }
+
+  if (!versionId) {
+    thongBao.value = 'Không xác định được version chương trình để xem syllabus chương trình.'
+    menuVersionDangMo.value = null
+    return
+  }
+
+  menuVersionDangMo.value = null
+
+  router.push({
+    name: TEN_ROUTE_SYLLABUS_CHUONG_TRINH,
+    params: {
+      chuongTrinhId
+    },
+    query: {
+      nganhId,
+      versionId,
+      chuongTrinhVersionId: versionId
+    }
+  }).catch(() => {
+    thongBao.value = 'Route xem syllabus chương trình chưa được cấu hình. Vui lòng kiểm tra tongTheRoutes.'
+  })
+}
+
 
 function baoChucNangSau(tenChucNang) {
   thongBao.value = `Chức năng "${tenChucNang}" sẽ được bổ sung sau.`

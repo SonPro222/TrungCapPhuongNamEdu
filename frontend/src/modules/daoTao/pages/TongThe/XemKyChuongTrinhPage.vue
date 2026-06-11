@@ -449,7 +449,7 @@ function layTaiLieuTuSyllabusDaGan(syllabusRecord, syllabus) {
     Không lấy tài liệu từ môn học gốc.
   */
   const candidates = [
-    syllabusRecord?.taiLieuGoc,
+    syllabusRecord?.taiLieumau,
     syllabusRecord?.taiLieu,
     syllabusRecord?.taiLieuHocTap,
     syllabusRecord?.syllabusTaiLieu,
@@ -458,7 +458,7 @@ function layTaiLieuTuSyllabusDaGan(syllabusRecord, syllabus) {
     syllabusRecord?.files,
     syllabusRecord?.fileList,
 
-    syllabus?.taiLieuGoc,
+    syllabus?.taiLieumau,
     syllabus?.taiLieu,
     syllabus?.taiLieuHocTap,
     syllabus?.syllabusTaiLieu,

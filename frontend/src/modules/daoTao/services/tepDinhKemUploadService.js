@@ -61,7 +61,7 @@ export const tepDinhKemUploadService = {
 
                      syllabusChuongTrinhId,
                      syllabusMonHocId,
-                     taiLieuGocId,
+                     taiLieumauId,
                      tangNghiepVu
                  }) {
         if (!file) {
@@ -102,7 +102,7 @@ export const tepDinhKemUploadService = {
 
             syllabusChuongTrinhId,
             syllabusMonHocId,
-            taiLieuGocId,
+            taiLieumauId,
             tangNghiepVu
         }
 
@@ -159,7 +159,7 @@ export const tepDinhKemUploadService = {
 
                          syllabusChuongTrinhId,
                          syllabusMonHocId,
-                         taiLieuGocId,
+                         taiLieumauId,
                          tangNghiepVu
                      }) {
         const danhSachFile = Array.isArray(files) ? files : []
@@ -208,7 +208,7 @@ export const tepDinhKemUploadService = {
 
                 syllabusChuongTrinhId,
                 syllabusMonHocId,
-                taiLieuGocId,
+                taiLieumauId,
                 tangNghiepVu
             })
 

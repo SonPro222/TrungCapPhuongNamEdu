@@ -5,26 +5,33 @@
       <RouterLink to="/admin/dao-tao/xem-chuong-trinh">
         Ngành / Chương trình
       </RouterLink>
-      <RouterLink to="/admin/dao-tao/mon-hoc-goc">
-        Môn gốc
+      <RouterLink to="/admin/dao-tao/syllabus-chuong-trinh-mau">
+        Syllabus chương trình mẫu
       </RouterLink>
-      <RouterLink to="/admin/dao-tao/syllabus-chuong-trinh-goc">
-        Syllabus chương trình gốc
+      <RouterLink to="/admin/dao-tao/mon-hoc-mau">
+        Môn mẫu
       </RouterLink>
-      <RouterLink to="/admin/dao-tao/syllabus-mon-hoc-goc">
-        Syllabus môn học gốc
+
+      <RouterLink to="/admin/dao-tao/syllabus-mon-hoc-mau">
+        Syllabus môn học mẫu
       </RouterLink>
-      <RouterLink to="/admin/dao-tao/muc-tieu-chuong-trinh-goc">
-        Mục tiêu chương trình gốc
+      <RouterLink to="/admin/dao-tao/muc-tieu-chuong-trinh-mau">
+        Mục tiêu chương trình mẫu
       </RouterLink>
-      <RouterLink to="/admin/dao-tao/nang-luc-dau-ra-goc">
-        Năng lực đầu ra gốc
+      <RouterLink to="/admin/dao-tao/nang-luc-dau-ra-mau">
+        Năng lực đầu ra mẫu
       </RouterLink>
-      <RouterLink to="/admin/dao-tao/vi-tri-viec-lam-goc">
-        Vị trí việc làm gốc
+      <RouterLink to="/admin/dao-tao/vi-tri-viec-lam-mau">
+        Vị trí việc làm mẫu
+      </RouterLink>
+      <RouterLink to="/admin/dao-tao/dieu-kien-tot-nghiep-mau">
+        Điều kiện tốt nghiệp mẫu
       </RouterLink>
       <RouterLink to="/admin/dao-tao/nhom-kien-thuc-mon">
-        Nhóm kiến thức - Môn học
+        Nhóm kiến thức - Môn học trong chương trình
+      </RouterLink>
+      <RouterLink to="/admin/dao-tao/cau-hinh-mau-dao-tao">
+        Cấu hình mẫu đào tạo
       </RouterLink>
     </nav>
 
@@ -57,6 +64,8 @@
   font-size: 13px;
   font-weight: 600;
   background: #f9fafb;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .dao-tao-tabs a.router-link-active {
@@ -65,3 +74,5 @@
   color: #1d4ed8;
 }
 </style>
+<script setup lang="ts">
+</script>

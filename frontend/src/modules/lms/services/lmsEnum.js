@@ -14,7 +14,7 @@ export const MUC_DO = {
     kho: 'Khó',
 }
 
-export const TRANG_THAI_CAU_HOI_GOC = {
+export const TRANG_THAI_CAU_HOI_mau = {
     dang_su_dung: 'Đang sử dụng',
     ngung_su_dung: 'Ngưng sử dụng',
     huy: 'Hủy',

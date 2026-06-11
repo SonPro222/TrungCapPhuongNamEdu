@@ -12,7 +12,7 @@
       Đổi mật khẩu tài khoản
     </RouterLink>
 
-    <RouterLink :to="{ name: 'HeThong.CrudGoc' }">
+    <RouterLink :to="{ name: 'HeThong.Crudmau' }">
       Quản lý CRUD gốc
     </RouterLink>
 

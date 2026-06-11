@@ -5,12 +5,14 @@ import DaoTaoLayout from './layouts/DaoTaoLayout.vue'
 import DaoTaoXemChuongTrinhPage from './pages/DaoTaoXemChuongTrinhPage.vue'
 import DaoTaoXemTepPage from './pages/DaoTaoXemTepPage.vue'
 import DaoTaoNhomKienThucMon from '@/modules/daoTao/pages/DaoTaoNhomKienThucMon.vue'
-import DaoTaoMonHocGoc from './pages/DaoTaoMonHocGoc.vue'
-import DaoTaoSyllabusMonHocGoc from './pages/DaoTaoSyllabusMonHocGoc.vue'
-import DaoTaoSyllabusChuongTrinhGoc from './pages/DaoTaoSyllabusChuongTrinhGoc.vue'
-import DaoTaoMucTieuChuongTrinhGoc from './pages/DaoTaoMucTieuChuongTrinhGoc.vue'
-import DaoTaoNangLucDauRaGoc from './pages/DaoTaoNangLucDauRaGoc.vue'
-import DaoTaoViTriViecLamGoc from './pages/DaoTaoViTriViecLamGoc.vue'
+import DaoTaoMonHocmau from './pages/DaoTaoMonHocMau.vue'
+import DaoTaoSyllabusMonHocmau from './pages/DaoTaoSyllabusMonHocMau.vue'
+import DaoTaoSyllabusChuongTrinhmau from './pages/DaoTaoSyllabusChuongTrinhMau.vue'
+import DaoTaoMucTieuChuongTrinhmau from './pages/DaoTaoMucTieuChuongTrinhMau.vue'
+import DaoTaoNangLucDauRamau from './pages/DaoTaoNangLucDauRaMau.vue'
+import DaoTaoViTriViecLammau from './pages/DaoTaoViTriViecLamMau.vue'
+import DaoTaoDieuKienTotNghiepmau from './pages/DaoTaoDieuKienTotNghiepMau.vue'
+import DaoTaoCauHinhMauDaoTao from './pages/DaoTaoCauHinhMauDaoTao.vue'
 export const daoTaoRoutes = [
     {
         path: 'dao-tao',
@@ -67,8 +69,8 @@ export const daoTaoRoutes = [
                 meta: {title: 'Đào tạo xem - Môn trong chương trình', roles: [ROLES.ADMIN, ROLES.DAO_TAO]}
             },
             {
-                path: 'xem-chuong-trinh/nganh/:nganhId/chuong-trinh/:chuongTrinhId/version/:versionId/syllabus-goc/:monHocId?',
-                name: 'DaoTao.XemChuongTrinh.SyllabusGoc',
+                path: 'xem-chuong-trinh/nganh/:nganhId/chuong-trinh/:chuongTrinhId/version/:versionId/syllabus-mau/:monHocId?',
+                name: 'DaoTao.XemChuongTrinh.Syllabusmau',
                 component: DaoTaoXemChuongTrinhPage,
                 meta: {title: 'Đào tạo xem - Syllabus môn học gốc', roles: [ROLES.ADMIN, ROLES.DAO_TAO]}
             },
@@ -89,9 +91,9 @@ export const daoTaoRoutes = [
             },
 
             {
-                path: 'syllabus-chuong-trinh-goc',
-                name: 'DaoTao.SyllabusChuongTrinhGoc',
-                component: DaoTaoSyllabusChuongTrinhGoc,
+                path: 'syllabus-chuong-trinh-mau',
+                name: 'DaoTao.SyllabusChuongTrinhmau',
+                component: DaoTaoSyllabusChuongTrinhmau,
                 meta: {
                     title: 'Đào tạo - Syllabus chương trình gốc',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
@@ -99,36 +101,45 @@ export const daoTaoRoutes = [
             },
 
             {
-                path: 'muc-tieu-chuong-trinh-goc',
-                name: 'DaoTao.MucTieuChuongTrinhGoc',
-                component: DaoTaoMucTieuChuongTrinhGoc,
+                path: 'muc-tieu-chuong-trinh-mau',
+                name: 'DaoTao.MucTieuChuongTrinhmau',
+                component: DaoTaoMucTieuChuongTrinhmau,
                 meta: {
                     title: 'Đào tạo - Mục tiêu chương trình gốc',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
                 }
             },
             {
-                path: 'nang-luc-dau-ra-goc',
-                name: 'DaoTao.NangLucDauRaGoc',
-                component: DaoTaoNangLucDauRaGoc,
+                path: 'nang-luc-dau-ra-mau',
+                name: 'DaoTao.NangLucDauRamau',
+                component: DaoTaoNangLucDauRamau,
                 meta: {
                     title: 'Đào tạo - Năng lực đầu ra gốc',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
                 }
             },
             {
-                path: 'vi-tri-viec-lam-goc',
-                name: 'DaoTao.ViTriViecLamGoc',
-                component: DaoTaoViTriViecLamGoc,
+                path: 'vi-tri-viec-lam-mau',
+                name: 'DaoTao.ViTriViecLammau',
+                component: DaoTaoViTriViecLammau,
                 meta: {
                     title: 'Đào tạo - Vị trí việc làm gốc',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
                 }
             },
             {
-                path: 'syllabus-mon-hoc-goc',
-                name: 'DaoTao.SyllabusMonHocGoc',
-                component: DaoTaoSyllabusMonHocGoc,
+                path: 'dieu-kien-tot-nghiep-mau',
+                name: 'DaoTao.DieuKienTotNghiepmau',
+                component: DaoTaoDieuKienTotNghiepmau,
+                meta: {
+                    title: 'Đào tạo - Điều kiện tốt nghiệp gốc',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO]
+                }
+            },
+            {
+                path: 'syllabus-mon-hoc-mau',
+                name: 'DaoTao.SyllabusMonHocmau',
+                component: DaoTaoSyllabusMonHocmau,
                 meta: {
                     title: 'Đào tạo - Syllabus môn học gốc',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
@@ -144,15 +155,23 @@ export const daoTaoRoutes = [
                 }
             },
             {
-                path: 'mon-hoc-goc',
-                name: 'DaoTao.MonHocGoc',
-                component: DaoTaoMonHocGoc,
+                path: 'mon-hoc-mau',
+                name: 'DaoTao.MonHocmau',
+                component: DaoTaoMonHocmau,
                 meta: {
                     title: 'Đào tạo - Môn gốc',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
                 }
             },
-
+            {
+                path: 'cau-hinh-mau-dao-tao',
+                name: 'DaoTao.CauHinhMauDaoTao',
+                component: DaoTaoCauHinhMauDaoTao,
+                meta: {
+                    title: 'Đào tạo - Cấu hình mẫu đào tạo',
+                    roles: [ROLES.ADMIN, ROLES.DAO_TAO]
+                }
+            },
         ]
 
     }

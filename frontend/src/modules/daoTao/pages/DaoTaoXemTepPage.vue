@@ -191,12 +191,12 @@ const loaiThongBao = ref('success')
 const syllabusMonHoc = ref(null)
 const chuongTrinhMon = ref(null)
 const danhSachTaiLieu = ref([])
-const taiLieuGocDangXem = ref(null)
-const syllabusChuongTrinhGocDangXem = ref(null)
+const taiLieumauDangXem = ref(null)
+const syllabusChuongTrinhmauDangXem = ref(null)
 const syllabusChuongTrinhDangXem = ref(null)
-const mucTieuChuongTrinhGocDangXem = ref(null)
-const nangLucDauRaGocDangXem = ref(null)
-const viTriViecLamGocDangXem = ref(null)
+const mucTieuChuongTrinhmauDangXem = ref(null)
+const nangLucDauRamauDangXem = ref(null)
+const viTriViecLammauDangXem = ref(null)
 const previewUrl = ref('')
 const previewError = ref('')
 const loaiPreview = ref('')
@@ -207,26 +207,41 @@ const chuongTrinhMonId = computed(() => {
   return val && String(val) !== '0' ? val : null
 })
 
+const chuongTrinhIdCanXem = computed(() => {
+  const val = route.params.chuongTrinhId || route.query.chuongTrinhId || null
+  return val && String(val) !== '0' ? val : null
+})
+
+const versionIdCanXem = computed(() => {
+  const val =
+      route.params.versionId ||
+      route.query.versionId ||
+      route.query.chuongTrinhVersionId ||
+      null
+
+  return val && String(val) !== '0' ? val : null
+})
+
 const tepNguonCanXem = computed(() => {
   const value = String(route.query.tepNguon || '')
 
-  if (value === 'taiLieuGoc') return 'taiLieuGoc'
-  if (value === 'syllabusChuongTrinhGoc') return 'syllabusChuongTrinhGoc'
+  if (value === 'taiLieumau') return 'taiLieumau'
+  if (value === 'syllabusChuongTrinhmau') return 'syllabusChuongTrinhmau'
   if (value === 'syllabusChuongTrinh') return 'syllabusChuongTrinh'
-  if (value === 'mucTieuChuongTrinhGoc') return 'mucTieuChuongTrinhGoc'
-  if (value === 'nangLucDauRaGoc') return 'nangLucDauRaGoc'
-  if (value === 'viTriViecLamGoc') return 'viTriViecLamGoc'
+  if (value === 'mucTieuChuongTrinhmau') return 'mucTieuChuongTrinhmau'
+  if (value === 'nangLucDauRamau') return 'nangLucDauRamau'
+  if (value === 'viTriViecLammau') return 'viTriViecLammau'
 
   return 'syllabusTaiLieu'
 })
 
-const taiLieuGocIdCanXem = computed(() => route.query.taiLieuGocId || null)
+const taiLieumauIdCanXem = computed(() => route.query.taiLieumauId || null)
 const syllabusTaiLieuIdCanXem = computed(() => route.query.syllabusTaiLieuId || null)
-const syllabusChuongTrinhGocIdCanXem = computed(() => route.query.syllabusChuongTrinhGocId || null)
+const syllabusChuongTrinhmauIdCanXem = computed(() => route.query.syllabusChuongTrinhmauId || null)
 const syllabusChuongTrinhIdCanXem = computed(() => route.query.syllabusChuongTrinhId || null)
-const mucTieuChuongTrinhGocIdCanXem = computed(() => route.query.mucTieuChuongTrinhGocId || null)
-const nangLucDauRaGocIdCanXem = computed(() => route.query.nangLucDauRaGocId || null)
-const viTriViecLamGocIdCanXem = computed(() => route.query.viTriViecLamGocId || null)
+const mucTieuChuongTrinhmauIdCanXem = computed(() => route.query.mucTieuChuongTrinhmauId || null)
+const nangLucDauRamauIdCanXem = computed(() => route.query.nangLucDauRamauId || null)
+const viTriViecLammauIdCanXem = computed(() => route.query.viTriViecLammauId || null)
 
 const fileIndexDangXem = computed(() => {
   const value = Number(route.query.fileIndex)
@@ -270,51 +285,51 @@ const tenSyllabusMon = computed(() => {
   return [
     syllabus.ma,
     syllabus.ten,
-    syllabus.tenSyllabusMonHocGoc,
-    syllabus.maSyllabusMonHocGoc,
+    syllabus.tenSyllabusMonHocmau,
+    syllabus.maSyllabusMonHocmau,
     syllabus.mucTieu
   ].filter(Boolean)[0] || syllabus.id || '-'
 })
 
 const tieuDeBangTep = computed(() => {
-  if (tepNguonCanXem.value === 'taiLieuGoc') return 'Danh sách tệp tài liệu gốc / mẫu'
-  if (tepNguonCanXem.value === 'syllabusChuongTrinhGoc') return 'Danh sách tệp syllabus chương trình gốc / mẫu'
+  if (tepNguonCanXem.value === 'taiLieumau') return 'Danh sách tệp tài liệu gốc / mẫu'
+  if (tepNguonCanXem.value === 'syllabusChuongTrinhmau') return 'Danh sách tệp syllabus chương trình gốc / mẫu'
   if (tepNguonCanXem.value === 'syllabusChuongTrinh') return 'Danh sách tệp syllabus chương trình'
-  if (tepNguonCanXem.value === 'mucTieuChuongTrinhGoc') return 'Danh sách tệp mục tiêu chương trình gốc / mẫu'
-  if (tepNguonCanXem.value === 'nangLucDauRaGoc') return 'Danh sách tệp năng lực đầu ra gốc / mẫu'
-  if (tepNguonCanXem.value === 'viTriViecLamGoc') return 'Danh sách tệp vị trí việc làm gốc / mẫu'
+  if (tepNguonCanXem.value === 'mucTieuChuongTrinhmau') return 'Danh sách tệp mục tiêu chương trình gốc / mẫu'
+  if (tepNguonCanXem.value === 'nangLucDauRamau') return 'Danh sách tệp năng lực đầu ra gốc / mẫu'
+  if (tepNguonCanXem.value === 'viTriViecLammau') return 'Danh sách tệp vị trí việc làm gốc / mẫu'
 
   return 'Danh sách tệp tài liệu syllabus'
 })
 
 const nhanSoTep = computed(() => {
-  if (tepNguonCanXem.value === 'taiLieuGoc') return 'Số tệp tài liệu gốc'
-  if (tepNguonCanXem.value === 'syllabusChuongTrinhGoc') return 'Số tệp syllabus chương trình gốc'
+  if (tepNguonCanXem.value === 'taiLieumau') return 'Số tệp tài liệu gốc'
+  if (tepNguonCanXem.value === 'syllabusChuongTrinhmau') return 'Số tệp syllabus chương trình gốc'
   if (tepNguonCanXem.value === 'syllabusChuongTrinh') return 'Số tệp syllabus chương trình'
 
   return 'Số tệp tài liệu syllabus'
 })
 
 const thongBaoRong = computed(() => {
-  if (tepNguonCanXem.value === 'taiLieuGoc') return 'Tài liệu gốc / mẫu này chưa có tệp đã lưu.'
-  if (tepNguonCanXem.value === 'syllabusChuongTrinhGoc') return 'Syllabus chương trình gốc / mẫu này chưa có tệp đã lưu.'
+  if (tepNguonCanXem.value === 'taiLieumau') return 'Tài liệu gốc / mẫu này chưa có tệp đã lưu.'
+  if (tepNguonCanXem.value === 'syllabusChuongTrinhmau') return 'Syllabus chương trình gốc / mẫu này chưa có tệp đã lưu.'
   if (tepNguonCanXem.value === 'syllabusChuongTrinh') return 'Syllabus chương trình này chưa có tệp đã lưu.'
-  if (tepNguonCanXem.value === 'mucTieuChuongTrinhGoc') return 'Mục tiêu chương trình gốc / mẫu này chưa có tệp đã lưu.'
-  if (tepNguonCanXem.value === 'nangLucDauRaGoc') return 'Năng lực đầu ra gốc / mẫu này chưa có tệp đã lưu.'
-  if (tepNguonCanXem.value === 'viTriViecLamGoc') return 'Vị trí việc làm gốc / mẫu này chưa có tệp đã lưu.'
+  if (tepNguonCanXem.value === 'mucTieuChuongTrinhmau') return 'Mục tiêu chương trình gốc / mẫu này chưa có tệp đã lưu.'
+  if (tepNguonCanXem.value === 'nangLucDauRamau') return 'Năng lực đầu ra gốc / mẫu này chưa có tệp đã lưu.'
+  if (tepNguonCanXem.value === 'viTriViecLammau') return 'Vị trí việc làm gốc / mẫu này chưa có tệp đã lưu.'
 
   return 'Tài liệu syllabus này chưa có tệp đã lưu.'
 })
 
 const danhSachTep = computed(() => {
-  if (tepNguonCanXem.value === 'taiLieuGoc') {
-    if (!taiLieuGocDangXem.value?.duongDan) return []
-    return taoDanhSachTepTuDongTaiLieu(taiLieuGocDangXem.value, 'taiLieuGoc')
+  if (tepNguonCanXem.value === 'taiLieumau') {
+    if (!taiLieumauDangXem.value?.duongDan) return []
+    return taoDanhSachTepTuDongTaiLieu(taiLieumauDangXem.value, 'taiLieumau')
   }
 
-  if (tepNguonCanXem.value === 'syllabusChuongTrinhGoc') {
-    if (!syllabusChuongTrinhGocDangXem.value?.duongDan) return []
-    return taoDanhSachTepTuDongTaiLieu(syllabusChuongTrinhGocDangXem.value, 'syllabusChuongTrinhGoc')
+  if (tepNguonCanXem.value === 'syllabusChuongTrinhmau') {
+    if (!syllabusChuongTrinhmauDangXem.value?.duongDan) return []
+    return taoDanhSachTepTuDongTaiLieu(syllabusChuongTrinhmauDangXem.value, 'syllabusChuongTrinhmau')
   }
 
   if (tepNguonCanXem.value === 'syllabusChuongTrinh') {
@@ -322,19 +337,19 @@ const danhSachTep = computed(() => {
     return taoDanhSachTepTuDongTaiLieu(syllabusChuongTrinhDangXem.value, 'syllabusChuongTrinh')
   }
 
-  if (tepNguonCanXem.value === 'mucTieuChuongTrinhGoc') {
-    if (!mucTieuChuongTrinhGocDangXem.value?.duongDan) return []
-    return taoDanhSachTepTuDongTaiLieu(mucTieuChuongTrinhGocDangXem.value, 'mucTieuChuongTrinhGoc')
+  if (tepNguonCanXem.value === 'mucTieuChuongTrinhmau') {
+    if (!mucTieuChuongTrinhmauDangXem.value?.duongDan) return []
+    return taoDanhSachTepTuDongTaiLieu(mucTieuChuongTrinhmauDangXem.value, 'mucTieuChuongTrinhmau')
   }
 
-  if (tepNguonCanXem.value === 'nangLucDauRaGoc') {
-    if (!nangLucDauRaGocDangXem.value?.duongDan) return []
-    return taoDanhSachTepTuDongTaiLieu(nangLucDauRaGocDangXem.value, 'nangLucDauRaGoc')
+  if (tepNguonCanXem.value === 'nangLucDauRamau') {
+    if (!nangLucDauRamauDangXem.value?.duongDan) return []
+    return taoDanhSachTepTuDongTaiLieu(nangLucDauRamauDangXem.value, 'nangLucDauRamau')
   }
 
-  if (tepNguonCanXem.value === 'viTriViecLamGoc') {
-    if (!viTriViecLamGocDangXem.value?.duongDan) return []
-    return taoDanhSachTepTuDongTaiLieu(viTriViecLamGocDangXem.value, 'viTriViecLamGoc')
+  if (tepNguonCanXem.value === 'viTriViecLammau') {
+    if (!viTriViecLammauDangXem.value?.duongDan) return []
+    return taoDanhSachTepTuDongTaiLieu(viTriViecLammauDangXem.value, 'viTriViecLammau')
   }
 
   return (danhSachTaiLieu.value || [])
@@ -364,7 +379,7 @@ function tachDanhSachDuongDanTep(duongDan) {
                 return {
                   id: null,
                   duongDan: item,
-                  tenGoc: layTenFileTuDuongDan(item),
+                  tenmau: layTenFileTuDuongDan(item),
                   tenHienThi: layTenFileTuDuongDan(item),
                   contentType: '',
                   dungLuong: 0
@@ -374,8 +389,8 @@ function tachDanhSachDuongDanTep(duongDan) {
               return {
                 id: item?.id || item?.tepDinhKemId || null,
                 duongDan: item?.duongDan || '',
-                tenGoc: item?.tenGoc || item?.fileName || layTenFileTuDuongDan(item?.duongDan || ''),
-                tenHienThi: item?.tenHienThi || item?.tenGoc || layTenFileTuDuongDan(item?.duongDan || ''),
+                tenmau: item?.tenmau || item?.fileName || layTenFileTuDuongDan(item?.duongDan || ''),
+                tenHienThi: item?.tenHienThi || item?.tenmau || layTenFileTuDuongDan(item?.duongDan || ''),
                 contentType: item?.contentType || '',
                 dungLuong: item?.dungLuong || 0
               }
@@ -386,7 +401,7 @@ function tachDanhSachDuongDanTep(duongDan) {
       return [{
         id: null,
         duongDan: text,
-        tenGoc: layTenFileTuDuongDan(text),
+        tenmau: layTenFileTuDuongDan(text),
         tenHienThi: layTenFileTuDuongDan(text),
         contentType: '',
         dungLuong: 0
@@ -397,7 +412,7 @@ function tachDanhSachDuongDanTep(duongDan) {
   return [{
     id: null,
     duongDan: text,
-    tenGoc: layTenFileTuDuongDan(text),
+    tenmau: layTenFileTuDuongDan(text),
     tenHienThi: layTenFileTuDuongDan(text),
     contentType: '',
     dungLuong: 0
@@ -416,10 +431,10 @@ function taoDanhSachTepTuDongTaiLieu(item, tepNguon) {
         ...item,
         duongDan: tep.duongDan,
         __tepDinhKemId: tep.id,
-        __duongDanGoc: item.duongDan,
+        __duongDanmau: item.duongDan,
         __tepNguon: tepNguon,
         __fileIndex: index,
-        __tenTep: tep.tenHienThi || tep.tenGoc || `${item?.ten || 'Tệp'} ${index + 1}`,
+        __tenTep: tep.tenHienThi || tep.tenmau || `${item?.ten || 'Tệp'} ${index + 1}`,
         __contentType: tep.contentType || '',
         __dungLuong: tep.dungLuong || 0
       }))
@@ -644,7 +659,7 @@ async function xoaTepDangXem() {
   dangXoaTep.value = true
 
   try {
-    const danhSachCu = tachDanhSachDuongDanTep(tepDangXem.value.__duongDanGoc || tepDangXem.value.duongDan)
+    const danhSachCu = tachDanhSachDuongDanTep(tepDangXem.value.__duongDanmau || tepDangXem.value.duongDan)
     const danhSachMoi = danhSachCu.filter((item, index) => index !== tepDangXem.value.__fileIndex)
 
     const duongDanMoi = danhSachMoi.length === 0
@@ -660,24 +675,24 @@ async function xoaTepDangXem() {
 
     delete payload.__tepNguon
     delete payload.__fileIndex
-    delete payload.__duongDanGoc
+    delete payload.__duongDanmau
     delete payload.__tenTep
     delete payload.__contentType
     delete payload.__dungLuong
     delete payload.__tepDinhKemId
 
-    if (tepNguonCanXem.value === 'taiLieuGoc') {
-      await daoTaoXemChuongTrinhService.taiLieuGoc.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'syllabusChuongTrinhGoc') {
-      await daoTaoXemChuongTrinhService.syllabusChuongTrinhGoc.update(tepDangXem.value.id, payload)
+    if (tepNguonCanXem.value === 'taiLieumau') {
+      await daoTaoXemChuongTrinhService.taiLieumau.update(tepDangXem.value.id, payload)
+    } else if (tepNguonCanXem.value === 'syllabusChuongTrinhmau') {
+      await daoTaoXemChuongTrinhService.syllabusChuongTrinhmau.update(tepDangXem.value.id, payload)
     } else if (tepNguonCanXem.value === 'syllabusChuongTrinh') {
       await daoTaoXemChuongTrinhService.syllabusChuongTrinh.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'mucTieuChuongTrinhGoc') {
-      await daoTaoXemChuongTrinhService.mucTieuChuongTrinhGoc.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'nangLucDauRaGoc') {
-      await daoTaoXemChuongTrinhService.nangLucDauRaGoc.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'viTriViecLamGoc') {
-      await daoTaoXemChuongTrinhService.viTriViecLamGoc.update(tepDangXem.value.id, payload)
+    } else if (tepNguonCanXem.value === 'mucTieuChuongTrinhmau') {
+      await daoTaoXemChuongTrinhService.mucTieuChuongTrinhmau.update(tepDangXem.value.id, payload)
+    } else if (tepNguonCanXem.value === 'nangLucDauRamau') {
+      await daoTaoXemChuongTrinhService.nangLucDauRamau.update(tepDangXem.value.id, payload)
+    } else if (tepNguonCanXem.value === 'viTriViecLammau') {
+      await daoTaoXemChuongTrinhService.viTriViecLammau.update(tepDangXem.value.id, payload)
     } else {
       await daoTaoXemChuongTrinhService.syllabusTaiLieu.update(tepDangXem.value.id, payload)
     }
@@ -727,24 +742,24 @@ async function taiTaiLieuSyllabus() {
   danhSachTaiLieu.value = item ? [item] : []
 }
 
-async function taiTaiLieuGocCanXem() {
-  taiLieuGocDangXem.value = null
+async function taiTaiLieumauCanXem() {
+  taiLieumauDangXem.value = null
 
-  if (tepNguonCanXem.value !== 'taiLieuGoc') return
-  if (!taiLieuGocIdCanXem.value) return
+  if (tepNguonCanXem.value !== 'taiLieumau') return
+  if (!taiLieumauIdCanXem.value) return
 
-  const result = await daoTaoXemChuongTrinhService.taiLieuGoc.getById(taiLieuGocIdCanXem.value)
-  taiLieuGocDangXem.value = layMotDong(result)
+  const result = await daoTaoXemChuongTrinhService.taiLieumau.getById(taiLieumauIdCanXem.value)
+  taiLieumauDangXem.value = layMotDong(result)
 }
 
-async function taiSyllabusChuongTrinhGocCanXem() {
-  syllabusChuongTrinhGocDangXem.value = null
+async function taiSyllabusChuongTrinhmauCanXem() {
+  syllabusChuongTrinhmauDangXem.value = null
 
-  if (tepNguonCanXem.value !== 'syllabusChuongTrinhGoc') return
-  if (!syllabusChuongTrinhGocIdCanXem.value) return
+  if (tepNguonCanXem.value !== 'syllabusChuongTrinhmau') return
+  if (!syllabusChuongTrinhmauIdCanXem.value) return
 
-  const result = await daoTaoXemChuongTrinhService.syllabusChuongTrinhGoc.getById(syllabusChuongTrinhGocIdCanXem.value)
-  syllabusChuongTrinhGocDangXem.value = layMotDong(result)
+  const result = await daoTaoXemChuongTrinhService.syllabusChuongTrinhmau.getById(syllabusChuongTrinhmauIdCanXem.value)
+  syllabusChuongTrinhmauDangXem.value = layMotDong(result)
 }
 
 async function taiSyllabusChuongTrinhCanXem() {
@@ -757,34 +772,34 @@ async function taiSyllabusChuongTrinhCanXem() {
   syllabusChuongTrinhDangXem.value = layMotDong(result)
 }
 
-async function taiMucTieuChuongTrinhGocCanXem() {
-  mucTieuChuongTrinhGocDangXem.value = null
+async function taiMucTieuChuongTrinhmauCanXem() {
+  mucTieuChuongTrinhmauDangXem.value = null
 
-  if (tepNguonCanXem.value !== 'mucTieuChuongTrinhGoc') return
-  if (!mucTieuChuongTrinhGocIdCanXem.value) return
+  if (tepNguonCanXem.value !== 'mucTieuChuongTrinhmau') return
+  if (!mucTieuChuongTrinhmauIdCanXem.value) return
 
-  const result = await daoTaoXemChuongTrinhService.mucTieuChuongTrinhGoc.getById(mucTieuChuongTrinhGocIdCanXem.value)
-  mucTieuChuongTrinhGocDangXem.value = layMotDong(result)
+  const result = await daoTaoXemChuongTrinhService.mucTieuChuongTrinhmau.getById(mucTieuChuongTrinhmauIdCanXem.value)
+  mucTieuChuongTrinhmauDangXem.value = layMotDong(result)
 }
 
-async function taiNangLucDauRaGocCanXem() {
-  nangLucDauRaGocDangXem.value = null
+async function taiNangLucDauRamauCanXem() {
+  nangLucDauRamauDangXem.value = null
 
-  if (tepNguonCanXem.value !== 'nangLucDauRaGoc') return
-  if (!nangLucDauRaGocIdCanXem.value) return
+  if (tepNguonCanXem.value !== 'nangLucDauRamau') return
+  if (!nangLucDauRamauIdCanXem.value) return
 
-  const result = await daoTaoXemChuongTrinhService.nangLucDauRaGoc.getById(nangLucDauRaGocIdCanXem.value)
-  nangLucDauRaGocDangXem.value = layMotDong(result)
+  const result = await daoTaoXemChuongTrinhService.nangLucDauRamau.getById(nangLucDauRamauIdCanXem.value)
+  nangLucDauRamauDangXem.value = layMotDong(result)
 }
 
-async function taiViTriViecLamGocCanXem() {
-  viTriViecLamGocDangXem.value = null
+async function taiViTriViecLammauCanXem() {
+  viTriViecLammauDangXem.value = null
 
-  if (tepNguonCanXem.value !== 'viTriViecLamGoc') return
-  if (!viTriViecLamGocIdCanXem.value) return
+  if (tepNguonCanXem.value !== 'viTriViecLammau') return
+  if (!viTriViecLammauIdCanXem.value) return
 
-  const result = await daoTaoXemChuongTrinhService.viTriViecLamGoc.getById(viTriViecLamGocIdCanXem.value)
-  viTriViecLamGocDangXem.value = layMotDong(result)
+  const result = await daoTaoXemChuongTrinhService.viTriViecLammau.getById(viTriViecLammauIdCanXem.value)
+  viTriViecLammauDangXem.value = layMotDong(result)
 }
 
 async function taiDuLieu() {
@@ -795,12 +810,12 @@ async function taiDuLieu() {
       taiSyllabusMonHoc(),
       taiChuongTrinhMon(),
       taiTaiLieuSyllabus(),
-      taiTaiLieuGocCanXem(),
-      taiSyllabusChuongTrinhGocCanXem(),
+      taiTaiLieumauCanXem(),
+      taiSyllabusChuongTrinhmauCanXem(),
       taiSyllabusChuongTrinhCanXem(),
-      taiMucTieuChuongTrinhGocCanXem(),
-      taiNangLucDauRaGocCanXem(),
-      taiViTriViecLamGocCanXem()
+      taiMucTieuChuongTrinhmauCanXem(),
+      taiNangLucDauRamauCanXem(),
+      taiViTriViecLammauCanXem()
     ])
 
     if (dangMoToanManHinh.value) {
@@ -831,18 +846,24 @@ function quayLaiSyllabus() {
 
   const tepNguon = tepNguonCanXem.value
 
-  if (tepNguon === 'syllabusChuongTrinhGoc') {
-    router.push({ name: 'DaoTao.SyllabusChuongTrinhGoc' })
+  if (tepNguon === 'syllabusChuongTrinhmau') {
+    router.push({ name: 'DaoTao.SyllabusChuongTrinhMau' })
     return
   }
 
   if (tepNguon === 'syllabusChuongTrinh') {
     router.push({
-      name: 'DaoTao.XemChuongTrinh.SyllabusGoc',
+      name: 'DaoTao.XemChuongTrinh.Syllabusmau',
       params: {
         nganhId: route.params.nganhId || 0,
-        chuongTrinhId: route.params.chuongTrinhId || 0,
-        versionId: route.params.versionId || 0
+        chuongTrinhId: chuongTrinhIdCanXem.value || 0,
+        versionId: versionIdCanXem.value || 0
+      },
+      query: {
+        ...route.query,
+        chuongTrinhId: chuongTrinhIdCanXem.value || route.query.chuongTrinhId,
+        versionId: versionIdCanXem.value || route.query.versionId,
+        chuongTrinhVersionId: versionIdCanXem.value || route.query.chuongTrinhVersionId
       }
     })
     return

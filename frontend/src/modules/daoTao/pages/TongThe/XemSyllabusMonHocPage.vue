@@ -283,15 +283,41 @@
           </div>
 
           <div v-else class="document-list">
-            <button
+            <article
                 v-for="(taiLieu, index) in danhSachTaiLieu"
                 :key="index"
-                type="button"
-                class="doc-link"
-                @click="moLinkTaiLieu(taiLieu)"
+                class="document-item"
             >
-              {{ layTenTaiLieu(taiLieu, index) }}
-            </button>
+              <div class="document-info">
+                <strong>{{ layTenTaiLieu(taiLieu, index) }}</strong>
+                <span v-if="layLinkTaiLieu(taiLieu)">
+        Có file/link đính kèm
+      </span>
+                <span v-else>
+        Chưa có đường dẫn file
+      </span>
+              </div>
+
+              <div class="document-actions">
+                <button
+                    type="button"
+                    class="btn"
+                    :disabled="!layLinkTaiLieu(taiLieu)"
+                    @click="xemTaiLieu(taiLieu)"
+                >
+                  Xem
+                </button>
+
+                <button
+                    type="button"
+                    class="btn primary"
+                    :disabled="!layLinkTaiLieu(taiLieu)"
+                    @click="taiTaiLieu(taiLieu)"
+                >
+                  Tải
+                </button>
+              </div>
+            </article>
           </div>
         </article>
 
@@ -569,12 +595,54 @@ function hienThiBoolean(value) {
   return hienThi(value)
 }
 
-function moLinkTaiLieu(taiLieu) {
-  const link = taiLieu?.duongDan || taiLieu?.url || taiLieu?.link
+function layLinkTaiLieu(taiLieu) {
+  return (
+      taiLieu?.duongDan ||
+      taiLieu?.url ||
+      taiLieu?.link ||
+      taiLieu?.fileUrl ||
+      taiLieu?.duongDanTaiVe ||
+      taiLieu?.duongDanCongKhai ||
+      ''
+  )
+}
 
-  if (link) {
-    moLienKet(link)
+function xemTaiLieu(taiLieu) {
+  const link = layLinkTaiLieu(taiLieu)
+  if (!link) return
+
+  moLienKet(chuyenLinkDownloadThanhPreview(link))
+}
+
+function taiTaiLieu(taiLieu) {
+  const link = layLinkTaiLieu(taiLieu)
+  if (!link) return
+
+  moLienKet(chuyenLinkPreviewThanhDownload(link))
+}
+
+function chuyenLinkDownloadThanhPreview(link) {
+  const rawLink = String(link || '').trim()
+
+  if (!rawLink) return ''
+
+  if (rawLink.includes('/download')) {
+    return rawLink.replace('/download', '/preview')
   }
+
+  return rawLink
+}
+
+function chuyenLinkPreviewThanhDownload(link) {
+  const rawLink = String(link || '').trim()
+
+  if (!rawLink) return ''
+
+  if (rawLink.includes('/preview')) {
+    return rawLink.replace('/preview', '/download')
+  }
+
+  return rawLink
 }
 
 function moLienKet(link) {
@@ -1064,6 +1132,60 @@ function hienThi(value) {
 
   .chapter-head {
     flex-direction: column;
+  }
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 10px;
+}
+
+.document-info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.document-info strong {
+  color: #0b5a92;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.document-info span {
+  color: #42637f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.document-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .document-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .document-actions {
+    justify-content: flex-start;
   }
 }
 </style>
