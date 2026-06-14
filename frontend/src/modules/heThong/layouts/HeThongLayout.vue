@@ -160,25 +160,34 @@ function isActive(names) {
 
 <style scoped>
 .he-thong-shell {
-  min-height: 100vh;
+  /* Trừ đi khoảng 60px chiều cao của thanh Header màu xanh */
+  /* (Nếu header của bạn cao hơn hoặc thấp hơn, hãy sửa số 60px này nhé) */
+  min-height: calc(100vh - 60px);
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   margin: -20px;
   background: #f8fafc;
   color: #1f2937;
+  /* Thêm transition để trượt mượt mà */
+  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .module-sidebar {
   position: sticky;
+  /* Nếu thanh Header của bạn đang dùng position: fixed, hãy đổi top thành top: 60px (bằng chiều cao header) */
   top: 0;
   align-self: start;
-  height: 100vh;
+  /* Chiều cao của sidebar cũng phải trừ hao Header để phần đáy không bị đẩy ra ngoài màn hình */
+  height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
   border-right: 1px solid #e5e7eb;
   background: #ffffff;
   padding: 16px 12px;
-  overflow: hidden;
+  /* Ngăn chặn thanh cuộn ngang khi khung đang thu hẹp */
+  overflow-x: hidden;
+  box-sizing: border-box; /* Thêm dòng này để 100vh không bị cộng dồn với padding làm lố màn hình */
+  /* Đã bỏ overflow-y: auto ở đây để nút luôn cố định */
 }
 
 .sidebar-brand {
@@ -188,6 +197,7 @@ function isActive(names) {
   padding: 4px 8px 18px;
   border-bottom: 1px solid #eef2f7;
   margin-bottom: 12px;
+  white-space: nowrap; /* Chống rớt dòng text */
 }
 
 .brand-icon {
@@ -201,12 +211,15 @@ function isActive(names) {
   font-size: 13px;
   font-weight: 850;
   letter-spacing: 0.3px;
+  flex-shrink: 0; /* Đảm bảo icon không bị bóp méo khi thu gọn */
 }
 
 .brand-text {
   display: grid;
   gap: 2px;
   min-width: 0;
+  transition: opacity 0.2s ease;
+  opacity: 1;
 }
 
 .brand-text strong {
@@ -225,8 +238,11 @@ function isActive(names) {
 .accordion-menu {
   display: grid;
   gap: 8px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding-right: 2px;
+  flex: 1; /* Thêm dòng này để vùng menu tự động chiếm hết khoảng trống ở giữa, ép nút Thu gọn xuống đáy */
+  align-content: start; /* THÊM DÒNG NÀY: Ép các menu dồn lên trên cùng, không bị giãn xa nhau nữa */
 }
 
 .menu-section {
@@ -248,6 +264,7 @@ function isActive(names) {
   cursor: pointer;
   font-weight: 750;
   text-align: left;
+  white-space: nowrap;
 }
 
 .section-head:hover {
@@ -271,10 +288,17 @@ function isActive(names) {
   flex: 0 0 auto;
 }
 
+.nav-text {
+  transition: opacity 0.2s ease;
+  opacity: 1;
+}
+
 .chevron {
   color: #98a2b3;
   font-size: 14px;
   flex: 0 0 auto;
+  transition: opacity 0.2s ease;
+  opacity: 1;
 }
 
 .section-body {
@@ -298,6 +322,7 @@ function isActive(names) {
   font-size: 14px;
   font-weight: 650;
   text-align: left;
+  white-space: nowrap;
 }
 
 .menu-link:hover {
@@ -338,6 +363,7 @@ function isActive(names) {
   padding: 9px 10px;
   cursor: pointer;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .collapse-btn:hover {
@@ -356,6 +382,7 @@ function isActive(names) {
   background: #f8fafc;
 }
 
+/* ================= TRẠNG THÁI COLLAPSED ================= */
 .he-thong-shell.collapsed {
   grid-template-columns: 76px minmax(0, 1fr);
 }
@@ -364,10 +391,13 @@ function isActive(names) {
   padding-inline: 10px;
 }
 
+/* Thay display: none bằng opacity/visibility để tránh vỡ layout và mượt hơn */
 .he-thong-shell.collapsed .brand-text,
 .he-thong-shell.collapsed .nav-text,
 .he-thong-shell.collapsed .chevron {
-  display: none;
+  opacity: 0;
+  width: 0;
+  visibility: hidden;
 }
 
 .he-thong-shell.collapsed .sidebar-brand {
@@ -384,8 +414,9 @@ function isActive(names) {
   justify-content: center;
 }
 
+/* ĐIỂM QUAN TRỌNG: Ép ẩn toàn bộ menu con bằng CSS, không cần đụng tới biến JS */
 .he-thong-shell.collapsed .section-body {
-  padding-left: 0;
+  display: none !important;
 }
 
 .he-thong-shell.collapsed .menu-link {
@@ -401,6 +432,7 @@ function isActive(names) {
   justify-content: center;
 }
 
+/* ================= RESPONSIVE ================= */
 @media (max-width: 860px) {
   .he-thong-shell,
   .he-thong-shell.collapsed {
@@ -418,10 +450,13 @@ function isActive(names) {
   .he-thong-shell.collapsed .brand-text,
   .he-thong-shell.collapsed .nav-text,
   .he-thong-shell.collapsed .chevron {
-    display: inline;
+    opacity: 1;
+    width: auto;
+    visibility: visible;
   }
 
   .he-thong-shell.collapsed .section-body {
+    display: grid !important; /* Trả lại menu con trên mobile */
     padding-left: 32px;
   }
 

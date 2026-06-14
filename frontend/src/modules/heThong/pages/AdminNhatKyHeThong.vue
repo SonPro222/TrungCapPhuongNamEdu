@@ -391,6 +391,7 @@ function xoaLoc() {
 </script>
 
 <style scoped>
+/* ================= BỐ CỤC CHUNG ================= */
 .page {
   display: flex;
   flex-direction: column;
@@ -400,61 +401,106 @@ function xoaLoc() {
 .page-head {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .page-head h1 {
   margin: 0;
+  font-size: 20px;
+  color: #111827;
 }
 
 .page-head p {
   margin: 6px 0 0;
   color: #64748b;
+  font-size: 14px;
 }
 
+/* ================= BỘ LỌC (FILTER) ================= */
 .filter-card {
   display: grid;
-  grid-template-columns: minmax(260px, 1.3fr) 220px 180px 180px auto;
-  gap: 12px;
-  padding: 16px;
+  /* Dùng auto-fit để các ô tự động dàn đều và rớt dòng mượt mà */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 20px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #fff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .filter-card label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .filter-card span {
   font-size: 13px;
-  font-weight: 700;
-  color: #334155;
+  font-weight: 600;
+  color: #475467;
 }
 
 input,
 select {
-  border: 1px solid #cbd5e1;
+  border: 1px solid #d0d5dd;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+input:hover,
+select:hover {
+  border-color: #94a3b8;
+}
+
+input:focus,
+select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .filter-actions {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 10px;
+  /* Ép nút bấm nằm gọn trong 1 cột hoặc kéo dài tùy màn hình */
+  min-width: 180px;
 }
 
+/* ================= BUTTONS ================= */
 .btn {
   border: 1px solid #cbd5e1;
   background: #fff;
-  color: #0f172a;
+  color: #475467;
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 8px 14px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn.primary {
@@ -463,73 +509,128 @@ select {
   border-color: #0f172a;
 }
 
+.btn.primary:hover:not(:disabled) {
+  background: #1e293b;
+  border-color: #1e293b;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= THỐNG KÊ (SUMMARY GRID) ================= */
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .summary-grid div {
   border: 1px solid #e2e8f0;
   background: #ffffff;
   border-radius: 12px;
-  padding: 14px;
-  display: grid;
-  gap: 6px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-grid div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .summary-grid span {
   color: #64748b;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 13px;
 }
 
 .summary-grid strong {
-  font-size: 22px;
-  color: #0f172a;
+  font-size: 24px;
+  color: #111827;
+  line-height: 1;
 }
 
+/* ================= THÔNG BÁO (ALERTS) ================= */
 .alert {
-  padding: 10px 12px;
+  padding: 12px 16px;
   border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .alert.error {
-  background: #fee2e2;
+  background: #fef2f2;
   color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
+/* ================= PHÂN TRANG (PAGINATION) ================= */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.pagination-bar span {
+  color: #475569;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* ================= BẢNG DỮ LIỆU (TABLE) ================= */
 .table-wrap {
-  overflow: auto;
+  overflow-x: auto;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #ffffff;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 2300px;
+  min-width: 2300px; /* Giữ nguyên độ rộng khổng lồ của trang này */
 }
 
 th,
 td {
-  padding: 10px 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid #e2e8f0;
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #334155;
 }
 
 th {
   background: #f8fafc;
-  color: #475569;
-  font-size: 12px;
-  text-transform: uppercase;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
+/* Hiệu ứng rê chuột highlight dòng cứu rỗi đôi mắt */
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* ================= THÀNH PHẦN TRONG BẢNG ================= */
 .object-cell {
   display: grid;
   gap: 4px;
+}
+
+.object-cell strong {
+  color: #111827;
+  font-weight: 600;
 }
 
 .object-cell span {
@@ -538,87 +639,87 @@ th {
 }
 
 .path-cell {
-  max-width: 320px;
+  max-width: 280px;
   white-space: normal;
-  color: #334155;
+  color: #1d4ed8; /* Màu xanh liên kết cho đường dẫn */
+  font-family: ui-monospace, monospace; /* Font code cho URL nhìn Pro hơn */
+  font-size: 13px;
+  word-break: break-all;
 }
 
 .user-agent {
-  max-width: 320px;
+  max-width: 250px;
   white-space: normal;
   color: #475569;
   font-size: 13px;
+  line-height: 1.4;
 }
 
 .desc-cell {
-  max-width: 280px;
+  max-width: 250px;
   white-space: normal;
+  line-height: 1.4;
 }
 
+/* JSON Log */
+pre {
+  margin: 0;
+  max-width: 300px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: #1e293b;
+  background: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  max-height: 150px; /* Giới hạn chiều cao nếu JSON quá dài */
+  overflow-y: auto;
+}
+
+/* Badges */
 .status,
 .action {
   display: inline-flex;
   border-radius: 999px;
   padding: 5px 10px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.status.success {
-  background: #ecfdf5;
-  color: #047857;
-}
+.status.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.status.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
-.status.error {
-  background: #fef2f2;
-  color: #b91c1c;
-}
+.action.TAO_MOI { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.action.CAP_NHAT { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.action.XOA { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
-.action.TAO_MOI {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.action.CAP_NHAT {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.action.XOA {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-pre {
-  margin: 0;
-  max-width: 320px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  color: #334155;
-}
-
+/* ================= RESPONSIVE (MÀN HÌNH NHỎ) ================= */
 @media (max-width: 1200px) {
-  .filter-card,
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-card {
+    grid-template-columns: 1fr; /* Tự động xếp dọc các ô tìm kiếm */
+  }
+
   .summary-grid {
     grid-template-columns: 1fr;
   }
 
   .filter-actions {
-    align-items: stretch;
+    justify-content: flex-start;
   }
-}
-.pagination-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 10px 0;
-}
 
-.pagination-bar span {
-  color: #475569;
-  font-weight: 700;
+  .pagination-bar {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
 }
 </style>

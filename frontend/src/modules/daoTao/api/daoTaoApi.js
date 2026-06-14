@@ -53,11 +53,20 @@ export const daoTaoApi = {
         goiYTheoVersion(versionId) {
             return apiClient.get(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/goi-y`)
         },
-        taoDuKyConThieu(versionId) {
-            return apiClient.post(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/tao-du-ky-con-thieu`)
+        taoDuKyConThieu(versionId, payload = {}) {
+            return apiClient.post(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/tao-du-ky-con-thieu`, payload)
         },
         canhBaoTaiHoc(versionId) {
             return apiClient.get(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/canh-bao-tai-hoc`)
+        },
+        layNghiChuyenKyTheoVersion(versionId) {
+            return apiClient.get(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/nghi-chuyen-ky`)
+        },
+        luuNghiChuyenKyTheoVersion(versionId, payload) {
+            return apiClient.put(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/nghi-chuyen-ky`, payload)
+        },
+        goiYSinhTuDong(versionId, payload) {
+            return apiClient.post(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/goi-y-sinh-tu-dong`, payload)
         }
     },
     khungKymau: createCrudApi(DAO_TAO_URL, 'khung-ky-mau'),

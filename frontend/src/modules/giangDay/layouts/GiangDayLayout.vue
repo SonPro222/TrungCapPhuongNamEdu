@@ -11,38 +11,6 @@
       </div>
 
       <nav class="accordion-menu">
-<!--        <div class="menu-section">-->
-<!--          <button type="button" class="section-head" @click="toggleGroup('lopHocPhan')">-->
-<!--            <span class="head-left">-->
-<!--              <span class="nav-icon">▦</span>-->
-<!--              <span class="nav-text">Lớp học phần</span>-->
-<!--            </span>-->
-
-<!--            <span class="chevron">{{ openGroups.lopHocPhan ? '⌃' : '⌄' }}</span>-->
-<!--          </button>-->
-
-<!--          <div v-show="openGroups.lopHocPhan" class="section-body">-->
-<!--            <RouterLink-->
-<!--                :to="{ name: 'GiangDay.LopHocPhan' }"-->
-<!--                :class="[-->
-<!--                'menu-link',-->
-<!--                {-->
-<!--                  active: isActive([-->
-<!--                    'GiangDay.LopHocPhan',-->
-<!--                    'GiangDay.ChonChuongTrinh',-->
-<!--                    'GiangDay.ChonVersion',-->
-<!--                    'GiangDay.ChonKy',-->
-<!--                    'GiangDay.LopHocPhanTheoKy'-->
-<!--                  ])-->
-<!--                }-->
-<!--              ]"-->
-<!--            >-->
-<!--              <span class="dot"></span>-->
-<!--              <span class="nav-text">Quản lý lớp học phần</span>-->
-<!--            </RouterLink>-->
-<!--          </div>-->
-<!--        </div>-->
-
         <div class="menu-section">
           <button type="button" class="section-head" @click="toggleGroup('giangDay')">
             <span class="head-left">
@@ -132,6 +100,13 @@
             >
               <span class="dot"></span>
               <span class="nav-text">Ca học</span>
+            </RouterLink>
+            <RouterLink
+                :to="{ name: 'GiangDay.NgayNghi' }"
+                :class="['menu-link', { active: isActive(['GiangDay.NgayNghi']) }]"
+            >
+              <span class="dot"></span>
+              <span class="nav-text">Ngày Nghỉ</span>
             </RouterLink>
           </div>
         </div>

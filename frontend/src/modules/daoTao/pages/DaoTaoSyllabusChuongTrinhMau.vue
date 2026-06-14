@@ -40,7 +40,7 @@
         <label>
           <span>Chương trình</span>
           <select v-model="boLoc.chuongTrinhId" :disabled="!boLoc.nganhId" @change="doiChuongTrinh">
-            <option value="">Tất cả chương trình</option>
+            <option value="">Chọn chương trình</option>
             <option v-for="ct in danhSachChuongTrinhTheoNganh" :key="ct.id" :value="ct.id">
               {{ ct.maChuongTrinh || ct.ma || '' }} - {{ ct.tenChuongTrinh || ct.ten || ct.id }}
             </option>
@@ -197,7 +197,7 @@
 
             <tbody>
             <tr v-if="!danhSachSyllabusLoc.length">
-              <td colspan="6" class="rong">Chưa có syllabus chương trình mẫu phù hợp bộ lọc.</td>
+              <td colspan="6" class="rong">Chọn Ngành và Chương trình để tải danh sách syllabus chương trình mẫu.</td>
             </tr>
 
             <tr
@@ -250,17 +250,12 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useDaoTaoXemChuongTrinh } from '@/modules/daoTao/composables/useDaoTaoXemChuongTrinh'
+import { daoTaoService } from '@/modules/daoTao/services/daoTaoService'
 import { tepDinhKemUploadService } from '@/modules/daoTao/services/tepDinhKemUploadService'
 import { layThongBaoLoi } from '@/modules/daoTao/utils/layThongBaoLoi'
 
 const router = useRouter()
-
-const {
-  duLieu,
-  services,
-  taiDuLieuCoSanTatCaBang
-} = useDaoTaoXemChuongTrinh()
+const services = daoTaoService
 
 const thongBao = ref('')
 const loaiThongBao = ref('success')
@@ -271,6 +266,10 @@ const tuKhoa = ref('')
 const maLoc = ref('')
 const fileInput = ref(null)
 const danhSachFile = ref([])
+
+const danhSachNganhRaw = ref([])
+const danhSachChuongTrinhRaw = ref([])
+const danhSachSyllabusRaw = ref([])
 
 const boLoc = reactive({
   nganhId: '',
@@ -300,16 +299,13 @@ const loiForm = reactive({
   ten: ''
 })
 
-const danhSachNganh = computed(() => [...(duLieu.value.nganh || [])]
+const danhSachNganh = computed(() => [...danhSachNganhRaw.value]
     .sort((a, b) => String(a.tenNganh || a.ten || '').localeCompare(String(b.tenNganh || b.ten || ''), 'vi')))
 
-const danhSachChuongTrinhTheoNganh = computed(() => {
-  return (duLieu.value.chuongTrinh || [])
-      .filter((ct) => !boLoc.nganhId || String(ct.nganhId || '') === String(boLoc.nganhId))
-      .sort((a, b) => String(a.tenChuongTrinh || a.ten || '').localeCompare(String(b.tenChuongTrinh || b.ten || ''), 'vi'))
-})
+const danhSachChuongTrinhTheoNganh = computed(() => [...danhSachChuongTrinhRaw.value]
+    .sort((a, b) => String(a.tenChuongTrinh || a.ten || '').localeCompare(String(b.tenChuongTrinh || b.ten || ''), 'vi')))
 
-const danhSachSyllabusmau = computed(() => [...(duLieu.value.syllabusChuongTrinhmau || [])]
+const danhSachSyllabusmau = computed(() => [...danhSachSyllabusRaw.value]
     .sort((a, b) => String(a.ten || '').localeCompare(String(b.ten || ''), 'vi')))
 
 const danhSachSyllabusLoc = computed(() => {
@@ -318,10 +314,6 @@ const danhSachSyllabusLoc = computed(() => {
 
   return danhSachSyllabusmau.value.filter((item) => {
     if (boLoc.chuongTrinhId && String(item.chuongTrinhId || '') !== String(boLoc.chuongTrinhId)) return false
-    if (!boLoc.chuongTrinhId && boLoc.nganhId) {
-      const idsChuongTrinh = new Set(danhSachChuongTrinhTheoNganh.value.map((ct) => String(ct.id || '')))
-      if (!idsChuongTrinh.has(String(item.chuongTrinhId || ''))) return false
-    }
     if (ma && !String(item.ma || '').toLowerCase().includes(ma)) return false
 
     if (!keyword) return true
@@ -346,7 +338,7 @@ const danhSachSyllabusLoc = computed(() => {
 })
 
 function layChuongTrinhTheoId(id) {
-  return (duLieu.value.chuongTrinh || []).find((ct) => String(ct.id || '') === String(id || '')) || null
+  return danhSachChuongTrinhRaw.value.find((ct) => String(ct.id || '') === String(id || '')) || null
 }
 
 function tenChuongTrinhTheoId(id) {
@@ -358,9 +350,13 @@ function tenChuongTrinhTheoId(id) {
 function tenNganhTheoChuongTrinhId(chuongTrinhId) {
   const chuongTrinh = layChuongTrinhTheoId(chuongTrinhId)
   const nganhId = chuongTrinh?.nganhId
-  const nganh = (duLieu.value.nganh || []).find((item) => String(item.id || '') === String(nganhId || ''))
+  const nganh = danhSachNganhRaw.value.find((item) => String(item.id || '') === String(nganhId || ''))
   if (!nganh) return 'Chưa xác định ngành'
   return `${nganh.maNganh || nganh.ma || ''} - ${nganh.tenNganh || nganh.ten || nganh.tenNganhDaoTao || nganh.id}`.trim()
+}
+
+function layItems(result) {
+  return Array.isArray(result?.items) ? result.items : []
 }
 
 function baoTin(message, type = 'success') {
@@ -372,11 +368,52 @@ function baoTin(message, type = 'success') {
   }, 5000)
 }
 
+async function taiDanhSachNganh() {
+  const result = await services.nganh.getAll({ size: 1000 })
+  danhSachNganhRaw.value = layItems(result)
+}
+
+async function taiChuongTrinhTheoNganh() {
+  danhSachChuongTrinhRaw.value = []
+  danhSachSyllabusRaw.value = []
+
+  if (!boLoc.nganhId) return
+
+  const result = await services.chuongTrinh.getAll({
+    size: 1000,
+    nganhId: boLoc.nganhId
+  })
+
+  danhSachChuongTrinhRaw.value = layItems(result)
+}
+
+async function taiSyllabusTheoChuongTrinh() {
+  danhSachSyllabusRaw.value = []
+
+  if (!boLoc.chuongTrinhId) return
+
+  const result = await services.syllabusChuongTrinhmau.getAll({
+    size: 1000,
+    chuongTrinhId: boLoc.chuongTrinhId
+  })
+
+  danhSachSyllabusRaw.value = layItems(result)
+}
+
 async function taiDuLieu() {
   dangTai.value = true
 
   try {
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachNganh()
+
+    if (boLoc.nganhId) {
+      await taiChuongTrinhTheoNganh()
+    }
+
+    if (boLoc.chuongTrinhId) {
+      await taiSyllabusTheoChuongTrinh()
+    }
+
     baoTin('Đã tải lại dữ liệu syllabus chương trình mẫu.')
   } catch (error) {
     baoTin(layThongBaoLoi(error, 'Không tải được dữ liệu syllabus chương trình mẫu.'), 'error')
@@ -385,13 +422,32 @@ async function taiDuLieu() {
   }
 }
 
-function doiNganh() {
+async function doiNganh() {
   boLoc.chuongTrinhId = ''
+  danhSachSyllabusRaw.value = []
   if (!form.id) form.chuongTrinhId = ''
+
+  try {
+    dangTai.value = true
+    await taiChuongTrinhTheoNganh()
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không tải được danh sách chương trình theo ngành.'), 'error')
+  } finally {
+    dangTai.value = false
+  }
 }
 
-function doiChuongTrinh() {
+async function doiChuongTrinh() {
   if (!form.id) form.chuongTrinhId = boLoc.chuongTrinhId || ''
+
+  try {
+    dangTai.value = true
+    await taiSyllabusTheoChuongTrinh()
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không tải được syllabus theo chương trình.'), 'error')
+  } finally {
+    dangTai.value = false
+  }
 }
 
 function resetForm() {
@@ -438,7 +494,6 @@ function suaSyllabus(item) {
     duongDan: chuanHoaDuongDan(item.duongDan || '')
   })
 }
-
 
 function giaTriTrim(value) {
   return String(value || '').trim()
@@ -533,7 +588,7 @@ async function luuSyllabus() {
       baoTin('Đã thêm syllabus chương trình mẫu.')
     }
 
-    await taiDuLieuCoSanTatCaBang()
+    await taiSyllabusTheoChuongTrinh()
     resetForm()
   } catch (error) {
     baoTin(layThongBaoLoi(error, 'Không lưu được syllabus chương trình mẫu.'), 'error')
@@ -542,10 +597,28 @@ async function luuSyllabus() {
   }
 }
 
+async function kiemTraSyllabusMauDangDung(id) {
+  if (!id) return false
+
+  const result = await services.syllabusChuongTrinh.getAll({
+    size: 1,
+    syllabusChuongTrinhMauId: id
+  })
+
+  return layItems(result).length > 0
+}
+
 async function xoaSyllabus(item) {
   if (!item?.id) return
 
-  const dangDung = (duLieu.value.syllabusChuongTrinh || []).some((syllabus) => String(syllabus.syllabusChuongTrinhmauId || '') === String(item.id))
+  let dangDung = false
+
+  try {
+    dangDung = await kiemTraSyllabusMauDangDung(item.id)
+  } catch (error) {
+    dangDung = false
+  }
+
   const noiDungCanhBao = dangDung
       ? `Syllabus mẫu "${item.ten || item.ma || item.id}" đang được version sử dụng. Vẫn xóa?`
       : `Xóa syllabus mẫu "${item.ten || item.ma || item.id}"?`
@@ -556,7 +629,7 @@ async function xoaSyllabus(item) {
 
   try {
     await services.syllabusChuongTrinhmau.delete(item.id)
-    await taiDuLieuCoSanTatCaBang()
+    await taiSyllabusTheoChuongTrinh()
     if (String(form.id || '') === String(item.id || '')) resetForm()
     baoTin('Đã xóa syllabus chương trình mẫu.')
   } catch (error) {
@@ -594,7 +667,7 @@ async function luuTep() {
 
     if (form.id) {
       await services.syllabusChuongTrinhmau.update(form.id, taoPayload())
-      await taiDuLieuCoSanTatCaBang()
+      await taiSyllabusTheoChuongTrinh()
       baoTin(`Đã upload và lưu ${duongDanMoi.length} tệp vào syllabus.`)
     } else {
       baoTin(`Đã upload ${duongDanMoi.length} tệp. Bấm “Thêm syllabus” để lưu đường dẫn vào bản ghi.`)
@@ -661,7 +734,16 @@ function rutGon(value, max = 100) {
   return `${text.slice(0, max)}...`
 }
 
-onMounted(taiDuLieu)
+onMounted(async () => {
+  dangTai.value = true
+  try {
+    await taiDanhSachNganh()
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không tải được danh sách ngành.'), 'error')
+  } finally {
+    dangTai.value = false
+  }
+})
 </script>
 
 <style scoped>

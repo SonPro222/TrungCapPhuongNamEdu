@@ -1,0 +1,266 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    --public-bg: #f4f9ff;
+    --public-white: #ffffff;
+
+    --public-blue-900: #063b7a;
+    --public-blue-800: #074b9a;
+    --public-blue-700: #075fc8;
+    --public-blue-600: #0b6fe8;
+
+    --public-text-main: #0b376d;
+    --public-text-normal: #365979;
+    --public-text-muted: #607894;
+
+    --public-border: #dbe9f8;
+    --public-border-soft: #edf4fb;
+
+    --public-shadow: 0 14px 32px rgba(7, 63, 131, 0.12);
+    --public-shadow-soft: 0 8px 22px rgba(7, 63, 131, 0.07);
+
+    --public-font: 'Be Vietnam Pro', Inter, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--public-bg);
+    color: var(--public-text-main);
+    font-family: var(--public-font);
+    font-size: 15px;
+    line-height: 1.65;
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+    font-family: var(--public-font);
+}
+
+button,
+input,
+select,
+textarea {
+    font-size: inherit;
+}
+
+a {
+    color: inherit;
+}
+
+p {
+    color: var(--public-text-normal);
+    font-size: 15px;
+    line-height: 1.75;
+    font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--public-blue-900);
+    font-family: var(--public-font);
+    line-height: 1.22;
+    letter-spacing: -0.45px;
+}
+
+h1 {
+    font-weight: 800;
+}
+
+h2,
+h3 {
+    font-weight: 800;
+}
+
+h4,
+h5,
+h6 {
+    font-weight: 700;
+}
+
+button,
+.menu-link,
+.login-button,
+.primary-button,
+.light-button,
+.white-button,
+.outline-white-button,
+.nut-public {
+    font-weight: 700;
+    letter-spacing: -0.15px;
+}
+
+.brand-text h1,
+.brand-text h2 {
+    font-family: var(--public-font);
+    letter-spacing: -0.35px;
+}
+
+.public-container {
+    width: min(1340px, calc(100% - 64px));
+    margin: 0 auto;
+}
+
+.public-section {
+    padding: 38px 0;
+}
+
+.white-section,
+.gray-section {
+    background: var(--public-bg);
+}
+
+.compact-section {
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.breadcrumb-public {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.breadcrumb-public a {
+    color: #6b7280;
+    text-decoration: none;
+}
+
+.breadcrumb-public strong {
+    color: var(--public-blue-700);
+    font-weight: 700;
+}
+
+.tieu-de-muc-public {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.tieu-de-muc-public.can-trai {
+    justify-content: flex-start;
+}
+
+.tieu-de-muc-public span {
+    width: 70px;
+    height: 1px;
+    background: #9db8d7;
+}
+
+.tieu-de-muc-public h2 {
+    margin: 0;
+    color: var(--public-blue-900);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.45px;
+}
+
+.nut-public {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 9px;
+    padding: 0 22px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.nut-public.chinh {
+    border: none;
+    background: var(--public-blue-700);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(7, 95, 200, 0.24);
+}
+
+.nut-public.phu {
+    border: 1px solid #b7cae3;
+    background: #ffffff;
+    color: #123d70;
+}
+
+.the-thong-ke-public {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.the-thong-ke-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: #edf6ff;
+    color: var(--public-blue-700);
+    font-size: 22px;
+}
+
+.the-thong-ke-public strong {
+    display: block;
+    color: var(--public-blue-900);
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.the-thong-ke-public p {
+    margin: 4px 0 0;
+    color: var(--public-text-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+    body {
+        font-size: 14px;
+    }
+
+    p {
+        font-size: 14px;
+    }
+
+    .public-container {
+        width: min(100% - 32px, 1340px);
+    }
+
+    .public-section {
+        padding: 28px 0;
+    }
+
+    .tieu-de-muc-public {
+        gap: 12px;
+    }
+
+    .tieu-de-muc-public span {
+        width: 38px;
+    }
+
+    .tieu-de-muc-public h2 {
+        font-size: 22px;
+    }
+}

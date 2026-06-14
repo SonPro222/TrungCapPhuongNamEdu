@@ -116,28 +116,13 @@
                 :key="chuongTrinh.rowKey"
                 class="program-item"
             >
-              <button
-                  type="button"
-                  class="program-toggle"
-                  @click.stop="toggleChuongTrinh(chuongTrinh.rowKey)"
-              >
-                <span class="toggle-icon">
-                  {{ chuongTrinhDangMo.has(chuongTrinh.rowKey) ? '▾' : '▸' }}
-                </span>
+              <div class="program-header">
+                <span class="program-name">{{ chuongTrinh.tenChuongTrinh }}</span>
+                <span class="version-count">{{ chuongTrinh.versionList.length }} version</span>
+              </div>
 
-                <span class="program-name">
-                  {{ chuongTrinh.tenChuongTrinh }}
-                </span>
-
-                <span class="version-count">
-                  {{ chuongTrinh.versionList.length }} version
-                </span>
-              </button>
-
-              <div v-if="chuongTrinhDangMo.has(chuongTrinh.rowKey)" class="version-box">
-                <div class="version-box-title">
-                  Version
-                </div>
+              <div class="version-box">
+                <div class="version-box-title">Version</div>
 
                 <div v-if="!chuongTrinh.versionList.length" class="version-empty">
                   Chương trình này chưa có version.
@@ -151,7 +136,6 @@
                 >
                   <div class="version-info">
                     <strong>{{ version.tenVersion }}</strong>
-
                     <span :class="['current-badge', version.hienHanhClass]">
                       Hiện hành: {{ version.hienHanhText }}
                     </span>
@@ -207,7 +191,6 @@ const danhSachNganh = ref([])
 const danhSachChuongTrinh = ref([])
 const danhSachVersion = ref([])
 
-const chuongTrinhDangMo = ref(new Set())
 const menuVersionDangMo = ref(null)
 
 const laAdmin = computed(() => {
@@ -379,35 +362,11 @@ async function taiDuLieuTongQuan() {
     danhSachNganh.value = layDanhSachTuResponse(nganhRes)
     danhSachChuongTrinh.value = layDanhSachTuResponse(chuongTrinhRes)
     danhSachVersion.value = layDanhSachTuResponse(versionRes)
-
-    moChuongTrinhDauTien()
   } catch (error) {
     errorMessage.value = layThongBaoLoi(error, 'Không tải được tổng quan chương trình đào tạo.')
   } finally {
     loading.value = false
   }
-}
-
-function moChuongTrinhDauTien() {
-  const firstGroup = danhSachNganhGroup.value[0]
-  const firstProgram = firstGroup?.chuongTrinhList?.[0]
-
-  if (!firstProgram) return
-
-  chuongTrinhDangMo.value = new Set([firstProgram.rowKey])
-}
-
-function toggleChuongTrinh(rowKey) {
-  const next = new Set(chuongTrinhDangMo.value)
-
-  if (next.has(rowKey)) {
-    next.delete(rowKey)
-  } else {
-    next.add(rowKey)
-  }
-
-  chuongTrinhDangMo.value = next
-  menuVersionDangMo.value = null
 }
 
 function toggleMenuVersion(rowKey) {
@@ -944,12 +903,12 @@ function coGiaTri(value) {
 }
 
 /* =========================
-   INDUSTRY GRID: 2 / 1
+   INDUSTRY GRID: 3 cols
 ========================= */
 
 .industry-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   align-items: start;
 }
@@ -1021,34 +980,20 @@ function coGiaTri(value) {
   overflow: visible;
 }
 
-.program-toggle {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
+.program-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 8px;
-  align-items: center;
-  width: 100%;
-  border: 0;
-  background: #ffffff;
-  color: #0f172a;
-  padding: 12px;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 14px;
-  transition: background 0.15s ease;
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
-}
-
-.program-toggle:hover {
-  background: #eaf4ff;
-}
-
-.toggle-icon {
-  color: #0b5a92;
-  font-size: 16px;
-  font-weight: 900;
+  padding: 10px 12px;
+  border-bottom: 1px solid #d8ecff;
+  border-radius: 14px 14px 0 0;
+  background: #f0f7ff;
 }
 
 .program-name {
+  flex: 1;
+  min-width: 0;
   color: #0f172a;
   font-size: 13px;
   font-weight: 800;
@@ -1057,9 +1002,9 @@ function coGiaTri(value) {
 }
 
 .version-count {
-  grid-column: 2 / 3;
+  flex-shrink: 0;
   width: fit-content;
-  background: #f8fbff;
+  background: #ffffff;
   color: #0f3d64;
 }
 
@@ -1068,9 +1013,8 @@ function coGiaTri(value) {
 ========================= */
 
 .version-box {
-  margin: 0 10px 12px 36px;
-  border: 1px solid #bfdbfe;
-  border-radius: 14px;
+  border: 0;
+  border-top: 0;
   background: #ffffff;
   overflow: visible;
 }
@@ -1204,7 +1148,13 @@ function coGiaTri(value) {
    RESPONSIVE
 ========================= */
 
-@media (max-width: 1180px) {
+@media (max-width: 1280px) {
+  .industry-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
   .industry-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1223,10 +1173,6 @@ function coGiaTri(value) {
   .header-actions {
     width: 100%;
   }
-
-  .version-box {
-    margin-left: 12px;
-  }
 }
 
 @media (max-width: 640px) {
@@ -1240,20 +1186,6 @@ function coGiaTri(value) {
 
   .page-header h1 {
     font-size: 19px;
-  }
-
-  .program-toggle {
-    grid-template-columns: 22px minmax(0, 1fr);
-  }
-
-  .version-count {
-    grid-column: 2 / 3;
-    width: fit-content;
-  }
-
-  .version-box {
-    margin-left: 10px;
-    margin-right: 10px;
   }
 
   .version-row {

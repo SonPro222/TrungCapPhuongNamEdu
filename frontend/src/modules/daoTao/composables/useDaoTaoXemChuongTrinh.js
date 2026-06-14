@@ -342,19 +342,13 @@ function themTenLienKet(duLieu) {
         })),
         quyDoiDiem: duLieu.quyDoiDiem.map((item) => ({
             ...item,
-            tenChuongTrinhMon: layTen(chuongTrinhMonMap, item.chuongTrinhMonId, ['maMonTrongCt', 'tenMon']),
             tenSyllabusMonHoc: layTen(syllabusMonMap, item.syllabusMonHocId, [
                 'ten',
                 'tenSyllabusMonHocmau',
                 'ma',
                 'maSyllabusMonHocmau',
                 'mucTieu'
-            ]),
-            tenCotDiemMau: layGiaTriTheoKhoa(
-                item,
-                ['tenCotDiemMau', 'ten_cot_diem_mau', 'tenCotDiem', 'ten_cot_diem', 'ghiChu', 'ghi_chu'],
-                ''
-            )
+            ])
         })),
         quyDoiDiemMau: duLieu.quyDoiDiemMau.map((item) => ({...item})),
         cauHinhDanhGiaMau: duLieu.cauHinhDanhGiaMau.map((item) => ({
@@ -710,6 +704,196 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             }
         }
     }
+
+    async function taiLaiBang(key, params = {}) {
+        const service = daoTaoXemChuongTrinhService[key]
+        if (!service?.getAll) return []
+
+        try {
+            const result = await service.getAll({
+                size: 1000,
+                ...params
+            })
+            const list = layDanhSachTuKetQua(result)
+            rawData[key] = list
+            return list
+        } catch (error) {
+            console.warn(`Không tải lại được bảng ${key}`, error)
+            return []
+        }
+    }
+
+
+    const cacheTaiBangTheoScope = new Set()
+
+    function coGiaTriLoc(value) {
+        return value !== null && value !== undefined && value !== ''
+    }
+
+    function taoParamsLoc(params = {}) {
+        const out = {}
+        Object.entries(params || {}).forEach(([key, value]) => {
+            if (coGiaTriLoc(value)) out[key] = value
+        })
+        return out
+    }
+
+    function taoCacheKey(key, params = {}) {
+        const clean = taoParamsLoc(params)
+        const ordered = Object.keys(clean).sort().reduce((acc, itemKey) => {
+            acc[itemKey] = clean[itemKey]
+            return acc
+        }, {})
+        return `${key}:${JSON.stringify(ordered)}`
+    }
+
+    async function taiBangTheoScope(key, params = {}, options = {}) {
+        const {force = false, append = false} = options
+        const service = daoTaoXemChuongTrinhService[key]
+        if (!service?.getAll) return []
+
+        const requestParams = {size: 1000, ...taoParamsLoc(params)}
+        const cacheKey = taoCacheKey(key, requestParams)
+        if (!force && cacheTaiBangTheoScope.has(cacheKey)) return rawData[key] || []
+
+        try {
+            const result = await service.getAll(requestParams)
+            const list = layDanhSachTuKetQua(result)
+
+            if (append) {
+                const map = new Map((rawData[key] || []).map((row) => [String(row.id), row]))
+                list.forEach((row) => {
+                    if (row?.id !== null && row?.id !== undefined) map.set(String(row.id), row)
+                })
+                rawData[key] = Array.from(map.values())
+            } else {
+                rawData[key] = list
+            }
+
+            cacheTaiBangTheoScope.add(cacheKey)
+            return list
+        } catch (error) {
+            console.warn(`Không tải được bảng ${key} theo scope`, error)
+            return []
+        }
+    }
+
+    async function taiNhieuBangTheoScope(jobs = [], options = {}) {
+        await Promise.all(jobs.map((job) => {
+            if (Array.isArray(job)) return taiBangTheoScope(job[0], job[1] || {}, options)
+            if (typeof job === 'string') return taiBangTheoScope(job, {}, options)
+            return Promise.resolve([])
+        }))
+    }
+
+    function xacDinhTangTheoRouteName(routeName = '') {
+        if (routeName === 'DaoTao.XemChuongTrinh.KhungCauTruc') return 6
+        if (routeName === 'DaoTao.XemChuongTrinh.Mon') return 7
+        if (routeName === 'DaoTao.XemChuongTrinh.Syllabusmau') return 8
+        if (routeName === 'DaoTao.XemChuongTrinh.SyllabusApDung') return 9
+        if (routeName === 'DaoTao.XemChuongTrinh.TongQuan') return 5
+        if (routeName === 'DaoTao.XemChuongTrinh.Version') return 4
+        if (routeName === 'DaoTao.XemChuongTrinh.ChuongTrinh') return 3
+        if (routeName === 'DaoTao.XemChuongTrinh.CauHinh') return 2
+        return 1
+    }
+
+    async function taiDuLieuNenXemChuongTrinh(force = false) {
+        await taiBangTheoScope('nganh', {}, {force})
+    }
+
+    async function taiDuLieuXemChuongTrinhTheoRoute(routeInfo = {}) {
+        const routeName = routeInfo.name || routeInfo.routeName || ''
+        const params = routeInfo.params || {}
+        const query = routeInfo.query || {}
+        const force = Boolean(routeInfo.force)
+        const tang = Number(routeInfo.tang || xacDinhTangTheoRouteName(routeName) || 1)
+
+        const nganhId = params.nganhId || query.nganhId || selected.nganh?.id || null
+        const chuongTrinhId = params.chuongTrinhId || query.chuongTrinhId || selected.chuongTrinh?.id || null
+        const chuongTrinhVersionId = params.versionId || query.versionId || params.chuongTrinhVersionId || query.chuongTrinhVersionId || selected.chuongTrinhVersion?.id || null
+        const khungKyId = query.khungKyId || selected.khungKy?.id || null
+        const chuongTrinhMonId = params.chuongTrinhMonId || query.chuongTrinhMonId || selected.chuongTrinhMon?.id || null
+        const monHocId = params.monHocId || query.monHocId || selected.monHoc?.id || selected.chuongTrinhMon?.monHocId || null
+        const syllabusMonId = params.syllabusMonId || query.syllabusMonId || selected.syllabusMonHoc?.id || null
+
+        await taiDuLieuNenXemChuongTrinh(force)
+
+        if (tang >= 2 && nganhId) {
+            await taiNhieuBangTheoScope([
+                ['trinhDoDaoTao', {}],
+                ['loaiChuongTrinh', {}],
+                ['nganhTrinhDoDaoTao', {nganhId}],
+                ['nganhLoaiChuongTrinh', {nganhId}],
+                ['nganhHeDaoTao', {nganhId}],
+                ['chuongTrinh', {nganhId}]
+            ], {force})
+        }
+
+        if (tang >= 4 && chuongTrinhId) {
+            await taiBangTheoScope('chuongTrinhVersion', {chuongTrinhId}, {force})
+        }
+
+        if (tang === 5 && chuongTrinhVersionId) {
+            await taiDuLieuTongQuanVersion(chuongTrinhVersionId)
+            await taiBangTheoScope('syllabusChuongTrinhmau', {chuongTrinhId}, {force})
+            await taiNhieuBangTheoScope([
+                ['mucTieuChuongTrinhmau', {}],
+                ['nangLucDauRamau', {}],
+                ['viTriViecLammau', {}],
+                ['dieuKienTotNghiepmau', {}]
+            ], {force})
+        }
+
+        if (tang >= 6 && chuongTrinhVersionId) {
+            await taiBangTheoScope('khungKy', {chuongTrinhVersionId}, {force})
+            if (tang === 6) {
+                await taiBangTheoScope('khungKymau', {}, {force})
+            }
+        }
+
+        if (tang >= 7 && chuongTrinhVersionId) {
+            await taiNhieuBangTheoScope([
+                ['nhomKienThuc', {chuongTrinhVersionId}],
+                ['nhomTuChon', {chuongTrinhVersionId}],
+                ['chuongTrinhMon', {chuongTrinhVersionId}],
+                ['monTuChon', {chuongTrinhVersionId}],
+                ['monTienQuyet', {chuongTrinhVersionId}],
+                ['monHoc', {}]
+            ], {force})
+
+            if (khungKyId) {
+                await taiBangTheoScope('chuongTrinhMon', {chuongTrinhVersionId, khungKyId}, {force})
+            }
+        }
+
+        if (tang === 8) {
+            if (chuongTrinhMonId) {
+                await taiBangTheoScope('syllabusMonHoc', {chuongTrinhMonId}, {force})
+            } else if (chuongTrinhVersionId) {
+                await taiBangTheoScope('syllabusMonHoc', {chuongTrinhVersionId}, {force})
+            }
+
+            if (monHocId) {
+                await taiBangTheoScope('syllabusMonHocmau', {monHocId}, {force})
+            }
+        }
+
+        if (tang === 9) {
+            if (chuongTrinhMonId) {
+                await taiBangTheoScope('syllabusMonHoc', {chuongTrinhMonId}, {force})
+            }
+
+            const syllabusDangXem = syllabusMonId
+                ? (rawData.syllabusMonHoc || []).find((row) => String(row.id || '') === String(syllabusMonId || ''))
+                : selected.syllabusMonHoc
+
+            if (syllabusDangXem?.id) {
+                await taiDuLieuTheoSyllabusMonHocApDung(syllabusDangXem)
+            }
+        }
+    }
+
     async function taiDuLieuMauCrud(serviceKey) {
         const keys = [
             'nganh',
@@ -922,6 +1106,108 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         rawData.syllabusChuongBai = [...(rawData.syllabusChuongBai || [])].sort(sortThuTu)
         rawData.syllabusMonHocmauChuongBai = [...(rawData.syllabusMonHocmauChuongBai || [])].sort(sortThuTu)
     }
+
+    // ===== NGHỈ CHUYỂN KỲ =====
+    const nghiChuyenKyRows = ref([])
+    const dangTaiNghiChuyenKy = ref(false)
+    const dangLuuNghiChuyenKy = ref(false)
+
+    function soKyCuaVersion() {
+        return Number(selected.nganhHeDaoTao?.soKy || selected.chuongTrinh?.soKy || 0)
+    }
+
+    function taoRowsNghiChuyenKyMacDinh(soKy, rowsDaCo = []) {
+        const map = new Map((rowsDaCo || []).map(row => [`${row.tuKyThu}-${row.denKyThu}`, row]))
+        const result = []
+        for (let i = 1; i < soKy; i += 1) {
+            const key = `${i}-${i + 1}`
+            const old = map.get(key) || {}
+            result.push({
+                id: old.id || null,
+                chuongTrinhVersionId: selected.chuongTrinhVersion?.id || null,
+                tuKyThu: i,
+                denKyThu: i + 1,
+                soNgayNghi: Number(old.soNgayNghi ?? 0),
+                ghiChu: old.ghiChu || `Nghỉ chuyển từ kỳ ${i} sang kỳ ${i + 1}`
+            })
+        }
+        return result
+    }
+
+    async function layNghiChuyenKyTheoVersion(versionId) {
+        if (!versionId) {
+            nghiChuyenKyRows.value = []
+            return
+        }
+        dangTaiNghiChuyenKy.value = true
+        try {
+            const res = await daoTaoXemChuongTrinhService.khungKy.layNghiChuyenKyTheoVersion(versionId)
+            const data = res?.data?.data ?? res?.data ?? res
+            const rows = Array.isArray(data) ? data : []
+            const soKy = soKyCuaVersion()
+            nghiChuyenKyRows.value = taoRowsNghiChuyenKyMacDinh(soKy, rows)
+        } catch (error) {
+            const soKy = soKyCuaVersion()
+            nghiChuyenKyRows.value = taoRowsNghiChuyenKyMacDinh(soKy, [])
+            baoTin(layThongBaoLoi(error, 'Không tải được cấu hình nghỉ chuyển kỳ.'), 'error')
+        } finally {
+            dangTaiNghiChuyenKy.value = false
+        }
+    }
+
+    async function luuNghiChuyenKyTheoVersion() {
+        const versionId = selected.chuongTrinhVersion?.id
+        if (!versionId) {
+            baoTin('Cần chọn Version trước khi lưu nghỉ chuyển kỳ.', 'error')
+            return
+        }
+        const soKy = soKyCuaVersion()
+        if (!soKy || soKy < 1) {
+            baoTin('Chưa xác định được số kỳ của ngành hệ đào tạo.', 'error')
+            return
+        }
+        const invalid = nghiChuyenKyRows.value.find(row => Number(row.soNgayNghi) < 0)
+        if (invalid) {
+            baoTin('Số ngày nghỉ chuyển kỳ không được âm.', 'error')
+            return
+        }
+        dangLuuNghiChuyenKy.value = true
+        try {
+            const payload = {
+                danhSachNghiChuyenKy: nghiChuyenKyRows.value.map(row => ({
+                    tuKyThu: Number(row.tuKyThu),
+                    denKyThu: Number(row.denKyThu),
+                    soNgayNghi: Number(row.soNgayNghi || 0),
+                    ghiChu: row.ghiChu || ''
+                }))
+            }
+            await daoTaoXemChuongTrinhService.khungKy.luuNghiChuyenKyTheoVersion(versionId, payload)
+            baoTin('Đã lưu cấu hình nghỉ chuyển kỳ của Version.', 'success')
+            await layNghiChuyenKyTheoVersion(versionId)
+        } catch (error) {
+            baoTin(layThongBaoLoi(error, 'Không lưu được cấu hình nghỉ chuyển kỳ.'), 'error')
+        } finally {
+            dangLuuNghiChuyenKy.value = false
+        }
+    }
+
+    watch(
+        () => selected.chuongTrinhVersion?.id,
+        (versionId) => {
+            layNghiChuyenKyTheoVersion(versionId)
+        },
+        { immediate: true }
+    )
+
+    // Re-build rows khi nganhHeDaoTao load xong (race condition: version watch fire trước khi soKy có giá trị)
+    watch(
+        () => selected.nganhHeDaoTao?.soKy,
+        () => {
+            const versionId = selected.chuongTrinhVersion?.id
+            if (versionId) layNghiChuyenKyTheoVersion(versionId)
+        }
+    )
+    // ===== END NGHỈ CHUYỂN KỲ =====
 
     watch(
         () => selected.chuongTrinhMon?.id || null,
@@ -1194,15 +1480,8 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         },
     }
 
-    const bangMauGanMon = {
-        quyDoiDiemMau: {
-            joinKey: 'chuongTrinhMonQuyDoiDiemMau',
-            mauIdKey: 'quyDoiDiemMauId',
-            syllabusIdKey: 'syllabusMonHocId',
-            serviceKey: 'chuongTrinhMonQuyDoiDiemMau',
-            tenBang: 'Mẫu quy đổi kết quả'
-        }
-    }
+    // quyDoiDiemMau xử lý riêng trong toggleLuuBangPhu (dùng dayQuyDoiDiemMauXuongQuyDoiDiem)
+    const bangMauGanMon = {}
 
     function timChuongTrinhMonTheoMonHocmau(item, parentValues = {}) {
         const chuongTrinhVersionId = parentValues.chuongTrinhVersionId || selected.chuongTrinhVersion?.id
@@ -1357,6 +1636,8 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
     function taoPayloadQuyDoiDiemTuMau(item, syllabusMonHocId) {
         return {
             syllabusMonHocId,
+            ma: item.ma || '',
+            ten: item.ten || '',
             loaiMau: item.loaiMau || 'COT_DIEM',
             nguongTu: item.nguongTu ?? null,
             nguongDen: item.nguongDen ?? null,
@@ -1367,7 +1648,7 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             thuTu: item.thuTu ?? null,
             batBuoc: item.batBuoc !== false,
             congThuc: item.congThuc || '',
-            ghiChu: item.ghiChu || item.ten || item.ma || ''
+            ghiChu: item.ghiChu || ''
         }
     }
 
@@ -1687,6 +1968,13 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         return timDongNoiVersion(config, item, chuongTrinhVersionId)
     }
 
+    const bangConSyllabusChuongTrinh = new Set([
+        'mucTieuChuongTrinhmau',
+        'nangLucDauRamau',
+        'viTriViecLammau',
+        'dieuKienTotNghiepmau'
+    ])
+
     function timDongApDungVersion(key, item, chuongTrinhVersionId) {
         const config = bangmauTaoApDungVersion[key]
         if (!config) return null
@@ -1694,6 +1982,14 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         const list = rawData[config.joinKey] || []
         const rowKey = config.matchBy?.rowKey || config.mauIdKey
         const itemKey = config.matchBy?.itemKey || 'id'
+
+        if (bangConSyllabusChuongTrinh.has(key)) {
+            const syllabusChuongTrinhId = laySyllabusChuongTrinhIdTheoVersion(chuongTrinhVersionId)
+            return list.find((row) => {
+                return String(row.syllabusChuongTrinhId || '') === String(syllabusChuongTrinhId || '')
+                    && String(row[rowKey] || '') === String(item?.[itemKey] || '')
+            })
+        }
 
         return list.find((row) => {
             return String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || '')
@@ -2173,17 +2469,37 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             return
         }
 
+        if (key === 'quyDoiDiemMau') {
+            const syllabusMonHocId = laySyllabusMonHocIdDangChon(parentValues)
+            if (!syllabusMonHocId) {
+                baoTinBang(key, 'Cần chọn Syllabus môn học áp dụng trước khi gán mẫu quy đổi.', 'error')
+                return
+            }
+            if (!laMauQuyDoiKetQua(item)) {
+                baoTinBang(key, 'Chỉ được gán mẫu loại QUY_DOI_KET_QUA vào syllabus. Cột điểm không gán qua bảng mẫu quy đổi.', 'error')
+                return
+            }
+            try {
+                const result = await dayQuyDoiDiemMauXuongQuyDoiDiem(item, syllabusMonHocId)
+                if (result.existed) {
+                    baoTinBang(key, 'Mẫu quy đổi này đã được gán vào syllabus trước đó (dữ liệu trùng).')
+                } else {
+                    selectEntity(key, item)
+                    baoTinBang(key, 'Đã gán mẫu quy đổi vào syllabus môn học áp dụng.')
+                }
+            } catch (error) {
+                const message = layThongBaoLoi(error, 'Không gán được mẫu quy đổi vào syllabus.')
+                baoTinBang(key, message, 'error')
+            }
+            return
+        }
+
         const configMau = bangMauGanMon[key]
         if (configMau) {
             const syllabusMonHocId = laySyllabusMonHocIdDangChon(parentValues)
 
             if (!syllabusMonHocId) {
                 baoTinBang(key, `Cần chọn Syllabus môn học áp dụng trước khi lưu ${configMau.tenBang}.`, 'error')
-                return
-            }
-
-            if (key === 'quyDoiDiemMau' && !laMauQuyDoiKetQua(item)) {
-                baoTinBang(key, 'Chỉ được gán mẫu loại QUY_DOI_KET_QUA vào syllabus. Cột điểm không gán qua bảng mẫu quy đổi.', 'error')
                 return
             }
 
@@ -2412,17 +2728,37 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             return
         }
 
+        if (key === 'quyDoiDiemMau') {
+            const syllabusMonHocId = laySyllabusMonHocIdDangChon(parentValues)
+            if (!syllabusMonHocId) {
+                baoTinBang(key, 'Cần chọn Syllabus môn học áp dụng trước khi gán mẫu quy đổi.', 'error')
+                return
+            }
+            if (!laMauQuyDoiKetQua(item)) {
+                baoTinBang(key, 'Chỉ được gán mẫu loại QUY_DOI_KET_QUA vào syllabus.', 'error')
+                return
+            }
+            try {
+                const result = await dayQuyDoiDiemMauXuongQuyDoiDiem(item, syllabusMonHocId)
+                if (result.existed) {
+                    baoTinBang(key, 'Mẫu quy đổi này đã được gán vào syllabus trước đó (dữ liệu trùng).')
+                } else {
+                    selectEntity(key, item)
+                    baoTinBang(key, 'Đã gán mẫu quy đổi vào syllabus môn học áp dụng.')
+                }
+            } catch (error) {
+                const message = layThongBaoLoi(error, 'Không gán được mẫu quy đổi vào syllabus.')
+                baoTinBang(key, message, 'error')
+            }
+            return
+        }
+
         const configMau = bangMauGanMon[key]
         if (configMau) {
             const syllabusMonHocId = laySyllabusMonHocIdDangChon(parentValues)
 
             if (!syllabusMonHocId) {
                 baoTinBang(key, `Cần chọn Syllabus môn học áp dụng trước khi lưu ${configMau.tenBang}.`, 'error')
-                return
-            }
-
-            if (key === 'quyDoiDiemMau' && !laMauQuyDoiKetQua(item)) {
-                baoTinBang(key, 'Chỉ được gán mẫu loại QUY_DOI_KET_QUA vào syllabus. Cột điểm không gán qua bảng mẫu quy đổi.', 'error')
                 return
             }
 
@@ -2557,9 +2893,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             const row = layDuLieuLuu(saved) || {...item, ...parentValues}
             const rowDaCapNhat = capNhatDongTrongRawData(key, row)
             selectEntity(key, rowDaCapNhat)
-            baoTin('Đã chọn dữ liệu có sẵn và gắn vào luồng hiện tại.')
+            baoTin('\u0110\u00e3 ch\u1ecdn d\u1eef li\u1ec7u c\u00f3 s\u1eb5n v\u00e0 g\u1eafn v\u00e0o lu\u1ed3ng hi\u1ec7n t\u1ea1i.')
         } catch (error) {
-            const message = layThongBaoLoi(error, 'Không gắn được dữ liệu có sẵn vào luồng hiện tại.')
+            const message = layThongBaoLoi(error, 'Kh\u00f4ng g\u1eafn \u0111\u01b0\u1ee3c d\u1eef li\u1ec7u c\u00f3 s\u1eb5n v\u00e0o lu\u1ed3ng hi\u1ec7n t\u1ea1i.')
             baoTinBang(key, message, 'error')
         }
     }
@@ -2568,14 +2904,14 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         const row = layDuLieuLuu(saved)
 
         if (!row || !row.id) {
-            baoTin('Đã gọi API nhưng không nhận được dữ liệu trả về hợp lệ.', 'error')
+            baoTin('\u0110\u00e3 g\u1ecdi API nh\u01b0ng kh\u00f4ng nh\u1eadn \u0111\u01b0\u1ee3c d\u1eef li\u1ec7u tr\u1ea3 v\u1ec1 h\u1ee3p l\u1ec7.', 'error')
             return
         }
 
         const list = rawData[key]
 
         if (!Array.isArray(list)) {
-            baoTin(`Không tìm thấy vùng dữ liệu cho bảng ${key}.`, 'error')
+            baoTin(`Kh\u00f4ng t\u00ecm th\u1ea5y v\u00f9ng d\u1eef li\u1ec7u cho b\u1ea3ng ${key}.`, 'error')
             return
         }
 
@@ -2588,7 +2924,7 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             list.push(row)
         }
 
-        // Gán lại mảng để chắc chắn computed rows của bảng cập nhật ngay sau khi POST/PUT thành công.
+        // G\u00e1n l\u1ea1i m\u1ea3ng \u0111\u1ec3 ch\u1eafc ch\u1eafn computed rows c\u1ee7a b\u1ea3ng c\u1eadp nh\u1eadt ngay sau khi POST/PUT th\u00e0nh c\u00f4ng.
         rawData[key] = [...list]
 
         if (key === 'quyDoiDiemMau') {
@@ -2603,7 +2939,7 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             xoaLuaChonCon(key)
         }
 
-        baoTin('Đã lưu và thêm vào dữ liệu vừa tạo trong luồng.')
+        baoTin('\u0110\u00e3 l\u01b0u v\u00e0 th\u00eam v\u00e0o d\u1eef li\u1ec7u v\u1eeba t\u1ea1o trong lu\u1ed3ng.')
     }
 
     function sauKhiXoa(key, item) {
@@ -2629,33 +2965,33 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
 
         if (!nganhDangNhap?.id) {
             resetLuonNhapKhongThongBao()
-            baoTin('Đã làm mới luồng nhập.')
+            baoTin('\u0110\u00e3 l\u00e0m m\u1edbi lu\u1ed3ng nh\u1eadp.')
             return
         }
 
-        const dongY = confirm(`Làm mới luồng nhập sẽ gọi API xóa ngành vừa tạo: ${nganhDangNhap.tenNganh || nganhDangNhap.maNganh || nganhDangNhap.id}. Tiếp tục?`)
+        const dongY = confirm(`L\u00e0m m\u1edbi lu\u1ed3ng nh\u1eadp s\u1ebd g\u1ecdi API x\u00f3a ng\u00e0nh v\u1eeba t\u1ea1o: ${nganhDangNhap.tenNganh || nganhDangNhap.maNganh || nganhDangNhap.id}. Ti\u1ebfp t\u1ee5c?`)
         if (!dongY) return
 
         try {
             await daoTaoXemChuongTrinhService.nganh.delete(nganhDangNhap.id)
             resetLuonNhapKhongThongBao()
-            baoTin('Đã xóa ngành vừa tạo và làm mới luồng nhập.')
+            baoTin('\u0110\u00e3 x\u00f3a ng\u00e0nh v\u1eeba t\u1ea1o v\u00e0 l\u00e0m m\u1edbi lu\u1ed3ng nh\u1eadp.')
         } catch (error) {
-            baoTin(layThongBaoLoi(error, 'Không xóa được ngành vừa tạo. Kiểm tra ràng buộc dữ liệu ở BE.'), 'error')
+            baoTin(layThongBaoLoi(error, 'Kh\u00f4ng x\u00f3a \u0111\u01b0\u1ee3c ng\u00e0nh v\u1eeba t\u1ea1o. Ki\u1ec3m tra r\u00e0ng bu\u1ed9c d\u1eef li\u1ec7u \u1edf BE.'), 'error')
         }
     }
 
     function luuChuongTrinhTong() {
         if (!selected.nganh || !selected.chuongTrinh || !selected.chuongTrinhVersion) {
-            baoTin('Cần lưu tối thiểu Ngành, Chương trình và Version trước khi lưu chương trình.', 'error')
+            baoTin('C\u1ea7n l\u01b0u t\u1ed1i thi\u1ec3u Ng\u00e0nh, Ch\u01b0\u01a1ng tr\u00ecnh v\u00e0 Version tr\u01b0\u1edbc khi l\u01b0u ch\u01b0\u01a1ng tr\u00ecnh.', 'error')
             return
         }
 
-        baoTin('Đã xác nhận luồng xây dựng chương trình đào tạo.')
+        baoTin('\u0110\u00e3 x\u00e1c nh\u1eadn lu\u1ed3ng x\u00e2y d\u1ef1ng ch\u01b0\u01a1ng tr\u00ecnh \u0111\u00e0o t\u1ea1o.')
     }
     onMounted(() => {
         if (autoLoad) {
-            taiDuLieuCoSanTatCaBang()
+            taiDuLieuNenXemChuongTrinh()
         }
     })
     return {
@@ -2674,6 +3010,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         chonBangPhuVaoLuong,
         toggleLuuBangPhu,
         taiDuLieuCoSanTatCaBang,
+        taiDuLieuNenXemChuongTrinh,
+        taiDuLieuXemChuongTrinhTheoRoute,
+        taiLaiBang,
         taiDuLieuTongQuanVersion,
         taiDuLieuTheoSyllabusMonHocApDung,
         sauKhiLuu,
@@ -2681,5 +3020,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         lamMoiLuon,
         luuChuongTrinhTong,
         taiDuLieuMauCrud,
+        nghiChuyenKyRows,
+        dangTaiNghiChuyenKy,
+        dangLuuNghiChuyenKy,
+        luuNghiChuyenKyTheoVersion,
     }
 }

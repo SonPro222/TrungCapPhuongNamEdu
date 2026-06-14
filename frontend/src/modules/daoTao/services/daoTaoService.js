@@ -99,11 +99,20 @@ export const daoTaoService = {
         async goiYTheoVersion(versionId) {
             return await daoTaoApi.khungKy.goiYTheoVersion(versionId)
         },
-        async taoDuKyConThieu(versionId) {
-            return await daoTaoApi.khungKy.taoDuKyConThieu(versionId)
+        async taoDuKyConThieu(versionId, payload = {}) {
+            return await daoTaoApi.khungKy.taoDuKyConThieu(versionId, cleanPayload(payload))
         },
         async canhBaoTaiHoc(versionId) {
             return await daoTaoApi.khungKy.canhBaoTaiHoc(versionId)
+        },
+        async layNghiChuyenKyTheoVersion(versionId) {
+            return await daoTaoApi.khungKy.layNghiChuyenKyTheoVersion(versionId)
+        },
+        async luuNghiChuyenKyTheoVersion(versionId, payload) {
+            return await daoTaoApi.khungKy.luuNghiChuyenKyTheoVersion(versionId, cleanPayload(payload))
+        },
+        async goiYSinhTuDong(versionId, payload) {
+            return await daoTaoApi.khungKy.goiYSinhTuDong(versionId, cleanPayload(payload))
         }
     },
     khungKymau: createCrudService(daoTaoApi.khungKymau),

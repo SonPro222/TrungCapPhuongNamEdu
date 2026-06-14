@@ -391,14 +391,10 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useDaoTaoXemChuongTrinh } from '@/modules/daoTao/composables/useDaoTaoXemChuongTrinh'
+import { daoTaoService } from '@/modules/daoTao/services/daoTaoService'
 import { layThongBaoLoi } from '@/modules/daoTao/utils/layThongBaoLoi'
 
-const {
-  duLieu,
-  services,
-  taiDuLieuCoSanTatCaBang
-} = useDaoTaoXemChuongTrinh()
+const services = daoTaoService
 
 const nganhIdDangChon = ref('')
 const versionIdDangChon = ref('')
@@ -408,6 +404,16 @@ const loaiThongBao = ref('success')
 const dangLuu = ref(false)
 const dangTai = ref(false)
 const tuKhoaMonmau = ref('')
+
+const danhSachNganhRaw = ref([])
+const danhSachChuongTrinhRaw = ref([])
+const danhSachVersionRaw = ref([])
+const danhSachNhomKienThucRaw = ref([])
+const danhSachNhomKienThucmauRaw = ref([])
+const danhSachMonTheoVersionRaw = ref([])
+const danhSachMonHocmauRaw = ref([])
+const daTaiNhomKienThucmau = ref(false)
+const daTaiMonHocmau = ref(false)
 
 const formNhom = reactive({
   id: null,
@@ -420,14 +426,14 @@ const formNhom = reactive({
 })
 
 const danhSachNganh = computed(() => {
-  return [...(duLieu.value.nganh || [])]
+  return [...danhSachNganhRaw.value]
       .sort((a, b) => String(a.tenNganh || a.ten || '').localeCompare(String(b.tenNganh || b.ten || ''), 'vi'))
 })
 
 const danhSachChuongTrinhTheoNganh = computed(() => {
   if (!nganhIdDangChon.value) return []
 
-  return (duLieu.value.chuongTrinh || [])
+  return danhSachChuongTrinhRaw.value
       .filter((item) => String(item.nganhId || '') === String(nganhIdDangChon.value))
 })
 
@@ -438,7 +444,7 @@ const danhSachVersionTheoNganh = computed(() => {
       danhSachChuongTrinhTheoNganh.value.map((item) => String(item.id))
   )
 
-  return (duLieu.value.chuongTrinhVersion || [])
+  return danhSachVersionRaw.value
       .filter((version) => chuongTrinhIds.has(String(version.chuongTrinhId || '')))
       .sort((a, b) => String(a.maVersion || a.id).localeCompare(String(b.maVersion || b.id), 'vi'))
 })
@@ -446,26 +452,26 @@ const danhSachVersionTheoNganh = computed(() => {
 const danhSachNhomKienThucTheoVersion = computed(() => {
   if (!versionIdDangChon.value) return []
 
-  return (duLieu.value.nhomKienThuc || [])
+  return danhSachNhomKienThucRaw.value
       .filter((item) => String(item.chuongTrinhVersionId || '') === String(versionIdDangChon.value))
       .sort((a, b) => Number(a.thuTu || 9999) - Number(b.thuTu || 9999))
 })
 
 const danhSachNhomKienThucmau = computed(() => {
-  return [...(duLieu.value.nhomKienThucmau || [])]
+  return [...danhSachNhomKienThucmauRaw.value]
       .sort((a, b) => Number(a.thuTu || 9999) - Number(b.thuTu || 9999))
 })
 
 const danhSachMonTheoVersion = computed(() => {
   if (!versionIdDangChon.value) return []
 
-  return (duLieu.value.chuongTrinhMon || [])
+  return danhSachMonTheoVersionRaw.value
       .filter((item) => String(item.chuongTrinhVersionId || '') === String(versionIdDangChon.value))
       .sort((a, b) => Number(a.thuTu || 9999) - Number(b.thuTu || 9999))
 })
 
 const danhSachMonHocmau = computed(() => {
-  return [...(duLieu.value.monHoc || [])]
+  return [...danhSachMonHocmauRaw.value]
       .sort((a, b) => String(a.tenMon || a.ten || '').localeCompare(String(b.tenMon || b.ten || ''), 'vi'))
 })
 
@@ -488,12 +494,12 @@ const danhSachMonHocmauLoc = computed(() => {
 })
 
 const nganhDangChon = computed(() => {
-  return (duLieu.value.nganh || [])
+  return danhSachNganhRaw.value
       .find((item) => String(item.id || '') === String(nganhIdDangChon.value)) || null
 })
 
 const versionDangChon = computed(() => {
-  return (duLieu.value.chuongTrinhVersion || [])
+  return danhSachVersionRaw.value
       .find((item) => String(item.id || '') === String(versionIdDangChon.value)) || null
 })
 
@@ -522,16 +528,38 @@ const soMonTrongNhomDangChon = computed(() => {
   return demSoMonTrongNhom(nhomKienThucIdDangChon.value)
 })
 
-watch(nganhIdDangChon, () => {
+watch(nganhIdDangChon, async () => {
   versionIdDangChon.value = ''
   nhomKienThucIdDangChon.value = ''
+  danhSachVersionRaw.value = []
+  danhSachNhomKienThucRaw.value = []
+  danhSachMonTheoVersionRaw.value = []
   resetFormNhom()
+
+  if (nganhIdDangChon.value) {
+    await taiDuLieuTheoNganh()
+  }
 })
 
-watch(versionIdDangChon, () => {
+watch(versionIdDangChon, async () => {
   nhomKienThucIdDangChon.value = ''
+  danhSachNhomKienThucRaw.value = []
+  danhSachMonTheoVersionRaw.value = []
   resetFormNhom()
+
+  if (versionIdDangChon.value) {
+    await taiDuLieuTheoVersion()
+  }
 })
+
+function layItems(result) {
+  if (Array.isArray(result)) return result
+  if (Array.isArray(result?.items)) return result.items
+  if (Array.isArray(result?.content)) return result.content
+  if (Array.isArray(result?.data?.items)) return result.data.items
+  if (Array.isArray(result?.data?.content)) return result.data.content
+  return []
+}
 
 function baoTin(message, type = 'success') {
   thongBao.value = message
@@ -544,12 +572,119 @@ function baoTin(message, type = 'success') {
   }, 5000)
 }
 
+async function taiDanhSachNganh() {
+  const result = await services.nganh.getAll({ size: 1000 })
+  danhSachNganhRaw.value = layItems(result)
+}
+
+async function taiDuLieuTheoNganh() {
+  dangTai.value = true
+
+  try {
+    const chuongTrinhResult = await services.chuongTrinh.getAll({
+      size: 1000,
+      nganhId: nganhIdDangChon.value
+    })
+
+    const chuongTrinhList = layItems(chuongTrinhResult)
+    danhSachChuongTrinhRaw.value = chuongTrinhList
+
+    if (!chuongTrinhList.length) {
+      danhSachVersionRaw.value = []
+      return
+    }
+
+    const versionResults = await Promise.all(
+        chuongTrinhList.map((chuongTrinh) => services.chuongTrinhVersion.getAll({
+          size: 1000,
+          chuongTrinhId: chuongTrinh.id
+        }))
+    )
+
+    danhSachVersionRaw.value = versionResults.flatMap((result) => layItems(result))
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không tải được chương trình/version theo ngành.'), 'error')
+  } finally {
+    dangTai.value = false
+  }
+}
+
+async function taiDanhSachNhomKienThucTheoVersion() {
+  if (!versionIdDangChon.value) {
+    danhSachNhomKienThucRaw.value = []
+    return
+  }
+
+  const result = await services.nhomKienThuc.getAll({
+    size: 1000,
+    chuongTrinhVersionId: versionIdDangChon.value
+  })
+
+  danhSachNhomKienThucRaw.value = layItems(result)
+}
+
+async function taiDanhSachMonTheoVersion() {
+  if (!versionIdDangChon.value) {
+    danhSachMonTheoVersionRaw.value = []
+    return
+  }
+
+  const result = await services.chuongTrinhMon.getAll({
+    size: 1000,
+    chuongTrinhVersionId: versionIdDangChon.value
+  })
+
+  danhSachMonTheoVersionRaw.value = layItems(result)
+}
+
+async function taiDanhSachNhomKienThucmauNeuCan() {
+  if (daTaiNhomKienThucmau.value) return
+
+  const result = await services.nhomKienThucmau.getAll({ size: 1000 })
+  danhSachNhomKienThucmauRaw.value = layItems(result)
+  daTaiNhomKienThucmau.value = true
+}
+
+async function taiDanhSachMonHocmauNeuCan() {
+  if (daTaiMonHocmau.value) return
+
+  const result = await services.monHoc.getAll({ size: 1000 })
+  danhSachMonHocmauRaw.value = layItems(result)
+  daTaiMonHocmau.value = true
+}
+
+async function taiDuLieuTheoVersion() {
+  dangTai.value = true
+
+  try {
+    await Promise.all([
+      taiDanhSachNhomKienThucTheoVersion(),
+      taiDanhSachMonTheoVersion(),
+      taiDanhSachNhomKienThucmauNeuCan(),
+      taiDanhSachMonHocmauNeuCan()
+    ])
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không tải được dữ liệu theo version.'), 'error')
+  } finally {
+    dangTai.value = false
+  }
+}
+
 async function taiDuLieu() {
   dangTai.value = true
 
   try {
-    await taiDuLieuCoSanTatCaBang()
-    baoTin('Đã tải lại dữ liệu.')
+    await taiDanhSachNganh()
+
+    if (nganhIdDangChon.value) {
+      await taiDuLieuTheoNganh()
+    }
+
+    if (versionIdDangChon.value) {
+      await taiDuLieuTheoVersion()
+    }
+
+    baoTin('Đã tải lại dữ liệu theo phạm vi đang chọn.')
   } catch (error) {
     baoTin(layThongBaoLoi(error, 'Không tải được dữ liệu.'), 'error')
   } finally {
@@ -557,8 +692,15 @@ async function taiDuLieu() {
   }
 }
 
+async function taiLaiDuLieuChinhCuaVersion() {
+  await Promise.all([
+    taiDanhSachNhomKienThucTheoVersion(),
+    taiDanhSachMonTheoVersion()
+  ])
+}
+
 function hienThiVersion(version) {
-  const chuongTrinh = (duLieu.value.chuongTrinh || [])
+  const chuongTrinh = danhSachChuongTrinhRaw.value
       .find((item) => String(item.id || '') === String(version.chuongTrinhId || ''))
 
   const tenChuongTrinh = version.tenChuongTrinh || chuongTrinh?.tenChuongTrinh || chuongTrinh?.ten || ''
@@ -579,7 +721,18 @@ function hienThiLoaiNhom(loaiNhom) {
 
 function timTheoId(key, id) {
   if (!id) return null
-  return (duLieu.value[key] || [])
+
+  const map = {
+    monHoc: danhSachMonHocmauRaw.value,
+    nganh: danhSachNganhRaw.value,
+    chuongTrinh: danhSachChuongTrinhRaw.value,
+    chuongTrinhVersion: danhSachVersionRaw.value,
+    nhomKienThuc: danhSachNhomKienThucRaw.value,
+    nhomKienThucmau: danhSachNhomKienThucmauRaw.value,
+    chuongTrinhMon: danhSachMonTheoVersionRaw.value
+  }
+
+  return (map[key] || [])
       .find((item) => String(item.id || '') === String(id || '')) || null
 }
 
@@ -641,7 +794,7 @@ async function copyMonmauVaoVersion(monHoc) {
 
   try {
     await services.chuongTrinhMon.create(taoPayloadCopyMonmauVaoVersion(monHoc))
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachMonTheoVersion()
     baoTin('Đã copy môn mẫu vào version. Hãy gán nhóm kiến thức ở bảng "Môn đã nằm trong version".')
   } catch (error) {
     baoTin(layThongBaoLoi(error, 'Không copy được môn mẫu vào version.'), 'error')
@@ -722,7 +875,7 @@ async function luuNhomKienThuc() {
       baoTin('Đã thêm nhóm kiến thức.')
     }
 
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachNhomKienThucTheoVersion()
     resetFormNhom()
   } catch (error) {
     baoTin(layThongBaoLoi(error, 'Không lưu được nhóm kiến thức.'), 'error')
@@ -747,7 +900,7 @@ async function xoaNhomKienThuc(nhom) {
       nhomKienThucIdDangChon.value = ''
     }
 
-    await taiDuLieuCoSanTatCaBang()
+    await taiLaiDuLieuChinhCuaVersion()
     baoTin('Đã xóa nhóm kiến thức.')
   } catch (error) {
     baoTin(layThongBaoLoi(error, 'Không xóa được nhóm kiến thức. Kiểm tra nhóm này có đang được môn sử dụng không.'), 'error')
@@ -789,10 +942,10 @@ async function capNhatLoaiPhamVi(mon, loaiPhamVi) {
         taoPayloadCapNhatChuongTrinhMon(mon, { loaiPhamVi })
     )
 
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachMonTheoVersion()
     baoTin('Đã cập nhật loại phạm vi môn.')
   } catch (error) {
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachMonTheoVersion()
     baoTin(layThongBaoLoi(error, 'Không cập nhật được loại phạm vi môn.'), 'error')
   } finally {
     dangLuu.value = false
@@ -814,13 +967,13 @@ async function capNhatNhomKienThucChoMon(mon, nhomKienThucId) {
 
     if (!nhom) {
       baoTin('Nhóm kiến thức không thuộc version đang chọn.', 'error')
-      await taiDuLieuCoSanTatCaBang()
+      await taiLaiDuLieuChinhCuaVersion()
       return
     }
 
     if (String(mon.chuongTrinhVersionId || '') !== String(nhom.chuongTrinhVersionId || '')) {
       baoTin('Nhóm kiến thức không thuộc version của môn này.', 'error')
-      await taiDuLieuCoSanTatCaBang()
+      await taiLaiDuLieuChinhCuaVersion()
       return
     }
   }
@@ -833,10 +986,10 @@ async function capNhatNhomKienThucChoMon(mon, nhomKienThucId) {
         taoPayloadCapNhatChuongTrinhMon(mon, { nhomKienThucId: nhomIdMoi })
     )
 
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachMonTheoVersion()
     baoTin(nhomIdMoi ? 'Đã gán môn vào nhóm kiến thức.' : 'Đã bỏ nhóm kiến thức khỏi môn.')
   } catch (error) {
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachMonTheoVersion()
     baoTin(layThongBaoLoi(error, 'Không cập nhật được nhóm kiến thức của môn.'), 'error')
   } finally {
     dangLuu.value = false
@@ -876,10 +1029,10 @@ async function boGanMonKhoiVersion(mon) {
 
   try {
     await services.chuongTrinhMon.delete(mon.id)
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachMonTheoVersion()
     baoTin('Đã bỏ gán môn khỏi version.')
   } catch (error) {
-    await taiDuLieuCoSanTatCaBang()
+    await taiDanhSachMonTheoVersion()
     baoTin(layThongBaoLoi(error, 'Không bỏ gán được môn khỏi version.'), 'error')
   } finally {
     dangLuu.value = false
