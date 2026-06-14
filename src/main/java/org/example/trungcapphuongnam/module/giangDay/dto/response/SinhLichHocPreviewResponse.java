@@ -17,4 +17,9 @@ public class SinhLichHocPreviewResponse {
     private Integer soBuoiXepDuoc;
     private List<String> canhBao;
     private List<LichHocPreviewItemResponse> items;
+
+    private Boolean choPhepLanKy;
+    private Integer soNgayLanKyToiDa;
+    private Integer soBuoiVuotKhungKy;
+    private Integer soNgayNghiBiBoQua;
 }

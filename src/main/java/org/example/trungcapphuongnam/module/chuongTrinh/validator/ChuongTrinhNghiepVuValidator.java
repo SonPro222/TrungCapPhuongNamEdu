@@ -5,6 +5,7 @@ import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.*;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinh;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersion;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.NangLucDauRaMau;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.time.temporal.ChronoUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -180,7 +182,9 @@ public class ChuongTrinhNghiepVuValidator {
             throw new BadRequestException("Ngày quyết định không được sau ngày áp dụng");
         }
 
-
+        if (request.getNgayApDung() != null && request.getNgayHetHieuLuc() != null) {
+            validateThoiHanVersion(chuongTrinhId, request.getNgayApDung(), request.getNgayHetHieuLuc());
+        }
 
         if (id == null && chuongTrinhVersionRepository.existsByChuongTrinhIdAndMaVersion(chuongTrinhId, maVersion)) {
             throw new DuplicateResourceException("Mã phiên bản đã tồn tại trong chương trình: " + maVersion);
@@ -1375,6 +1379,41 @@ public class ChuongTrinhNghiepVuValidator {
     private void positiveOrZeroInt(Integer value, String fieldName) {
         if (value != null && value < 0) {
             throw new BadRequestException(fieldName + " không được âm");
+        }
+    }
+
+    private void validateThoiHanVersion(Long chuongTrinhId, LocalDate ngayApDung, LocalDate ngayHetHieuLuc) {
+        ChuongTrinh chuongTrinh = chuongTrinhRepository.findById(chuongTrinhId).orElse(null);
+        if (chuongTrinh == null || chuongTrinh.getNganhHeDaoTaoId() == null) return;
+
+        NganhHeDaoTao nganhHe = nganhHeDaoTaoRepository.findById(chuongTrinh.getNganhHeDaoTaoId()).orElse(null);
+        if (nganhHe == null || nganhHe.getSoThang() == null || nganhHe.getSoThang() <= 0) return;
+
+        int soThang = nganhHe.getSoThang();
+
+        // Ngày hết hiệu lực kỳ vọng = ngayApDung + soThang tháng - 1 ngày
+        LocalDate ngayKyVong = ngayApDung.plusMonths(soThang).minusDays(1);
+
+        // Giới hạn dưới: kỳ vọng - 15 ngày
+        LocalDate gioiHanDuoi = ngayKyVong.minusDays(15);
+
+        // Giới hạn trên: kỳ vọng + 1 tháng
+        LocalDate gioiHanTren = ngayKyVong.plusMonths(1);
+
+        if (ngayHetHieuLuc.isBefore(gioiHanDuoi)) {
+            long soNgayThieu = ChronoUnit.DAYS.between(ngayHetHieuLuc, gioiHanDuoi);
+            throw new BadRequestException(
+                "Ngày hết hiệu lực quá ngắn so với quy định " + soThang + " tháng của ngành hệ đào tạo. " +
+                "Tối thiểu phải là " + gioiHanDuoi + " (hiện thiếu " + soNgayThieu + " ngày)."
+            );
+        }
+
+        if (ngayHetHieuLuc.isAfter(gioiHanTren)) {
+            long soNgayThua = ChronoUnit.DAYS.between(gioiHanTren, ngayHetHieuLuc);
+            throw new BadRequestException(
+                "Ngày hết hiệu lực vượt quá 1 tháng so với quy định " + soThang + " tháng của ngành hệ đào tạo. " +
+                "Tối đa cho phép là " + gioiHanTren + " (hiện thừa " + soNgayThua + " ngày)."
+            );
         }
     }
 

@@ -38,5 +38,7 @@ public final class ChuongTrinhPath {
     public static final String NHOM_KIEN_THUC_MAU = BASE + "/nhom-kien-thuc-mau";
     public static final String NHOM_TU_CHON_MAU = BASE + "/nhom-tu-chon-mau";
     public static final String CAU_HINH_DANH_GIA_MAU = BASE + "/cau-hinh-danh-gia-mau";
+    public static final String SYLLABUS_MON_HOC_MAU_FILE = BASE + "/syllabus-mon-hoc-mau-files";
+    public static final String SYLLABUS_MON_HOC_FILE    = BASE + "/syllabus-mon-hoc-files";
     public static final String ID = "/{id}";
 }

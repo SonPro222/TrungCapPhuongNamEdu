@@ -21,6 +21,10 @@ public class ChuongTrinhMonResponse {
     private String maMonTrongCt;
 
     private Long khungKyId;
+    private Integer thuTuKy;
+    private String tenKy;
+    private String maKy;
+    private String tenKyDaGan;
 
     private Long nhomKienThucId;
 

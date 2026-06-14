@@ -36,5 +36,7 @@ public class KhungKyGoiYResponse {
 
     private List<KhungKyGoiYItemResponse> danhSachKy;
 
+    private KhungKyCanhBaoTaiHocResponse canhBaoTaiHoc;
+
     private String message;
 }

@@ -22,4 +22,13 @@ public class LichHocRequest {
     private String noiDungBuoiHoc;
     private TrangThaiLichHoc trangThai;
     private String ghiChu;
+
+    /**
+     * Cho phép lưu lịch học sau ngày kết thúc gốc của lớp/kỳ khi lịch được sinh tự động và có cấu hình lan kỳ.
+     */
+    private Boolean choPhepVuotNgayKetThuc;
+
+    private Boolean vuotKhungKy;
+    private LocalDate ngayKetThucGoc;
+    private Integer soNgayVuotKhungKy;
 }

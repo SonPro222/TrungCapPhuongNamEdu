@@ -51,6 +51,7 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
     private final DieuKienMonHocRepository dieuKienMonHocRepository;
     private final SyllabusChuongBaiRepository syllabusChuongBaiRepository;
     private final SyllabusTaiLieuRepository syllabusTaiLieuRepository;
+    private final SyllabusMonHocFileRepository syllabusMonHocFileRepository;
     private final ChuongTrinhMapper chuongTrinhMapper;
     private final ChuongTrinhVersionMapper chuongTrinhVersionMapper;
     private final MucTieuChuongTrinhMapper mucTieuChuongTrinhMapper;
@@ -313,9 +314,10 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                                 .getContent()
                 )
                 .chuongBai(
-                        syllabusChuongBaiRepository.findBySyllabusMonId(entity.getId(), pageable)
+                        syllabusChuongBaiRepository.findBySyllabusMonIdOrderByThuTuAsc(entity.getId())
+                                .stream()
                                 .map(syllabusChuongBaiMapper::toResponse)
-                                .getContent()
+                                .toList()
                 )
                 .taiLieu(
                         syllabusTaiLieuRepository.findBySyllabusMonId(entity.getId(), pageable)
@@ -335,6 +337,26 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                                 .toList()
                 )
                 .quyDoiDiemTheoChuongTrinh(buildQuyDoiDiemTheoChuongTrinh(entity.getId()))
+                .fileSyllabus(
+                        syllabusMonHocFileRepository.findBySyllabusMonHocIdOrderByCreatedAtDesc(entity.getId())
+                                .stream()
+                                .map(f -> SyllabusMonHocFileResponse.builder()
+                                        .id(f.getId())
+                                        .syllabusMonHocId(f.getSyllabusMonHocId())
+                                        .tenFile(f.getTenFile())
+                                        .loaiFile(f.getLoaiFile())
+                                        .kichThuoc(f.getKichThuoc())
+                                        .loaiTaiLieu(f.getLoaiTaiLieu())
+                                        .laFileNguon(f.getLaFileNguon())
+                                        .trangThaiDoc(f.getTrangThaiDoc())
+                                        .loiDoc(f.getLoiDoc())
+                                        .checksum(f.getChecksum())
+                                        .ghiChu(f.getGhiChu())
+                                        .createdAt(f.getCreatedAt())
+                                        .updatedAt(f.getUpdatedAt())
+                                        .build())
+                                .toList()
+                )
                 .build();
     }
 

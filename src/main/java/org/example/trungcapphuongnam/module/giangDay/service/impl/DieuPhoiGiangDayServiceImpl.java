@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -89,31 +90,56 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         List<LichHocPreviewItemResponse> items = new ArrayList<>();
         List<String> canhBaoTong = new ArrayList<>();
 
+        LocalDate ngayKetThucGoc = request.getDenNgay();
+        boolean choPhepLanKy = Boolean.TRUE.equals(request.getChoPhepLanKy());
+        int soNgayLanKyToiDa = chuanHoaSoNgayLanKyToiDa(request);
+        LocalDate ngayKetThucTimKiem = choPhepLanKy
+                ? ngayKetThucGoc.plusDays(soNgayLanKyToiDa)
+                : ngayKetThucGoc;
+
+        int soNgayNghiBiBoQua = 0;
         LocalDate ngay = request.getTuNgay();
-        while (!ngay.isAfter(request.getDenNgay()) && items.size() < soBuoiConLai) {
+        while (!ngay.isAfter(ngayKetThucTimKiem) && items.size() < soBuoiConLai) {
             int thu = tinhThuTrongTuan(ngay);
 
             if (request.getThuTrongTuan().contains(thu)) {
-                for (Long caHocId : caHocIds) {
-                    if (items.size() >= soBuoiConLai) {
-                        break;
-                    }
+                boolean laNgayNghi = ngayNghiRepository.existsNgayNghiApDung(ngay);
+                if (laNgayNghi) {
+                    soNgayNghiBiBoQua++;
+                    canhBaoTong.add("Bỏ qua ngày nghỉ " + ngay);
+                } else {
+                    for (Long caHocId : caHocIds) {
+                        if (items.size() >= soBuoiConLai) {
+                            break;
+                        }
 
-                    List<String> canhBao = taoCanhBaoSlot(lopHocPhanId, request, ngay, thu, caHocId);
+                        List<String> canhBao = taoCanhBaoSlot(lopHocPhanId, request, ngay, thu, caHocId);
 
-                    if (canhBao.isEmpty()) {
-                        int stt = soBuoiDaXep + items.size() + 1;
-                        items.add(dieuPhoiMapper.toPreviewItem(
-                                stt,
-                                ngay,
-                                caHocId,
-                                request.getPhongHocId(),
-                                request.getGiaoVienId(),
-                                taoNoiDungBuoiHoc(lop, stt, soBuoiCanXep, request.getTuDongGanNoiDungSyllabus()),
-                                List.of()
-                        ));
-                    } else {
-                        canhBaoTong.add("Ngày " + ngay + " - ca " + caHocId + ": " + String.join(", ", canhBao));
+                        if (canhBao.isEmpty()) {
+                            int stt = soBuoiDaXep + items.size() + 1;
+                            boolean vuotKhungKy = ngay.isAfter(ngayKetThucGoc);
+                            int soNgayVuotKhungKy = vuotKhungKy
+                                    ? (int) ChronoUnit.DAYS.between(ngayKetThucGoc, ngay)
+                                    : 0;
+                            List<String> canhBaoItem = vuotKhungKy
+                                    ? List.of("Buổi học bù vượt ngày kết thúc gốc " + ngayKetThucGoc + " " + soNgayVuotKhungKy + " ngày")
+                                    : List.of();
+
+                            items.add(dieuPhoiMapper.toPreviewItem(
+                                    stt,
+                                    ngay,
+                                    caHocId,
+                                    request.getPhongHocId(),
+                                    request.getGiaoVienId(),
+                                    taoNoiDungBuoiHoc(lop, stt, soBuoiCanXep, request.getTuDongGanNoiDungSyllabus()),
+                                    canhBaoItem,
+                                    vuotKhungKy,
+                                    vuotKhungKy ? ngayKetThucGoc : null,
+                                    soNgayVuotKhungKy
+                            ));
+                        } else {
+                            canhBaoTong.add("Ngày " + ngay + " - ca " + caHocId + ": " + String.join(", ", canhBao));
+                        }
                     }
                 }
             }
@@ -121,9 +147,21 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
             ngay = ngay.plusDays(1);
         }
 
+        int soBuoiVuotKhungKy = (int) items.stream()
+                .filter(item -> Boolean.TRUE.equals(item.getVuotKhungKy()))
+                .count();
+
         boolean hopLe = items.size() == soBuoiConLai;
         if (!hopLe) {
-            canhBaoTong.add("Không xếp đủ số buổi còn lại trong khoảng ngày đã chọn");
+            if (choPhepLanKy) {
+                canhBaoTong.add("Không xếp đủ số buổi còn lại trong khoảng ngày đã chọn và "
+                        + soNgayLanKyToiDa + " ngày được phép lan kỳ");
+            } else {
+                canhBaoTong.add("Không xếp đủ số buổi còn lại trong khoảng ngày đã chọn. Có thể bật cho phép lan kỳ để bù các buổi thiếu do ngày nghỉ hoặc xung đột lịch.");
+            }
+        }
+        if (soBuoiVuotKhungKy > 0) {
+            canhBaoTong.add("Có " + soBuoiVuotKhungKy + " buổi học bù vượt ngày kết thúc gốc " + ngayKetThucGoc);
         }
 
         return dieuPhoiMapper.toPreviewResponse(
@@ -133,7 +171,11 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
                 soBuoiConLai,
                 items.size(),
                 canhBaoTong,
-                items
+                items,
+                choPhepLanKy,
+                soNgayLanKyToiDa,
+                soBuoiVuotKhungKy,
+                soNgayNghiBiBoQua
         );
     }
 
@@ -319,6 +361,23 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         return lopRequest;
     }
 
+    private int chuanHoaSoNgayLanKyToiDa(SinhLichHocRequest request) {
+        if (!Boolean.TRUE.equals(request.getChoPhepLanKy())) {
+            return 0;
+        }
+        Integer soNgay = request.getSoNgayLanKyToiDa();
+        if (soNgay == null) {
+            return 30;
+        }
+        if (soNgay < 1) {
+            throw new GiangDayException("Số ngày lan kỳ tối đa phải lớn hơn 0 khi bật cho phép lan kỳ");
+        }
+        if (soNgay > 365) {
+            throw new GiangDayException("Số ngày lan kỳ tối đa không được vượt quá 365 ngày");
+        }
+        return soNgay;
+    }
+
     private boolean coCaHoc(SinhLichHocRequest request) {
         return (request.getCaHocIds() != null && request.getCaHocIds().stream().anyMatch(java.util.Objects::nonNull))
                 || request.getCaHocId() != null;
@@ -370,6 +429,9 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         target.setTuDongChonPhong(source.getTuDongChonPhong());
         target.setTuDongChonCa(source.getTuDongChonCa());
         target.setSoPhuongAn(source.getSoPhuongAn());
+        target.setTuDongBuNgayNghi(source.getTuDongBuNgayNghi());
+        target.setChoPhepLanKy(source.getChoPhepLanKy());
+        target.setSoNgayLanKyToiDa(source.getSoNgayLanKyToiDa());
         return target;
     }
 
@@ -421,7 +483,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
             throw new GiangDayException("Từ ngày không được trước ngày bắt đầu của lớp học phần");
         }
         if (lop.getNgayKetThuc() != null && request.getDenNgay().isAfter(lop.getNgayKetThuc())) {
-            throw new GiangDayException("Đến ngày không được sau ngày kết thúc của lớp học phần");
+            throw new GiangDayException("Đến ngày không được sau ngày kết thúc của lớp học phần. Nếu cần bù buổi do ngày nghỉ, hãy giữ đến ngày trong kỳ và bật cho phép lan kỳ.");
         }
     }
 
@@ -493,7 +555,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
             throw new GiangDayException("Từ ngày không được trước ngày bắt đầu của lớp học phần");
         }
         if (lop.getNgayKetThuc() != null && request.getDenNgay().isAfter(lop.getNgayKetThuc())) {
-            throw new GiangDayException("Đến ngày không được sau ngày kết thúc của lớp học phần");
+            throw new GiangDayException("Đến ngày không được sau ngày kết thúc của lớp học phần. Nếu cần bù buổi do ngày nghỉ, hãy giữ đến ngày trong kỳ và bật cho phép lan kỳ.");
         }
 
         if (request.getThuTrongTuan() == null || request.getThuTrongTuan().isEmpty()) {
@@ -509,7 +571,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
     private List<String> taoCanhBaoSlot(Long lopHocPhanId, SinhLichHocRequest request, LocalDate ngay, int thu, Long caHocId) {
         List<String> canhBao = new ArrayList<>();
 
-        if (ngayNghiRepository.existsByNgay(ngay)) {
+        if (ngayNghiRepository.existsNgayNghiApDung(ngay)) {
             canhBao.add("Ngày nghỉ");
         }
 

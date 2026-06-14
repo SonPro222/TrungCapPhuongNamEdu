@@ -20,4 +20,20 @@ public class SinhLichHocRequest {
     private Boolean tuDongChonPhong = false;
     private Boolean tuDongChonCa = false;
     private Integer soPhuongAn = 5;
+
+    /**
+     * true: ngày nghỉ không được xếp học; nếu thiếu buổi thì tiếp tục tìm ngày học hợp lệ tiếp theo.
+     * Hiện tại sinh lịch luôn né ngày nghỉ, field này dùng để FE thể hiện rõ nghiệp vụ.
+     */
+    private Boolean tuDongBuNgayNghi = true;
+
+    /**
+     * true: nếu hết denNgay mà chưa đủ số buổi thì được tiếp tục xếp sang sau denNgay.
+     */
+    private Boolean choPhepLanKy = false;
+
+    /**
+     * Số ngày tối đa được xếp vượt quá denNgay khi choPhepLanKy=true.
+     */
+    private Integer soNgayLanKyToiDa = 0;
 }

@@ -29,6 +29,9 @@ public class LichHocMapper {
                 .noiDungBuoiHoc(request.getNoiDungBuoiHoc())
                 .trangThai(request.getTrangThai())
                 .ghiChu(request.getGhiChu())
+                .vuotKhungKy(request.getVuotKhungKy())
+                .ngayKetThucGoc(request.getNgayKetThucGoc())
+                .soNgayVuotKhungKy(request.getSoNgayVuotKhungKy())
                 .build();
     }
 
@@ -45,6 +48,10 @@ public class LichHocMapper {
                 .noiDungBuoiHoc(item.getNoiDungBuoiHoc())
                 .trangThai(TrangThaiLichHoc.du_kien)
                 .ghiChu(null)
+                .choPhepVuotNgayKetThuc(item.getVuotKhungKy())
+                .vuotKhungKy(item.getVuotKhungKy())
+                .ngayKetThucGoc(item.getNgayKetThucGoc())
+                .soNgayVuotKhungKy(item.getSoNgayVuotKhungKy())
                 .build();
     }
 
@@ -62,6 +69,9 @@ public class LichHocMapper {
                 .noiDungBuoiHoc(entity.getNoiDungBuoiHoc())
                 .trangThai(entity.getTrangThai())
                 .ghiChu(entity.getGhiChu())
+                .vuotKhungKy(entity.getVuotKhungKy())
+                .ngayKetThucGoc(entity.getNgayKetThucGoc())
+                .soNgayVuotKhungKy(entity.getSoNgayVuotKhungKy())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -123,6 +133,9 @@ public class LichHocMapper {
         entity.setNoiDungBuoiHoc(request.getNoiDungBuoiHoc());
         entity.setTrangThai(request.getTrangThai());
         entity.setGhiChu(request.getGhiChu());
+        entity.setVuotKhungKy(request.getVuotKhungKy());
+        entity.setNgayKetThucGoc(request.getNgayKetThucGoc());
+        entity.setSoNgayVuotKhungKy(request.getSoNgayVuotKhungKy());
     }
 
     private Integer tinhThuTrongTuan(LocalDate ngayHoc) {

@@ -40,6 +40,11 @@ public class LichHocResponse {
     private String noiDungBuoiHoc;
     private TrangThaiLichHoc trangThai;
     private String ghiChu;
+
+    private Boolean vuotKhungKy;
+    private LocalDate ngayKetThucGoc;
+    private Integer soNgayVuotKhungKy;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.DaoTaoPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyCanhBaoTaiHocResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGoiYResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyRequest;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyResponse;
@@ -44,6 +45,13 @@ public class KhungKyController {
             @PathVariable Long chuongTrinhVersionId
     ) {
         return ResponseEntity.ok(ApiResponse.ok(service.goiYTheoVersion(chuongTrinhVersionId)));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}/canh-bao-tai-hoc")
+    public ResponseEntity<ApiResponse<KhungKyCanhBaoTaiHocResponse>> canhBaoTaiHocTheoVersion(
+            @PathVariable Long chuongTrinhVersionId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.canhBaoTaiHocTheoVersion(chuongTrinhVersionId)));
     }
 
     @PostMapping("/theo-version/{chuongTrinhVersionId}/tao-du-ky-con-thieu")

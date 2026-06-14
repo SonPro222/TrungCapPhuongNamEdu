@@ -18,4 +18,11 @@ public class LichHocPreviewItemResponse {
     private Long giaoVienId;
     private String noiDungBuoiHoc;
     private List<String> canhBao;
+
+    /**
+     * true nếu buổi học được bù sau ngày kết thúc gốc của khoảng sinh lịch/kỳ.
+     */
+    private Boolean vuotKhungKy;
+    private LocalDate ngayKetThucGoc;
+    private Integer soNgayVuotKhungKy;
 }

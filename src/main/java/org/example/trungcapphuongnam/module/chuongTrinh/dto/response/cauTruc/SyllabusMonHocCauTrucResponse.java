@@ -28,4 +28,7 @@ public class SyllabusMonHocCauTrucResponse {
 
     /** Các mẫu quy đổi kết quả đã được gán cho syllabus_mon_hoc áp dụng trong chương trình. */
     private List<ChuongTrinhMonQuyDoiDiemMauResponse> quyDoiDiemTheoChuongTrinh;
+
+    /** File gốc đã được gán vào syllabus môn học áp dụng. */
+    private List<SyllabusMonHocFileResponse> fileSyllabus;
 }

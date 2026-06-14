@@ -35,8 +35,18 @@ public class ChuongTrinhVersionMapper {
 
     public ChuongTrinhVersionResponse toResponse(ChuongTrinhVersion entity) {
         if (entity == null) return null;
+
+        // Tổng giờ/tín chỉ lấy từ DB view v_chuong_trinh_version_tong_hop,
+        // view này tính từ: chuong_trinh_mon → v_syllabus_mon_hoc_tong_hop.
+        // KHÔNG dùng số lưu cứng trên entity, KHÔNG dùng dữ liệu FE gửi lên.
         var tongHop = tongHopRepository.findById(entity.getId()).orElse(null);
+
         TrangThaiChuongTrinhVersion trangThai = trangThaiHieuDung(entity);
+
+        int soMonChuaCoSyllabus = (int) tongHopRepository.countMonChuaCoSyllabus(entity.getId());
+        String canhBao = soMonChuaCoSyllabus > 0
+                ? "Có " + soMonChuaCoSyllabus + " môn chưa có syllabus áp dụng, tổng giờ/tín chỉ có thể chưa đầy đủ."
+                : null;
 
         return ChuongTrinhVersionResponse.builder()
                 .id(entity.getId())
@@ -50,6 +60,7 @@ public class ChuongTrinhVersionMapper {
                 .nguoiKy(entity.getNguoiKy())
                 .coQuanBanHanh(entity.getCoQuanBanHanh())
                 .fileQuyetDinh(entity.getFileQuyetDinh())
+                // Nguồn: v_chuong_trinh_version_tong_hop (tính từ syllabus áp dụng)
                 .tongTinChi(tongHop != null ? tongHop.getTongTinChi() : null)
                 .tongSoGio(tongHop != null ? tongHop.getTongSoGio() : null)
                 .tongGioLyThuyet(tongHop != null ? tongHop.getTongGioLyThuyet() : null)
@@ -61,6 +72,8 @@ public class ChuongTrinhVersionMapper {
                 .duocPhepChinhSua(duocPhepChinhSua(entity))
                 .duocPhepVanHanh(duocPhepVanHanh(entity))
                 .lyDoTrangThai(lyDoTrangThai(entity))
+                .soMonChuaCoSyllabus(soMonChuaCoSyllabus)
+                .canhBaoTongHop(canhBao)
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -102,7 +115,8 @@ public class ChuongTrinhVersionMapper {
     private boolean duocPhepChinhSua(ChuongTrinhVersion entity) {
         TrangThaiChuongTrinhVersion trangThai = trangThaiHieuDung(entity);
         return trangThai == TrangThaiChuongTrinhVersion.DANG_SOAN
-                || trangThai == TrangThaiChuongTrinhVersion.CHO_AP_DUNG;
+                || trangThai == TrangThaiChuongTrinhVersion.CHO_AP_DUNG
+                || trangThai == TrangThaiChuongTrinhVersion.HIEN_HANH;
     }
 
     private boolean duocPhepVanHanh(ChuongTrinhVersion entity) {

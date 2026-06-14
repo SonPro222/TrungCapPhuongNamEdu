@@ -1,5 +1,6 @@
 package org.example.trungcapphuongnam.module.daoTao.service;
 
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyCanhBaoTaiHocResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGoiYResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyRequest;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyResponse;
@@ -15,6 +16,8 @@ public interface KhungKyService {
     );
 
     KhungKyGoiYResponse goiYTheoVersion(Long chuongTrinhVersionId);
+
+    KhungKyCanhBaoTaiHocResponse canhBaoTaiHocTheoVersion(Long chuongTrinhVersionId);
 
     List<KhungKyResponse> taoCacKyConThieuTheoVersion(Long chuongTrinhVersionId);
 

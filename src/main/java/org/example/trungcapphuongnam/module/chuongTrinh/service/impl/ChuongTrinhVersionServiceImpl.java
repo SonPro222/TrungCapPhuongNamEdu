@@ -90,20 +90,35 @@ public class ChuongTrinhVersionServiceImpl implements ChuongTrinhVersionService 
             throw new BadRequestException("Trạng thái version không được để trống.");
         }
 
-        if (trangThaiMoi == TrangThaiChuongTrinhVersion.HIEN_HANH) {
-            validateTrangThaiHienHanh(entity);
+        switch (trangThaiMoi) {
+            case DANG_SOAN:
+                entity.setTrangThai(TrangThaiChuongTrinhVersion.DANG_SOAN);
+                entity.setLaHienHanh(false);
+                break;
+            case CHO_AP_DUNG:
+                entity.setTrangThai(TrangThaiChuongTrinhVersion.CHO_AP_DUNG);
+                entity.setLaHienHanh(false);
+                break;
+            case HIEN_HANH:
+                validateTrangThaiHienHanh(entity);
+                entity.setTrangThai(TrangThaiChuongTrinhVersion.HIEN_HANH);
+                entity.setLaHienHanh(true);
+                break;
+            case KHOA:
+                entity.setTrangThai(TrangThaiChuongTrinhVersion.KHOA);
+                entity.setLaHienHanh(false);
+                break;
+            case HET_HIEU_LUC:
+                entity.setTrangThai(TrangThaiChuongTrinhVersion.HET_HIEU_LUC);
+                entity.setLaHienHanh(false);
+                break;
+            case HUY:
+                entity.setTrangThai(TrangThaiChuongTrinhVersion.HUY);
+                entity.setLaHienHanh(false);
+                break;
+            default:
+                throw new BadRequestException("Trạng thái version không hợp lệ.");
         }
-
-        if (entity.getTrangThai() == TrangThaiChuongTrinhVersion.HUY
-                && trangThaiMoi != TrangThaiChuongTrinhVersion.DANG_SOAN) {
-            throw new BadRequestException("Version đã hủy. Chỉ có thể đưa về trạng thái DANG_SOAN nếu cần cấu hình lại.");
-        }
-
-        entity.setTrangThai(trangThaiMoi);
-        entity.setLaHienHanh(trangThaiMoi == TrangThaiChuongTrinhVersion.HIEN_HANH);
-
-        // Không tắt các version hiện hành khác cùng chương trình.
-        // Một chương trình có thể có nhiều version hiện hành song song cho nhiều khóa/lớp khác nhau.
 
         return mapper.toResponse(repository.save(entity));
     }
@@ -167,9 +182,10 @@ public class ChuongTrinhVersionServiceImpl implements ChuongTrinhVersionService 
                     : TrangThaiChuongTrinhVersion.DANG_SOAN;
         }
 
-        if (trangThai != TrangThaiChuongTrinhVersion.DANG_SOAN
-                && trangThai != TrangThaiChuongTrinhVersion.CHO_AP_DUNG) {
-            throw new BadRequestException("Chỉ version DANG_SOAN hoặc CHO_AP_DUNG mới được sửa cấu trúc.");
+        if (trangThai == TrangThaiChuongTrinhVersion.KHOA
+                || trangThai == TrangThaiChuongTrinhVersion.HET_HIEU_LUC
+                || trangThai == TrangThaiChuongTrinhVersion.HUY) {
+            throw new BadRequestException("Version ở trạng thái " + trangThai + " không được sửa cấu trúc.");
         }
     }
 

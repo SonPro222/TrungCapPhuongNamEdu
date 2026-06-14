@@ -22,7 +22,10 @@ public class DieuPhoiGiangDayMapper {
             Long phongHocId,
             Long giaoVienId,
             String noiDungBuoiHoc,
-            List<String> canhBao
+            List<String> canhBao,
+            Boolean vuotKhungKy,
+            LocalDate ngayKetThucGoc,
+            Integer soNgayVuotKhungKy
     ) {
         return LichHocPreviewItemResponse.builder()
                 .stt(stt)
@@ -32,6 +35,9 @@ public class DieuPhoiGiangDayMapper {
                 .giaoVienId(giaoVienId)
                 .noiDungBuoiHoc(noiDungBuoiHoc)
                 .canhBao(canhBao)
+                .vuotKhungKy(vuotKhungKy)
+                .ngayKetThucGoc(ngayKetThucGoc)
+                .soNgayVuotKhungKy(soNgayVuotKhungKy)
                 .build();
     }
 
@@ -42,7 +48,11 @@ public class DieuPhoiGiangDayMapper {
             Integer soBuoiConLai,
             Integer soBuoiXepDuoc,
             List<String> canhBao,
-            List<LichHocPreviewItemResponse> items
+            List<LichHocPreviewItemResponse> items,
+            Boolean choPhepLanKy,
+            Integer soNgayLanKyToiDa,
+            Integer soBuoiVuotKhungKy,
+            Integer soNgayNghiBiBoQua
     ) {
         return SinhLichHocPreviewResponse.builder()
                 .hopLe(hopLe)
@@ -52,6 +62,10 @@ public class DieuPhoiGiangDayMapper {
                 .soBuoiXepDuoc(soBuoiXepDuoc)
                 .canhBao(canhBao)
                 .items(items)
+                .choPhepLanKy(choPhepLanKy)
+                .soNgayLanKyToiDa(soNgayLanKyToiDa)
+                .soBuoiVuotKhungKy(soBuoiVuotKhungKy)
+                .soNgayNghiBiBoQua(soNgayNghiBiBoQua)
                 .build();
     }
 

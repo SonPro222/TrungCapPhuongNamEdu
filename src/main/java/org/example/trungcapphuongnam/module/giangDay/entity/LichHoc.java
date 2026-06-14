@@ -43,6 +43,15 @@ public class LichHoc {
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
 
+    @Column(name = "vuot_khung_ky")
+    private Boolean vuotKhungKy;
+
+    @Column(name = "ngay_ket_thuc_goc")
+    private LocalDate ngayKetThucGoc;
+
+    @Column(name = "so_ngay_vuot_khung_ky")
+    private Integer soNgayVuotKhungKy;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 

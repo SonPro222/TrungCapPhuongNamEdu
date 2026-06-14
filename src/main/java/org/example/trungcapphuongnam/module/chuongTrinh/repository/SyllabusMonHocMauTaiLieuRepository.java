@@ -18,6 +18,8 @@ public interface SyllabusMonHocMauTaiLieuRepository
 
     boolean existsBySyllabusMonHocMauIdAndThuTuAndIdNot(Long syllabusMonHocMauId, Integer thuTu, Long id);
 
+    java.util.List<SyllabusMonHocMauTaiLieu> findBySyllabusMonHocMauIdOrderByThuTuAscIdAsc(Long syllabusMonHocMauId);
+
     void deleteBySyllabusMonHocMauId(Long syllabusMonHocMauId);
 
     void deleteByTaiLieuMauId(Long taiLieuMauId);

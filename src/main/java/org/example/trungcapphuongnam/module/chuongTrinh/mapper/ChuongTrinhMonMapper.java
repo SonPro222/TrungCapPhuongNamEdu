@@ -7,15 +7,16 @@ import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.MonHocRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocTongHopViewRepository;
+import org.example.trungcapphuongnam.module.daoTao.entity.KhungKy;
+import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyRepository;
 import org.springframework.stereotype.Component;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.view.SyllabusMonHocTongHopView;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocTongHopViewRepository;
 @Component
 @RequiredArgsConstructor
 public class ChuongTrinhMonMapper {
     private final SyllabusMonHocTongHopViewRepository syllabusTongHopRepository;
-
     private final MonHocRepository monHocRepository;
+    private final KhungKyRepository khungKyRepository;
 
     public ChuongTrinhMon toEntity(ChuongTrinhMonRequest request) {
         if (request == null) return null;
@@ -49,6 +50,9 @@ public class ChuongTrinhMonMapper {
         SyllabusMonHocTongHopView tongHop = entity.getId() == null
                 ? null
                 : syllabusTongHopRepository.findByChuongTrinhMonId(entity.getId()).orElse(null);
+        KhungKy khungKy = entity.getKhungKyId() == null
+                ? null
+                : khungKyRepository.findById(entity.getKhungKyId()).orElse(null);
         return ChuongTrinhMonResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
@@ -57,6 +61,10 @@ public class ChuongTrinhMonMapper {
                 .tenMonHoc(monHoc != null ? monHoc.getTenMon() : null)
                 .maMonTrongCt(entity.getMaMonTrongCt())
                 .khungKyId(entity.getKhungKyId())
+                .thuTuKy(khungKy != null ? khungKy.getThuTu() : null)
+                .tenKy(khungKy != null ? khungKy.getTenKy() : null)
+                .maKy(khungKy != null ? khungKy.getMaKy() : null)
+                .tenKyDaGan(buildTenKyDaGan(khungKy))
                 .nhomKienThucId(entity.getNhomKienThucId())
                 .loai(entity.getLoai())
                 .loaiHocPhan(entity.getLoaiHocPhan())
@@ -73,6 +81,18 @@ public class ChuongTrinhMonMapper {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
+    }
+
+    private String buildTenKyDaGan(KhungKy khungKy) {
+        if (khungKy == null) return "Chưa gán kỳ";
+        Integer thuTu = khungKy.getThuTu();
+        String tenKy = khungKy.getTenKy();
+        String maKy = khungKy.getMaKy();
+        if (thuTu != null && tenKy != null && !tenKy.isBlank()) return "Kỳ " + thuTu + " - " + tenKy;
+        if (thuTu != null) return "Kỳ " + thuTu;
+        if (tenKy != null && !tenKy.isBlank()) return tenKy;
+        if (maKy != null && !maKy.isBlank()) return maKy;
+        return "Kỳ ID " + khungKy.getId();
     }
 
     public void updateEntity(ChuongTrinhMon entity, ChuongTrinhMonRequest request) {

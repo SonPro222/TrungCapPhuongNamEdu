@@ -15,6 +15,7 @@ import org.example.trungcapphuongnam.module.giangDay.repository.CaHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LichHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.NgayNghiRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.PhanCongGiangDayRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.PhongHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.SinhVienLopHocPhanRepository;
@@ -33,6 +34,7 @@ public class LichHocValidator {
     private final LichHocRepository lichHocRepository;
     private final SinhVienLopHocPhanRepository sinhVienLopHocPhanRepository;
     private final PhanCongGiangDayRepository phanCongGiangDayRepository;
+    private final NgayNghiRepository ngayNghiRepository;
 
     public void validateCreate(LichHocRequest request) {
         validateCommon(null, request);
@@ -95,7 +97,21 @@ public class LichHocValidator {
         }
 
         if (lopHocPhan.getNgayKetThuc() != null && request.getNgayHoc().isAfter(lopHocPhan.getNgayKetThuc())) {
-            throw new GiangDayException("Ngày học không được sau ngày kết thúc của lớp học phần");
+            if (!Boolean.TRUE.equals(request.getChoPhepVuotNgayKetThuc())) {
+                throw new GiangDayException("Ngày học không được sau ngày kết thúc của lớp học phần");
+            }
+            request.setVuotKhungKy(true);
+            if (request.getNgayKetThucGoc() == null) {
+                request.setNgayKetThucGoc(lopHocPhan.getNgayKetThuc());
+            }
+            if (request.getSoNgayVuotKhungKy() == null && request.getNgayKetThucGoc() != null) {
+                request.setSoNgayVuotKhungKy((int) java.time.temporal.ChronoUnit.DAYS.between(
+                        request.getNgayKetThucGoc(),
+                        request.getNgayHoc()
+                ));
+            }
+        } else if (request.getVuotKhungKy() == null) {
+            request.setVuotKhungKy(false);
         }
 
         if (request.getGiaoVienId() != null) {
@@ -140,6 +156,10 @@ public class LichHocValidator {
 
         if (request.getCaHocId() == null) {
             throw new GiangDayException("Ca học không được để trống khi xếp lịch học");
+        }
+
+        if (ngayNghiRepository.existsNgayNghiApDung(request.getNgayHoc())) {
+            throw new GiangDayException("Ngày học nằm trong lịch nghỉ, không được xếp buổi học");
         }
 
         Integer soBuoiHoc = lopHocPhan.getSoBuoiHoc();

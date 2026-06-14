@@ -1,16 +1,22 @@
 package org.example.trungcapphuongnam.module.daoTao.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
 import org.example.trungcapphuongnam.common.util.TextUtil;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinh;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.view.SyllabusMonHocTongHopView;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhVersion;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhVersionRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.SyllabusMonHocTongHopViewRepository;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyCanhBaoTaiHocResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGoiYItemResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyTaiHocItemResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGoiYResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyRequest;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyResponse;
@@ -25,6 +31,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,7 +46,9 @@ import java.util.stream.Collectors;
 @Transactional
 public class KhungKyServiceImpl implements KhungKyService {
     private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
+    private final ChuongTrinhMonRepository chuongTrinhMonRepository;
     private final ChuongTrinhRepository chuongTrinhRepository;
+    private final SyllabusMonHocTongHopViewRepository syllabusMonHocTongHopViewRepository;
     private final NganhHeDaoTaoRepository nganhHeDaoTaoRepository;
     private final KhungKyRepository repository;
     private final KhungKyMapper mapper;
@@ -145,10 +155,23 @@ public class KhungKyServiceImpl implements KhungKyService {
                 .daTaoDuKy(soKyConThieu == 0)
                 .kyTiepTheoGoiY(kyTiepTheo)
                 .danhSachKy(danhSachKy)
+                .canhBaoTaiHoc(tinhCanhBaoTaiHoc(version, nganhHe, kyDaTao))
                 .message(soKyConThieu == 0
                         ? "Version đã tạo đủ " + nganhHe.getSoKy() + " kỳ."
                         : "Version còn thiếu " + soKyConThieu + " kỳ. Nên tạo theo đúng thứ tự từ kỳ tiếp theo.")
                 .build();
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public KhungKyCanhBaoTaiHocResponse canhBaoTaiHocTheoVersion(Long chuongTrinhVersionId) {
+        ChuongTrinhVersion version = getVersion(chuongTrinhVersionId);
+        ChuongTrinh chuongTrinh = getChuongTrinh(version.getChuongTrinhId());
+        NganhHeDaoTao nganhHe = resolveNganhHeDaoTao(chuongTrinh);
+        validateCauHinhThoiGian(version, nganhHe);
+        List<KhungKy> kyDaTao = repository.findByChuongTrinhVersionIdOrderByThuTuAsc(chuongTrinhVersionId);
+        return tinhCanhBaoTaiHoc(version, nganhHe, kyDaTao);
     }
 
     @Override
@@ -187,6 +210,272 @@ public class KhungKyServiceImpl implements KhungKyService {
         return ketQua.stream()
                 .sorted(Comparator.comparing(KhungKyResponse::getThuTu))
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+
+    private KhungKyCanhBaoTaiHocResponse tinhCanhBaoTaiHoc(
+            ChuongTrinhVersion version,
+            NganhHeDaoTao nganhHe,
+            List<KhungKy> kyDaTao
+    ) {
+        List<ChuongTrinhMon> danhSachMon = chuongTrinhMonRepository.findByChuongTrinhVersionId(version.getId());
+        Map<Integer, KhungKy> kyTheoThuTu = kyDaTao.stream()
+                .filter(ky -> ky.getThuTu() != null)
+                .collect(Collectors.toMap(KhungKy::getThuTu, Function.identity(), (a, b) -> a));
+
+        Map<Long, TaiHocAccumulator> taiHocTheoKhungKyId = new java.util.HashMap<>();
+        TaiHocAccumulator chuaXepKy = new TaiHocAccumulator();
+        TaiHocAccumulator tong = new TaiHocAccumulator();
+
+        for (ChuongTrinhMon mon : danhSachMon) {
+            TaiHocMon taiHocMon = layTaiHocMon(mon);
+            tong.add(taiHocMon);
+            if (mon.getKhungKyId() == null) {
+                chuaXepKy.add(taiHocMon);
+            } else {
+                taiHocTheoKhungKyId
+                        .computeIfAbsent(mon.getKhungKyId(), id -> new TaiHocAccumulator())
+                        .add(taiHocMon);
+            }
+        }
+
+        int soKy = nganhHe.getSoKy();
+        BigDecimal soMonTrungBinh = chia(BigDecimal.valueOf(tong.soMon), soKy);
+        BigDecimal tinChiTrungBinh = chia(tong.tongTinChi, soKy);
+        BigDecimal gioTrungBinh = chia(tong.tongGio, soKy);
+        BigDecimal buoiTrungBinh = chia(BigDecimal.valueOf(tong.soBuoiHoc), soKy);
+        BigDecimal nguongQuaTaiGio = gioTrungBinh.multiply(new BigDecimal("1.20")).setScale(1, RoundingMode.HALF_UP);
+        BigDecimal nguongQuaTaiTinChi = tinChiTrungBinh.multiply(new BigDecimal("1.20")).setScale(1, RoundingMode.HALF_UP);
+        BigDecimal nguongNheTaiGio = gioTrungBinh.multiply(new BigDecimal("0.70")).setScale(1, RoundingMode.HALF_UP);
+        int soMonToiDaKhuyenNghi = soMonTrungBinh.setScale(0, RoundingMode.CEILING).intValue() + 1;
+        int soMonToiThieuCanhBao = Math.max(soMonTrungBinh.setScale(0, RoundingMode.FLOOR).intValue() - 1, 0);
+
+        List<String> canhBaoChung = new ArrayList<>();
+        if (tong.soMon == 0) {
+            canhBaoChung.add("Version chưa có môn học để đánh giá tải học theo kỳ.");
+        }
+        if (chuaXepKy.soMon > 0) {
+            canhBaoChung.add("Có " + chuaXepKy.soMon + " môn chưa được xếp vào kỳ, nên tải học theo kỳ chưa phản ánh đầy đủ.");
+        }
+
+        List<KhungKyTaiHocItemResponse> danhSachKy = new ArrayList<>();
+        for (int thuTu = 1; thuTu <= soKy; thuTu++) {
+            KhungKy ky = kyTheoThuTu.get(thuTu);
+            TaiHocAccumulator taiHoc = ky != null
+                    ? taiHocTheoKhungKyId.getOrDefault(ky.getId(), new TaiHocAccumulator())
+                    : new TaiHocAccumulator();
+            danhSachKy.add(buildTaiHocItem(
+                    ky != null ? ky.getId() : null,
+                    thuTu,
+                    ky != null ? ky.getMaKy() : defaultMaKy(thuTu),
+                    ky != null ? ky.getTenKy() : defaultTenKy(thuTu),
+                    ky != null,
+                    false,
+                    taiHoc,
+                    gioTrungBinh,
+                    nguongQuaTaiGio,
+                    nguongQuaTaiTinChi,
+                    nguongNheTaiGio,
+                    soMonToiDaKhuyenNghi,
+                    soMonToiThieuCanhBao
+            ));
+        }
+
+        if (chuaXepKy.soMon > 0) {
+            danhSachKy.add(buildTaiHocItem(
+                    null,
+                    null,
+                    "CHUA_XEP_KY",
+                    "Môn chưa xếp kỳ",
+                    false,
+                    true,
+                    chuaXepKy,
+                    gioTrungBinh,
+                    nguongQuaTaiGio,
+                    nguongQuaTaiTinChi,
+                    nguongNheTaiGio,
+                    soMonToiDaKhuyenNghi,
+                    soMonToiThieuCanhBao
+            ));
+        }
+
+        danhSachKy.stream()
+                .filter(item -> item.getCanhBao() != null)
+                .flatMap(item -> item.getCanhBao().stream())
+                .forEach(canhBaoChung::add);
+
+        int soMonDaXepKy = Math.max(tong.soMon - chuaXepKy.soMon, 0);
+        return KhungKyCanhBaoTaiHocResponse.builder()
+                .chuongTrinhVersionId(version.getId())
+                .soKy(soKy)
+                .tongSoMon(tong.soMon)
+                .soMonDaXepKy(soMonDaXepKy)
+                .soMonChuaXepKy(chuaXepKy.soMon)
+                .tongTinChi(scale1(tong.tongTinChi))
+                .tongGio(scale1(tong.tongGio))
+                .gioLyThuyet(scale1(tong.gioLyThuyet))
+                .gioThucHanh(scale1(tong.gioThucHanh))
+                .gioKiemTra(scale1(tong.gioKiemTra))
+                .tongSoBuoiHoc(tong.soBuoiHoc)
+                .soMonTrungBinhMoiKy(scale1(soMonTrungBinh))
+                .tinChiTrungBinhMoiKy(scale1(tinChiTrungBinh))
+                .gioTrungBinhMoiKy(scale1(gioTrungBinh))
+                .buoiHocTrungBinhMoiKy(scale1(buoiTrungBinh))
+                .nguongQuaTaiTheoGio(scale1(nguongQuaTaiGio))
+                .nguongQuaTaiTheoTinChi(scale1(nguongQuaTaiTinChi))
+                .nguongNheTaiTheoGio(scale1(nguongNheTaiGio))
+                .canhBaoChung(canhBaoChung)
+                .danhSachKy(danhSachKy)
+                .build();
+    }
+
+    private KhungKyTaiHocItemResponse buildTaiHocItem(
+            Long khungKyId,
+            Integer thuTu,
+            String maKy,
+            String tenKy,
+            Boolean daCoKhungKy,
+            Boolean chuaXepKy,
+            TaiHocAccumulator taiHoc,
+            BigDecimal gioTrungBinh,
+            BigDecimal nguongQuaTaiGio,
+            BigDecimal nguongQuaTaiTinChi,
+            BigDecimal nguongNheTaiGio,
+            int soMonToiDaKhuyenNghi,
+            int soMonToiThieuCanhBao
+    ) {
+        List<String> canhBao = new ArrayList<>();
+        String mucDoTai = "BINH_THUONG";
+
+        if (Boolean.TRUE.equals(chuaXepKy)) {
+            mucDoTai = "CHUA_XEP_KY";
+            canhBao.add(tenKy + " có " + taiHoc.soMon + " môn chưa được xếp vào kỳ.");
+        } else if (Boolean.FALSE.equals(daCoKhungKy)) {
+            mucDoTai = "CHUA_TAO_KY";
+            canhBao.add(tenKy + " chưa được tạo khung kỳ nên chưa thể phân bổ tải học.");
+        } else {
+            if (taiHoc.soMon > soMonToiDaKhuyenNghi) {
+                mucDoTai = "QUA_TAI";
+                canhBao.add(tenKy + " có " + taiHoc.soMon + " môn, vượt mức khuyến nghị khoảng " + soMonToiDaKhuyenNghi + " môn/kỳ.");
+            }
+            if (taiHoc.tongGio.compareTo(nguongQuaTaiGio) > 0) {
+                mucDoTai = "QUA_TAI";
+                canhBao.add(tenKy + " có " + scale1(taiHoc.tongGio) + " giờ, cao hơn ngưỡng quá tải " + scale1(nguongQuaTaiGio) + " giờ/kỳ.");
+            }
+            if (taiHoc.tongTinChi.compareTo(nguongQuaTaiTinChi) > 0) {
+                mucDoTai = "QUA_TAI";
+                canhBao.add(tenKy + " có " + scale1(taiHoc.tongTinChi) + " tín chỉ, cao hơn ngưỡng quá tải " + scale1(nguongQuaTaiTinChi) + " tín chỉ/kỳ.");
+            }
+            if (taiHoc.soMon > 0 && taiHoc.tongGio.compareTo(nguongNheTaiGio) < 0 && gioTrungBinh.compareTo(BigDecimal.ZERO) > 0) {
+                if (!"QUA_TAI".equals(mucDoTai)) {
+                    mucDoTai = "NHE_TAI";
+                }
+                canhBao.add(tenKy + " chỉ có " + scale1(taiHoc.tongGio) + " giờ, thấp hơn nhiều so với mức trung bình.");
+            }
+            if (taiHoc.soMon <= soMonToiThieuCanhBao && soMonToiThieuCanhBao > 0) {
+                if (!"QUA_TAI".equals(mucDoTai)) {
+                    mucDoTai = "NHE_TAI";
+                }
+                canhBao.add(tenKy + " chỉ có " + taiHoc.soMon + " môn, thấp hơn nhiều so với phân bổ trung bình.");
+            }
+        }
+
+        BigDecimal tyLeTai = BigDecimal.ZERO;
+        if (gioTrungBinh.compareTo(BigDecimal.ZERO) > 0) {
+            tyLeTai = taiHoc.tongGio.multiply(BigDecimal.valueOf(100)).divide(gioTrungBinh, 1, RoundingMode.HALF_UP);
+        }
+
+        return KhungKyTaiHocItemResponse.builder()
+                .khungKyId(khungKyId)
+                .thuTu(thuTu)
+                .maKy(maKy)
+                .tenKy(tenKy)
+                .daCoKhungKy(daCoKhungKy)
+                .chuaXepKy(chuaXepKy)
+                .soMon(taiHoc.soMon)
+                .tongTinChi(scale1(taiHoc.tongTinChi))
+                .tongGio(scale1(taiHoc.tongGio))
+                .gioLyThuyet(scale1(taiHoc.gioLyThuyet))
+                .gioThucHanh(scale1(taiHoc.gioThucHanh))
+                .gioKiemTra(scale1(taiHoc.gioKiemTra))
+                .soBuoiHoc(taiHoc.soBuoiHoc)
+                .tyLeTaiTheoGio(scale1(tyLeTai))
+                .mucDoTai(mucDoTai)
+                .canhBao(canhBao)
+                .build();
+    }
+
+    private TaiHocMon layTaiHocMon(ChuongTrinhMon mon) {
+        return syllabusMonHocTongHopViewRepository.findByChuongTrinhMonId(mon.getId())
+                .map(view -> TaiHocMon.builder()
+                        .soTinChi(firstNonNull(view.getSoTinChi(), mon.getSoTinChi()))
+                        .tongGio(firstNonNull(view.getTongGio(), mon.getTongGio()))
+                        .gioLyThuyet(firstNonNull(view.getGioLyThuyet(), mon.getGioLyThuyet()))
+                        .gioThucHanh(firstNonNull(view.getGioThucHanh(), mon.getGioThucHanh()))
+                        .gioKiemTra(firstNonNull(view.getGioKiemTra(), mon.getGioKiemTra()))
+                        .soBuoiHoc(view.getSoBuoiHoc() == null ? 0 : view.getSoBuoiHoc())
+                        .build())
+                .orElseGet(() -> TaiHocMon.builder()
+                        .soTinChi(nullToZero(mon.getSoTinChi()))
+                        .tongGio(nullToZero(mon.getTongGio()))
+                        .gioLyThuyet(nullToZero(mon.getGioLyThuyet()))
+                        .gioThucHanh(nullToZero(mon.getGioThucHanh()))
+                        .gioKiemTra(nullToZero(mon.getGioKiemTra()))
+                        .soBuoiHoc(0)
+                        .build());
+    }
+
+    private BigDecimal firstNonNull(BigDecimal primary, BigDecimal fallback) {
+        return primary != null ? primary : nullToZero(fallback);
+    }
+
+    private BigDecimal nullToZero(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
+    private BigDecimal chia(BigDecimal value, int divisor) {
+        if (divisor <= 0) {
+            return BigDecimal.ZERO;
+        }
+        return nullToZero(value).divide(BigDecimal.valueOf(divisor), 2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal scale1(BigDecimal value) {
+        return nullToZero(value).setScale(1, RoundingMode.HALF_UP);
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    private static class TaiHocMon {
+        private BigDecimal soTinChi;
+        private BigDecimal tongGio;
+        private BigDecimal gioLyThuyet;
+        private BigDecimal gioThucHanh;
+        private BigDecimal gioKiemTra;
+        private Integer soBuoiHoc;
+    }
+
+    private static class TaiHocAccumulator {
+        private int soMon = 0;
+        private BigDecimal tongTinChi = BigDecimal.ZERO;
+        private BigDecimal tongGio = BigDecimal.ZERO;
+        private BigDecimal gioLyThuyet = BigDecimal.ZERO;
+        private BigDecimal gioThucHanh = BigDecimal.ZERO;
+        private BigDecimal gioKiemTra = BigDecimal.ZERO;
+        private int soBuoiHoc = 0;
+
+        private void add(TaiHocMon mon) {
+            soMon++;
+            tongTinChi = tongTinChi.add(mon.getSoTinChi() == null ? BigDecimal.ZERO : mon.getSoTinChi());
+            tongGio = tongGio.add(mon.getTongGio() == null ? BigDecimal.ZERO : mon.getTongGio());
+            gioLyThuyet = gioLyThuyet.add(mon.getGioLyThuyet() == null ? BigDecimal.ZERO : mon.getGioLyThuyet());
+            gioThucHanh = gioThucHanh.add(mon.getGioThucHanh() == null ? BigDecimal.ZERO : mon.getGioThucHanh());
+            gioKiemTra = gioKiemTra.add(mon.getGioKiemTra() == null ? BigDecimal.ZERO : mon.getGioKiemTra());
+            soBuoiHoc += mon.getSoBuoiHoc() == null ? 0 : mon.getSoBuoiHoc();
+        }
     }
 
     private void validate(KhungKyRequest request, Long id) {

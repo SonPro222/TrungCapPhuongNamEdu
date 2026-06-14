@@ -16,6 +16,8 @@ public interface SyllabusMonHocMauChuongBaiRepository
 
     boolean existsBySyllabusMonHocMauIdAndThuTuAndIdNot(Long syllabusMonHocMauId, Integer thuTu, Long id);
 
+    java.util.List<SyllabusMonHocMauChuongBai> findBySyllabusMonHocMauIdOrderByThuTuAscIdAsc(Long syllabusMonHocMauId);
+
     void deleteBySyllabusMonHocMauId(@Param("syllabusMonHocMauId") Long syllabusMonHocMauId);
 
     @Query("select coalesce(sum(cb.tongGio), 0) from SyllabusMonHocMauChuongBai cb where cb.syllabusMonHocMauId = :syllabusMonHocMauId")
