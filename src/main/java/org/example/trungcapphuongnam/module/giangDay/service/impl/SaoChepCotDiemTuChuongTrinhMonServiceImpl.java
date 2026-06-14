@@ -3,10 +3,8 @@ package org.example.trungcapphuongnam.module.giangDay.service.impl;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMonQuyDoiDiemMau;
-import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiemMau;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonQuyDoiDiemMauRepository;
-import org.example.trungcapphuongnam.module.chuongTrinh.repository.QuyDoiDiemMauRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.QuyDoiDiem;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.QuyDoiDiemRepository;
 import org.example.trungcapphuongnam.module.diem.entity.CauHinhDanhGia;
 import org.example.trungcapphuongnam.module.diem.repository.CauHinhDanhGiaRepository;
 import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -25,8 +22,7 @@ import java.util.List;
 @Transactional
 public class SaoChepCotDiemTuChuongTrinhMonServiceImpl implements SaoChepCotDiemTuChuongTrinhMonService {
 
-    private final ChuongTrinhMonQuyDoiDiemMauRepository chuongTrinhMonQuyDoiDiemMauRepository;
-    private final QuyDoiDiemMauRepository quyDoiDiemMauRepository;
+    private final QuyDoiDiemRepository quyDoiDiemRepository;
     private final CauHinhDanhGiaRepository cauHinhDanhGiaRepository;
     private final LopHocPhanRepository lopHocPhanRepository;
     private final CauHinhDanhGiaGiangDayMapper cauHinhDanhGiaMapper;
@@ -44,41 +40,30 @@ public class SaoChepCotDiemTuChuongTrinhMonServiceImpl implements SaoChepCotDiem
 
         Long syllabusMonHocId = resolveSyllabusMonHocId(lopHocPhanId, chuongTrinhMonId);
 
-        List<Long> mauIds = chuongTrinhMonQuyDoiDiemMauRepository
-                .findByChuongTrinhMonId(chuongTrinhMonId)
-                .stream()
-                .map(ChuongTrinhMonQuyDoiDiemMau::getQuyDoiDiemMauId)
-                .toList();
+        List<QuyDoiDiem> danhSachQuyDoiDiem = quyDoiDiemRepository
+                .findBySyllabusMonHocIdOrderByThuTuAscIdAsc(syllabusMonHocId);
 
-        List<QuyDoiDiemMau> cotDiemMau = quyDoiDiemMauRepository.findAllById(mauIds)
-                .stream()
-                .filter(item -> "COT_DIEM".equalsIgnoreCase(item.getLoaiMau()))
-                .sorted(Comparator
-                        .comparing(QuyDoiDiemMau::getThuTu, Comparator.nullsLast(Integer::compareTo))
-                        .thenComparing(QuyDoiDiemMau::getId))
-                .toList();
-
-        if (cotDiemMau.isEmpty()) {
-            throw new BadRequestException("Chương trình môn chưa gán mẫu cột điểm");
+        if (danhSachQuyDoiDiem.isEmpty()) {
+            throw new BadRequestException(
+                    "Syllabus môn học áp dụng chưa có Quy đổi điểm. " +
+                            "Cần khai báo bảng Quy đổi điểm cho syllabus môn học áp dụng trước khi tạo lớp học phần."
+            );
         }
 
-        BigDecimal tongTyLe = cotDiemMau.stream()
-                .map(item -> item.getTyLe() == null ? BigDecimal.ZERO : item.getTyLe())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (tongTyLe.compareTo(new BigDecimal("100")) != 0) {
-            throw new BadRequestException("Tổng tỷ lệ cột điểm của chương trình môn phải bằng 100%");
-        }
 
-        for (QuyDoiDiemMau mau : cotDiemMau) {
-            if (tonTaiCauHinhDanhGia(syllabusMonHocId, mau.getTen())) {
+        for (QuyDoiDiem quyDoiDiem : danhSachQuyDoiDiem) {
+            String tenCotDiem = layTenCotDiemTuQuyDoiDiem(quyDoiDiem);
+
+            if (tonTaiCauHinhDanhGia(syllabusMonHocId, tenCotDiem)) {
                 continue;
             }
 
-            CauHinhDanhGia cauHinh = cauHinhDanhGiaMapper.toEntityFromQuyDoiDiemMau(
+            CauHinhDanhGia cauHinh = cauHinhDanhGiaMapper.toEntityFromQuyDoiDiem(
                     syllabusMonHocId,
-                    mau,
-                    chuanHoaLoaiDiem(mau.getLoaiMau())
+                    quyDoiDiem,
+                    tenCotDiem,
+                    chuanHoaLoaiDiem(quyDoiDiem.getLoaiMau())
             );
 
             cauHinhDanhGiaRepository.save(cauHinh);
@@ -112,24 +97,33 @@ public class SaoChepCotDiemTuChuongTrinhMonServiceImpl implements SaoChepCotDiem
                 .getResultList();
 
         if (result.isEmpty()) {
-            throw new BadRequestException("Chương trình môn chưa có syllabus môn học");
+            throw new BadRequestException("Chương trình môn chưa có syllabus môn học áp dụng");
         }
 
         return ((Number) result.get(0)).longValue();
     }
 
-    private boolean tonTaiCauHinhDanhGia(Long syllabusMonHocId, String tenCotDiem) {
-        Number count = (Number) entityManager.createNativeQuery("""
-                        SELECT COUNT(1)
-                        FROM cau_hinh_danh_gia chdg
-                        WHERE chdg.syllabus_mon_hoc_id = :syllabusMonHocId
-                          AND LOWER(TRIM(chdg.ten_cot_diem)) = LOWER(TRIM(:tenCotDiem))
-                        """)
-                .setParameter("syllabusMonHocId", syllabusMonHocId)
-                .setParameter("tenCotDiem", tenCotDiem)
-                .getSingleResult();
+    private String layTenCotDiemTuQuyDoiDiem(QuyDoiDiem quyDoiDiem) {
+        if (quyDoiDiem.getTen() != null && !quyDoiDiem.getTen().isBlank()) {
+            return quyDoiDiem.getTen().trim();
+        }
 
-        return count.longValue() > 0;
+        if (quyDoiDiem.getMa() != null && !quyDoiDiem.getMa().isBlank()) {
+            return quyDoiDiem.getMa().trim();
+        }
+
+        if (quyDoiDiem.getGhiChu() != null && !quyDoiDiem.getGhiChu().isBlank()) {
+            return quyDoiDiem.getGhiChu().trim();
+        }
+
+        throw new BadRequestException("Quy đổi điểm phải có tên cột điểm.");
+    }
+
+    private boolean tonTaiCauHinhDanhGia(Long syllabusMonHocId, String tenCotDiem) {
+        return cauHinhDanhGiaRepository.countBySyllabusMonHocIdAndTenCotDiemIgnoreTrim(
+                syllabusMonHocId,
+                tenCotDiem
+        ) > 0;
     }
 
     private String chuanHoaLoaiDiem(String loaiDiem) {

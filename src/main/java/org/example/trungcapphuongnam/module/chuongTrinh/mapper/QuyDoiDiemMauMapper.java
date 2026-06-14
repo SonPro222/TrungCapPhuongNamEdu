@@ -19,7 +19,6 @@ public class QuyDoiDiemMauMapper {
         entity.setNguongTu(request.getNguongTu());
         entity.setNguongDen(request.getNguongDen());
         entity.setLoaiMau(request.getLoaiMau());
-        entity.setTyLe(request.getTyLe());
         entity.setDiemToiDa(request.getDiemToiDa());
         entity.setThuTu(request.getThuTu());
         entity.setBatBuoc(request.getBatBuoc());
@@ -40,7 +39,6 @@ public class QuyDoiDiemMauMapper {
         entity.setNguongTu(request.getNguongTu());
         entity.setNguongDen(request.getNguongDen());
         entity.setLoaiMau(request.getLoaiMau());
-        entity.setTyLe(request.getTyLe());
         entity.setDiemToiDa(request.getDiemToiDa());
         entity.setThuTu(request.getThuTu());
         entity.setBatBuoc(request.getBatBuoc());
@@ -62,7 +60,6 @@ public class QuyDoiDiemMauMapper {
                 .nguongTu(entity.getNguongTu())
                 .nguongDen(entity.getNguongDen())
                 .loaiMau(entity.getLoaiMau())
-                .tyLe(entity.getTyLe())
                 .diemToiDa(entity.getDiemToiDa())
                 .thuTu(entity.getThuTu())
                 .batBuoc(entity.getBatBuoc())

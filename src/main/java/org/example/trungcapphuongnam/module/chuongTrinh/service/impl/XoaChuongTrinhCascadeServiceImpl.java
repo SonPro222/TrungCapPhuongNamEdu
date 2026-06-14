@@ -10,6 +10,7 @@ import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCa
 import org.example.trungcapphuongnam.module.daoTao.entity.KhungKy;
 import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyRepository;
 import org.example.trungcapphuongnam.module.daoTao.repository.LopHanhChinhRepository;
+import org.example.trungcapphuongnam.module.diem.repository.CauHinhDanhGiaRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class XoaChuongTrinhCascadeServiceImpl implements XoaChuongTrinhCascadeSe
 
     private final MonTienQuyetRepository monTienQuyetRepository;
     private final QuyDoiDiemRepository quyDoiDiemRepository;
+    private final CauHinhDanhGiaRepository cauHinhDanhGiaRepository;
     private final SyllabusMonHocRepository syllabusMonHocRepository;
     private final DieuKienMonHocRepository dieuKienMonHocRepository;
     private final SyllabusChuongBaiRepository syllabusChuongBaiRepository;
@@ -138,7 +140,6 @@ public class XoaChuongTrinhCascadeServiceImpl implements XoaChuongTrinhCascadeSe
 
         monTuChonRepository.deleteByChuongTrinhMonId(chuongTrinhMonId);
         monTienQuyetRepository.deleteByMonIdOrMonDieuKienId(chuongTrinhMonId, chuongTrinhMonId);
-        quyDoiDiemRepository.deleteByChuongTrinhMonId(chuongTrinhMonId);
         lopHocPhanRepository.deleteByChuongTrinhMonId(chuongTrinhMonId);
         chuongTrinhMonRepository.deleteById(chuongTrinhMonId);
     }
@@ -158,6 +159,9 @@ public class XoaChuongTrinhCascadeServiceImpl implements XoaChuongTrinhCascadeSe
         dieuKienMonHocRepository.deleteBySyllabusMonId(syllabusMonHocId);
         syllabusChuongBaiRepository.deleteBySyllabusMonId(syllabusMonHocId);
         syllabusTaiLieuRepository.deleteBySyllabusMonId(syllabusMonHocId);
+
+        cauHinhDanhGiaRepository.deleteBySyllabusMonHocId(syllabusMonHocId);
+        quyDoiDiemRepository.deleteBySyllabusMonHocId(syllabusMonHocId);
 
         syllabusMonHocRepository.deleteById(syllabusMonHocId);
     }

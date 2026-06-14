@@ -32,7 +32,6 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
     @Override
     @Transactional(readOnly = true)
     public Page<QuyDoiDiemResponse> findAll(
-            Long chuongTrinhMonId,
             Long syllabusMonHocId,
             String ketQua,
             String keyword,
@@ -40,7 +39,6 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
     ) {
         return repository.findAll(
                 LocJpa.<QuyDoiDiem>empty()
-                        .and(LocJpa.eq("chuongTrinhMonId", chuongTrinhMonId))
                         .and(LocJpa.eq("syllabusMonHocId", syllabusMonHocId))
                         .and(LocJpa.like("ketQua", ketQua))
                         .and(LocJpa.keyword(keyword, "ketQua", "congThuc", "ghiChu", "ma", "ten", "loaiMau")),
@@ -99,10 +97,6 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
         request.setTen(TextUtil.trimToNull(request.getTen()));
         request.setLoaiMau(TextUtil.trimToNull(request.getLoaiMau()));
 
-        if (request.getChuongTrinhMonId() != null) {
-            throw new BadRequestException("Quy đổi điểm không được gán trực tiếp vào môn trong chương trình. Hãy truyền syllabusMonHocId.");
-        }
-
         if (request.getSyllabusMonHocId() == null) {
             throw new BadRequestException("syllabusMonHocId không được để trống");
         }
@@ -113,14 +107,12 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
         validateNguongDiem(request);
         validateOverlapInSyllabus(request, currentId);
         validateTenCotDiemInSyllabus(request, currentId);
-        validateTongTyLeInSyllabus(request, currentId);
 
         return syllabusMonHoc;
     }
 
     private void ganScopeTheoSyllabus(QuyDoiDiem entity, SyllabusMonHoc syllabusMonHoc) {
         entity.setSyllabusMonHocId(syllabusMonHoc.getId());
-        entity.setChuongTrinhMonId(syllabusMonHoc.getChuongTrinhMonId());
     }
 
     private void validateNguongDiem(QuyDoiDiemRequest request) {
@@ -135,11 +127,6 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
             throw new BadRequestException("Điểm quy đổi không được âm");
         }
 
-        if (request.getTyLe() != null &&
-                (request.getTyLe().compareTo(BigDecimal.ZERO) < 0 ||
-                        request.getTyLe().compareTo(new BigDecimal("100")) > 0)) {
-            throw new BadRequestException("Tỷ lệ phải nằm trong khoảng 0 - 100");
-        }
 
         if (request.getDiemToiDa() != null && request.getDiemToiDa().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BadRequestException("Điểm tối đa phải lớn hơn 0");
@@ -185,20 +172,5 @@ public class QuyDoiDiemServiceImpl implements QuyDoiDiemService {
         }
     }
 
-    private void validateTongTyLeInSyllabus(QuyDoiDiemRequest request, Long currentId) {
-        if (request.getTyLe() == null) {
-            return;
-        }
 
-        BigDecimal tongTyLeHienTai = repository.tongTyLeTrongSyllabusKhongTinhDongHienTai(
-                request.getSyllabusMonHocId(),
-                currentId
-        );
-
-        BigDecimal tongSauKhiLuu = tongTyLeHienTai.add(request.getTyLe());
-
-        if (tongSauKhiLuu.compareTo(new BigDecimal("100")) > 0) {
-            throw new BadRequestException("Tổng tỷ lệ quy đổi điểm trong syllabus môn học không được vượt quá 100");
-        }
-    }
 }

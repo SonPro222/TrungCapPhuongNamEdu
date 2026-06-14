@@ -14,8 +14,6 @@ public class QuyDoiDiemResponse {
 
     private Long id;
 
-    private Long chuongTrinhMonId;
-
     private Long syllabusMonHocId;
 
     private BigDecimal nguongTu;
@@ -40,7 +38,6 @@ public class QuyDoiDiemResponse {
 
     private String loaiMau;
 
-    private BigDecimal tyLe;
 
     private BigDecimal diemToiDa;
 

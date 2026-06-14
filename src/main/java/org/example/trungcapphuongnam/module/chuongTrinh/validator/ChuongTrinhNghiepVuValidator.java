@@ -515,48 +515,7 @@ public class ChuongTrinhNghiepVuValidator {
         }
     }
 
-    public void validateQuyDoiDiem(QuyDoiDiemRequest request, Long id) {
-        notNull(request, "Dữ liệu quy đổi điểm không hợp lệ");
 
-        Long chuongTrinhMonId = request.getChuongTrinhMonId();
-        Long syllabusMonHocId = request.getSyllabusMonHocId();
-
-        validateOnlyOneScope(chuongTrinhMonId, syllabusMonHocId);
-
-        if (chuongTrinhMonId == null && syllabusMonHocId == null) {
-            throw new BadRequestException("Phải truyền chuongTrinhMonId hoặc syllabusMonHocId");
-        }
-
-        if (chuongTrinhMonId != null) {
-            requireExists(chuongTrinhMonRepository, chuongTrinhMonId, "Môn trong chương trình");
-            validateNguongDiem(request.getNguongTu(), request.getNguongDen(), request.getDiemQuyDoi());
-            validateTenCotDiemVaTongTyLeQuyDoiDiem(request, id);
-
-            if (request.getNguongTu() != null
-                    && request.getNguongDen() != null
-                    && quyDoiDiemRepository.existsOverlap(chuongTrinhMonId, request.getNguongTu(), request.getNguongDen(), id)) {
-                throw new DuplicateResourceException("Khoảng ngưỡng quy đổi điểm bị chồng lấn với dòng đã có của môn này");
-            }
-
-            return;
-        }
-
-        requireExists(syllabusMonHocRepository, syllabusMonHocId, "Syllabus môn học");
-        validateNguongDiem(request.getNguongTu(), request.getNguongDen(), request.getDiemQuyDoi());
-
-        if (request.getNguongTu() != null
-                && request.getNguongDen() != null
-                && quyDoiDiemRepository.existsOverlapBySyllabusMonHocId(
-                syllabusMonHocId,
-                request.getNguongTu(),
-                request.getNguongDen(),
-                id
-        )) {
-            throw new DuplicateResourceException("Khoảng ngưỡng quy đổi điểm bị chồng lấn với dòng đã có của syllabus môn học này");
-        }
-
-        validateTenCotDiemVaTongTyLeQuyDoiDiemTheoSyllabus(request, id);
-    }
     private void validateTenCotDiemVaTongTyLeQuyDoiDiemTheoSyllabus(QuyDoiDiemRequest request, Long id) {
         Long syllabusMonHocId = request.getSyllabusMonHocId();
 
@@ -575,58 +534,10 @@ public class ChuongTrinhNghiepVuValidator {
             throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong Quy đổi điểm đã lưu cho syllabus môn học: " + tenCotDiem);
         }
 
-        BigDecimal tyLe = request.getTyLe() == null ? BigDecimal.ZERO : request.getTyLe();
 
-        if (tyLe.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("Tỷ lệ % không được âm");
-        }
 
-        if (tyLe.compareTo(new BigDecimal("100")) > 0) {
-            throw new BadRequestException("Tỷ lệ % không được lớn hơn 100%");
-        }
-
-        BigDecimal tongTyLeCu = quyDoiDiemRepository.tongTyLeTrongSyllabusKhongTinhDongHienTai(syllabusMonHocId, id);
-        BigDecimal tongTyLeMoi = tongTyLeCu.add(tyLe);
-
-        if (tongTyLeMoi.compareTo(new BigDecimal("100")) > 0) {
-            throw new BadRequestException("Tổng tỷ lệ % của Quy đổi điểm đã lưu cho syllabus môn học không được vượt quá 100%. Hiện tại sau khi lưu sẽ là " + tongTyLeMoi.stripTrailingZeros().toPlainString() + "%");
-        }
     }
-    private void validateTenCotDiemVaTongTyLeQuyDoiDiem(QuyDoiDiemRequest request, Long id) {
-        Long chuongTrinhMonId = request.getChuongTrinhMonId();
 
-        String tenCotDiem = null;
-        if (request.getTen() != null && !request.getTen().trim().isEmpty()) {
-            tenCotDiem = request.getTen().trim();
-        } else if (request.getGhiChu() != null && !request.getGhiChu().trim().isEmpty()) {
-            tenCotDiem = request.getGhiChu().trim();
-        }
-
-        if (tenCotDiem == null) {
-            throw new BadRequestException("Tên cột điểm mẫu không được để trống");
-        }
-
-        if (quyDoiDiemRepository.existsTenCotDiemTrongMon(chuongTrinhMonId, tenCotDiem, id)) {
-            throw new DuplicateResourceException("Tên cột điểm mẫu đã tồn tại trong Quy đổi điểm đã lưu cho môn trong chương trình: " + tenCotDiem);
-        }
-
-        BigDecimal tyLe = request.getTyLe() == null ? BigDecimal.ZERO : request.getTyLe();
-
-        if (tyLe.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("Tỷ lệ % không được âm");
-        }
-
-        if (tyLe.compareTo(new BigDecimal("100")) > 0) {
-            throw new BadRequestException("Tỷ lệ % không được lớn hơn 100%");
-        }
-
-        BigDecimal tongTyLeCu = quyDoiDiemRepository.tongTyLeTrongMonKhongTinhDongHienTai(chuongTrinhMonId, id);
-        BigDecimal tongTyLeMoi = tongTyLeCu.add(tyLe);
-
-        if (tongTyLeMoi.compareTo(new BigDecimal("100")) > 0) {
-            throw new BadRequestException("Tổng tỷ lệ % của Quy đổi điểm đã lưu cho môn trong chương trình không được vượt quá 100%. Hiện tại sau khi lưu sẽ là " + tongTyLeMoi.stripTrailingZeros().toPlainString() + "%");
-        }
-    }
     public void validateSyllabusMonHoc(SyllabusMonHocRequest request, Long id) {
         notNull(request, "Dữ liệu syllabus môn học không hợp lệ");
 
@@ -1300,13 +1211,30 @@ public class ChuongTrinhNghiepVuValidator {
     }
 
     private void validateNguongDiem(BigDecimal nguongTu, BigDecimal nguongDen, BigDecimal diemQuyDoi) {
-        positiveOrZero(nguongTu, "Ngưỡng từ");
-        positiveOrZero(nguongDen, "Ngưỡng đến");
+        if (nguongTu == null) {
+            throw new BadRequestException("Ngưỡng từ không được để trống");
+        }
 
-        validateDiemTrongKhoang(diemQuyDoi, "Điểm quy đổi", BigDecimal.ZERO, BigDecimal.TEN);
+        if (nguongDen == null) {
+            throw new BadRequestException("Ngưỡng đến không được để trống");
+        }
 
-        if (nguongTu != null && nguongDen != null && nguongTu.compareTo(nguongDen) > 0) {
-            throw new BadRequestException("Ngưỡng từ không được lớn hơn ngưỡng đến");
+        if (diemQuyDoi == null) {
+            throw new BadRequestException("Điểm quy đổi không được để trống");
+        }
+
+        validateDiemTrongKhoang(nguongTu, "Ngưỡng từ", BigDecimal.ZERO, BigDecimal.TEN);
+        validateDiemTrongKhoang(nguongDen, "Ngưỡng đến", BigDecimal.ZERO, BigDecimal.TEN);
+
+        validateDiemTrongKhoang(
+                diemQuyDoi,
+                "Điểm quy đổi",
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(4)
+        );
+
+        if (nguongTu.compareTo(nguongDen) >= 0) {
+            throw new BadRequestException("Ngưỡng từ phải nhỏ hơn ngưỡng đến");
         }
     }
 

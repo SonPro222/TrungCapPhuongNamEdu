@@ -51,8 +51,6 @@ public class QuyDoiDiemMau {
     @Column(name = "loai_mau", nullable = true, length = 50)
     private String loaiMau;
 
-    @Column(name = "ty_le", nullable = true)
-    private BigDecimal tyLe;
 
     @Column(name = "diem_toi_da", nullable = true)
     private BigDecimal diemToiDa;

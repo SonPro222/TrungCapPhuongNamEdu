@@ -22,6 +22,8 @@ public class KhungKyGoiYResponse {
 
     private Integer soKy;
 
+    private Integer tongSoNgayNghiChuyenKy;
+
     private LocalDate ngayApDung;
 
     private LocalDate ngayHetHieuLucGoiY;
@@ -35,6 +37,8 @@ public class KhungKyGoiYResponse {
     private KhungKyGoiYItemResponse kyTiepTheoGoiY;
 
     private List<KhungKyGoiYItemResponse> danhSachKy;
+
+    private List<ChuongTrinhVersionNghiChuyenKyResponse> danhSachNghiChuyenKy;
 
     private KhungKyCanhBaoTaiHocResponse canhBaoTaiHoc;
 

@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @Builder
 public class QuyDoiDiemRequest {
 
-    private Long chuongTrinhMonId;
-
     private Long syllabusMonHocId;
 
     private BigDecimal nguongTu;
@@ -38,7 +36,6 @@ public class QuyDoiDiemRequest {
 
     private String loaiMau;
 
-    private BigDecimal tyLe;
 
     private BigDecimal diemToiDa;
 

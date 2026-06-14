@@ -253,13 +253,6 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                 .getContent()
                 : List.of();
 
-        List<QuyDoiDiemResponse> quyDoiDiem = includeSyllabusDetail
-                ? quyDoiDiemRepository
-                .findByChuongTrinhMonId(entity.getId(), pageable)
-                .map(quyDoiDiemMapper::toResponse)
-                .getContent()
-                : List.of();
-
         List<SyllabusMonHocCauTrucResponse> syllabusMonHoc = syllabusMonHocRepository
                 .findByChuongTrinhMonId(entity.getId(), pageable)
                 .getContent()
@@ -269,6 +262,13 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                         : buildSyllabusMonHocTomTat(syllabus)
                 )
                 .toList();
+
+        List<QuyDoiDiemResponse> quyDoiDiem = includeSyllabusDetail
+                ? syllabusMonHoc.stream()
+                .filter(item -> item.getQuyDoiDiem() != null)
+                .flatMap(item -> item.getQuyDoiDiem().stream())
+                .toList()
+                : List.of();
 
         return ChuongTrinhMonCauTrucResponse.builder()
                 .chuongTrinhMon(chuongTrinhMon)
@@ -386,7 +386,6 @@ public class ChuongTrinhCauTrucServiceImpl implements ChuongTrinhCauTrucService 
                             .ketQua(Mau != null && Mau.getKetQua() != null ? Mau.getKetQua().getValue() : null)
                             .congThuc(Mau != null ? Mau.getCongThuc() : null)
                             .loaiMau(Mau != null ? Mau.getLoaiMau() : null)
-                            .tyLe(Mau != null ? Mau.getTyLe() : null)
                             .diemToiDa(Mau != null ? Mau.getDiemToiDa() : null)
                             .thuTu(Mau != null ? Mau.getThuTu() : null)
                             .batBuoc(Mau != null ? Mau.getBatBuoc() : null)

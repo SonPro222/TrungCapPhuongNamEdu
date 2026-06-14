@@ -19,13 +19,6 @@ public class QuyDoiDiem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Chỉ là khóa cha được suy ra từ syllabus_mon_hoc_id để giữ tương thích report/filter cũ.
-     * Không nhận trực tiếp từ request nghiệp vụ.
-     */
-    @Column(name = "chuong_trinh_mon_id")
-    private Long chuongTrinhMonId;
-
     @Column(name = "syllabus_mon_hoc_id", nullable = false)
     private Long syllabusMonHocId;
 
@@ -62,8 +55,7 @@ public class QuyDoiDiem {
     @Column(name = "loai_mau")
     private String loaiMau;
 
-    @Column(name = "ty_le")
-    private BigDecimal tyLe;
+
 
     @Column(name = "diem_toi_da")
     private BigDecimal diemToiDa;

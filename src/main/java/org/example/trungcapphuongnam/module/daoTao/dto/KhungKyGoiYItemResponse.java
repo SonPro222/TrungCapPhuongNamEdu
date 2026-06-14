@@ -23,6 +23,12 @@ public class KhungKyGoiYItemResponse {
 
     private LocalDate ngayKetThucGoiY;
 
+    private Integer soNgayNghiChuyenKySau;
+
+    private LocalDate ngayBatDauNghiChuyenKySauGoiY;
+
+    private LocalDate ngayKetThucNghiChuyenKySauGoiY;
+
     private LocalDate ngayBatDauHienTai;
 
     private LocalDate ngayKetThucHienTai;

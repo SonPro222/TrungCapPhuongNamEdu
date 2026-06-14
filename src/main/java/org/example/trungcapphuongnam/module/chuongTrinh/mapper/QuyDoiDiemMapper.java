@@ -14,7 +14,6 @@ public class QuyDoiDiemMapper {
         }
 
         return QuyDoiDiem.builder()
-                .chuongTrinhMonId(request.getChuongTrinhMonId())
                 .syllabusMonHocId(request.getSyllabusMonHocId())
                 .nguongTu(request.getNguongTu())
                 .nguongDen(request.getNguongDen())
@@ -25,7 +24,6 @@ public class QuyDoiDiemMapper {
                 .ma(request.getMa())
                 .ten(request.getTen())
                 .loaiMau(request.getLoaiMau())
-                .tyLe(request.getTyLe())
                 .diemToiDa(request.getDiemToiDa())
                 .thuTu(request.getThuTu())
                 .batBuoc(request.getBatBuoc())
@@ -39,7 +37,6 @@ public class QuyDoiDiemMapper {
 
         return QuyDoiDiemResponse.builder()
                 .id(entity.getId())
-                .chuongTrinhMonId(entity.getChuongTrinhMonId())
                 .syllabusMonHocId(entity.getSyllabusMonHocId())
                 .nguongTu(entity.getNguongTu())
                 .nguongDen(entity.getNguongDen())
@@ -52,7 +49,6 @@ public class QuyDoiDiemMapper {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .loaiMau(entity.getLoaiMau())
-                .tyLe(entity.getTyLe())
                 .diemToiDa(entity.getDiemToiDa())
                 .thuTu(entity.getThuTu())
                 .batBuoc(entity.getBatBuoc())
@@ -64,7 +60,6 @@ public class QuyDoiDiemMapper {
             return;
         }
 
-        entity.setChuongTrinhMonId(request.getChuongTrinhMonId());
         entity.setSyllabusMonHocId(request.getSyllabusMonHocId());
         entity.setNguongTu(request.getNguongTu());
         entity.setNguongDen(request.getNguongDen());
@@ -75,7 +70,6 @@ public class QuyDoiDiemMapper {
         entity.setMa(request.getMa());
         entity.setTen(request.getTen());
         entity.setLoaiMau(request.getLoaiMau());
-        entity.setTyLe(request.getTyLe());
         entity.setDiemToiDa(request.getDiemToiDa());
         entity.setThuTu(request.getThuTu());
         entity.setBatBuoc(request.getBatBuoc());

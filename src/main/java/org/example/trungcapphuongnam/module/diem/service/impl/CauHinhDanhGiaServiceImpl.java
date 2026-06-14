@@ -75,6 +75,7 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
         validate(request);
         validateSyllabusExists(request.getSyllabusMonHocId());
         validateDuplicate(request, null);
+        validateTongTyLe(request, null);
 
         CauHinhDanhGia entity = mapper.toEntity(request);
         return mapper.toResponse(repository.save(entity));
@@ -86,6 +87,7 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
         validate(request);
         validateSyllabusExists(request.getSyllabusMonHocId());
         validateDuplicate(request, id);
+        validateTongTyLe(request, id);
 
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
@@ -157,6 +159,28 @@ public class CauHinhDanhGiaServiceImpl implements CauHinhDanhGiaService {
             if (duplicateThuTu) {
                 throw new DuplicateResourceException("Thứ tự cột điểm đã tồn tại trong syllabus môn học này");
             }
+        }
+    }
+
+    private void validateTongTyLe(CauHinhDanhGiaRequest request, Long currentId) {
+        BigDecimal tongHienCo = repository.sumTyLeBySyllabusMonHocIdExcludeId(
+                request.getSyllabusMonHocId(),
+                currentId
+        );
+
+        if (tongHienCo == null) {
+            tongHienCo = BigDecimal.ZERO;
+        }
+
+        BigDecimal tongSauKhiLuu = tongHienCo.add(request.getTyLe());
+        BigDecimal motTram = new BigDecimal("100.00");
+
+        if (tongSauKhiLuu.compareTo(motTram) > 0) {
+            throw new BadRequestException(
+                    "Tổng tỷ lệ cột điểm của syllabus môn học không được vượt quá 100%. " +
+                            "Hiện có = " + tongHienCo + "%, thêm/cập nhật = " + request.getTyLe() +
+                            "%, tổng = " + tongSauKhiLuu + "%"
+            );
         }
     }
 

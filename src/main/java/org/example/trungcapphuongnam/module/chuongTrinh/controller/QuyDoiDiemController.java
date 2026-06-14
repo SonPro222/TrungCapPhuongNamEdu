@@ -22,13 +22,12 @@ public class QuyDoiDiemController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<QuyDoiDiemResponse>>> findAll(
             Pageable pageable,
-            @RequestParam(required = false) Long chuongTrinhMonId,
             @RequestParam(required = false) Long syllabusMonHocId,
             @RequestParam(required = false) String ketQua,
             @RequestParam(required = false) String keyword
     ) {
         return ResponseEntity.ok(ApiResponse.ok(
-                service.findAll(chuongTrinhMonId, syllabusMonHocId, ketQua, keyword, pageable)
+                service.findAll(syllabusMonHocId, ketQua, keyword, pageable)
         ));
     }
 

@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 public interface QuyDoiDiemService {
 
     Page<QuyDoiDiemResponse> findAll(
-            Long chuongTrinhMonId,
             Long syllabusMonHocId,
             String ketQua,
             String keyword,

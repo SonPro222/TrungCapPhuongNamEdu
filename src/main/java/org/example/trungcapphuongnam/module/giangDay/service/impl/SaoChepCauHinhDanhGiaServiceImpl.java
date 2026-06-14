@@ -43,10 +43,13 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
         Long syllabusMonHocId = resolveSyllabusMonHocId(lopHocPhanId, chuongTrinhMonId);
 
         List<QuyDoiDiem> danhSachQuyDoiDiem = quyDoiDiemRepository
-                .findByChuongTrinhMonIdOrderByThuTuAscIdAsc(chuongTrinhMonId);
+                .findBySyllabusMonHocIdOrderByThuTuAscIdAsc(syllabusMonHocId);
 
         if (danhSachQuyDoiDiem.isEmpty()) {
-            throw new BadRequestException("Môn trong chương trình chưa có Quy đổi điểm đã lưu. Cần khai báo bảng Quy đổi điểm đã lưu cho môn trong chương trình trước khi tạo lớp học phần.");
+            throw new BadRequestException(
+                    "Syllabus môn học áp dụng chưa có Quy đổi điểm. " +
+                            "Cần khai báo bảng Quy đổi điểm cho syllabus môn học áp dụng trước khi tạo lớp học phần."
+            );
         }
 
         kiemTraQuyDoiDiemDaLuu(danhSachQuyDoiDiem);
@@ -96,24 +99,21 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
                 .getResultList();
 
         if (result.isEmpty()) {
-            throw new BadRequestException("Chương trình môn chưa có syllabus môn học");
+            throw new BadRequestException("Chương trình môn chưa có syllabus môn học áp dụng");
         }
 
         return ((Number) result.get(0)).longValue();
     }
 
     private boolean tonTaiCauHinhDanhGia(Long syllabusMonHocId, String tenCotDiem) {
-        Number count = (Number) entityManager.createNativeQuery("""
-                        SELECT COUNT(1)
-                        FROM cau_hinh_danh_gia chdg
-                        WHERE chdg.syllabus_mon_hoc_id = :syllabusMonHocId
-                          AND LOWER(TRIM(chdg.ten_cot_diem)) = LOWER(TRIM(:tenCotDiem))
-                        """)
-                .setParameter("syllabusMonHocId", syllabusMonHocId)
-                .setParameter("tenCotDiem", tenCotDiem)
-                .getSingleResult();
+        if (syllabusMonHocId == null || tenCotDiem == null || tenCotDiem.isBlank()) {
+            return false;
+        }
 
-        return count.longValue() > 0;
+        return cauHinhDanhGiaRepository.countBySyllabusMonHocIdAndTenCotDiemIgnoreTrim(
+                syllabusMonHocId,
+                tenCotDiem
+        ) > 0;
     }
 
     private void kiemTraQuyDoiDiemDaLuu(List<QuyDoiDiem> danhSachQuyDoiDiem) {
@@ -121,33 +121,18 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
 
         for (QuyDoiDiem quyDoiDiem : danhSachQuyDoiDiem) {
             String tenCotDiem = layTenCotDiemTuQuyDoiDiem(quyDoiDiem);
+            if (quyDoiDiem.getDiemToiDa() != null) {
+                if (quyDoiDiem.getDiemToiDa().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new BadRequestException("Điểm tối đa của Quy đổi điểm '" + tenCotDiem + "' phải lớn hơn 0.");
+                }
 
-            if (quyDoiDiem.getTyLe() == null) {
-                throw new BadRequestException("Quy đổi điểm đã lưu '" + tenCotDiem + "' chưa có tỷ lệ.");
+                if (quyDoiDiem.getDiemToiDa().compareTo(BigDecimal.TEN) > 0) {
+                    throw new BadRequestException("Điểm tối đa của Quy đổi điểm '" + tenCotDiem + "' không được lớn hơn 10.");
+                }
             }
 
-            if (quyDoiDiem.getTyLe().compareTo(BigDecimal.ZERO) < 0 || quyDoiDiem.getTyLe().compareTo(MOT_TRAM) > 0) {
-                throw new BadRequestException("Tỷ lệ Quy đổi điểm đã lưu '" + tenCotDiem + "' phải từ 0 đến 100.");
-            }
-
-            if (quyDoiDiem.getDiemToiDa() != null && quyDoiDiem.getDiemToiDa().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new BadRequestException("Điểm tối đa của Quy đổi điểm đã lưu '" + tenCotDiem + "' phải lớn hơn 0.");
-            }
-
-            tongTyLe = tongTyLe.add(quyDoiDiem.getTyLe());
         }
 
-        if (tongTyLe.compareTo(MOT_TRAM) != 0) {
-            String chiTiet = danhSachQuyDoiDiem.stream()
-                    .map(item -> layTenCotDiemTuQuyDoiDiem(item) + "=" + item.getTyLe() + "%")
-                    .reduce((a, b) -> a + ", " + b)
-                    .orElse("không có dòng quy đổi điểm");
-
-            throw new BadRequestException(
-                    "Tổng tỷ lệ bảng Quy đổi điểm đã lưu cho môn trong chương trình phải bằng 100%. " +
-                            "Hiện tại = " + tongTyLe + "%. Chi tiết: " + chiTiet
-            );
-        }
     }
 
     private String layTenCotDiemTuQuyDoiDiem(QuyDoiDiem quyDoiDiem) {
@@ -163,7 +148,7 @@ public class SaoChepCauHinhDanhGiaServiceImpl implements SaoChepCauHinhDanhGiaSe
             return quyDoiDiem.getGhiChu().trim();
         }
 
-        throw new BadRequestException("Quy đổi điểm đã lưu phải có tên cột điểm.");
+        throw new BadRequestException("Quy đổi điểm phải có tên cột điểm.");
     }
 
     private String chuanHoaLoaiDiem(String loaiDiem) {

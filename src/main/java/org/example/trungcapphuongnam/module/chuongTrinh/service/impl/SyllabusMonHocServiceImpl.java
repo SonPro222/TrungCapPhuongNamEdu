@@ -128,7 +128,6 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
             }
 
             QuyDoiDiem quyDoiDiem = QuyDoiDiem.builder()
-                    .chuongTrinhMonId(syllabusMonHoc.getChuongTrinhMonId())
                     .syllabusMonHocId(syllabusMonHoc.getId())
                     .ma(Mau.getMa())
                     .ten(Mau.getTen())
@@ -139,7 +138,6 @@ public class SyllabusMonHocServiceImpl implements SyllabusMonHocService {
                     .congThuc(Mau.getCongThuc())
                     .ghiChu(Mau.getGhiChu())
                     .loaiMau(Mau.getLoaiMau())
-                    .tyLe(Mau.getTyLe())
                     .diemToiDa(Mau.getDiemToiDa())
                     .thuTu(Mau.getThuTu())
                     .batBuoc(Mau.getBatBuoc())

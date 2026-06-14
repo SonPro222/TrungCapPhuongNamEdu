@@ -24,7 +24,6 @@ public class CauHinhDanhGiaGiangDayMapper {
                 .syllabusMonHocId(syllabusMonHocId)
                 .tenCotDiem(tenCotDiem)
                 .loaiDiem(loaiDiem)
-                .tyLe(quyDoiDiem.getTyLe())
                 .diemToiDa(quyDoiDiem.getDiemToiDa() == null ? BigDecimal.TEN : quyDoiDiem.getDiemToiDa())
                 .thuTu(quyDoiDiem.getThuTu())
                 .build();
@@ -43,7 +42,6 @@ public class CauHinhDanhGiaGiangDayMapper {
                 .syllabusMonHocId(syllabusMonHocId)
                 .tenCotDiem(mau.getTen())
                 .loaiDiem(loaiDiem)
-                .tyLe(mau.getTyLe())
                 .diemToiDa(mau.getDiemToiDa() == null ? BigDecimal.TEN : mau.getDiemToiDa())
                 .thuTu(mau.getThuTu())
                 .build();

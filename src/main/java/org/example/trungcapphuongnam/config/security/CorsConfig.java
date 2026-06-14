@@ -1,9 +1,9 @@
 package org.example.trungcapphuongnam.config.security;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.*;
+
 import java.util.List;
 
 @Configuration
@@ -16,11 +16,21 @@ public class CorsConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
+                "http://localhost:5174",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:5174",
+                "http://192.168.100.128:5173",
+                "http://192.168.100.128:5174",
                 "http://localhost:3000"
         ));
 
         config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
         ));
 
         config.setAllowedHeaders(List.of(
@@ -29,6 +39,11 @@ public class CorsConfig {
                 "Accept",
                 "Origin",
                 "X-Requested-With"
+        ));
+
+        config.setExposedHeaders(List.of(
+                "Authorization",
+                "Content-Type"
         ));
 
         config.setAllowCredentials(true);
