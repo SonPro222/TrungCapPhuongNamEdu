@@ -30,6 +30,14 @@ export const luaChonEnum = {
         {id: 'mon_hoc', ten: 'Môn học'},
         {id: 'mo_dun', ten: 'Mô đun'}
     ],
+    trangThaiChuongTrinhVersion: [
+        {id: 'DANG_SOAN',    ten: 'Đang soạn'},
+        {id: 'CHO_AP_DUNG',  ten: 'Chờ áp dụng'},
+        {id: 'HIEN_HANH',    ten: 'Hiện hành'},
+        {id: 'KHOA',         ten: 'Khóa'},
+        {id: 'HET_HIEU_LUC', ten: 'Hết hiệu lực'},
+        {id: 'HUY',          ten: 'Hủy'}
+    ],
     loaiPhamViMon: [
         {id: 'mon_chuyen_nganh', ten: 'Môn chuyên ngành'},
         {id: 'mon_chung', ten: 'Môn học chung'}
@@ -561,6 +569,8 @@ function taoDuLieuRong() {
         syllabusMonHocmauChuongBai: [],
         syllabusMonHocmauDieuKien: [],
         syllabusMonHocmauTaiLieu: [],
+        syllabusMonHocmauFile: [],
+        syllabusMonHocFile: [],
         dieuKienMonHoc: [],
         dieuKienMonHocmau: [],
         syllabusMonHocDieuKien: [],
@@ -820,9 +830,30 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
         }))
     }
 
+    function layMangResponse(res) {
+        if (Array.isArray(res)) return res
+
+        const payload = res?.data
+
+        if (Array.isArray(payload)) return payload
+        if (Array.isArray(payload?.data)) return payload.data
+        if (Array.isArray(payload?.content)) return payload.content
+        if (Array.isArray(payload?.items)) return payload.items
+        if (Array.isArray(payload?.result)) return payload.result
+        if (Array.isArray(payload?.data?.content)) return payload.data.content
+        if (Array.isArray(payload?.data?.items)) return payload.data.items
+
+        return []
+    }
     async function taiDuLieuTheoSyllabusMonHocApDung(syllabusMonHoc = null) {
         const syllabusMonId = syllabusMonHoc?.id || null
-        const syllabusMonHocMauId = syllabusMonHoc?.syllabusMonHocMauId || null
+        const syllabusMonHocMauId =
+            syllabusMonHoc?.syllabusMonHocMauId ||
+            syllabusMonHoc?.syllabus_mon_hoc_mau_id ||
+            syllabusMonHoc?.mauId ||
+            syllabusMonHoc?.syllabusMauId ||
+            selected.syllabusMonHocmau?.id ||
+            null
 
         if (!syllabusMonId) {
             rawData.syllabusChuongBai = []
@@ -830,6 +861,8 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             rawData.syllabusTaiLieu = []
             rawData.syllabusMonHocDieuKien = []
             rawData.syllabusMonHocTaiLieu = []
+            rawData.syllabusMonHocFile = []
+            rawData.syllabusMonHocmauFile = []
 
             rawData.chuongTrinhMonQuyDoiDiemMau = []
             rawData.quyDoiDiem = []
@@ -863,15 +896,31 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             jobs.push(taiDuLieuBangTheoParams('syllabusMonHocmauChuongBai', {syllabusMonHocMauId: syllabusMonHocMauId}))
             jobs.push(taiDuLieuBangTheoParams('syllabusMonHocmauDieuKien', {syllabusMonHocMauId: syllabusMonHocMauId}))
             jobs.push(taiDuLieuBangTheoParams('syllabusMonHocmauTaiLieu', {syllabusMonHocMauId: syllabusMonHocMauId}))
+            jobs.push(
+                daoTaoXemChuongTrinhService.syllabusMonHocMauFile.list(syllabusMonHocMauId)
+                    .then(res => { rawData.syllabusMonHocmauFile = layMangResponse(res) })
+                    .catch(() => { rawData.syllabusMonHocmauFile = [] })
+            )
         } else {
             rawData.quyDoiDiemMau = []
             rawData.cauHinhDanhGiaMau = []
             rawData.syllabusMonHocmauChuongBai = []
             rawData.syllabusMonHocmauDieuKien = []
             rawData.syllabusMonHocmauTaiLieu = []
+            rawData.syllabusMonHocmauFile = []
         }
 
+        jobs.push(
+            daoTaoXemChuongTrinhService.syllabusMonHocFile.list(syllabusMonId)
+                .then(res => { rawData.syllabusMonHocFile = layMangResponse(res) })
+                .catch(() => { rawData.syllabusMonHocFile = [] })
+        )
+
         await Promise.all(jobs)
+
+        const sortThuTu = (a, b) => (a.thuTu ?? 999999) - (b.thuTu ?? 999999) || (a.id ?? 0) - (b.id ?? 0)
+        rawData.syllabusChuongBai = [...(rawData.syllabusChuongBai || [])].sort(sortThuTu)
+        rawData.syllabusMonHocmauChuongBai = [...(rawData.syllabusMonHocmauChuongBai || [])].sort(sortThuTu)
     }
 
     watch(
@@ -1694,7 +1743,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
             const cungThuTu = item?.thuTu !== null && item?.thuTu !== undefined && row.thuTu !== null && row.thuTu !== undefined
                 && String(row.thuTu || '') === String(item.thuTu || '')
 
-            return cungMaChuong || cungTen || cungThuTu
+            return cungMaChuong
+                || cungThuTu
+                || (cungTen && !row.maChuong && !item?.maChuong && row.thuTu == null && item?.thuTu == null)
         }) || null
     }
 
@@ -1758,20 +1809,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
 
         try {
             if (existing?.id) {
-                if (!serviceChuongBai.delete) {
-                    baoTinBang('syllabusMonHocmauChuongBai', 'Chưa khai báo API xóa Chương/bài đã lưu trong syllabus áp dụng.', 'error')
-                    return
-                }
-
-                await serviceChuongBai.delete(existing.id)
-                xoaDongTrongRawData('syllabusChuongBai', existing.id)
-
-                if (selected.syllabusChuongBai?.id === existing.id) {
-                    selectEntity('syllabusChuongBai', null)
-                }
-
-                await taiDuLieuTheoSyllabusMonHocApDung(selected.syllabusMonHoc)
-                baoTinBang('syllabusMonHocmauChuongBai', 'Đã bỏ gán chương/bài khỏi syllabus áp dụng.')
+                selectEntity('syllabusMonHocmauChuongBai', null)
+                selectEntity('syllabusChuongBai', existing)
+                baoTinBang('syllabusMonHocmauChuongBai', 'Đã bỏ chọn dòng mẫu. Chương/bài đã copy vào syllabus vẫn được giữ nguyên.')
                 return
             }
 
@@ -1856,19 +1896,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
 
         try {
             if (existing?.id) {
-                if (!serviceDieuKien.delete) {
-                    baoTinBang('dieuKienMonHocmau', 'Chưa khai báo API xóa Điều kiện môn học đã lưu vào syllabus.', 'error')
-                    return
-                }
-
-                await serviceDieuKien.delete(existing.id)
-                xoaDongTrongRawData('dieuKienMonHoc', existing.id)
-
-                if (selected.dieuKienMonHoc?.id === existing.id) {
-                    selectEntity('dieuKienMonHoc', null)
-                }
-
-                baoTinBang('dieuKienMonHocmau', 'Đã bỏ gán điều kiện môn học khỏi syllabus.')
+                selectEntity('dieuKienMonHocmau', null)
+                selectEntity('dieuKienMonHoc', existing)
+                baoTinBang('dieuKienMonHocmau', 'Đã bỏ chọn dòng mẫu. Điều kiện môn học đã copy vào syllabus vẫn được giữ nguyên.')
                 return
             }
 
@@ -1905,20 +1935,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
 
         try {
             if (existing?.id) {
-                if (!serviceTaiLieu.delete) {
-                    baoTinBang('syllabusMonHocmauTaiLieu', 'Chưa khai báo API xóa Tài liệu đã lưu vào syllabus.', 'error')
-                    return
-                }
-
-                await serviceTaiLieu.delete(existing.id)
-                xoaDongTrongRawData('syllabusTaiLieu', existing.id)
-
-                if (selected.syllabusTaiLieu?.id === existing.id) {
-                    selectEntity('syllabusTaiLieu', null)
-                }
-
-                await taiDuLieuTheoSyllabusMonHocApDung(selected.syllabusMonHoc)
-                baoTinBang('syllabusMonHocmauTaiLieu', 'Đã bỏ gán tài liệu khỏi syllabus.')
+                selectEntity('syllabusMonHocmauTaiLieu', null)
+                selectEntity('syllabusTaiLieu', existing)
+                baoTinBang('syllabusMonHocmauTaiLieu', 'Đã bỏ chọn dòng mẫu. Tài liệu đã copy vào syllabus vẫn được giữ nguyên.')
                 return
             }
 
@@ -2178,11 +2197,8 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
 
             try {
                 if (existing?.id) {
-                    await serviceNoi.delete(existing.id)
-                    xoaDongTrongRawData(configMau.joinKey, existing.id)
-
-                    if (selected[key]?.id === item.id) selectEntity(key, null)
-                    baoTinBang(key, `Đã bỏ gán ${configMau.tenBang} khỏi syllabus môn học.`)
+                    selectEntity(key, null)
+                    baoTinBang(key, `Đã bỏ chọn dòng mẫu. ${configMau.tenBang} đã gán vào syllabus vẫn được giữ nguyên.`)
                     return
                 }
 

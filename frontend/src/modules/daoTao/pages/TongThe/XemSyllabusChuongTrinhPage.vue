@@ -11,9 +11,7 @@
         <p class="version-text">
           Version: <strong>{{ tenVersion }}</strong>
         </p>
-        <p class="subtitle">
-          Trang chỉ xem syllabus chương trình, tệp đính kèm và các bảng cùng tầng của version. Không có thao tác thêm, sửa, xóa.
-        </p>
+
       </div>
 
       <div class="header-actions">
@@ -76,8 +74,8 @@
             <strong>{{ danhSachDieuKien.length }}</strong>
           </article>
           <article>
-            <span>Môn trong CT</span>
-            <strong>{{ danhSachMonTrongChuongTrinh.length }}</strong>
+            <span>Môn trong kỳ</span>
+            <strong>{{ danhSachMonTrongKy.length }}</strong>
           </article>
 
           <article class="tong-hop">
@@ -100,6 +98,14 @@
             <span>Giờ KT</span>
             <strong>{{ dinhDangSo(tongHopChuongTrinh.gioKiemTra) }}</strong>
           </article>
+        </div>
+      </section>
+
+      <!-- Cảnh báo môn trong kỳ chưa có syllabus -->
+      <section v-if="soMonChuaCoSyllabus > 0" class="state-card canh-bao-syllabus">
+        <div>
+          <h3>⚠ Tổng giờ/tín chỉ chưa đầy đủ</h3>
+          <p>Có {{ soMonChuaCoSyllabus }} môn trong kỳ chưa có syllabus áp dụng nên tổng giờ/tín chỉ có thể chưa đầy đủ.</p>
         </div>
       </section>
 
@@ -232,12 +238,12 @@
           <article class="table-card full">
             <header>
               <div>
-                <p class="card-eyebrow">Bảng cùng tầng</p>
-                <h3>Môn trong chương trình</h3>
+                <p class="card-eyebrow">Môn trong kỳ (tổng theo Kỳ → Môn → Syllabus áp dụng)</p>
+                <p v-if="soMonChuaCoSyllabus > 0" class="canh-bao-inline">⚠ {{ soMonChuaCoSyllabus }} môn chưa có syllabus</p>
               </div>
-              <span class="count-pill">{{ danhSachMonTrongChuongTrinh.length }}</span>
+              <span class="count-pill">{{ danhSachMonTrongKy.length }}</span>
             </header>
-            <SimpleTable :rows="danhSachMonTrongChuongTrinh" :columns="cotMonTrongChuongTrinh" empty-text="Chưa có môn trong chương trình." />
+            <SimpleTable :rows="danhSachMonTrongKy" :columns="cotMonTrongKy" empty-text="Chưa có môn nào được xếp vào kỳ." />
           </article>
         </div>
       </section>
@@ -321,23 +327,49 @@ const danhSachViTri = computed(() => layMangDauTien(cauTruc.value, ['viTriViecLa
 const danhSachDieuKien = computed(() => layMangDauTien(cauTruc.value, ['dieuKienTotNghiep', 'dieuKien', 'danhSachDieuKien']))
 const danhSachNhomKienThuc = computed(() => layMangDauTien(cauTruc.value, ['nhomKienThuc', 'danhSachNhomKienThuc']))
 const danhSachNhomTuChon = computed(() => layMangDauTien(cauTruc.value, ['nhomTuChon', 'danhSachNhomTuChon']))
+// Giữ lại để tương thích, không dùng cho tổng/bảng chính nữa
 const danhSachMonTrongChuongTrinh = computed(() => layMangDauTien(cauTruc.value, ['monTrongChuongTrinh', 'danhSachMonHoc', 'monHocList']))
 
+// ===== LUỒNG ĐÚNG: Version → Kỳ → Môn trong kỳ → Syllabus áp dụng =====
+// Lấy syllabus áp dụng từ môn trong kỳ (phần tử đầu tiên trong mảng syllabusMonHoc)
+function laySyllabusApDung(row) {
+  const list = Array.isArray(row?.syllabusMonHoc) ? row.syllabusMonHoc : []
+  return list?.[0]?.syllabusMonHoc || null
+}
+
+// Gom tất cả môn trong kỳ từ cauTruc.khungKy (chỉ môn đã xếp kỳ)
+const danhSachMonTrongKy = computed(() => {
+  const danhSachKy = layMangDauTien(cauTruc.value, ['khungKy', 'danhSachKhungKy'])
+  return danhSachKy.flatMap((ky) => {
+    const monTrongKy = layMangDauTien(ky, ['monTrongKy', 'danhSachMonTrongKy'])
+    // Gắn thêm thông tin kỳ vào mỗi môn để hiển thị cột Kỳ
+    return monTrongKy.map((row) => ({ ...row, _tenKy: ky.tenKy || ky.maKy || null }))
+  })
+})
+
+const soMonChuaCoSyllabus = computed(() =>
+  danhSachMonTrongKy.value.filter((row) => !laySyllabusApDung(row)).length
+)
+
+// Tổng theo luồng: Kỳ → Môn trong kỳ → Syllabus áp dụng
+// Môn chưa có syllabus KHÔNG cộng số từ chuongTrinhMon
 const tongHopChuongTrinh = computed(() =>
-  danhSachMonTrongChuongTrinh.value.reduce(
+  danhSachMonTrongKy.value.reduce(
     (acc, row) => {
-      const mon = row.chuongTrinhMon || {}
+      const syllabus = laySyllabusApDung(row)
+      if (!syllabus) return acc
       return {
-        soTinChi: acc.soTinChi + (Number(mon.soTinChi) || 0),
-        tongGio: acc.tongGio + (Number(mon.tongGio) || 0),
-        gioLyThuyet: acc.gioLyThuyet + (Number(mon.gioLyThuyet) || 0),
-        gioThucHanh: acc.gioThucHanh + (Number(mon.gioThucHanh) || 0),
-        gioKiemTra: acc.gioKiemTra + (Number(mon.gioKiemTra) || 0),
+        soTinChi: acc.soTinChi + (Number(syllabus.soTinChi) || 0),
+        tongGio: acc.tongGio + (Number(syllabus.tongGio) || 0),
+        gioLyThuyet: acc.gioLyThuyet + (Number(syllabus.gioLyThuyet) || 0),
+        gioThucHanh: acc.gioThucHanh + (Number(syllabus.gioThucHanh) || 0),
+        gioKiemTra: acc.gioKiemTra + (Number(syllabus.gioKiemTra) || 0),
       }
     },
     { soTinChi: 0, tongGio: 0, gioLyThuyet: 0, gioThucHanh: 0, gioKiemTra: 0 }
   )
 )
+// ===== END LUỒNG ĐÚNG =====
 
 function dinhDangSo(value) {
   const n = Number(value)
@@ -352,7 +384,7 @@ const tongBangLienQuan = computed(() => [
   danhSachDieuKien.value,
   danhSachNhomKienThuc.value,
   danhSachNhomTuChon.value,
-  danhSachMonTrongChuongTrinh.value
+  danhSachMonTrongKy.value
 ].filter((items) => items.length > 0).length)
 
 const thongTinChinh = computed(() => locDongCoGiaTri([
@@ -418,20 +450,62 @@ const cotNhomTuChon = [
   { key: 'soMon', label: 'Số môn', render: (row) => hienThi((layMangDauTien(row, ['monTuChon', 'monHoc']).length || null)) }
 ]
 
-const cotMonTrongChuongTrinh = [
+// Bảng cũ — giữ lại nhưng không dùng trực tiếp
+const cotMonTrongChuongTrinh = []
+
+// Bảng mới — TC/giờ lấy từ syllabus áp dụng, KHÔNG từ chuongTrinhMon
+const cotMonTrongKy = [
   { key: 'stt', label: 'STT', render: (_row, index) => index + 1 },
-  { key: 'ma', label: 'Mã môn', render: (row) => hienThi(layTruong(row, ['monHoc.maMon', 'monHoc.ma', 'maMon', 'ma'])) },
+  { key: 'ky', label: 'Kỳ', render: (row) => hienThi(row._tenKy) },
+  { key: 'ma', label: 'Mã môn', render: (row) => hienThi(layTruong(row, ['monHoc.maMon', 'monHoc.ma', 'chuongTrinhMon.maMonTrongCt', 'maMon', 'ma'])) },
   { key: 'ten', label: 'Tên môn', render: (row) => hienThi(layTruong(row, ['monHoc.tenMon', 'monHoc.ten', 'tenMon', 'ten'])) },
-  { key: 'tinChi', label: 'TC', render: (row) => hienThi(layTruong(row, ['chuongTrinhMon.soTinChi', 'soTinChi'])) },
-  { key: 'tongGio', label: 'Tổng giờ', render: (row) => hienThi(layTruong(row, ['chuongTrinhMon.tongGio', 'tongGio'])) },
-  { key: 'gioLyThuyet', label: 'Giờ LT', render: (row) => hienThi(layTruong(row, ['chuongTrinhMon.gioLyThuyet'])) },
-  { key: 'gioThucHanh', label: 'Giờ TH', render: (row) => hienThi(layTruong(row, ['chuongTrinhMon.gioThucHanh'])) },
-  { key: 'gioKiemTra', label: 'Giờ KT', render: (row) => hienThi(layTruong(row, ['chuongTrinhMon.gioKiemTra'])) },
-  { key: 'syllabus', label: 'Syllabus môn', render: (row) => {
-    const syllabusId = row.syllabusMonHoc?.[0]?.syllabusMonHoc?.id
-    if (!syllabusId) return h('span', { style: 'color:#94a3b8;font-size:12px;' }, 'Chưa có')
-    return h('button', { type: 'button', class: 'btn-xem-syllabus', onClick: () => router.push({ path: '/syllabus-mon-hoc/xem', query: { syllabusMonHocId: syllabusId } }) }, 'Xem syllabus')
-  }}
+  {
+    key: 'tinChi', label: 'TC',
+    render: (row) => {
+      const s = laySyllabusApDung(row)
+      return s ? hienThi(s.soTinChi) : h('span', { style: 'color:#94a3b8;' }, '—')
+    }
+  },
+  {
+    key: 'tongGio', label: 'Tổng giờ',
+    render: (row) => {
+      const s = laySyllabusApDung(row)
+      return s ? hienThi(s.tongGio) : h('span', { style: 'color:#94a3b8;' }, '—')
+    }
+  },
+  {
+    key: 'gioLyThuyet', label: 'Giờ LT',
+    render: (row) => {
+      const s = laySyllabusApDung(row)
+      return s ? hienThi(s.gioLyThuyet) : h('span', { style: 'color:#94a3b8;' }, '—')
+    }
+  },
+  {
+    key: 'gioThucHanh', label: 'Giờ TH',
+    render: (row) => {
+      const s = laySyllabusApDung(row)
+      return s ? hienThi(s.gioThucHanh) : h('span', { style: 'color:#94a3b8;' }, '—')
+    }
+  },
+  {
+    key: 'gioKiemTra', label: 'Giờ KT',
+    render: (row) => {
+      const s = laySyllabusApDung(row)
+      return s ? hienThi(s.gioKiemTra) : h('span', { style: 'color:#94a3b8;' }, '—')
+    }
+  },
+  {
+    key: 'syllabus', label: 'Syllabus môn',
+    render: (row) => {
+      const syllabusId = laySyllabusApDung(row)?.id
+      if (!syllabusId) return h('span', { style: 'color:#94a3b8;font-size:12px;' }, 'Chưa có')
+      return h('button', {
+        type: 'button',
+        class: 'btn-xem-syllabus',
+        onClick: () => router.push({ path: '/syllabus-mon-hoc/xem', query: { syllabusMonHocId: syllabusId } })
+      }, 'Xem syllabus')
+    }
+  }
 ]
 
 onMounted(() => {
@@ -822,6 +896,28 @@ function dinhDangNgay(value) {
 .state-card.empty {
   display: block;
   background: #f8fbff;
+}
+
+.state-card.canh-bao-syllabus {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.state-card.canh-bao-syllabus h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.state-card.canh-bao-syllabus p {
+  color: #78350f;
+}
+
+.canh-bao-inline {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #b45309;
+  font-weight: 600;
 }
 
 .spinner {

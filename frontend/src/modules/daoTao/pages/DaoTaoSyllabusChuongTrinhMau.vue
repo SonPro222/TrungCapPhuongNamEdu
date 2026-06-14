@@ -6,9 +6,10 @@
 
     <section class="khoi-dau">
       <div>
-        <h2>Quản lý Syllabus chương trình mẫu / gốc</h2>
+        <h2>Quản lý Syllabus chương trình mẫu </h2>
         <p>
-          Kho mẫu syllabus chương trình nằm ngoài Version. Mỗi mẫu thuộc Ngành/Chương trình, dùng lại cho các Version của chương trình đó; tầng 5 chỉ chọn mẫu để copy dữ liệu vào khung áp dụng.
+          Kho mẫu syllabus chương trình nằm ngoài Version. Mỗi mẫu thuộc Ngành/Chương trình,
+          dùng lại cho các Version của chương trình đó
         </p>
       </div>
 

@@ -275,6 +275,47 @@
           </div>
         </article>
 
+        <article class="info-card full">
+          <h3>File syllabus</h3>
+
+          <div v-if="!danhSachFileMau.length" class="empty-inline">
+            Chưa có file nào được gán vào syllabus này.
+          </div>
+
+          <div v-else class="document-list">
+            <article
+                v-for="file in danhSachFileMau"
+                :key="file.id"
+                class="document-item"
+            >
+              <div class="document-info">
+                <strong>{{ file.tenFile || 'File không có tên' }}</strong>
+                <span>{{ [file.loaiFile, formatKichThuoc(file.kichThuoc)].filter(Boolean).join(' · ') || 'Không rõ định dạng' }}</span>
+              </div>
+
+              <div class="document-actions">
+                <button
+                    type="button"
+                    class="btn"
+                    :disabled="!!loadingFile"
+                    @click="xemFileMau(file)"
+                >
+                  {{ loadingFile === `xem-${file.id}` ? 'Đang tải...' : 'Xem' }}
+                </button>
+
+                <button
+                    type="button"
+                    class="btn primary"
+                    :disabled="!!loadingFile"
+                    @click="taiFileMau(file)"
+                >
+                  {{ loadingFile === `tai-${file.id}` ? 'Đang tải...' : 'Tải' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </article>
+
         <article class="info-card">
           <h3>Tài liệu học tập</h3>
 
@@ -349,6 +390,7 @@ const router = useRouter()
 const payload = ref(null)
 const errorMessage = ref('')
 const loading = ref(false)
+const loadingFile = ref(null)
 
 const tenMonHoc = computed(() => {
   return payload.value?.tenMon || 'Syllabus môn học'
@@ -387,7 +429,7 @@ const thongTinSyllabus = computed(() => {
 })
 
 const danhSachChuongBai = computed(() => {
-  return layMangDauTien(payload.value, ['chuongBai', 'danhSachChuongBai', 'noiDung', 'noiDungSyllabus'])
+  return sapXepTheoThuTu(layMangDauTien(payload.value, ['chuongBai', 'danhSachChuongBai', 'noiDung', 'noiDungSyllabus']))
 })
 
 const danhSachChuanDauRa = computed(() => {
@@ -412,11 +454,15 @@ const tongTyLeDanhGia = computed(() => {
 })
 
 const danhSachQuyDoiDiem = computed(() => {
-  return sapXepTheoThuTu(layMangDauTien(payload.value, ['quyDoiDiem', 'quyDoiDiemTheoChuongTrinh', 'quyDoiKetQua', 'bangQuyDoiDiem', 'syllabus.quyDoiDiem', 'syllabus.quyDoiDiemTheoChuongTrinh', 'syllabus.quyDoiKetQua']))
+  return sapXepTheoThuTu(layMangDauTien(payload.value, ['quyDoiDiemTheoChuongTrinh', 'quyDoiDiem', 'quyDoiKetQua', 'bangQuyDoiDiem', 'syllabus.quyDoiDiemTheoChuongTrinh', 'syllabus.quyDoiDiem', 'syllabus.quyDoiKetQua']))
 })
 
 const danhSachDieuKien = computed(() => {
   return sapXepTheoThuTu(layMangDauTien(payload.value, ['dieuKien', 'dieuKienMonHoc', 'syllabusMonHocDieuKien', 'dieuKienSyllabus', 'syllabus.dieuKien', 'syllabus.dieuKienMonHoc', 'syllabus.syllabusMonHocDieuKien']))
+})
+
+const danhSachFileMau = computed(() => {
+  return payload.value?.fileSyllabus || []
 })
 
 const linkSyllabus = computed(() => {
@@ -444,10 +490,13 @@ async function taiChiTietSyllabusNeuCan(basePayload = {}) {
     const chiTiet = layDataTuApiResponse(res)
     const syllabus = chiTiet?.syllabusMonHoc || basePayload.syllabus || {}
 
+    const syllabusMonHocMauId = syllabus?.syllabusMonHocMauId || null
+
     return {
       ...basePayload,
       coSyllabus: true,
       syllabusId,
+      syllabusMonHocMauId,
       syllabus,
       soTinChi: basePayload.soTinChi ?? syllabus.soTinChi,
       gioLyThuyet: basePayload.gioLyThuyet ?? syllabus.gioLyThuyet,
@@ -460,7 +509,8 @@ async function taiChiTietSyllabusNeuCan(basePayload = {}) {
       quyDoiDiemTheoChuongTrinh: chiTiet?.quyDoiDiemTheoChuongTrinh || [],
       quyDoiDiem: chiTiet?.quyDoiDiem || [],
       dieuKien: chiTiet?.dieuKienMonHoc || [],
-      dieuKienMonHoc: chiTiet?.dieuKienMonHoc || []
+      dieuKienMonHoc: chiTiet?.dieuKienMonHoc || [],
+      fileSyllabus: Array.isArray(chiTiet?.fileSyllabus) ? chiTiet.fileSyllabus : []
     }
   } catch (error) {
     throw new Error(layThongBaoLoi(error, 'Không tải được chi tiết syllabus.'))
@@ -531,7 +581,7 @@ function layMangDauTien(item, keys = []) {
 
   for (const key of keys) {
     const value = layNestedValue(item, key)
-    if (Array.isArray(value)) return value
+    if (Array.isArray(value) && value.length > 0) return value
   }
 
   return []
@@ -648,6 +698,45 @@ function chuyenLinkPreviewThanhDownload(link) {
 function moLienKet(link) {
   if (!link) return
   window.open(link, '_blank')
+}
+
+async function xemFileMau(file) {
+  loadingFile.value = `xem-${file.id}`
+  try {
+    const res = await daoTaoService.syllabusMonHocFile.view(file.id)
+    const url = URL.createObjectURL(res.data)
+    window.open(url, '_blank')
+  } catch (_) {
+    // ignore
+  } finally {
+    loadingFile.value = null
+  }
+}
+
+async function taiFileMau(file) {
+  loadingFile.value = `tai-${file.id}`
+  try {
+    const res = await daoTaoService.syllabusMonHocFile.download(file.id)
+    const url = URL.createObjectURL(res.data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = file.tenFile || 'syllabus'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (_) {
+    // ignore
+  } finally {
+    loadingFile.value = null
+  }
+}
+
+function formatKichThuoc(bytes) {
+  if (!bytes) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 function coGiaTri(value) {

@@ -54,7 +54,7 @@
           />
         </label>
 
-        <label>
+        <label v-if="laAdmin">
           <span>Hiện hành</span>
           <select v-model="boLoc.hienHanh">
             <option value="">Tất cả</option>
@@ -191,6 +191,8 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { daoTaoService } from '../../services/daoTaoService.js'
 import { layThongBaoLoi } from '../../utils/layThongBaoLoi.js'
+import { authService } from '@/core/services/authService.js'
+import { ROLES } from '@/core/constants/roles.js'
 
 const router = useRouter()
 
@@ -207,6 +209,10 @@ const danhSachVersion = ref([])
 
 const chuongTrinhDangMo = ref(new Set())
 const menuVersionDangMo = ref(null)
+
+const laAdmin = computed(() => {
+  return authService.hasAnyRole([ROLES.ADMIN, ROLES.DAO_TAO])
+})
 
 const boLoc = reactive({
   nganhId: '',
@@ -300,9 +306,12 @@ const danhSachNganhGroupDaLoc = computed(() => {
                   : true
 
               const versionList = chuongTrinh.versionList.filter((version) => {
-                if (boLoc.hienHanh === 'co' && version.hienHanhText !== 'Có') return false
-                if (boLoc.hienHanh === 'khong' && version.hienHanhText !== 'Không') return false
-                if (boLoc.hienHanh === 'khong-ro' && version.hienHanhText !== '—') return false
+                // Sinh viên / giảng viên / khách: chỉ xem version hiện hành
+                if (!laAdmin.value && version.hienHanhText !== 'Có') return false
+
+                if (laAdmin.value && boLoc.hienHanh === 'co' && version.hienHanhText !== 'Có') return false
+                if (laAdmin.value && boLoc.hienHanh === 'khong' && version.hienHanhText !== 'Không') return false
+                if (laAdmin.value && boLoc.hienHanh === 'khong-ro' && version.hienHanhText !== '—') return false
 
                 if (keyword) {
                   const text = [

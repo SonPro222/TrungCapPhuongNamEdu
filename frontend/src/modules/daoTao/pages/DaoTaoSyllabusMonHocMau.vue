@@ -54,33 +54,20 @@
               <ThongBaoKhuVuc :state="thongBaoKhuVuc.syllabus" />
 
               <form class="form-grid form-syllabus" @submit.prevent="luuSyllabus">
-                <label>
-                  <span>Mã syllabus</span>
-                  <input v-model.trim="formSyllabus.ma" type="text" placeholder="VD: SYL-mau-MH28-BTSCMB-2026">
-                </label>
-                <label>
-                  <span>Tên syllabus <b>*</b></span>
-                  <input v-model.trim="formSyllabus.ten" type="text" placeholder="VD: Syllabus mẫu - An toàn an ninh dân dụng">
-                </label>
+                <div class="hang-compact cot-rong">
+                  <label><span>Mã syllabus</span><input v-model.trim="formSyllabus.ma" type="text" placeholder="VD: SYL-mau-MH28-BTSCMB-2026"></label>
+                  <label><span>Tên syllabus <b>*</b></span><input v-model.trim="formSyllabus.ten" type="text" placeholder="VD: Syllabus mẫu - An toàn an ninh dân dụng"></label>
+                  <label class="nho"><span>Số buổi học <b>*</b></span><input v-model="formSyllabus.soBuoiHoc" type="number" min="1" step="1"></label>
+                  <label class="nho"><span>Số tín chỉ</span><input v-model="formSyllabus.soTinChi" type="number" min="0" step="0.1"></label>
+                  <label class="nho"><span>Số tiết mỗi buổi <b>*</b></span><input v-model="formSyllabus.soTietMoiBuoi" type="number" min="0.1" step="0.1"></label>
+                </div>
                 <label class="cot-rong">
                   <span>Vị trí</span>
-                  <textarea v-model.trim="formSyllabus.viTri" rows="3" placeholder="Vị trí của môn học trong chương trình"></textarea>
+                  <textarea v-model.trim="formSyllabus.viTri" v-auto-resize placeholder="Vị trí của môn học trong chương trình"></textarea>
                 </label>
                 <label>
                   <span>Tính chất</span>
                   <input v-model.trim="formSyllabus.tinhChat" type="text" placeholder="VD: Bắt buộc / Tự chọn">
-                </label>
-                <label>
-                  <span>Số buổi học <b>*</b></span>
-                  <input v-model="formSyllabus.soBuoiHoc" type="number" min="1" step="1">
-                </label>
-                <label>
-                  <span>Số tín chỉ</span>
-                  <input v-model="formSyllabus.soTinChi" type="number" min="0" step="0.1">
-                </label>
-                <label>
-                  <span>Số tiết mỗi buổi <b>*</b></span>
-                  <input v-model="formSyllabus.soTietMoiBuoi" type="number" min="0.1" step="0.1">
                 </label>
                 <div class="cot-rong tong-hop-syllabus">
                   <div class="tieu-de-tong-hop">Tổng hợp giờ từ chương/bài mẫu - không nhập tay</div>
@@ -127,27 +114,27 @@
                 </label>
                 <label class="cot-rong">
                   <span>Mục tiêu</span>
-                  <textarea v-model.trim="formSyllabus.mucTieu" rows="8"></textarea>
+                  <textarea v-model.trim="formSyllabus.mucTieu" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Phương pháp đánh giá</span>
-                  <textarea v-model.trim="formSyllabus.phuongPhapDanhGia" rows="7"></textarea>
+                  <textarea v-model.trim="formSyllabus.phuongPhapDanhGia" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Điều kiện hoàn thành</span>
-                  <textarea v-model.trim="formSyllabus.dieuKienHoanThanh" rows="3"></textarea>
+                  <textarea v-model.trim="formSyllabus.dieuKienHoanThanh" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Hướng dẫn</span>
-                  <textarea v-model.trim="formSyllabus.huongDan" rows="3"></textarea>
+                  <textarea v-model.trim="formSyllabus.huongDan" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Công thức quy đổi</span>
-                  <textarea v-model.trim="formSyllabus.congThucQuyDoi" rows="3"></textarea>
+                  <textarea v-model.trim="formSyllabus.congThucQuyDoi" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Ghi chú</span>
-                  <textarea v-model.trim="formSyllabus.ghiChu" rows="2" placeholder="VD: Syllabus mẫu nhập từ tài liệu chương trình đào tạo năm 2026."></textarea>
+                  <textarea v-model.trim="formSyllabus.ghiChu" v-auto-resize placeholder="VD: Syllabus mẫu nhập từ tài liệu chương trình đào tạo năm 2026."></textarea>
                 </label>
                 <div class="hang-nut cot-rong">
                   <button type="submit" class="nut chinh" :disabled="dangLuu">{{ formSyllabus.id ? 'Cập nhật syllabus' : 'Lưu syllabus' }}</button>
@@ -174,37 +161,24 @@
                   <span>Tên chương/bài <b>*</b></span>
                   <input v-model.trim="formChuongBai.ten" type="text" placeholder="VD: Chương 1: Các định nghĩa và khái niệm">
                 </label>
-                <label>
-                  <span>TT</span>
-                  <input v-model="formChuongBai.thuTu" type="number" min="0">
-                </label>
-                <label>
-                  <span>Tổng giờ</span>
-                  <input v-model="formChuongBai.tongGio" type="number" min="0" step="0.1">
-                </label>
-                <label>
-                  <span>LT</span>
-                  <input v-model="formChuongBai.gioLyThuyet" type="number" min="0" step="0.1">
-                </label>
-                <label>
-                  <span>TH</span>
-                  <input v-model="formChuongBai.gioThucHanh" type="number" min="0" step="0.1">
-                </label>
-                <label>
-                  <span>KT</span>
-                  <input v-model="formChuongBai.gioKiemTra" type="number" min="0" step="0.1">
-                </label>
+                <div class="hang-compact cot-rong">
+                  <label class="nho"><span>TT</span><input v-model="formChuongBai.thuTu" type="number" min="0"></label>
+                  <label class="nho"><span>Tổng giờ</span><input v-model="formChuongBai.tongGio" type="number" min="0" step="0.1"></label>
+                  <label class="nho"><span>LT</span><input v-model="formChuongBai.gioLyThuyet" type="number" min="0" step="0.1"></label>
+                  <label class="nho"><span>TH</span><input v-model="formChuongBai.gioThucHanh" type="number" min="0" step="0.1"></label>
+                  <label class="nho"><span>KT</span><input v-model="formChuongBai.gioKiemTra" type="number" min="0" step="0.1"></label>
+                </div>
                 <label class="cot-rong">
                   <span>Mục tiêu chương/bài</span>
-                  <textarea v-model.trim="formChuongBai.mucTieu" rows="2"></textarea>
+                  <textarea v-model.trim="formChuongBai.mucTieu" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Nội dung</span>
-                  <textarea v-model.trim="formChuongBai.noiDung" rows="2"></textarea>
+                  <textarea v-model.trim="formChuongBai.noiDung" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Ghi chú</span>
-                  <textarea v-model.trim="formChuongBai.ghiChu" rows="2"></textarea>
+                  <textarea v-model.trim="formChuongBai.ghiChu" v-auto-resize></textarea>
                 </label>
                 <div class="hang-nut cot-rong">
                   <button type="submit" class="nut chinh" :disabled="dangLuu || !syllabusDangChon">{{ formChuongBai.id ? 'Cập nhật' : 'Thêm chương/bài' }}</button>
@@ -240,7 +214,11 @@
                     <td class="cot-so">{{ hienThi(row.gioLyThuyet) }}</td>
                     <td class="cot-so">{{ hienThi(row.gioThucHanh) }}</td>
                     <td class="cot-so">{{ hienThi(row.gioKiemTra) }}</td>
-                    <td class="cot-noi-dung">{{ hienThi(row.noiDung) }}</td>
+                    <td class="cot-noi-dung">
+                      <div class="outline-content-cell">
+                        {{ formatOutlineText(row.noiDung) }}
+                      </div>
+                    </td>
                     <td class="cot-ghi-chu-bang">{{ hienThi(row.ghiChu) }}</td>
                     <td class="thao-tac">
                       <button type="button" class="nut nho" @click="suaChuongBai(row)">Sửa</button>
@@ -313,7 +291,7 @@
                 </label>
                 <label class="cot-rong">
                   <span>Ghi chú</span>
-                  <textarea v-model.trim="formCauHinhDanhGiaMau.ghiChu" rows="2"></textarea>
+                  <textarea v-model.trim="formCauHinhDanhGiaMau.ghiChu" v-auto-resize></textarea>
                 </label>
                 <div class="hang-nut cot-rong">
                   <button type="submit" class="nut chinh" :disabled="dangLuu || !syllabusDangChon">{{ formCauHinhDanhGiaMau.id ? 'Cập nhật cấu hình đánh giá mẫu' : 'Thêm cấu hình đánh giá mẫu' }}</button>
@@ -395,11 +373,11 @@
                 </label>
                 <label class="cot-rong">
                   <span>Công thức</span>
-                  <textarea v-model.trim="formQuyDoiDiemMau.congThuc" rows="2" placeholder="VD: điểm >= 5 thì Đạt"></textarea>
+                  <textarea v-model.trim="formQuyDoiDiemMau.congThuc" v-auto-resize placeholder="VD: điểm >= 5 thì Đạt"></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Ghi chú</span>
-                  <textarea v-model.trim="formQuyDoiDiemMau.ghiChu" rows="2"></textarea>
+                  <textarea v-model.trim="formQuyDoiDiemMau.ghiChu" v-auto-resize></textarea>
                 </label>
                 <div class="hang-nut cot-rong">
                   <button type="submit" class="nut chinh" :disabled="dangLuu || !syllabusDangChon">{{ formQuyDoiDiemMau.id ? 'Cập nhật quy đổi điểm mẫu' : 'Thêm quy đổi điểm mẫu' }}</button>
@@ -427,8 +405,12 @@
                 <label><span>Tên tài liệu <b>*</b></span><input v-model.trim="formTaiLieumau.ten" type="text"></label>
                 <label><span>Loại</span><input v-model.trim="formTaiLieumau.loai" type="text"></label>
                 <label><span>Tác giả</span><input v-model.trim="formTaiLieumau.tacGia" type="text"></label>
-                <label><span>Nhà xuất bản</span><input v-model.trim="formTaiLieumau.nhaXuatBan" type="text"></label>
-                <label><span>Năm xuất bản</span><input v-model="formTaiLieumau.namXuatBan" type="number" min="1900" max="2100"></label>
+                <div class="hang-compact cot-rong">
+                  <label><span>Nhà xuất bản</span><input v-model.trim="formTaiLieumau.nhaXuatBan" type="text"></label>
+                  <label class="nho"><span>Năm XB</span><input v-model="formTaiLieumau.namXuatBan" type="number" min="1900" max="2100"></label>
+                  <label class="nho"><span>Thứ tự</span><input v-model="formGanTaiLieu.thuTu" type="number" min="0"></label>
+                  <label class="check-line compact-check tu-chinh"><input v-model="formGanTaiLieu.batBuoc" type="checkbox"><span>Bắt buộc</span></label>
+                </div>
                 <label class="cot-rong">
                   <span>Đường dẫn đã lưu / danh sách file</span>
                   <textarea
@@ -438,17 +420,9 @@
                       placeholder="Tự sinh sau khi chọn file/thư mục và upload qua API, không nhập tay."
                   ></textarea>
                 </label>
-                <label>
-                  <span>Thứ tự</span>
-                  <input v-model="formGanTaiLieu.thuTu" type="number" min="0">
-                </label>
-                <label class="check-line compact-check">
-                  <input v-model="formGanTaiLieu.batBuoc" type="checkbox">
-                  <span>Bắt buộc</span>
-                </label>
                 <label class="cot-rong">
                   <span>Ghi chú tài liệu</span>
-                  <textarea v-model.trim="formTaiLieumau.ghiChu" rows="2"></textarea>
+                  <textarea v-model.trim="formTaiLieumau.ghiChu" v-auto-resize></textarea>
                 </label>
                 <label class="cot-rong">
                   <span>Ghi chú gán trong syllabus mẫu</span>
@@ -457,16 +431,85 @@
                 <input ref="taiLieuFileInput" class="input-file-hidden" type="file" multiple accept=".doc,.docx,.pdf,.xls,.xlsx,.ppt,.pptx,.txt,.png,.jpg,.jpeg" @change="xuLyChonDuongDanTaiLieu">
                 <input ref="taiLieuFolderInput" class="input-file-hidden" type="file" multiple webkitdirectory directory @change="xuLyChonDuongDanTaiLieu">
                 <div class="hang-nut cot-rong">
-                  <button type="submit" class="nut" :disabled="dangLuu">{{ formGanTaiLieu.id ? 'Cập nhật tài liệu mẫu của syllabus' : 'Thêm tài liệu mẫu vào syllabus' }}</button>
-                  <button type="button" class="nut" @click="chonTepTaiLieu">Chọn nhiều file</button>
-                  <button type="button" class="nut" @click="chonThuMucTaiLieu">Chọn thư mục</button>
-                  <button type="button" class="nut" :disabled="!formTaiLieumau.duongDan" @click="moDuongDan(formTaiLieumau.duongDan)">Mở đường dẫn</button>
+                  <button type="submit" class="nut chinh" :disabled="dangLuu">{{ formGanTaiLieu.id ? 'Cập nhật tài liệu mẫu của syllabus' : 'Thêm tài liệu mẫu vào syllabus' }}</button>
+                  <button type="button" class="nut chinh" @click="chonTepTaiLieu">Chọn nhiều file</button>
+                  <button type="button" class="nut chinh" @click="chonThuMucTaiLieu">Chọn thư mục</button>
+                  <button type="button" class="nut chinh" :disabled="!formTaiLieumau.duongDan" @click="moDuongDan(formTaiLieumau.duongDan)">Mở đường dẫn</button>
                   <button type="button" class="nut" @click="resetFormTaiLieumau">Làm mới</button>
                 </div>
               </form>
 
               <BangDonGian :rows="danhSachGanTaiLieuHienThi" :columns="cotTaiLieu" empty-text="Chưa gán tài liệu mẫu." @edit="suaGanTaiLieu" @delete="xoaGanTaiLieu" />
             </div>
+
+            <!-- ==================== BLOCK FILE SYLLABUS MẪU ==================== -->
+            <div class="the khoi-file-syllabus">
+              <div class="tieu-de-the">
+                <h3>File gốc syllabus mẫu</h3>
+                <p>Upload PDF / DOCX — dữ liệu được import và lưu vào DB ngay. Kiểm tra/chỉnh sửa lại bên dưới nếu cần.</p>
+              </div>
+              <ThongBaoKhuVuc :state="thongBaoKhuVuc.fileSyllabus" />
+
+              <div v-if="!monHocIdDangChon" class="canh-bao-nho">Chọn môn học trước khi upload file.</div>
+
+              <div v-else class="file-upload-bar">
+                <input
+                    ref="syllabusFileInput"
+                    class="input-file-hidden"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    @change="xuLyImportFileSyllabus"
+                >
+                <button type="button" class="nut chinh" :disabled="dangUploadFile || !monHocIdDangChon" @click="chonFileSyllabus">
+                  {{ dangUploadFile ? 'Đang import...' : '+ Import file (PDF/DOCX)' }}
+                </button>
+                <span class="mo-ta-upload">
+                  {{ syllabusDangChon ? 'Parse và lưu dữ liệu vào DB ngay, sau đó kiểm tra/chỉnh sửa.' : 'Chưa có syllabus — tạo tự động rồi lưu dữ liệu parse được.' }}
+                </span>
+              </div>
+
+              <!-- Cảnh báo sau khi import -->
+              <div v-if="canhBaoTuFile.length" class="canhbao-parse-boc">
+                <div v-for="(msg, i) in canhBaoTuFile" :key="i" class="canhbao-parse-dong">⚠ {{ msg }}</div>
+              </div>
+
+              <div class="bang-boc bang-file">
+                <table class="bang-du-lieu">
+                  <thead>
+                  <tr>
+                    <th style="width:42px">STT</th>
+                    <th>Tên file</th>
+                    <th style="width:80px">Loại</th>
+                    <th style="width:80px">Kích thước</th>
+                    <th style="width:90px">Trạng thái đọc</th>
+                    <th style="width:70px">Nguồn</th>
+                    <th>Ghi chú</th>
+                    <th style="width:100px">Ngày upload</th>
+                    <th style="width:215px">Thao tác</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr v-if="!danhSachFileSyllabus.length"><td colspan="9" class="rong">Chưa có file nào được upload.</td></tr>
+                  <tr v-for="(row, idx) in danhSachFileSyllabus" :key="row.id">
+                    <td class="cot-so cot-can-giua">{{ idx + 1 }}</td>
+                    <td class="ten-file-cell">{{ row.tenFile }}</td>
+                    <td class="cot-can-giua">{{ row.loaiFile?.split('/').pop() || '-' }}</td>
+                    <td class="cot-can-giua">{{ hienThiKichThuoc(row.kichThuoc) }}</td>
+                    <td :class="['cot-can-giua', 'trang-thai-doc', row.trangThaiDoc]">{{ nhanTrangThaiDoc[row.trangThaiDoc] || row.trangThaiDoc || '-' }}</td>
+                    <td class="cot-can-giua">{{ row.laFileNguon ? 'Nguồn' : '-' }}</td>
+                    <td>{{ row.ghiChu || '-' }}</td>
+                    <td class="cot-can-giua">{{ hienThiNgay(row.createdAt) }}</td>
+                    <td class="thao-tac">
+                      <button type="button" class="nut nho nut-xem-file" @click="xemFileSyllabus(row)">Xem</button>
+                      <button type="button" class="nut nho nut-mo-doc" @click="taiFileSyllabus(row)">Tải</button>
+                      <button type="button" class="nut nho nut-xoa" @click="xoaFileSyllabus(row)">Xóa</button>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- ==================== END BLOCK FILE ==================== -->
 
             <div class="the khoi-dieu-kien">
               <div class="tieu-de-the"><h3>Điều kiện mẫu của syllabus</h3><p>Dữ liệu này có trong DB: điều kiện phòng học, thiết bị, học liệu, dụng cụ, nguyên vật liệu hoặc điều kiện khác. Đánh giá điểm nằm ở form syllabus phía trên.</p></div>
@@ -498,12 +541,12 @@
 
                 <label class="cot-rong">
                   <span>Nội dung <b>*</b></span>
-                  <textarea v-model.trim="formDieuKienmau.noiDung" rows="2"></textarea>
+                  <textarea v-model.trim="formDieuKienmau.noiDung" v-auto-resize></textarea>
                 </label>
 
                 <label class="cot-rong">
                   <span>Ghi chú điều kiện</span>
-                  <textarea v-model.trim="formDieuKienmau.ghiChu" rows="2"></textarea>
+                  <textarea v-model.trim="formDieuKienmau.ghiChu" v-auto-resize></textarea>
                 </label>
 
                 <label class="cot-rong">
@@ -564,7 +607,9 @@ const ThongBaoKhuVuc = defineComponent({
     state: { type: Object, required: true }
   },
   setup(props) {
-    return () => h('div', { class: ['thong-bao-khu-vuc', props.state?.type || 'info'] }, props.state?.message || 'Chưa có thông báo.')
+    return () => props.state?.message
+        ? h('div', { class: ['thong-bao-khu-vuc', props.state?.type || 'info'] }, props.state.message)
+        : null
   }
 })
 
@@ -609,7 +654,8 @@ const thongBaoKhuVuc = reactive({
   cauHinhDanhGiaMau: { message: 'Cấu hình đánh giá mẫu của syllabus mẫu sẵn sàng.', type: 'info' },
   quyDoiDiemMau: { message: 'Quy đổi điểm mẫu của syllabus mẫu sẵn sàng.', type: 'info' },
   taiLieu: { message: 'Tài liệu mẫu của syllabus sẵn sàng.', type: 'info' },
-  dieuKien: { message: 'Điều kiện mẫu sẵn sàng.', type: 'info' }
+  dieuKien: { message: 'Điều kiện mẫu sẵn sàng.', type: 'info' },
+  fileSyllabus: { message: 'File syllabus mẫu sẵn sàng.', type: 'info' }
 })
 const router = useRouter()
 const dangTai = ref(false)
@@ -617,6 +663,10 @@ const dangLuu = ref(false)
 const tuKhoaMon = ref('')
 const taiLieuFileInput = ref(null)
 const taiLieuFolderInput = ref(null)
+const syllabusFileInput = ref(null)
+const dangUploadFile = ref(false)
+const danhSachFileSyllabus = ref([])
+const canhBaoTuFile = ref([])
 const monHocIdDangChon = ref(null)
 const syllabusIdDangChon = ref(null)
 const syllabusTrungTheoMon = ref([])
@@ -812,10 +862,18 @@ function layItems(page) { return Array.isArray(page?.items) ? page.items : [] }
 function layIdSauKhiLuu(res) {
   return res?.id || res?.data?.id || res?.data?.data?.id || null
 }
-function baoTin(message, type = 'success', khuVuc = 'syllabus') {
+const _baoTinTimers = {}
+function baoTin(message, type = 'success', khuVuc = 'syllabus', thoiGian = 5000) {
   const key = thongBaoKhuVuc[khuVuc] ? khuVuc : 'syllabus'
   thongBaoKhuVuc[key].message = message
   thongBaoKhuVuc[key].type = type
+  clearTimeout(_baoTinTimers[key])
+  if (thoiGian > 0) {
+    _baoTinTimers[key] = setTimeout(() => {
+      thongBaoKhuVuc[key].message = ''
+      thongBaoKhuVuc[key].type = 'info'
+    }, thoiGian)
+  }
 }
 function datThongBaoNhieuKhuVuc(message, type, khuVucList) {
   khuVucList.forEach((khuVuc) => baoTin(message, type, khuVuc))
@@ -899,7 +957,8 @@ async function taiChiTietSyllabus() {
   if (!syllabusIdDangChon.value) return
   try {
     const params = { size: 500, syllabusMonHocMauId: syllabusIdDangChon.value }
-    const [chuongBai, cauHinhDanhGiaMau, quyDoiDiemMau, ganTaiLieu, ganDieuKien] = await Promise.all([services.syllabusMonHocmauChuongBai.getAll(params), services.cauHinhDanhGiaMau.getAll(params), services.quyDoiDiemMau.getAll(params), services.syllabusMonHocmauTaiLieu.getAll(params), services.syllabusMonHocmauDieuKien.getAll(params)])
+    const [chuongBai, cauHinhDanhGiaMau, quyDoiDiemMau, ganTaiLieu, ganDieuKien, dieuKienmauMoi] = await Promise.all([services.syllabusMonHocmauChuongBai.getAll(params), services.cauHinhDanhGiaMau.getAll(params), services.quyDoiDiemMau.getAll(params), services.syllabusMonHocmauTaiLieu.getAll(params), services.syllabusMonHocmauDieuKien.getAll(params), services.dieuKienMonHocmau.getAll({ size: 500 })])
+    await taiDanhSachFileSyllabus()
     danhSachChuongBai.value = layItems(chuongBai).sort((a, b) => Number(a.thuTu || 0) - Number(b.thuTu || 0))
     let rowsCauHinhDanhGiaMau = layItems(cauHinhDanhGiaMau)
     // BE chuẩn đã filter theo syllabusMonHocMauId. Dòng dưới vẫn lọc lại ở FE để tránh hiển thị nhầm nếu API trả nhiều dữ liệu.
@@ -908,6 +967,7 @@ async function taiChiTietSyllabus() {
     danhSachQuyDoiDiemMau.value = layItems(quyDoiDiemMau).sort((a, b) => Number(a.thuTu || 0) - Number(b.thuTu || 0))
     danhSachGanTaiLieu.value = layItems(ganTaiLieu).sort((a, b) => Number(a.thuTu || 0) - Number(b.thuTu || 0))
     danhSachGanDieuKien.value = layItems(ganDieuKien).sort((a, b) => Number(a.thuTu || 0) - Number(b.thuTu || 0))
+    danhSachDieuKienmau.value = layItems(dieuKienmauMoi)
   } catch (error) { datThongBaoNhieuKhuVuc(layThongBaoLoi(error, 'Không tải được chi tiết syllabus.'), 'error', ['chuongBai', 'cauHinhDanhGiaMau', 'quyDoiDiemMau', 'taiLieu', 'dieuKien']) }
 }
 
@@ -1280,13 +1340,158 @@ async function xoaGanDieuKien(row) { await xoaChiTiet(services.syllabusMonHocmau
 
 async function luuChiTiet(service, id, payload, resetFn, ten, khuVuc = 'syllabus') { if (!syllabusIdDangChon.value) return baoTin('Cần lưu syllabus mẫu trước.', 'error', khuVuc); dangLuu.value = true; try { if (id) await service.update(id, payload); else await service.create(payload); await taiChiTietSyllabus(); resetFn(); baoTin(`Đã lưu ${ten}.`, 'success', khuVuc) } catch (error) { baoTin(layThongBaoLoi(error, `Không lưu được ${ten}.`), 'error', khuVuc) } finally { dangLuu.value = false } }
 async function xoaChiTiet(service, row, ten, khuVuc = 'syllabus') { if (!row?.id) return; if (!window.confirm(`Xóa ${ten} này?`)) return; dangLuu.value = true; try { await service.delete(row.id); await taiChiTietSyllabus(); baoTin(`Đã xóa ${ten}.`, 'success', khuVuc) } catch (error) { baoTin(layThongBaoLoi(error, `Không xóa được ${ten}.`), 'error', khuVuc) } finally { dangLuu.value = false } }
-function resetTatCaFormChiTiet() { danhSachChuongBai.value = []; danhSachCauHinhDanhGiaMau.value = []; danhSachQuyDoiDiemMau.value = []; danhSachGanTaiLieu.value = []; danhSachGanDieuKien.value = []; resetFormChuongBai(); resetFormCauHinhDanhGiaMau(); resetFormQuyDoiDiemMau(); resetFormGanTaiLieu(); resetFormGanDieuKien() }
+function resetTatCaFormChiTiet() { danhSachChuongBai.value = []; danhSachCauHinhDanhGiaMau.value = []; danhSachQuyDoiDiemMau.value = []; danhSachGanTaiLieu.value = []; danhSachGanDieuKien.value = []; danhSachFileSyllabus.value = []; canhBaoTuFile.value = []; resetFormChuongBai(); resetFormCauHinhDanhGiaMau(); resetFormQuyDoiDiemMau(); resetFormGanTaiLieu(); resetFormGanDieuKien() }
+
+// ==================== File syllabus mẫu ====================
+function chonFileSyllabus() { syllabusFileInput.value?.click() }
+
+const nhanTrangThaiDoc = {
+  CHUA_DOC: 'Chưa đọc',
+  DA_DOC: 'Đã đọc',
+  DOC_LOI: 'Lỗi đọc'
+}
+
+function hienThiKichThuoc(bytes) {
+  if (!bytes) return '-'
+  const kb = Number(bytes) / 1024
+  if (kb < 1024) return `${kb.toFixed(1)} KB`
+  return `${(kb / 1024).toFixed(2)} MB`
+}
+
+async function taiDanhSachFileSyllabus() {
+  if (!syllabusIdDangChon.value) { danhSachFileSyllabus.value = []; return }
+  try {
+    const res = await services.syllabusMonHocMauFile.list(syllabusIdDangChon.value)
+    // parseResponse đã extract body.data → res là array trực tiếp
+    danhSachFileSyllabus.value = Array.isArray(res) ? res : []
+  } catch (error) { baoTin(layThongBaoLoi(error, 'Không tải được danh sách file syllabus mẫu.'), 'error', 'fileSyllabus') }
+}
+
+/**
+ * Import file: upload → BE parse → BE lưu DB → FE load lại từ DB.
+ * Thay thế flow upload cũ (chỉ upload + xem text).
+ */
+async function xuLyImportFileSyllabus(event) {
+  const file = event?.target?.files?.[0]
+  if (!file) return
+  if (!monHocIdDangChon.value) { event.target.value = ''; return baoTin('Cần chọn môn học.', 'error', 'fileSyllabus') }
+  dangUploadFile.value = true
+  canhBaoTuFile.value = []
+  try {
+    let res
+    if (syllabusIdDangChon.value) {
+      res = await services.syllabusMonHocMauFile.importFileBySyllabusId(syllabusIdDangChon.value, file)
+    } else {
+      res = await services.syllabusMonHocMauFile.importFileByMonHocId(monHocIdDangChon.value, file)
+    }
+    const data = res?.data?.data ?? res?.data ?? res
+    const canhBao = Array.isArray(data?.canhBao) ? data.canhBao : []
+    if (canhBao.length) canhBaoTuFile.value = canhBao
+
+    // Reload toàn bộ từ DB (syllabusId mới được cập nhật đúng)
+    await taiSyllabusTheoMonVaMoForm()
+
+    const msg = canhBao.length
+        ? `Đã import và lưu vào DB. Có ${canhBao.length} cảnh báo — kiểm tra bên dưới.`
+        : 'Đã import file và lưu dữ liệu vào DB. Vui lòng kiểm tra/chỉnh sửa lại các bảng nếu cần.'
+    baoTin(msg, canhBao.length ? 'warning' : 'success', 'fileSyllabus')
+  } catch (error) { baoTin(layThongBaoLoi(error, 'Không import được file syllabus mẫu.'), 'error', 'fileSyllabus') }
+  finally { dangUploadFile.value = false; event.target.value = '' }
+}
+
+/** Re-import từ file đã lưu trong DB: parse lại + cập nhật dữ liệu */
+async function importTuFileDaLuu(row) {
+  if (!row?.id) return
+  if (!window.confirm(`Re-import từ file "${row.tenFile}"? Dữ liệu chương/bài, điều kiện, tài liệu sẽ bị ghi đè.`)) return
+  baoTin('Đang import từ file...', 'info', 'fileSyllabus')
+  canhBaoTuFile.value = []
+  try {
+    const res = await services.syllabusMonHocMauFile.importByFileId(row.id)
+    const data = res?.data?.data ?? res?.data ?? res
+    const canhBao = Array.isArray(data?.canhBao) ? data.canhBao : []
+    if (canhBao.length) canhBaoTuFile.value = canhBao
+
+    await taiSyllabusTheoMonVaMoForm()
+
+    const msg = canhBao.length
+        ? `Đã import lại và lưu vào DB. Có ${canhBao.length} cảnh báo.`
+        : 'Đã import lại từ file và cập nhật dữ liệu. Vui lòng kiểm tra/chỉnh sửa nếu cần.'
+    baoTin(msg, canhBao.length ? 'warning' : 'success', 'fileSyllabus')
+  } catch (error) { baoTin(layThongBaoLoi(error, 'Không import được file.'), 'error', 'fileSyllabus') }
+}
+
+async function xemFileSyllabus(row) {
+  try {
+    const blob = await services.syllabusMonHocMauFile.view(row.id)
+    const objectUrl = URL.createObjectURL(blob)
+    const win = window.open(objectUrl, '_blank', 'noopener,noreferrer')
+    // revoke sau 60s để tránh memory leak
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60000)
+    if (!win) baoTin('Trình duyệt đã chặn popup. Hãy cho phép popup để xem file.', 'warning', 'fileSyllabus')
+  } catch (error) { baoTin(layThongBaoLoi(error, 'Không mở được file.'), 'error', 'fileSyllabus') }
+}
+
+async function taiFileSyllabus(row) {
+  try {
+    const blob = await services.syllabusMonHocMauFile.download(row.id)
+    const objectUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = objectUrl
+    a.download = row.tenFile || 'file'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 5000)
+  } catch (error) { baoTin(layThongBaoLoi(error, 'Không tải được file.'), 'error', 'fileSyllabus') }
+}
+
+async function xoaFileSyllabus(row) {
+  if (!row?.id) return
+  if (!window.confirm(`Xóa file "${row.tenFile}"?`)) return
+  try {
+    await services.syllabusMonHocMauFile.delete(row.id)
+    await taiDanhSachFileSyllabus()
+    baoTin(`Đã xóa file "${row.tenFile}".`, 'success', 'fileSyllabus')
+  } catch (error) { baoTin(layThongBaoLoi(error, 'Không xóa được file syllabus mẫu.'), 'error', 'fileSyllabus') }
+}
+const formatOutlineText = (value) => {
+  if (!value) return '-'
+
+  return String(value)
+      .replace(/\\n/g, ' ')
+      .replace(/\r?\n/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      // Xuống dòng trước các mục dạng 2.1. / 2.1.1. / 2.1.1.1.
+      .replace(/\s+(?=(?:\d+\.){2,}\s)/g, '\n')
+      // Xuống dòng trước mục cấp 1 dạng 1. / 2. / 3. nếu cần
+      .replace(/\s+(?=\d+\.\s+[A-ZÀ-Ỹa-zà-ỹ])/g, '\n')
+      .trim()
+}
+// ==================== Auto-resize textarea ====================
+function autoResizeEl(el) {
+  if (!el) return
+  if (!el._arInit) {
+    el.style.overflow = 'hidden'
+    el.style.resize = 'none'
+    el.addEventListener('input', () => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px' })
+    el._arInit = true
+  }
+  el.style.height = 'auto'
+  el.style.height = Math.max(el.scrollHeight, 48) + 'px'
+}
+const vAutoResize = { mounted: autoResizeEl, updated: autoResizeEl }
 
 onMounted(taiDuLieuNen)
 </script>
 
 <style scoped>
 .syllabus-mon-hoc-mau-page { display: grid; gap: 10px; padding: 10px; font-family: Roboto, Arial, sans-serif; color: #111827; }
+textarea { min-height: 48px; box-sizing: border-box; width: 100%; }
+.hang-compact { display: flex; gap: 8px; align-items: flex-end; flex-wrap: nowrap; }
+.hang-compact label { flex: 1 1 auto; min-width: 0; }
+.hang-compact label.nho { flex: 0 0 90px; }
+.hang-compact label.tu-chinh { flex: 0 0 auto; align-self: center; padding-top: 16px; }
 .thong-bao { padding: 9px 11px; border: 1px solid #bbf7d0; border-radius: 5px; background: #f0fdf4; color: #166534; font-size: 13px; }
 .thong-bao.error { border-color: #fecaca; background: #fef2f2; color: #b91c1c; }
 .khoi-dau, .the, .hop-rong, .thanh-mon { border: 1px solid #d7dde6; border-radius: 6px; background: #fff; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); }
@@ -1304,11 +1509,11 @@ onMounted(taiDuLieuNen)
 .tieu-de-the { padding: 9px 11px; border-bottom: 1px solid #e5e7eb; background: #f8fafc; }
 .tieu-de-the.compact h3 { font-size: 15px; }
 .bo-loc { padding: 10px; border-bottom: 1px solid #eef2f7; }
-.danh-sach-mon { display: grid; gap: 5px; padding: 10px; max-height: calc(100vh - 155px); min-height: 680px; overflow: auto; scrollbar-width: thin; }
-.dong-mon { display: grid; gap: 2px; width: 100%; border: 1px solid #e5e7eb; border-radius: 5px; background: #fff; padding: 7px 9px; text-align: left; cursor: pointer; font-family: Roboto, Arial, sans-serif; }
+.danh-sach-mon { display: grid; align-content: start; gap: 5px; padding: 10px; max-height: calc(100vh - 155px); min-height: 680px; overflow: auto; scrollbar-width: thin; }
+.dong-mon { display: grid; gap: 2px; width: 100%; min-width: 0; border: 1px solid #e5e7eb; border-radius: 5px; background: #fff; padding: 7px 9px; text-align: left; cursor: pointer; font-family: Roboto, Arial, sans-serif; overflow: hidden; }
 .dong-mon:hover, .dong-mon.dang-chon { border-color: #2563eb; background: #eff6ff; }
-.dong-mon b { font-size: 13px; }
-.dong-mon small, td small { display: block; margin-top: 2px; color: #64748b; }
+.dong-mon b { font-size: 13px; word-break: break-word; overflow-wrap: break-word; }
+.dong-mon small, td small { display: block; margin-top: 2px; color: #64748b; word-break: break-word; }
 .thanh-mon b { font-size: 12px; color: #475569; }
 .thanh-mon span { font-size: 13px; font-weight: 700; }
 .badge { padding: 5px 9px; border-radius: 999px; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; font-size: 12px; font-weight: 700; }
@@ -1379,7 +1584,18 @@ th { position: sticky; top: 0; z-index: 5; background: #f1f5f9; color: #334155; 
 td { background: #fff; }
 tr:nth-child(even) td { background: #fcfcfd; }
 .cot-so { width: 64px; text-align: center; white-space: nowrap; }
-.cot-noi-dung { min-width: 220px; color: #334155; }
+.cot-noi-dung {
+  min-width: 260px;
+  max-width: 520px;
+  color: #334155;
+}
+
+.outline-content-cell {
+  white-space: pre-line;
+  line-height: 1.55;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 .cot-ghi-chu-bang { min-width: 160px; color: #475569; }
 .cot-thao-tac { width: 128px; text-align: center; }
 .thao-tac { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px; }
@@ -1869,6 +2085,67 @@ tr:nth-child(even) td { background: #fcfcfd; }
   word-break: break-word;
 }
 @media (max-width: 1350px) { .luoi-chinh { grid-template-columns: 1fr; } }
-@media (max-width: 980px) { .luoi-trang { grid-template-columns: 1fr; } .danh-sach-mon { min-height: 0; max-height: 420px; } }
+@media (max-width: 980px) { .luoi-trang { grid-template-columns: 1fr; }
+  .danh-sach-mon { min-height: 0; max-height: 1000px; } }
 @media (max-width: 720px) { .khoi-dau, .thanh-mon { flex-direction: column; align-items: stretch; } .form-grid, .form-syllabus, .form-nho { grid-template-columns: 1fr; } }
+
+/* ====== Block file syllabus mẫu ====== */
+.khoi-file-syllabus { border-color: #d1fae5; }
+.khoi-file-syllabus .tieu-de-the { background: #f0fdf4; border-bottom-color: #a7f3d0; }
+.khoi-file-syllabus .tieu-de-the h3 { color: #065f46; }
+.file-upload-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+}
+.mo-ta-upload { font-size: 12px; color: #64748b; }
+.bang-file {
+  margin: 0 10px 10px;
+  max-height: 340px;
+  overflow: auto;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.bang-file .bang-du-lieu {
+  min-width: 860px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.bang-file th {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  border: 0;
+  border-bottom: 1px solid #a7f3d0;
+  background: linear-gradient(180deg, #f0fdf4 0%, #d1fae5 100%);
+  color: #065f46;
+}
+.bang-file td {
+  border: 0;
+  border-bottom: 1px solid #ecfdf5;
+}
+.bang-file tbody tr:hover td { background: #f0fdf4; }
+.ten-file-cell { font-weight: 600; color: #0f172a; word-break: break-all; }
+.trang-thai-doc { font-weight: 700; }
+.trang-thai-doc.CHUA_DOC { color: #92400e; }
+.trang-thai-doc.DA_DOC { color: #065f46; }
+.trang-thai-doc.DOC_LOI { color: #b91c1c; }
+
+/* Cảnh báo parse */
+.canhbao-parse-boc { margin: 0 10px 6px; padding: 8px 10px; border: 1px solid #fed7aa; border-radius: 6px; background: #fff7ed; }
+.canhbao-parse-dong { font-size: 12px; color: #9a3412; font-weight: 600; line-height: 1.5; }
+
+/* Text bóc từ file */
+.text-tu-file-boc { margin: 0 10px 6px; border: 1px solid #bfdbfe; border-radius: 6px; background: #f8fbff; }
+.text-tu-file-tieu-de { padding: 7px 10px; font-size: 12px; font-weight: 800; color: #1e40af; border-bottom: 1px solid #bfdbfe; background: #eff6ff; border-radius: 6px 6px 0 0; }
+.text-tu-file-tieu-de small { font-weight: 600; color: #64748b; }
+.text-tu-file-noi-dung { margin: 0; padding: 10px; font-size: 11.5px; line-height: 1.5; color: #334155; white-space: pre-wrap; word-break: break-word; max-height: 260px; overflow: auto; font-family: 'Courier New', monospace; }
+
+/* Nút đổ lên form */
+.nut-do-form { border-color: #a7f3d0; background: #ecfdf5; color: #065f46; }
+.nut-do-form:hover { background: #d1fae5; }
 </style>

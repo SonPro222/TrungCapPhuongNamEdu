@@ -55,6 +55,9 @@ export const daoTaoApi = {
         },
         taoDuKyConThieu(versionId) {
             return apiClient.post(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/tao-du-ky-con-thieu`)
+        },
+        canhBaoTaiHoc(versionId) {
+            return apiClient.get(`${DAO_TAO_URL}/khung-ky/theo-version/${versionId}/canh-bao-tai-hoc`)
         }
     },
     khungKymau: createCrudApi(DAO_TAO_URL, 'khung-ky-mau'),
@@ -80,7 +83,12 @@ export const daoTaoApi = {
             return apiClient.get(`${CHUONG_TRINH_URL}/chuong-trinh/${chuongTrinhId}/tong-the`, { params })
         }
     },
-    chuongTrinhVersion: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version'),
+    chuongTrinhVersion: {
+        ...createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-version'),
+        chuyenTrangThai(id, trangThai) {
+            return apiClient.patch(`${CHUONG_TRINH_URL}/chuong-trinh-version/${id}/trang-thai`, { trangThai })
+        }
+    },
     chuongTrinhMon: createCrudApi(CHUONG_TRINH_URL, 'chuong-trinh-mon'),
 
     monHoc: createCrudApi(CHUONG_TRINH_URL, 'mon-hoc'),
@@ -127,10 +135,177 @@ export const daoTaoApi = {
             return apiClient.get(`${CHUONG_TRINH_URL}/syllabus-mon-hoc/${id}/xem`)
         }
     },
-    syllabusMonHocmau: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau'),
+    syllabusMonHocmau: {
+        ...createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau'),
+        /** Tạo syllabus mẫu đầy đủ (thông tin + chương/bài + điều kiện + tài liệu + đánh giá + quy đổi) */
+        createFull(payload) {
+            return apiClient.post(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/full`, payload)
+        },
+        /** Cập nhật syllabus mẫu đầy đủ */
+        updateFull(id, payload) {
+            return apiClient.put(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/${id}/full`, payload)
+        },
+        /** Lấy syllabus mẫu đầy đủ kèm file list */
+        getFull(id) {
+            return apiClient.get(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/${id}/full`)
+        }
+    },
     syllabusMonHocmauChuongBai: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau-chuong-bai'),
     syllabusMonHocmauDieuKien: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau-dieu-kien'),
     syllabusMonHocmauTaiLieu: createCrudApi(CHUONG_TRINH_URL, 'syllabus-mon-hoc-mau-tai-lieu'),
+    syllabusMonHocMauFile: {
+        /** Upload file gốc cho syllabus mẫu — dùng FormData */
+        upload(syllabusMonHocMauId, file, loaiTaiLieu = 'FILE_NGUON_IMPORT', laFileNguon = true, ghiChu = '') {
+            const form = new FormData()
+            form.append('file', file)
+            form.append('loaiTaiLieu', loaiTaiLieu)
+            form.append('laFileNguon', String(laFileNguon))
+            if (ghiChu) form.append('ghiChu', ghiChu)
+            return apiClient.post(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/${syllabusMonHocMauId}/files`,
+                form,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            )
+        },
+        /** Danh sách file theo syllabusMonHocMauId */
+        list(syllabusMonHocMauId) {
+            return apiClient.get(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/${syllabusMonHocMauId}/files`)
+        },
+        /** Parse preview — trả text + cảnh báo, KHÔNG lưu vào DB nghiệp vụ */
+        parsePreview(fileId) {
+            return apiClient.post(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau-files/${fileId}/parse-preview`)
+        },
+        /**
+         * Lấy binary blob để xem inline (giữ Bearer token).
+         * Caller tự tạo objectURL rồi mở window.open / revoke sau khi dùng.
+         */
+        view(fileId) {
+            return apiClient.get(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau-files/${fileId}/view`,
+                { responseType: 'blob' }
+            )
+        },
+        /** Lấy binary blob để download */
+        download(fileId) {
+            return apiClient.get(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau-files/${fileId}/download`,
+                { responseType: 'blob' }
+            )
+        },
+        /** Xóa file */
+        delete(fileId) {
+            return apiClient.delete(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau-files/${fileId}`)
+        },
+        /**
+         * Upload file theo monHocId — tự tạo syllabus tối thiểu nếu môn chưa có syllabus.
+         * Response kèm noiDungText + canhBao để FE populate form (preview only).
+         */
+        uploadByMonHocId(monHocId, file, loaiTaiLieu = 'FILE_NGUON_IMPORT', laFileNguon = true, ghiChu = '') {
+            const form = new FormData()
+            form.append('file', file)
+            form.append('loaiTaiLieu', loaiTaiLieu)
+            form.append('laFileNguon', String(laFileNguon))
+            if (ghiChu) form.append('ghiChu', ghiChu)
+            return apiClient.post(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/by-mon-hoc/${monHocId}/files`,
+                form,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            )
+        },
+        /**
+         * Import từ file: upload + parse + lưu DB theo syllabusId.
+         * Trả về SyllabusMonHocMauFullResponse để FE load lên form.
+         */
+        importFileBySyllabusId(syllabusId, file) {
+            const form = new FormData()
+            form.append('file', file)
+            return apiClient.post(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/${syllabusId}/import-file`,
+                form,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            )
+        },
+        /**
+         * Import từ file: upload + parse + lưu DB theo monHocId.
+         * Tự tạo syllabus tối thiểu nếu chưa có.
+         */
+        importFileByMonHocId(monHocId, file) {
+            const form = new FormData()
+            form.append('file', file)
+            return apiClient.post(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau/by-mon-hoc/${monHocId}/import-file`,
+                form,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            )
+        },
+        /**
+         * Re-import từ file đã lưu trong DB (theo fileId).
+         * Parse lại + cập nhật dữ liệu syllabus.
+         */
+        importByFileId(fileId) {
+            return apiClient.post(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-mau-files/${fileId}/import`)
+        }
+    },
+
+    syllabusMonHocFile: {
+        /** Upload file mới cho syllabus môn học áp dụng */
+        upload(syllabusMonHocId, file, loaiTaiLieu = 'FILE_NGUON_IMPORT', laFileNguon = true, ghiChu = '') {
+            const form = new FormData()
+            form.append('file', file)
+            form.append('loaiTaiLieu', loaiTaiLieu)
+            form.append('laFileNguon', String(laFileNguon))
+            if (ghiChu) form.append('ghiChu', ghiChu)
+            return apiClient.post(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc/${syllabusMonHocId}/files`,
+                form,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            )
+        },
+        /** Danh sách file đã gán vào syllabus môn học áp dụng */
+        list(syllabusMonHocId) {
+            return apiClient.get(`${CHUONG_TRINH_URL}/syllabus-mon-hoc/${syllabusMonHocId}/files`)
+        },
+        /** Copy file từ syllabus mẫu sang syllabus môn học áp dụng */
+        copyFromMau(syllabusMonHocId, mauFileId) {
+            return apiClient.post(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc/${syllabusMonHocId}/copy-from-mau-file/${mauFileId}`
+            )
+        },
+        /** Xem file inline (blob) */
+        view(fileId) {
+            return apiClient.get(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-files/${fileId}/view`,
+                { responseType: 'blob' }
+            )
+        },
+        /** Download file về máy (blob) */
+        download(fileId) {
+            return apiClient.get(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-files/${fileId}/download`,
+                { responseType: 'blob' }
+            )
+        },
+        /** Thay thế file (replace) — giữ nguyên id, cập nhật binary */
+        replace(fileId, file, loaiTaiLieu = 'FILE_NGUON_IMPORT', ghiChu = '') {
+            const form = new FormData()
+            form.append('file', file)
+            form.append('loaiTaiLieu', loaiTaiLieu)
+            if (ghiChu) form.append('ghiChu', ghiChu)
+            return apiClient.post(
+                `${CHUONG_TRINH_URL}/syllabus-mon-hoc-files/${fileId}/replace`,
+                form,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            )
+        },
+        /** Xóa file */
+        delete(fileId) {
+            return apiClient.delete(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-files/${fileId}`)
+        },
+        /** Thông tin file theo fileId (metadata, không trả binary) */
+        getInfo(fileId) {
+            return apiClient.get(`${CHUONG_TRINH_URL}/syllabus-mon-hoc-files/${fileId}`)
+        }
+    },
 
     dieuKienMonHoc: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-mon-hoc'),
     dieuKienMonHocmau: createCrudApi(CHUONG_TRINH_URL, 'dieu-kien-mon-hoc-mau'),

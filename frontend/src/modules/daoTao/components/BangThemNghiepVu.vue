@@ -151,7 +151,8 @@
                 :min="field.type === 'number' ? layMin(field) : undefined"
                 :max="field.type === 'number' ? layMax(field) : undefined"
                 :step="field.type === 'number' ? layStep(field) : undefined"
-                @input="validateField(field)"
+                @input="validateField(field); field.onChange && field.onChange(form[field.key], form)"
+                @change="field.onChange && field.onChange(form[field.key], form)"
             />
 
             <small v-if="fieldErrors[field.key]" class="field-error">{{ fieldErrors[field.key] }}</small>
@@ -185,7 +186,7 @@
           <thead>
           <tr>
             <th v-if="hienCotTrangThai" class="col-action col-action-wide">Trạng thái</th>
-            <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
+            <th v-for="column in columns" :key="column.key" :style="column.width ? { width: column.width, minWidth: column.width } : {}">{{ column.label }}</th>
             <th v-if="hienCotThaoTac" class="col-action">Thao tác</th>
           </tr>
           </thead>
@@ -243,6 +244,7 @@
                   v-for="column in columns"
                   :key="column.key"
                   :class="cellClass(column)"
+                  :style="column.width ? { width: column.width, minWidth: column.width } : {}"
                   @click="column.openFile ? chanClickTrongDong($event) : null"
                   @mousedown="column.openFile ? chanClickTrongDong($event) : null"
                   @mouseup="column.openFile ? chanClickTrongDong($event) : null"
@@ -260,7 +262,7 @@
                 </button>
 
                 <template v-else>
-                  {{ displayValue(item, column) }}
+                  <div class="cell-text-wrap">{{ displayValue(item, column) }}</div>
                 </template>
               </td>
 
@@ -278,7 +280,8 @@
                   {{ viewLabel }}
                 </button>
                 <button v-if="!readOnly" type="button" class="btn tiny" @click.stop="editItem(item)">Sửa</button>
-                <button v-if="!readOnly" type="button" class="btn tiny danger" @click.stop="deleteItem(item)">Xóa
+                <button v-if="!readOnly" type="button" class="btn tiny danger" @click.stop="deleteItem(item)">
+                  {{ deleteLabel }}
                 </button>
               </td>
             </tr>
@@ -347,6 +350,8 @@ const props = defineProps({
   tableTitle: {type: String, default: ''},
   emptyText: {type: String, default: ''},
   resetAfterSave: {type: Boolean, default: true},
+  deleteHandler: {type: Function, default: null},
+  deleteLabel: {type: String, default: 'Xóa'},
   uploadFile: {type: Function, default: null}
 })
 const emit = defineEmits(['saved', 'deleted', 'select', 'view', 'toggle-save', 'notify', 'file-view', 'multi-select'])
@@ -1209,6 +1214,13 @@ function editItem(item) {
 async function deleteItem(item) {
   if (props.readOnly) return
   if (!item?.id) return
+
+  if (typeof props.deleteHandler === 'function') {
+    await props.deleteHandler(item)
+    resetForm()
+    return
+  }
+
   if (!confirm('Xóa dòng dữ liệu này?')) return
 
   try {
@@ -1522,10 +1534,13 @@ tr.clickable:hover {
 .bang-them-nghiep-vu.bang-phu .table-wrap {
   max-height: 340px;
 }
-
-.bang-them-nghiep-vu.bang-xuong-song .table-wrap {
-  max-height: 430px;
+.bang-them-nghiep-vu.bang-xuong-song .table-wrap[data-v-de9908c8] {
+  max-height: none;   /* bỏ giới hạn */
+  height: auto;       /* tự động theo nội dung */
+  overflow-y: visible;/* để nội dung hiển thị hết */
 }
+
+
 
 table {
   width: 100%;
@@ -1710,6 +1725,22 @@ tr.selected td:first-child {
   border-color: #2563eb;
   background: #dbeafe;
   color: #1d4ed8;
+}
+
+/* Truncate cell text to 3 lines by default; expand when row has is-expanded */
+.cell-text-wrap {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-word;
+}
+
+tr.is-expanded .cell-text-wrap {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
 }
 
 .empty-cell {

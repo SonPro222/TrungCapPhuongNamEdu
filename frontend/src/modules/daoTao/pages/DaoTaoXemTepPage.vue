@@ -6,15 +6,6 @@
           ← Quay lại
         </button>
 
-        <button
-            v-if="dangMoToanManHinh"
-            type="button"
-            class="btn"
-            @click="quayLaiDanhSachTep"
-        >
-          ← Danh sách tệp
-        </button>
-
         <button type="button" class="btn primary" :disabled="loading" @click="taiDuLieu">
           Tải lại
         </button>
@@ -27,11 +18,12 @@
 
 
 
-    <section v-if="!dangMoToanManHinh" class="table-card">
+    <!-- Bảng danh sách tệp (luôn hiển thị) -->
+    <section class="table-card">
       <div class="table-title">
         <div>
           <h3>{{ tieuDeBangTep }}</h3>
-          <p>Danh sách tệp đã lưu. Bấm “Xem” để mở trang đọc toàn màn hình.</p>
+          <p>Danh sách tệp đã lưu. Bấm "Xem" để xem trước trực tiếp.</p>
         </div>
       </div>
 
@@ -66,6 +58,7 @@
               v-for="(item, index) in danhSachTep"
               v-else
               :key="`${item.__tepNguon || 'syllabusTaiLieu'}-${item.id}-${item.__fileIndex || 0}`"
+              :class="{ 'row-dang-xem': tepDangXemIndex === index }"
           >
             <td class="col-stt">{{ index + 1 }}</td>
             <td>
@@ -84,10 +77,10 @@
               <button
                   type="button"
                   class="btn tiny primary"
-                  :disabled="!item.duongDan || loadingTep"
-                  @click="moTrangXemTep(index)"
+                  :disabled="loadingTep"
+                  @click="moXemTepInline(index)"
               >
-                Xem
+                {{ tepDangXemIndex === index ? 'Đang xem' : 'Xem' }}
               </button>
             </td>
           </tr>
@@ -96,16 +89,14 @@
       </div>
     </section>
 
-    <section v-else class="viewer-full-page">
+    <!-- Viewer inline (read-only) — hiện bên dưới bảng khi bấm Xem -->
+    <section v-if="tepDangXemIndex !== null" class="viewer-full-page">
       <div class="viewer-toolbar">
         <div>
           <h3>{{ tepDangXem?.__tenTep || tepDangXem?.ten || 'Tệp đang xem' }}</h3>
           <p>
-            {{ tepDangXem?.ma || '-' }}
-            <span>|</span>
-            {{ tepDangXem?.loai || layNhanLoaiFile(tepDangXem) }}
-            <span>|</span>
-            {{ formatDungLuong(tepDangXem?.__dungLuong) }}
+            {{ layNhanLoaiFile(tepDangXem) }}
+            <span v-if="tepDangXem?.__dungLuong">| {{ formatDungLuong(tepDangXem.__dungLuong) }}</span>
           </p>
         </div>
 
@@ -121,11 +112,19 @@
 
           <button
               type="button"
-              class="btn danger"
-              :disabled="loadingTep || dangXoaTep"
-              @click="xoaTepDangXem"
+              class="btn primary"
+              :disabled="loadingTep"
+              @click="taiVeTep"
           >
-            Xóa tệp đã lưu
+            Tải về
+          </button>
+
+          <button
+              type="button"
+              class="btn"
+              @click="dongViewer"
+          >
+            ✕ Đóng
           </button>
         </div>
       </div>
@@ -135,7 +134,10 @@
       </div>
 
       <div v-else-if="previewError" class="preview-error">
-        {{ previewError }}
+        <p>{{ previewError }}</p>
+        <button type="button" class="btn primary" style="margin-top:10px" @click="taiVeTep">
+          Tải về thay thế
+        </button>
       </div>
 
       <div v-else class="preview-body">
@@ -184,9 +186,11 @@ const router = useRouter()
 
 const loading = ref(false)
 const loadingTep = ref(false)
-const dangXoaTep = ref(false)
 const thongBao = ref('')
 const loaiThongBao = ref('success')
+
+// Local state cho viewer inline (không dùng URL fileIndex nữa)
+const tepDangXemIndex = ref(null)
 
 const syllabusMonHoc = ref(null)
 const chuongTrinhMon = ref(null)
@@ -197,6 +201,9 @@ const syllabusChuongTrinhDangXem = ref(null)
 const mucTieuChuongTrinhmauDangXem = ref(null)
 const nangLucDauRamauDangXem = ref(null)
 const viTriViecLammauDangXem = ref(null)
+const syllabusMonHocFileDangXem = ref(null)
+const tepDinhKemSyllabusChuongTrinh = ref([])
+const tepDinhKemSyllabusChuongTrinhmau = ref([])
 const previewUrl = ref('')
 const previewError = ref('')
 const loaiPreview = ref('')
@@ -231,10 +238,12 @@ const tepNguonCanXem = computed(() => {
   if (value === 'mucTieuChuongTrinhmau') return 'mucTieuChuongTrinhmau'
   if (value === 'nangLucDauRamau') return 'nangLucDauRamau'
   if (value === 'viTriViecLammau') return 'viTriViecLammau'
+  if (value === 'syllabusMonHocFile') return 'syllabusMonHocFile'
 
   return 'syllabusTaiLieu'
 })
 
+const syllabusMonHocFileIdCanXem = computed(() => route.query.syllabusMonHocFileId || null)
 const taiLieumauIdCanXem = computed(() => route.query.taiLieumauId || null)
 const syllabusTaiLieuIdCanXem = computed(() => route.query.syllabusTaiLieuId || null)
 const syllabusChuongTrinhmauIdCanXem = computed(() => route.query.syllabusChuongTrinhmauId || null)
@@ -242,11 +251,6 @@ const syllabusChuongTrinhIdCanXem = computed(() => route.query.syllabusChuongTri
 const mucTieuChuongTrinhmauIdCanXem = computed(() => route.query.mucTieuChuongTrinhmauId || null)
 const nangLucDauRamauIdCanXem = computed(() => route.query.nangLucDauRamauId || null)
 const viTriViecLammauIdCanXem = computed(() => route.query.viTriViecLammauId || null)
-
-const fileIndexDangXem = computed(() => {
-  const value = Number(route.query.fileIndex)
-  return Number.isInteger(value) && value >= 0 ? value : null
-})
 
 const duongDanQuayLai = computed(() => {
   const value = route.query.quayLaiPath || route.query.returnPath || route.query.from
@@ -260,11 +264,9 @@ const duongDanQuayLai = computed(() => {
   }
 })
 
-const dangMoToanManHinh = computed(() => fileIndexDangXem.value !== null)
-
 const tepDangXem = computed(() => {
-  if (fileIndexDangXem.value === null) return null
-  return danhSachTep.value[fileIndexDangXem.value] || null
+  if (tepDangXemIndex.value === null) return null
+  return danhSachTep.value[tepDangXemIndex.value] || null
 })
 
 const tenMonTrongChuongTrinh = computed(() => {
@@ -298,6 +300,7 @@ const tieuDeBangTep = computed(() => {
   if (tepNguonCanXem.value === 'mucTieuChuongTrinhmau') return 'Danh sách tệp mục tiêu chương trình gốc / mẫu'
   if (tepNguonCanXem.value === 'nangLucDauRamau') return 'Danh sách tệp năng lực đầu ra gốc / mẫu'
   if (tepNguonCanXem.value === 'viTriViecLammau') return 'Danh sách tệp vị trí việc làm gốc / mẫu'
+  if (tepNguonCanXem.value === 'syllabusMonHocFile') return 'File syllabus môn học áp dụng'
 
   return 'Danh sách tệp tài liệu syllabus'
 })
@@ -317,6 +320,7 @@ const thongBaoRong = computed(() => {
   if (tepNguonCanXem.value === 'mucTieuChuongTrinhmau') return 'Mục tiêu chương trình gốc / mẫu này chưa có tệp đã lưu.'
   if (tepNguonCanXem.value === 'nangLucDauRamau') return 'Năng lực đầu ra gốc / mẫu này chưa có tệp đã lưu.'
   if (tepNguonCanXem.value === 'viTriViecLammau') return 'Vị trí việc làm gốc / mẫu này chưa có tệp đã lưu.'
+  if (tepNguonCanXem.value === 'syllabusMonHocFile') return 'Không tìm thấy file syllabus môn học này.'
 
   return 'Tài liệu syllabus này chưa có tệp đã lưu.'
 })
@@ -328,11 +332,43 @@ const danhSachTep = computed(() => {
   }
 
   if (tepNguonCanXem.value === 'syllabusChuongTrinhmau') {
+    // Ưu tiên TepDinhKem (upload mới) trước, fallback về duongDan cũ nếu không có
+    if (tepDinhKemSyllabusChuongTrinhmau.value.length > 0) {
+      const mau = syllabusChuongTrinhmauDangXem.value || {}
+      return tepDinhKemSyllabusChuongTrinhmau.value.map((file, index) => ({
+        ...mau,
+        id: mau.id,
+        duongDan: `/he-thong/tep-dinh-kem/${file.id}/preview`,
+        __tepNguon: 'syllabusChuongTrinhmau',
+        __tepDinhKemId: file.id,
+        __duongDanmau: mau.duongDan || '',
+        __fileIndex: index,
+        __tenTep: file.tenMau || file.tenLuu || `File ${index + 1}`,
+        __contentType: file.contentType || '',
+        __dungLuong: file.dungLuong || 0
+      }))
+    }
     if (!syllabusChuongTrinhmauDangXem.value?.duongDan) return []
     return taoDanhSachTepTuDongTaiLieu(syllabusChuongTrinhmauDangXem.value, 'syllabusChuongTrinhmau')
   }
 
   if (tepNguonCanXem.value === 'syllabusChuongTrinh') {
+    // Ưu tiên dùng TepDinhKem (tránh trường hợp duongDan chỉ lưu tên file thuần, không có id)
+    if (tepDinhKemSyllabusChuongTrinh.value.length > 0) {
+      const syllabus = syllabusChuongTrinhDangXem.value || {}
+      return tepDinhKemSyllabusChuongTrinh.value.map((file, index) => ({
+        ...syllabus,
+        id: syllabus.id,
+        duongDan: `/he-thong/tep-dinh-kem/${file.id}/preview`,
+        __tepNguon: 'syllabusChuongTrinh',
+        __tepDinhKemId: file.id,
+        __duongDanmau: syllabus.duongDan || '',
+        __fileIndex: index,
+        __tenTep: file.tenMau || file.tenLuu || `File ${index + 1}`,
+        __contentType: file.contentType || '',
+        __dungLuong: file.dungLuong || 0
+      }))
+    }
     if (!syllabusChuongTrinhDangXem.value?.duongDan) return []
     return taoDanhSachTepTuDongTaiLieu(syllabusChuongTrinhDangXem.value, 'syllabusChuongTrinh')
   }
@@ -350,6 +386,24 @@ const danhSachTep = computed(() => {
   if (tepNguonCanXem.value === 'viTriViecLammau') {
     if (!viTriViecLammauDangXem.value?.duongDan) return []
     return taoDanhSachTepTuDongTaiLieu(viTriViecLammauDangXem.value, 'viTriViecLammau')
+  }
+
+  if (tepNguonCanXem.value === 'syllabusMonHocFile') {
+    const file = syllabusMonHocFileDangXem.value
+    if (!file?.id) return []
+    return [{
+      id: file.id,
+      duongDan: `/api/chuongTrinh/syllabus-mon-hoc-files/${file.id}/view`,
+      __tepNguon: 'syllabusMonHocFile',
+      __tenTep: file.tenFile || 'File syllabus',
+      __contentType: file.loaiFile || '',
+      __dungLuong: file.kichThuoc || 0,
+      __fileIndex: 0,
+      tenFile: file.tenFile,
+      loaiFile: file.loaiFile,
+      kichThuoc: file.kichThuoc,
+      createdAt: file.createdAt
+    }]
   }
 
   return (danhSachTaiLieu.value || [])
@@ -515,8 +569,22 @@ function taoPreviewApiPath(item) {
     return `/he-thong/tep-dinh-kem/${item.__tepDinhKemId}/preview`
   }
 
+  // syllabusMonHocFile dùng endpoint /view trực tiếp, không qua doiViewThanhDownload
+  if (item?.__tepNguon === 'syllabusMonHocFile' && item?.id) {
+    return `/chuongTrinh/syllabus-mon-hoc-files/${item.id}/view`
+  }
+
   const apiPath = taoApiPathTuDuongDan(item?.duongDan || '')
-  return String(apiPath || '').replace(/\/download(?=($|[?#]))/, '/preview')
+  if (!apiPath) return null
+
+  // Chỉ chấp nhận path bắt đầu bằng '/' (API path hợp lệ) hoặc URL đầy đủ
+  // Nếu là plain relative path như 'pdf/...' hoặc 'uploads/...' → không hợp lệ → trả null
+  const result = String(apiPath).replace(/\/download(?=($|[?#]))/, '/preview')
+  if (!result.startsWith('/') && !result.startsWith('http://') && !result.startsWith('https://')) {
+    return null
+  }
+
+  return result
 }
 
 function layExtension(item) {
@@ -587,24 +655,38 @@ function xoaPreviewUrlCu() {
   previewUrl.value = ''
 }
 
+function taoDownloadApiPath(item) {
+  if (item?.__tepDinhKemId) {
+    return `/he-thong/tep-dinh-kem/${item.__tepDinhKemId}/download`
+  }
+  if (item?.__tepNguon === 'syllabusMonHocFile' && item?.id) {
+    return `/chuongTrinh/syllabus-mon-hoc-files/${item.id}/download`
+  }
+  const apiPath = taoApiPathTuDuongDan(item?.duongDan || '')
+  if (!apiPath) return null
+  if (!apiPath.startsWith('/') && !apiPath.startsWith('http://') && !apiPath.startsWith('https://')) return null
+  return apiPath
+}
+
 async function xemTepToanManHinh() {
   const item = tepDangXem.value
 
-  if (!item?.duongDan) {
-    xoaPreviewUrlCu()
-    previewError.value = ''
-    loaiPreview.value = ''
+  xoaPreviewUrlCu()
+  previewError.value = ''
+  loaiPreview.value = ''
+
+  if (!item) return
+
+  const apiPath = taoPreviewApiPath(item)
+
+  if (!apiPath) {
+    previewError.value = 'Không tìm thấy file vật lý hoặc đường dẫn không hợp lệ. Hãy tải lên lại file qua giao diện quản lý.'
     return
   }
 
   loadingTep.value = true
-  previewError.value = ''
-  loaiPreview.value = ''
-  xoaPreviewUrlCu()
 
   try {
-    const apiPath = taoPreviewApiPath(item)
-
     const blob = await apiClient.get(apiPath, {
       responseType: 'blob'
     })
@@ -612,32 +694,62 @@ async function xemTepToanManHinh() {
     loaiPreview.value = xacDinhLoaiPreview(item, blob)
     previewUrl.value = URL.createObjectURL(blob)
   } catch (error) {
-    previewError.value = layThongBaoLoi(error, 'Không xem được tệp trong trang.')
+    previewError.value = layThongBaoLoi(error, 'Không xem được tệp. Thử tải về để xem.')
   } finally {
     loadingTep.value = false
   }
 }
 
-function moTrangXemTep(index) {
-  router.push({
-    name: route.name,
-    params: route.params,
-    query: {
-      ...route.query,
-      fileIndex: index
+async function taiVeTep() {
+  const item = tepDangXem.value
+  if (!item) return
+
+  const apiPath = taoDownloadApiPath(item)
+  if (!apiPath) {
+    baoTin('Không tìm thấy đường dẫn tải về.', 'error')
+    return
+  }
+
+  try {
+    const blob = await apiClient.get(apiPath, { responseType: 'blob' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = item.__tenTep || item.ten || 'tai-lieu'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 2000)
+  } catch (error) {
+    // fallback: mở tab nếu có URL đầy đủ
+    const fullUrl = taoUrlDayDu(item?.duongDan || '')
+    if (fullUrl && (fullUrl.startsWith('http://') || fullUrl.startsWith('https://'))) {
+      window.open(doiViewThanhDownload(fullUrl), '_blank')
+    } else {
+      baoTin(layThongBaoLoi(error, 'Không tải được tệp.'), 'error')
     }
-  })
+  }
 }
 
-function quayLaiDanhSachTep() {
-  const query = { ...route.query }
-  delete query.fileIndex
+async function moXemTepInline(index) {
+  if (tepDangXemIndex.value === index) {
+    // Bấm lại → đóng viewer
+    dongViewer()
+    return
+  }
+  tepDangXemIndex.value = index
+  xoaPreviewUrlCu()
+  previewError.value = ''
+  loaiPreview.value = ''
+  await nextTick()
+  await xemTepToanManHinh()
+}
 
-  router.push({
-    name: route.name,
-    params: route.params,
-    query
-  })
+function dongViewer() {
+  tepDangXemIndex.value = null
+  xoaPreviewUrlCu()
+  previewError.value = ''
+  loaiPreview.value = ''
 }
 
 function moTepBangTrinhDuyet() {
@@ -645,70 +757,18 @@ function moTepBangTrinhDuyet() {
     window.open(previewUrl.value, '_blank')
     return
   }
-
-  if (!tepDangXem.value?.duongDan) return
-  window.open(taoUrlDayDu(tepDangXem.value.duongDan), '_blank')
-}
-
-async function xoaTepDangXem() {
-  if (!tepDangXem.value?.id) return
-
-  const dongY = window.confirm('Xóa tệp đã lưu đang chọn? Dữ liệu tài liệu vẫn giữ, chỉ xóa tệp này khỏi danh sách.')
-  if (!dongY) return
-
-  dangXoaTep.value = true
-
-  try {
-    const danhSachCu = tachDanhSachDuongDanTep(tepDangXem.value.__duongDanmau || tepDangXem.value.duongDan)
-    const danhSachMoi = danhSachCu.filter((item, index) => index !== tepDangXem.value.__fileIndex)
-
-    const duongDanMoi = danhSachMoi.length === 0
-        ? null
-        : danhSachMoi.length === 1
-            ? danhSachMoi[0].duongDan
-            : JSON.stringify(danhSachMoi)
-
-    const payload = {
-      ...tepDangXem.value,
-      duongDan: duongDanMoi
-    }
-
-    delete payload.__tepNguon
-    delete payload.__fileIndex
-    delete payload.__duongDanmau
-    delete payload.__tenTep
-    delete payload.__contentType
-    delete payload.__dungLuong
-    delete payload.__tepDinhKemId
-
-    if (tepNguonCanXem.value === 'taiLieumau') {
-      await daoTaoXemChuongTrinhService.taiLieumau.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'syllabusChuongTrinhmau') {
-      await daoTaoXemChuongTrinhService.syllabusChuongTrinhmau.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'syllabusChuongTrinh') {
-      await daoTaoXemChuongTrinhService.syllabusChuongTrinh.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'mucTieuChuongTrinhmau') {
-      await daoTaoXemChuongTrinhService.mucTieuChuongTrinhmau.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'nangLucDauRamau') {
-      await daoTaoXemChuongTrinhService.nangLucDauRamau.update(tepDangXem.value.id, payload)
-    } else if (tepNguonCanXem.value === 'viTriViecLammau') {
-      await daoTaoXemChuongTrinhService.viTriViecLammau.update(tepDangXem.value.id, payload)
-    } else {
-      await daoTaoXemChuongTrinhService.syllabusTaiLieu.update(tepDangXem.value.id, payload)
-    }
-
-    baoTin('Đã xóa tệp đã lưu đang chọn.')
-
-    quayLaiDanhSachTep()
-    xoaPreviewUrlCu()
-
-    await taiDuLieu()
-  } catch (error) {
-    baoTin(layThongBaoLoi(error, 'Không xóa được tệp đã lưu.'), 'error')
-  } finally {
-    dangXoaTep.value = false
+  const item = tepDangXem.value
+  if (!item) return
+  const apiPath = taoPreviewApiPath(item)
+  if (apiPath) {
+    const fullUrl = apiPath.startsWith('/') ? `${layBackendOrigin()}/api${apiPath}` : apiPath
+    window.open(fullUrl, '_blank')
+    return
   }
+  const fullUrl = taoUrlDayDu(item.duongDan || '')
+  if (fullUrl) window.open(fullUrl, '_blank')
 }
+
 
 async function taiSyllabusMonHoc() {
   if (!syllabusMonId.value) {
@@ -754,22 +814,69 @@ async function taiTaiLieumauCanXem() {
 
 async function taiSyllabusChuongTrinhmauCanXem() {
   syllabusChuongTrinhmauDangXem.value = null
+  tepDinhKemSyllabusChuongTrinhmau.value = []
 
   if (tepNguonCanXem.value !== 'syllabusChuongTrinhmau') return
   if (!syllabusChuongTrinhmauIdCanXem.value) return
 
   const result = await daoTaoXemChuongTrinhService.syllabusChuongTrinhmau.getById(syllabusChuongTrinhmauIdCanXem.value)
   syllabusChuongTrinhmauDangXem.value = layMotDong(result)
+
+  // Tải TepDinhKem theo doiTuongId = syllabusChuongTrinhmauId
+  // DaoTaoSyllabusChuongTrinhMau.vue upload với nghiepVu: 'SYLLABUS_CHUONG_TRINH_mau'
+  try {
+    const tepRes = await apiClient.get('/he-thong/tep-dinh-kem/doi-tuong', {
+      params: {
+        module: 'dao-tao',
+        nghiepVu: 'SYLLABUS_CHUONG_TRINH_mau',
+        doiTuongId: syllabusChuongTrinhmauIdCanXem.value,
+        page: 0,
+        size: 50
+      }
+    })
+    const tepData = tepRes?.data?.data ?? tepRes?.data ?? tepRes
+    const items = Array.isArray(tepData?.content)
+      ? tepData.content
+      : Array.isArray(tepData)
+        ? tepData
+        : []
+    tepDinhKemSyllabusChuongTrinhmau.value = items
+  } catch {
+    tepDinhKemSyllabusChuongTrinhmau.value = []
+  }
 }
 
 async function taiSyllabusChuongTrinhCanXem() {
   syllabusChuongTrinhDangXem.value = null
+  tepDinhKemSyllabusChuongTrinh.value = []
 
   if (tepNguonCanXem.value !== 'syllabusChuongTrinh') return
   if (!syllabusChuongTrinhIdCanXem.value) return
 
   const result = await daoTaoXemChuongTrinhService.syllabusChuongTrinh.getById(syllabusChuongTrinhIdCanXem.value)
   syllabusChuongTrinhDangXem.value = layMotDong(result)
+
+  // Tải TepDinhKem theo doiTuongId = syllabusChuongTrinhId để lấy ID thực của file
+  try {
+    const tepRes = await apiClient.get('/he-thong/tep-dinh-kem/doi-tuong', {
+      params: {
+        module: 'dao-tao',
+        nghiepVu: 'syllabus_chuong_trinh',
+        doiTuongId: syllabusChuongTrinhIdCanXem.value,
+        page: 0,
+        size: 50
+      }
+    })
+    const tepData = tepRes?.data?.data ?? tepRes?.data ?? tepRes
+    const items = Array.isArray(tepData?.content)
+      ? tepData.content
+      : Array.isArray(tepData)
+        ? tepData
+        : []
+    tepDinhKemSyllabusChuongTrinh.value = items
+  } catch {
+    tepDinhKemSyllabusChuongTrinh.value = []
+  }
 }
 
 async function taiMucTieuChuongTrinhmauCanXem() {
@@ -802,6 +909,16 @@ async function taiViTriViecLammauCanXem() {
   viTriViecLammauDangXem.value = layMotDong(result)
 }
 
+async function taiSyllabusMonHocFileCanXem() {
+  syllabusMonHocFileDangXem.value = null
+
+  if (tepNguonCanXem.value !== 'syllabusMonHocFile') return
+  if (!syllabusMonHocFileIdCanXem.value) return
+
+  const result = await daoTaoXemChuongTrinhService.syllabusMonHocFile.getInfo(syllabusMonHocFileIdCanXem.value)
+  syllabusMonHocFileDangXem.value = layMotDong(result)
+}
+
 async function taiDuLieu() {
   loading.value = true
 
@@ -815,17 +932,12 @@ async function taiDuLieu() {
       taiSyllabusChuongTrinhCanXem(),
       taiMucTieuChuongTrinhmauCanXem(),
       taiNangLucDauRamauCanXem(),
-      taiViTriViecLammauCanXem()
+      taiViTriViecLammauCanXem(),
+      taiSyllabusMonHocFileCanXem()
     ])
 
-    if (dangMoToanManHinh.value) {
-      await nextTick()
-      await xemTepToanManHinh()
-    } else {
-      xoaPreviewUrlCu()
-      previewError.value = ''
-      loaiPreview.value = ''
-    }
+    // Reset viewer khi tải lại dữ liệu (tránh hiển thị viewer cũ)
+    dongViewer()
   } catch (error) {
     baoTin(layThongBaoLoi(error, 'Không tải được dữ liệu tệp.'), 'error')
   } finally {
@@ -885,20 +997,6 @@ function quayLaiSyllabus() {
   })
 }
 
-watch(
-    () => route.query.fileIndex,
-    async () => {
-      if (dangMoToanManHinh.value) {
-        await nextTick()
-        await xemTepToanManHinh()
-      } else {
-        xoaPreviewUrlCu()
-        previewError.value = ''
-        loaiPreview.value = ''
-      }
-    }
-)
-
 onMounted(() => {
   taiDuLieu()
 })
@@ -908,7 +1006,7 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+ <style scoped>
 .xem-tep-syllabus-page {
   padding: 24px;
   min-height: calc(100vh - 80px);
@@ -945,39 +1043,22 @@ onBeforeUnmount(() => {
   color: #b91c1c;
 }
 
-.info-box {
-  display: grid;
-  grid-template-columns: 1.4fr 1.4fr 0.5fr;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.info-box div {
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  background: #eff6ff;
-  padding: 12px;
-}
-
-.info-box span {
-  display: block;
-  color: #1d4ed8;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.info-box b {
-  color: #111827;
-  font-size: 13px;
-}
-
-.table-card,
-.viewer-full-page {
+.table-card {
   border: 1px solid #d1d5db;
   border-radius: 14px;
   background: #ffffff;
   overflow: hidden;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  margin-bottom: 16px;
+}
+
+.viewer-full-page {
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  margin-bottom: 16px;
+  overflow: hidden;
 }
 
 .table-title {
@@ -1000,7 +1081,7 @@ onBeforeUnmount(() => {
 
 .table-wrap {
   width: 100%;
-  max-height: 680px;
+  max-height: 480px;
   overflow: auto;
 }
 
@@ -1033,13 +1114,17 @@ tbody tr:hover {
   background: #f8fafc;
 }
 
+tbody tr.row-dang-xem {
+  background: #eff6ff;
+}
+
 .col-stt {
   width: 56px;
   text-align: center;
 }
 
 .col-action {
-  width: 100px;
+  width: 80px;
   text-align: center;
   white-space: nowrap;
 }
@@ -1066,7 +1151,7 @@ tbody tr:hover {
 }
 
 .viewer-full-page {
-  min-height: calc(100vh - 230px);
+  min-height: 500px;
   display: flex;
   flex-direction: column;
 }
@@ -1109,12 +1194,15 @@ tbody tr:hover {
   flex: 1;
   min-height: 0;
   background: #e5e7eb;
+  overflow-x: auto;
 }
 
 .preview-frame {
+  display: block;
   width: 100%;
-  height: calc(100vh - 280px);
-  min-height: 680px;
+  min-width: 860px;
+  height: calc(100vh - 200px);
+  min-height: 1200px;
   border: 0;
   background: #ffffff;
 }
@@ -1123,7 +1211,7 @@ tbody tr:hover {
   display: block;
   width: 100%;
   height: calc(100vh - 280px);
-  min-height: 680px;
+  min-height: 600px;
   object-fit: contain;
   background: #111827;
 }
@@ -1131,7 +1219,7 @@ tbody tr:hover {
 .preview-video {
   width: 100%;
   height: calc(100vh - 280px);
-  min-height: 680px;
+  min-height: 600px;
   background: #000000;
 }
 
@@ -1179,28 +1267,15 @@ tbody tr:hover {
   color: #ffffff;
 }
 
-.btn.danger {
-  background: #dc2626;
-  border-color: #dc2626;
-  color: #ffffff;
-}
-
-.btn.danger:hover:not(:disabled) {
-  background: #b91c1c;
-  border-color: #b91c1c;
-}
-
 .btn.tiny {
-  min-height: 26px;
-  padding: 4px 10px;
-  font-size: 11px;
+  min-height: 22px;
+  padding: 2px 6px;
+  font-size: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 @media (max-width: 1100px) {
-  .info-box {
-    grid-template-columns: 1fr;
-  }
-
   .page-head,
   .viewer-toolbar {
     flex-direction: column;
@@ -1209,8 +1284,8 @@ tbody tr:hover {
   .preview-frame,
   .preview-image,
   .preview-video {
-    height: 620px;
-    min-height: 620px;
+    height: 820px;
+    min-height: 820px;
   }
 }
 </style>

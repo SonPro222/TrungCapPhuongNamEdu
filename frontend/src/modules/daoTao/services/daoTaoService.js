@@ -101,6 +101,9 @@ export const daoTaoService = {
         },
         async taoDuKyConThieu(versionId) {
             return await daoTaoApi.khungKy.taoDuKyConThieu(versionId)
+        },
+        async canhBaoTaiHoc(versionId) {
+            return await daoTaoApi.khungKy.canhBaoTaiHoc(versionId)
         }
     },
     khungKymau: createCrudService(daoTaoApi.khungKymau),
@@ -116,7 +119,23 @@ export const daoTaoService = {
             return await daoTaoApi.chuongTrinh.getTongThe(chuongTrinhId, versionId, options)
         }
     },
-    chuongTrinhVersion: createCrudService(daoTaoApi.chuongTrinhVersion),
+    chuongTrinhVersion: {
+        ...createCrudService(daoTaoApi.chuongTrinhVersion),
+        async update(id, payload) {
+            const { trangThai, ...rest } = payload || {}
+            const coThayDoiCauTruc = Object.keys(rest).length > 0
+            const coThayDoiTrangThai = trangThai !== undefined && trangThai !== null
+
+            let result
+            if (coThayDoiCauTruc) {
+                result = await daoTaoApi.chuongTrinhVersion.update(id, cleanPayload(rest))
+            }
+            if (coThayDoiTrangThai) {
+                result = await daoTaoApi.chuongTrinhVersion.chuyenTrangThai(id, trangThai)
+            }
+            return result
+        }
+    },
     chuongTrinhMon: createCrudService(daoTaoApi.chuongTrinhMon),
 
     monHoc: createCrudService(daoTaoApi.monHoc),
@@ -167,10 +186,23 @@ export const daoTaoService = {
             return await daoTaoApi.syllabusMonHoc.getChiTietXem(id)
         }
     },
-    syllabusMonHocmau: createCrudService(daoTaoApi.syllabusMonHocmau),
+    syllabusMonHocmau: {
+        ...createCrudService(daoTaoApi.syllabusMonHocmau),
+        async createFull(payload) { return await daoTaoApi.syllabusMonHocmau.createFull(payload) },
+        async updateFull(id, payload) { return await daoTaoApi.syllabusMonHocmau.updateFull(id, payload) },
+        async getFull(id) { return await daoTaoApi.syllabusMonHocmau.getFull(id) }
+    },
     syllabusMonHocmauChuongBai: createCrudService(daoTaoApi.syllabusMonHocmauChuongBai),
     syllabusMonHocmauDieuKien: createCrudService(daoTaoApi.syllabusMonHocmauDieuKien),
     syllabusMonHocmauTaiLieu: createCrudService(daoTaoApi.syllabusMonHocmauTaiLieu),
+    syllabusMonHocMauFile: {
+        ...daoTaoApi.syllabusMonHocMauFile,
+        async importFileBySyllabusId(syllabusId, file) { return await daoTaoApi.syllabusMonHocMauFile.importFileBySyllabusId(syllabusId, file) },
+        async importFileByMonHocId(monHocId, file) { return await daoTaoApi.syllabusMonHocMauFile.importFileByMonHocId(monHocId, file) },
+        async importByFileId(fileId) { return await daoTaoApi.syllabusMonHocMauFile.importByFileId(fileId) }
+    },
+
+    syllabusMonHocFile: { ...daoTaoApi.syllabusMonHocFile },
 
     dieuKienMonHoc: createCrudService(daoTaoApi.dieuKienMonHoc),
     dieuKienMonHocmau: createCrudService(daoTaoApi.dieuKienMonHocmau),

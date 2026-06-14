@@ -55,6 +55,8 @@ export const daoTaoXemChuongTrinhService = {
     taiLieumau: daoTaoService.taiLieumau,
     syllabusMonHocTaiLieu: daoTaoService.syllabusMonHocTaiLieu,
     syllabusChuongBai: daoTaoService.syllabusChuongBai,
-    syllabusTaiLieu: daoTaoService.syllabusTaiLieu
+    syllabusTaiLieu: daoTaoService.syllabusTaiLieu,
+    syllabusMonHocFile: daoTaoService.syllabusMonHocFile,
+    syllabusMonHocMauFile: daoTaoService.syllabusMonHocMauFile
 }
 

@@ -82,6 +82,67 @@
         </div>
         <!-- End panel gợi ý -->
 
+        <!-- Panel cảnh báo tải học theo kỳ (tầng 6) -->
+        <div
+            v-if="tangHienTai === 6 && bang.key === 'khungKy' && selected.chuongTrinhVersion"
+            class="tai-hoc-panel"
+        >
+          <div class="tai-hoc-header" @click="taiHocMoRong = !taiHocMoRong">
+            <span class="tai-hoc-title">Cảnh báo tải học theo kỳ</span>
+            <span v-if="canhBaoTaiHoc" class="tai-hoc-summary">
+              <span v-for="item in canhBaoTaiHoc.danhSachKy.filter(k => !k.chuaXepKy)" :key="item.maKy"
+                    :class="['tai-badge', `tai-${item.mucDoTai?.toLowerCase()}`]"
+                    :title="item.canhBao?.join('\n')">
+                {{ item.maKy }}
+              </span>
+            </span>
+            <span class="tai-hoc-toggle">{{ taiHocMoRong ? '▲' : '▼' }}</span>
+          </div>
+          <template v-if="taiHocMoRong">
+            <div v-if="dangLayCanhBaoTaiHoc" class="goi-y-loading">Đang tính tải học...</div>
+            <template v-else-if="canhBaoTaiHoc">
+              <!-- Cảnh báo chung -->
+              <div v-if="canhBaoTaiHoc.canhBaoChung?.length" class="tai-canh-bao-chung">
+                <span v-for="(cb, i) in canhBaoTaiHoc.canhBaoChung" :key="i" class="tai-cb-item">⚠ {{ cb }}</span>
+              </div>
+              <!-- Tóm tắt tổng -->
+              <div class="tai-tong-hop">
+                <span>TB/kỳ:</span>
+                <strong>{{ canhBaoTaiHoc.soMonTrungBinhMoiKy }} môn</strong>
+                <strong>{{ canhBaoTaiHoc.gioTrungBinhMoiKy }} giờ</strong>
+                <strong>{{ canhBaoTaiHoc.tinChiTrungBinhMoiKy }} TC</strong>
+                <span class="tai-nguong">Ngưỡng QT: {{ canhBaoTaiHoc.nguongQuaTaiTheoGio }}h / {{ canhBaoTaiHoc.nguongQuaTaiTheoTinChi }}TC</span>
+              </div>
+              <!-- Bảng từng kỳ -->
+              <table class="tai-hoc-table">
+                <thead>
+                  <tr>
+                    <th>Kỳ</th>
+                    <th>Môn</th>
+                    <th>Giờ</th>
+                    <th>TC</th>
+                    <th>% tải</th>
+                    <th>Mức</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in canhBaoTaiHoc.danhSachKy" :key="item.maKy"
+                      :class="['tai-row', `tai-row-${item.mucDoTai?.toLowerCase()}`]"
+                      :title="item.canhBao?.join('\n')">
+                    <td>{{ item.tenKy }}</td>
+                    <td>{{ item.soMon }}</td>
+                    <td>{{ item.tongGio }}</td>
+                    <td>{{ item.tongTinChi }}</td>
+                    <td>{{ item.chuaXepKy || !item.daCoKhungKy ? '—' : item.tyLeTaiTheoGio + '%' }}</td>
+                    <td><span :class="['tai-badge', `tai-${item.mucDoTai?.toLowerCase()}`]">{{ mucDoTaiLabel(item.mucDoTai) }}</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </template>
+          </template>
+        </div>
+        <!-- End panel cảnh báo tải học -->
+
         <div
             v-if="tangHienTai === 7 && bang.key === 'monHoc'"
             class="mon-hoc-tang-7-filter"
@@ -97,6 +158,7 @@
 
           <small>Hiển thị toàn bộ kết quả, nếu nhiều dữ liệu thì cuộn phần hàng bên dưới.</small>
         </div>
+
 
         <div
             v-if="tangHienTai === 8 && bang.key === 'syllabusMonHocmau'"
@@ -116,7 +178,8 @@
             :class="[
               'bang-tang-wrapper',
               {
-                'bang-mon-hoc-tang-7-scroll': tangHienTai === 7 && bang.key === 'monHoc'
+                'bang-mon-hoc-tang-7-scroll': tangHienTai === 7 && bang.key === 'monHoc',
+                'bang-chuong-trinh-mon-tang-7': tangHienTai === 7 && bang.key === 'chuongTrinhMon'
               }
             ]"
         >
@@ -154,6 +217,8 @@
               :read-only="bang.readOnly"
               :table-title="bang.tableTitle"
               :empty-text="bang.emptyText"
+              :delete-handler="bang.deleteHandler"
+              :delete-label="bang.deleteLabel"
               @select="chonDongBang(bang, $event)"
               @multi-select="tichChonDongBang(bang, $event)"
               @view="xemDongBang(bang, $event)"
@@ -164,6 +229,82 @@
               @notify="xuLyThongBaoBang(bang, $event)"
           />
         </div>
+
+        <!-- Panel file syllabus môn học (tầng 9) — hiện SAU bảng Tài liệu đã lưu -->
+        <div
+            v-if="tangHienTai === 9 && bang.key === 'syllabusTaiLieu' && selected.syllabusMonHoc"
+            class="bang-tang-wrapper"
+        >
+          <div class="bang-header-row">
+            <span class="bang-header-title">File syllabus môn học</span>
+            <label class="btn tiny primary" style="cursor:pointer;">
+              {{ fileSyllabusUploading ? 'Đang tải...' : '+ Upload file' }}
+              <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  style="display:none"
+                  :disabled="fileSyllabusLoading || fileSyllabusUploading"
+                  @change="uploadFileSyllabusApDung($event)"
+              >
+            </label>
+            <span v-if="fileSyllabusLoading || fileSyllabusUploading" class="file-loading-text">Đang xử lý...</span>
+          </div>
+
+          <div v-if="fileSyllabusThongBao" :class="['table-message', fileSyllabusLoaiThongBao === 'error' ? 'error' : 'success']">
+            {{ fileSyllabusThongBao }}
+          </div>
+
+          <div v-if="!danhSachFileDaGanSyllabus.length" class="bang-rong-text">
+            Chưa có file nào. Khi gán syllabus mẫu, file sẽ được copy tự động. Hoặc upload file mới bằng nút bên trên.
+          </div>
+          <table v-else class="bang-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tên file</th>
+                <th>Loại file</th>
+                <th>Kích thước</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(f, idx) in danhSachFileDaGanSyllabus" :key="f.id">
+                <td>{{ idx + 1 }}</td>
+                <td class="file-ten-col">{{ f.tenFile }}</td>
+                <td>{{ f.loaiFile }}</td>
+                <td>{{ formatKichThuocFile(f.kichThuoc) }}</td>
+                <td>{{ f.createdAt ? new Date(f.createdAt).toLocaleDateString('vi-VN') : '' }}</td>
+                <td class="file-action-cell">
+                  <button
+                      type="button"
+                      class="btn tiny"
+                      :disabled="fileSyllabusLoading"
+                      @click="xemFileSyllabus(f.id)"
+                  >Xem</button>
+                  <label class="btn tiny" style="cursor:pointer;">
+                    {{ fileSyllabusThayId === f.id ? 'Đang tải...' : 'Cập nhật' }}
+                    <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        style="display:none"
+                        :disabled="fileSyllabusLoading || !!fileSyllabusThayId"
+                        @change="thayFileSyllabus(f.id, $event)"
+                    >
+                  </label>
+                  <button
+                      type="button"
+                      class="btn tiny danger"
+                      :disabled="fileSyllabusLoading"
+                      @click="xoaFileSyllabus(f)"
+                  >Xóa</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- End file syllabus panel -->
+
       </template>
     </section>
 
@@ -258,7 +399,7 @@
                   </span>
                 </td>
                 <td class="actions-cell">
-                  <button type="button" class="btn tiny view-btn" @click="xemChuongTrinhTuNganhHe(item)">Xem chương trình</button>
+                  <button type="button" class="save-status" @click="xemChuongTrinhTuNganhHe(item)">Xem chương trình</button>
                   <button type="button" class="btn tiny" @click="suaNganhHe(item)">Sửa</button>
                   <button type="button" class="btn tiny danger" @click="xoaNganhHe(item.id)">Xóa</button>
                 </td>
@@ -373,14 +514,74 @@ watch(
 )
 function sauKhiLuuVaCapNhatGoiY(key, saved) {
   sauKhiLuu(key, saved)
-  if (key === 'khungKy') layGoiYKhungKy(selected.chuongTrinhVersion?.id)
+  if (key === 'khungKy') {
+    layGoiYKhungKy(selected.chuongTrinhVersion?.id)
+    layCanhBaoTaiHoc(selected.chuongTrinhVersion?.id)
+  }
 }
 
 function sauKhiXoaVaCapNhatGoiY(key, id) {
   sauKhiXoa(key, id)
-  if (key === 'khungKy') layGoiYKhungKy(selected.chuongTrinhVersion?.id)
+  if (key === 'khungKy') {
+    layGoiYKhungKy(selected.chuongTrinhVersion?.id)
+    layCanhBaoTaiHoc(selected.chuongTrinhVersion?.id)
+  }
 }
 // ===== END KHUNG KỲ GỢI Ý =====
+
+// ===== CẢNH BÁO TẢI HỌC THEO KỲ =====
+const canhBaoTaiHoc = ref(null)
+const dangLayCanhBaoTaiHoc = ref(false)
+const taiHocMoRong = ref(false)
+
+async function layCanhBaoTaiHoc(versionId) {
+  if (!versionId) { canhBaoTaiHoc.value = null; return }
+  dangLayCanhBaoTaiHoc.value = true
+  try {
+    const res = await services.khungKy.canhBaoTaiHoc(versionId)
+    canhBaoTaiHoc.value = res?.data ?? res
+  } catch {
+    canhBaoTaiHoc.value = null
+  } finally {
+    dangLayCanhBaoTaiHoc.value = false
+  }
+}
+
+function mucDoTaiLabel(mucDo) {
+  const map = { BINH_THUONG: 'Bình thường', QUA_TAI: 'Quá tải', NHE_TAI: 'Nhẹ tải', CHUA_TAO_KY: 'Chưa tạo kỳ', CHUA_XEP_KY: 'Chưa xếp kỳ' }
+  return map[mucDo] ?? mucDo
+}
+
+watch(
+    () => selected.chuongTrinhVersion?.id,
+    (versionId) => layCanhBaoTaiHoc(versionId),
+    {immediate: true}
+)
+// ===== END CẢNH BÁO TẢI HỌC =====
+
+// ===== GỢI Ý NGÀY HẾT HIỆU LỰC THEO THÁNG NGÀNH HỆ ĐÀO TẠO =====
+const chuongTrinhVersionFields = computed(() => {
+  const baseFields = configs.chuongTrinhVersion?.fields || []
+  return baseFields.map((field) => {
+    if (field.key !== 'ngayApDung') return field
+    return {
+      ...field,
+      onChange(value, form) {
+        if (!value) return
+        const soThang = selected.nganhHeDaoTao?.soThang
+        if (!soThang || soThang <= 0) return
+        if (form.ngayHetHieuLuc) return  // không ghi đè nếu đã nhập tay
+        const ngayApDung = new Date(value)
+        if (isNaN(ngayApDung.getTime())) return
+        const ngayHetHieuLuc = new Date(ngayApDung)
+        ngayHetHieuLuc.setMonth(ngayHetHieuLuc.getMonth() + soThang)
+        ngayHetHieuLuc.setDate(ngayHetHieuLuc.getDate() - 1)
+        form.ngayHetHieuLuc = ngayHetHieuLuc.toISOString().slice(0, 10)
+      }
+    }
+  })
+})
+// ===== END GỢI Ý NGÀY HẾT HIỆU LỰC =====
 
 const cotDiemMauDaTichChonIds = ref([])
 const dangGanCotDiemMau = ref(false)
@@ -750,6 +951,190 @@ function taoOThongTinNhomTheoKy(loaiNhom) {
   ]
 }
 
+function chuanHoaEnum(value) {
+  return String(value ?? '')
+      .trim()
+      .toLowerCase()
+}
+
+const NHAN_TRANG_THAI_CHUONG_TRINH_VERSION = {
+  dang_soan: 'Đang soạn',
+  cho_ap_dung: 'Chờ áp dụng',
+  dang_ap_dung: 'Đang áp dụng',
+  het_hieu_luc: 'Hết hiệu lực',
+  tam_dung: 'Tạm dừng',
+  da_huy: 'Đã hủy'
+}
+
+function layNhanTrangThaiChuongTrinhVersion(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_TRANG_THAI_CHUONG_TRINH_VERSION[key] || value || '-'
+}
+
+function boSungNhanHienThiBang(key, row = {}) {
+  if (!row || typeof row !== 'object') return row
+
+  const result = {...row}
+
+  if (key === 'chuongTrinhVersion') {
+    result.trangThaiHienThi = layNhanTrangThaiChuongTrinhVersion(row.trangThai)
+  }
+
+  if ([
+    'mucTieuChuongTrinhmau',
+    'mucTieuChuongTrinh',
+    'nangLucDauRamau',
+    'nangLucDauRa'
+  ].includes(key)) {
+    result.loaiHienThi = layNhanLoaiMucTieuNangLuc(row.loai)
+  }
+
+  if (key === 'chuongTrinhMon') {
+    result.loaiHienThi = layNhanLoaiMonTang7(row.loai)
+    result.loaiHocPhanHienThi = layNhanLoaiHocPhanTang7(row.loaiHocPhan)
+    result.loaiPhamViHienThi = layNhanPhamViMonTang7(row.loaiPhamVi)
+  }
+
+  if (['cauHinhDanhGiaMau', 'cauHinhDanhGia'].includes(key)) {
+    result.loaiDiemHienThi = layNhanLoaiDiemTang9(row.loaiDiem)
+  }
+
+  if (['quyDoiDiemMau', 'chuongTrinhMonQuyDoiDiemMau'].includes(key)) {
+    result.loaiMauHienThi = layNhanLoaiQuyDoiTang9(row.loaiMau)
+    result.ketQuaHienThi = layNhanKetQuaTang9(row.ketQua)
+  }
+
+  if ([
+    'dieuKienMonHocmau',
+    'dieuKienMonHoc',
+    'taiLieumau',
+    'syllabusMonHocmauTaiLieu',
+    'syllabusTaiLieu'
+  ].includes(key)) {
+    result.loaiHienThi = layNhanLoaiDieuKienTaiLieuTang9(row.loai)
+  }
+
+  return result
+}
+const NHAN_LOAI_MUC_TIEU_NANG_LUC = {
+  // Mục tiêu chương trình / mục tiêu chương trình mẫu
+  chung: 'Chung',
+  kien_thuc: 'Kiến thức',
+  ky_nang: 'Kỹ năng',
+  thai_do: 'Thái độ',
+  nang_luc_tu_chu_trach_nhiem: 'Năng lực tự chủ trách nhiệm',
+
+  // Năng lực đầu ra / năng lực đầu ra mẫu
+  cot_loi: 'Cốt lõi',
+  nang_cao: 'Nâng cao',
+
+  // Các giá trị dự phòng nếu DB/API đang có
+  nang_luc: 'Năng lực',
+  co_ban: 'Cơ bản',
+  chuyen_mon: 'Chuyên môn',
+  tu_chu_trach_nhiem: 'Tự chủ trách nhiệm',
+  khac: 'Khác'
+}
+
+const NHAN_LOAI_MON_TANG_7 = {
+  bat_buoc: 'Bắt buộc',
+  tu_chon: 'Tự chọn'
+}
+
+const NHAN_LOAI_HOC_PHAN_TANG_7 = {
+  mon_hoc: 'Môn học',
+  mo_dun: 'Mô đun',
+  module: 'Mô đun'
+}
+
+const NHAN_PHAM_VI_MON_TANG_7 = {
+  mon_chung: 'Môn chung',
+  mon_co_so: 'Môn cơ sở',
+  mon_chuyen_nganh: 'Môn chuyên ngành',
+  mon_tu_chon_nang_cao: 'Môn tự chọn nâng cao'
+}
+
+const NHAN_LOAI_DIEM_TANG_9 = {
+  bai_tap: 'Bài tập',
+  kiem_tra: 'Kiểm tra',
+  giua_ky: 'Giữa kỳ',
+  cuoi_ky: 'Cuối kỳ',
+  thuc_hanh: 'Thực hành',
+  chuyen_can: 'Chuyên cần',
+  khac: 'Khác'
+}
+
+const NHAN_LOAI_QUY_DOI_TANG_9 = {
+  quy_doi_ket_qua: 'Quy đổi kết quả',
+  QUY_DOI_KET_QUA: 'Quy đổi kết quả'
+}
+
+const NHAN_KET_QUA_TANG_9 = {
+  dat: 'Đạt',
+  khong_dat: 'Không đạt'
+}
+
+const NHAN_LOAI_DIEU_KIEN_TAI_LIEU_TANG_9 = {
+  hoc_lieu: 'Học liệu',
+  giao_trinh: 'Giáo trình',
+  tai_lieu_tham_khao: 'Tài liệu tham khảo',
+  tai_lieu_bat_buoc: 'Tài liệu bắt buộc',
+  tai_lieu_khac: 'Tài liệu khác',
+  dieu_kien_tien_quyet: 'Điều kiện tiên quyết',
+  dieu_kien_song_hanh: 'Điều kiện song hành',
+  dieu_kien_khac: 'Điều kiện khác',
+  khac: 'Khác'
+}
+
+function layNhanLoaiDiemTang9(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_LOAI_DIEM_TANG_9[key] || value || '-'
+}
+
+function layNhanLoaiQuyDoiTang9(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_LOAI_QUY_DOI_TANG_9[key] || NHAN_LOAI_QUY_DOI_TANG_9[value] || value || '-'
+}
+
+function layNhanKetQuaTang9(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_KET_QUA_TANG_9[key] || value || '-'
+}
+
+function layNhanLoaiDieuKienTaiLieuTang9(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_LOAI_DIEU_KIEN_TAI_LIEU_TANG_9[key] || value || '-'
+}
+
+function layNhanLoaiMonTang7(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_LOAI_MON_TANG_7[key] || value || '-'
+}
+
+function layNhanLoaiHocPhanTang7(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_LOAI_HOC_PHAN_TANG_7[key] || value || '-'
+}
+
+function layNhanPhamViMonTang7(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_PHAM_VI_MON_TANG_7[key] || value || '-'
+}
+
+function layNhanLoaiMucTieuNangLuc(value) {
+  const key = chuanHoaEnum(value)
+  if (!key) return '-'
+  return NHAN_LOAI_MUC_TIEU_NANG_LUC[key] || value || '-'
+}
+
 const viTriHienTaiText = computed(() => {
   if (tangHienTai.value === 6) {
     return `${versionParentText.value} | Màn hình Kỳ học`
@@ -851,15 +1236,21 @@ const danhSachMonHocTang7DaLoc = computed(() => {
   const chuongTrinhVersionId = selected.chuongTrinhVersion?.id
 
   // Tầng 7 chỉ dùng MÔN ĐÃ NẰM TRONG VERSION (đã copy vào version), không dùng toàn bộ môn mẫu.
-  const monHocIdTrongVersion = new Set(
-      (duLieu.value.chuongTrinhMon || [])
-          .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
-          .map((row) => String(row.monHocId || row.monId || ''))
-          .filter(Boolean)
-  )
+  const monTrongVersion = (duLieu.value.chuongTrinhMon || [])
+      .filter((row) => String(row.chuongTrinhVersionId || '') === String(chuongTrinhVersionId || ''))
+
+  // Map monHocId → tenKyDaGan (backend trả sẵn trong chuongTrinhMon response)
+  const monHocKyMap = {}
+  monTrongVersion.forEach((row) => {
+    const monHocId = String(row.monHocId || row.monId || '')
+    if (monHocId) monHocKyMap[monHocId] = row.tenKyDaGan || 'Chưa gán kỳ'
+  })
+
+  const monHocIdTrongVersion = new Set(Object.keys(monHocKyMap))
 
   const danhSach = (duLieu.value.monHoc || [])
       .filter((mon) => monHocIdTrongVersion.has(String(mon.id || '')))
+      .map((mon) => ({...mon, tenKyDaGan: monHocKyMap[String(mon.id)] || 'Chưa gán kỳ'}))
 
   if (!tuKhoa) {
     return danhSach
@@ -1515,7 +1906,9 @@ function laySelectedIdsTheoBang(key, allRows = [], rows = [], parentValues = {},
           const cungTen = row.ten && item.ten && String(item.ten || '') === String(row.ten || '')
           const cungThuTu = row.thuTu !== null && row.thuTu !== undefined && item.thuTu !== null && item.thuTu !== undefined
               && String(item.thuTu || '') === String(row.thuTu || '')
-          return cungMaChuong || cungTen || cungThuTu
+          return cungMaChuong
+              || cungThuTu
+              || (cungTen && !row.maChuong && !item.maChuong && row.thuTu == null && item.thuTu == null)
         }))
         .map((row) => row.id)
         .filter((id) => id !== null && id !== undefined && id !== '')
@@ -2100,12 +2493,30 @@ function layTenDieuKienTumau(dieuKienmau) {
   return (noiDung || ma || 'Điều kiện mẫu').slice(0, 250)
 }
 
+function layMangResponse(res) {
+  if (Array.isArray(res)) return res
+
+  const payload = res?.data
+
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.data)) return payload.data
+  if (Array.isArray(payload?.content)) return payload.content
+  if (Array.isArray(payload?.items)) return payload.items
+  if (Array.isArray(payload?.result)) return payload.result
+  if (Array.isArray(payload?.data?.content)) return payload.data.content
+  if (Array.isArray(payload?.data?.items)) return payload.data.items
+
+  return []
+}
+
 async function copyChiTietSyllabusmauSangSyllabusMon({syllabusMonId, syllabusMonHocMauId, force = false}) {
   if (!syllabusMonId || !syllabusMonHocMauId) return
 
   const serviceChuongBai = services.syllabusChuongBai
   const serviceDieuKien = services.dieuKienMonHoc
   const serviceTaiLieu = services.syllabusTaiLieu
+  const serviceCauHinhDanhGia = services.cauHinhDanhGia
+  const serviceQuyDoiDiem = services.quyDoiDiem
 
   const chuongBaimau = (duLieu.value.syllabusMonHocmauChuongBai || [])
       .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
@@ -2119,6 +2530,14 @@ async function copyChiTietSyllabusmauSangSyllabusMon({syllabusMonId, syllabusMon
       .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
       .sort((a, b) => Number(a.thuTu ?? 999999) - Number(b.thuTu ?? 999999))
 
+  const cauHinhDanhGiaMauRows = (duLieu.value.cauHinhDanhGiaMau || [])
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
+      .sort((a, b) => Number(a.thuTu ?? 999999) - Number(b.thuTu ?? 999999))
+
+  const quyDoiDiemMauRows = (duLieu.value.quyDoiDiemMau || [])
+      .filter((row) => String(row.syllabusMonHocMauId || '') === String(syllabusMonHocMauId || ''))
+      .sort((a, b) => Number(a.thuTu ?? 999999) - Number(b.thuTu ?? 999999))
+
   const chuongBaiDaCo = (duLieu.value.syllabusChuongBai || [])
       .filter((row) => String(row.syllabusMonId || '') === String(syllabusMonId || ''))
 
@@ -2128,9 +2547,17 @@ async function copyChiTietSyllabusmauSangSyllabusMon({syllabusMonId, syllabusMon
   const taiLieuDaCo = (duLieu.value.syllabusTaiLieu || [])
       .filter((row) => String(row.syllabusMonId || '') === String(syllabusMonId || ''))
 
+  const cauHinhDanhGiaDaCo = (duLieu.value.cauHinhDanhGia || [])
+      .filter((row) => String(row.syllabusMonHocId || '') === String(syllabusMonId || ''))
+
+  const quyDoiDiemDaCo = (duLieu.value.quyDoiDiem || [])
+      .filter((row) => String(row.syllabusMonHocId || '') === String(syllabusMonId || ''))
+
   let soChuongBai = 0
   let soDieuKien = 0
   let soTaiLieu = 0
+  let soCauHinhDanhGia = 0
+  let soQuyDoiDiem = 0
 
   if (serviceChuongBai?.create && chuongBaimau.length && (force || !chuongBaiDaCo.length)) {
     for (const [index, row] of chuongBaimau.entries()) {
@@ -2196,16 +2623,88 @@ async function copyChiTietSyllabusmauSangSyllabusMon({syllabusMonId, syllabusMon
     }
   }
 
-  if (soChuongBai || soDieuKien || soTaiLieu) {
+  if (serviceCauHinhDanhGia?.create && cauHinhDanhGiaMauRows.length && (force || !cauHinhDanhGiaDaCo.length)) {
+    for (const row of cauHinhDanhGiaMauRows) {
+      await serviceCauHinhDanhGia.create(taoPayloadCotDiemSyllabusTuMau(row, syllabusMonId))
+      soCauHinhDanhGia += 1
+    }
+  }
+
+  if (serviceQuyDoiDiem?.create && quyDoiDiemMauRows.length && (force || !quyDoiDiemDaCo.length)) {
+    for (const [index, row] of quyDoiDiemMauRows.entries()) {
+      await serviceQuyDoiDiem.create({
+        syllabusMonHocId: syllabusMonId,
+        ma: row.ma || null,
+        ten: row.ten || null,
+        nguongTu: row.nguongTu ?? null,
+        nguongDen: row.nguongDen ?? null,
+        diemQuyDoi: row.diemQuyDoi ?? null,
+        ketQua: row.ketQua || null,
+        congThuc: row.congThuc || null,
+        loaiMau: row.loaiMau || null,
+        tyLe: row.tyLe ?? null,
+        diemToiDa: row.diemToiDa ?? null,
+        thuTu: row.thuTu ?? index + 1,
+        batBuoc: row.batBuoc ?? false,
+        ghiChu: row.ghiChu || null
+      })
+      soQuyDoiDiem += 1
+    }
+  }
+
+  // Copy file từ syllabusMonHocMauFile → syllabusMonHocFile
+  let soFile = 0
+  const loiCopyFile = []
+
+  try {
+    const resMauFiles = await services.syllabusMonHocMauFile.list(syllabusMonHocMauId)
+    const mauFiles = layMangResponse(resMauFiles)
+
+    console.log('[COPY FILE SYLLABUS MẪU] syllabusMonHocMauId =', syllabusMonHocMauId)
+    console.log('[COPY FILE SYLLABUS MẪU] raw response =', resMauFiles?.data)
+    console.log('[COPY FILE SYLLABUS MẪU] parsed mauFiles =', mauFiles)
+
+    if (!mauFiles.length) {
+      datThongBaoBang(
+        'syllabusMonHoc',
+        `Syllabus mẫu ${syllabusMonHocMauId} không có file mẫu hoặc FE parse response file mẫu bị rỗng.`,
+        'warning'
+      )
+    }
+
+    for (const f of mauFiles) {
+      if (!f?.id) {
+        console.warn('[COPY FILE SYLLABUS MẪU] Bỏ qua file không có id:', f)
+        continue
+      }
+      try {
+        console.log('[COPY FILE SYLLABUS MẪU] Copy file:', f.id, f.tenFile)
+        await services.syllabusMonHocFile.copyFromMau(syllabusMonId, f.id)
+        soFile++
+      } catch (error) {
+        console.error('[COPY FILE SYLLABUS MẪU LỖI]', f, error)
+        loiCopyFile.push(`${f.tenFile || f.id}: ${layThongBaoLoi(error)}`)
+      }
+    }
+  } catch (error) {
+    console.error('[COPY FILE SYLLABUS MẪU] Lỗi load danh sách file mẫu:', error)
+    loiCopyFile.push(layThongBaoLoi(error))
+  }
+
+  if (loiCopyFile.length) {
+    datThongBaoBang('syllabusMonHoc', `Có ${loiCopyFile.length} file syllabus mẫu copy lỗi: ${loiCopyFile.join('; ')}`, 'error')
+  }
+
+  if (soChuongBai || soDieuKien || soTaiLieu || soCauHinhDanhGia || soQuyDoiDiem || soFile) {
     datThongBaoBang(
         'syllabusMonHoc',
-        `Đã copy chi tiết từ syllabus mẫu: ${soChuongBai} chương/bài, ${soTaiLieu} tài liệu, ${soDieuKien} điều kiện.`,
+        `Đã copy từ syllabus mẫu: ${soChuongBai} chương/bài, ${soTaiLieu} tài liệu, ${soDieuKien} điều kiện, ${soCauHinhDanhGia} cấu hình đánh giá, ${soQuyDoiDiem} quy đổi điểm, ${soFile} file syllabus.`,
         'success'
     )
   } else {
     datThongBaoBang(
         'syllabusMonHoc',
-        'Đã gán syllabus. Chi tiết chương/bài, tài liệu, điều kiện không copy thêm vì bảng áp dụng đã có dữ liệu hoặc syllabus mẫu chưa có chi tiết.',
+        'Đã gán syllabus. Chi tiết không copy thêm vì bảng áp dụng đã có dữ liệu hoặc syllabus mẫu chưa có chi tiết.',
         'success'
     )
   }
@@ -2395,13 +2894,9 @@ async function ganCotDiemMauVaoSyllabus(item) {
   try {
     const existing = timCotDiemSyllabusTuMau(item, syllabusMonHocId)
     if (existing?.id) {
-      if (!service.delete) {
-        baoTin('Chưa khai báo API xóa Cột điểm của syllabus.', 'error')
-        return
-      }
-      await service.delete(existing.id)
-      await taiLaiDuLieuTangSyllabusDangChon()
-      datThongBaoBang('cauHinhDanhGia', 'Đã bỏ gán cột điểm mẫu khỏi syllabus.', 'success')
+      selectEntity('cauHinhDanhGiaMau', null)
+      selectEntity('cauHinhDanhGia', existing)
+      datThongBaoBang('cauHinhDanhGia', 'Đã bỏ chọn dòng mẫu. Cột điểm đã gán vào syllabus vẫn được giữ nguyên.', 'success')
       return
     }
 
@@ -2442,21 +2937,33 @@ async function ganSyllabusmauVaoSyllabusMonHocApDung(item, {boGanNeuDaGan = fals
 
   if (existingCungmau?.id) {
     if (boGanNeuDaGan) {
-      if (!service?.delete) {
-        datThongBaoBang('syllabusMonHocmau', 'Chưa khai báo API xóa syllabus_mon_hoc để bỏ chọn syllabus mẫu.', 'error')
-        return
+      selectEntity('syllabusMonHocmau', null)
+      selectEntity('syllabusMonHoc', existingCungmau)
+
+      // Copy file mẫu sang áp dụng nếu chưa có (force=false để không ghi đè)
+      try {
+        await copyChiTietSyllabusmauSangSyllabusMon({
+          syllabusMonId: existingCungmau.id,
+          syllabusMonHocMauId: item.id,
+          force: false
+        })
+        await taiDuLieuTheoSyllabusMonHocApDung(existingCungmau)
+      } catch (error) {
+        console.warn('[boGanNeuDaGan copy file]', error)
       }
 
-      try {
-        await service.delete(existingCungmau.id)
-        selectEntity('syllabusMonHocmau', null)
-        selectEntity('syllabusMonHoc', null)
-        await taiDuLieuCoSanTatCaBang()
-        datThongBaoBang('syllabusMonHocmau', 'Đã bỏ chọn syllabus mẫu khỏi môn trong chương trình.', 'success')
-        datThongBaoBang('syllabusMonHoc', 'Bảng Syllabus đã gán vào môn trong chương trình đã được cập nhật.', 'success')
-      } catch (error) {
-        datThongBaoBang('syllabusMonHocmau', layThongBaoLoi(error, 'Không bỏ chọn được syllabus mẫu khỏi môn trong chương trình.'), 'error')
-      }
+      datThongBaoBang(
+        'syllabusMonHocmau',
+        'Đã bỏ chọn dòng mẫu. Syllabus đã gán vào môn trong chương trình vẫn được giữ nguyên.',
+        'success'
+      )
+
+      datThongBaoBang(
+        'syllabusMonHoc',
+        'Dữ liệu syllabus đã gán không bị xóa.',
+        'success'
+      )
+
       return
     }
 
@@ -2548,9 +3055,21 @@ async function ganSyllabusChuongTrinhMauVaoVersion(item) {
     const existingMauId = existing?.syllabusChuongTrinhmauId || existing?.syllabusChuongTrinhMauId || null
 
     if (existing?.id && String(existingMauId || '') === String(item.id || '')) {
-      await services.syllabusChuongTrinh.delete(existing.id)
-      await taiDuLieuCoSanTatCaBang()
-      datThongBaoBang('syllabusChuongTrinhmau', 'Đã hủy gán syllabus chương trình khỏi Version. Dữ liệu mẫu vẫn được giữ nguyên.', 'success')
+      selectEntity('syllabusChuongTrinhmau', null)
+      selectEntity('syllabusChuongTrinh', existing)
+
+      datThongBaoBang(
+        'syllabusChuongTrinhmau',
+        'Đã bỏ chọn dòng mẫu. Syllabus chương trình đã lưu vào Version vẫn được giữ nguyên.',
+        'success'
+      )
+
+      datThongBaoBang(
+        'syllabusChuongTrinh',
+        'Dữ liệu Syllabus chương trình đã lưu vào Version không bị xóa.',
+        'success'
+      )
+
       return
     }
 
@@ -2582,9 +3101,21 @@ async function ganBangConSyllabusMauVaoVersion(mauKey, apDungKey, item) {
   try {
     const existing = timDongDaCopyTheoMa(apDungKey, item)
     if (existing?.id) {
-      await services[apDungKey].delete(existing.id)
-      await taiDuLieuCoSanTatCaBang()
-      datThongBaoBang(mauKey, 'Đã bỏ gán dòng mẫu khỏi Version.', 'success')
+      selectEntity(mauKey, null)
+      selectEntity(apDungKey, existing)
+
+      datThongBaoBang(
+        mauKey,
+        'Đã bỏ chọn dòng mẫu. Dữ liệu đã lưu vào Version vẫn được giữ nguyên.',
+        'success'
+      )
+
+      datThongBaoBang(
+        apDungKey,
+        'Dữ liệu đã lưu vào Version không bị xóa.',
+        'success'
+      )
+
       return
     }
 
@@ -2752,6 +3283,40 @@ function layThongBaoTyLeCotDiemSyllabus(rows = []) {
   return null
 }
 
+async function boMonKhoiKy(item) {
+  if (!item?.id) {
+    baoTin('Không tìm thấy môn trong chương trình để bỏ khỏi kỳ.', 'error')
+    return
+  }
+
+  const dongY = confirm('Chỉ bỏ môn khỏi kỳ hiện tại, môn vẫn còn trong Version. Tiếp tục?')
+  if (!dongY) return
+
+  const payload = {
+    chuongTrinhVersionId: item.chuongTrinhVersionId,
+    monHocId: item.monHocId || item.monId,
+    maMonTrongCt: item.maMonTrongCt,
+    khungKyId: null,
+    nhomKienThucId: item.nhomKienThucId ?? null,
+    loai: item.loai || 'bat_buoc',
+    loaiHocPhan: item.loaiHocPhan || 'mon_hoc',
+    loaiPhamVi: item.loaiPhamVi || 'mon_chuyen_nganh',
+    batBuoc: item.batBuoc !== false,
+    laMonDieuKien: item.laMonDieuKien === true,
+    thuTu: item.thuTu ?? null,
+    ghiChu: item.ghiChu || ''
+  }
+
+  try {
+    const saved = await services.chuongTrinhMon.update(item.id, payload)
+    sauKhiLuu('chuongTrinhMon', saved)
+    selectEntity('chuongTrinhMon', null)
+    baoTin('Đã bỏ môn khỏi kỳ hiện tại. Môn vẫn còn trong Version/chương trình.', 'success')
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không bỏ môn khỏi kỳ được.'), 'error')
+  }
+}
+
 function taoBang(key, options = {}) {
   const parentValues = options.parentValues || {}
   const linkParentValues = options.linkParentValues || parentValues
@@ -2767,7 +3332,8 @@ function taoBang(key, options = {}) {
 
   const rowsChuaSapXep = khongLocTheoCha || hienDayDuBangmauMau || hienDayDuBangPhu ? allRows : locDongTheoCha(allRows, filterValues)
   const rowsDaSapXep = sapXepBangTheoThuTu(key, rowsChuaSapXep)
-  const rows = Array.isArray(options.displayRows) ? options.displayRows : rowsDaSapXep
+  const rowsNguon = Array.isArray(options.displayRows) ? options.displayRows : rowsDaSapXep
+  const rows = rowsNguon.map((row) => boSungNhanHienThiBang(key, row))
   const coNutLuuBoLuu = options.canToggleSave === undefined ? bangCoNutLuuBoLuuMacDinh.has(key) : Boolean(options.canToggleSave)
   const coNutChon = options.canSelect === undefined ? !bangKhongCanChon.has(key) && !bangChiLuuGanKhongChon.has(key) : Boolean(options.canSelect)
   const coHienTrangThaiDaLuu = options.canShowSavedStatus === undefined
@@ -2829,7 +3395,9 @@ function taoBang(key, options = {}) {
     statusSavedLabel: options.statusSavedLabel || '✓ Đã gán',
     statusUnsavedLabel: options.statusUnsavedLabel || '+ Chưa gán',
     disabled: Boolean(options.disabled),
-    disabledText: options.disabledText || ''
+    disabledText: options.disabledText || '',
+    deleteHandler: options.deleteHandler || null,
+    deleteLabel: options.deleteLabel || 'Xóa'
   }
 }
 
@@ -3564,6 +4132,7 @@ const groups = computed(() => {
           filterValues: chuongTrinhVersionFilter.value,
           parentText: chuongTrinhVersionParentText.value,
           canView: true,
+          fields: chuongTrinhVersionFields.value,
           disabled: !selected.chuongTrinh,
           disabledText: 'Cần chọn Chương trình trước.'
         })
@@ -3590,7 +4159,7 @@ const groups = computed(() => {
           toggleSavedLabel: 'Đã gán',
           statusSavedLabel: '✓ Đã gán',
           statusUnsavedLabel: '+ Chưa gán',
-          saveStatusText: 'Bảng mẫu chỉ dùng để gán/hủy gán vào Version hiện tại. Bấm Đã gán lần nữa để hủy gán.',
+          saveStatusText: 'Bảng mẫu chỉ dùng để copy/gán vào Version hiện tại. Bấm Đã gán lần nữa chỉ bỏ chọn dòng mẫu, không xóa dữ liệu đã lưu.',
           disabled: !selected.chuongTrinhVersion,
           disabledText: 'Cần chọn Version trước.',
           emptyText: 'Chương trình này chưa có syllabus chương trình mẫu.',
@@ -3626,7 +4195,7 @@ const groups = computed(() => {
           toggleSavedLabel: 'Đã gán',
           statusSavedLabel: '✓ Đã gán',
           statusUnsavedLabel: '+ Chưa gán',
-          saveStatusText: 'Bấm Gán vào để copy mục tiêu mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          saveStatusText: 'Bấm Gán vào để copy dữ liệu mẫu vào Version; bấm Đã gán lần nữa chỉ bỏ chọn dòng mẫu, không xóa dữ liệu đã lưu.',
           disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
           disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
@@ -3658,7 +4227,7 @@ const groups = computed(() => {
           toggleSavedLabel: 'Đã gán',
           statusSavedLabel: '✓ Đã gán',
           statusUnsavedLabel: '+ Chưa gán',
-          saveStatusText: 'Bấm Gán vào để copy năng lực mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          saveStatusText: 'Bấm Gán vào để copy dữ liệu mẫu vào Version; bấm Đã gán lần nữa chỉ bỏ chọn dòng mẫu, không xóa dữ liệu đã lưu.',
           disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
           disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
@@ -3690,7 +4259,7 @@ const groups = computed(() => {
           toggleSavedLabel: 'Đã gán',
           statusSavedLabel: '✓ Đã gán',
           statusUnsavedLabel: '+ Chưa gán',
-          saveStatusText: 'Bấm Gán vào để copy vị trí mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          saveStatusText: 'Bấm Gán vào để copy dữ liệu mẫu vào Version; bấm Đã gán lần nữa chỉ bỏ chọn dòng mẫu, không xóa dữ liệu đã lưu.',
           disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
           disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
@@ -3722,7 +4291,7 @@ const groups = computed(() => {
           toggleSavedLabel: 'Đã gán',
           statusSavedLabel: '✓ Đã gán',
           statusUnsavedLabel: '+ Chưa gán',
-          saveStatusText: 'Bấm Gán vào để copy điều kiện mẫu vào Version; bấm Đã gán lần nữa để hủy gán dòng đã copy.',
+          saveStatusText: 'Bấm Gán vào để copy dữ liệu mẫu vào Version; bấm Đã gán lần nữa chỉ bỏ chọn dòng mẫu, không xóa dữ liệu đã lưu.',
           disabled: !selected.chuongTrinhVersion || !syllabusChuongTrinhMauIdDangGan.value,
           disabledText: 'Cần gán Syllabus chương trình mẫu cho Version trước.'
         }),
@@ -3796,7 +4365,12 @@ const groups = computed(() => {
           tableTitle: 'Môn học trong version',
           emptyText: 'Version này chưa có môn nào. Hãy copy môn vào version ở trang "Nhóm kiến thức và môn" trước.',
           disabled: !selected.chuongTrinhVersion || !selected.khungKy,
-          disabledText: 'Cần chọn Version và Kỳ học trước.'
+          disabledText: 'Cần chọn Version và Kỳ học trước.',
+          columns: [
+            {key: 'maMon', label: 'Mã môn'},
+            {key: 'tenMon', label: 'Tên môn'},
+            {key: 'tenKyDaGan', label: 'Thuộc kỳ'}
+          ]
         }),
         taoBang('chuongTrinhMon', {
           parentValues: chuongTrinhMonTheoKyFilter.value,
@@ -3807,15 +4381,15 @@ const groups = computed(() => {
           readOnly: false,
           canSelect: true,
           canToggleSave: false,
-          // Cho phép Sửa/Xóa môn trong kỳ, nhưng bỏ Loại phạm vi khỏi form nhập
-          // (Loại phạm vi & Nhóm kiến thức gán ở trang "Nhóm kiến thức và môn", ở đây chỉ hiển thị cột).
           fields: chuongTrinhMonFieldsTang7,
           title: 'Môn đã lưu vào kỳ',
-          description: 'Các môn đã gắn vào Version/Kỳ hiện tại qua chuong_trinh_mon. Có thể Sửa/Xóa môn. Riêng Loại phạm vi và Nhóm kiến thức gán ở trang "Nhóm kiến thức và môn", tại đây chỉ hiển thị.',
+          description: 'Các môn đã gắn vào kỳ hiện tại. Bấm "Bỏ khỏi kỳ" chỉ gỡ khungKyId khỏi môn trong Version, không xóa môn khỏi Version.',
           tableTitle: 'Môn học đã gắn vào kỳ',
           emptyText: 'Chưa có môn học nào được gắn vào kỳ hiện tại.',
           disabled: !selected.chuongTrinhVersion || !selected.khungKy,
-          disabledText: 'Cần chọn Version và Kỳ học trước.'
+          disabledText: 'Cần chọn Version và Kỳ học trước.',
+          deleteHandler: boMonKhoiKy,
+          deleteLabel: 'Bỏ khỏi kỳ'
         })
       ]
     }]
@@ -3883,11 +4457,8 @@ const groups = computed(() => {
         savedIds: layIdsCotDiemMauDaGanSyllabus(cotDiemSyllabusmauRows.value, syllabusMonHocScopeParent.value.syllabusMonHocId),
         parentText: `${syllabusMonParentText.value} | Đây là cột điểm lấy từ syllabus mẫu. Tích chọn nhiều dòng rồi bấm Gán cột điểm đã tích chọn, hoặc bấm Gán vào syllabus trên từng dòng để copy thành Cột điểm của syllabus áp dụng.`,
         readOnly: true,
-        canSelect: true,
-        multiSelect: true,
-        multiSelectIds: cotDiemMauDaTichChonIds.value,
-        multiSelectLabel: 'Tích chọn',
-        multiSelectedLabel: 'Bỏ tích',
+        canSelect: false,
+        multiSelect: false,
         canToggleSave: true,
         canShowSavedStatus: true,
         toggleHandler: ganCotDiemMauVaoSyllabus,
@@ -3904,7 +4475,7 @@ const groups = computed(() => {
         columns: [
           {key: 'tenSyllabusmauHienThi', label: 'Syllabus mẫu'},
           {key: 'tenCotDiem', label: 'Tên cột điểm'},
-          {key: 'loaiDiem', label: 'Loại điểm'},
+          {key: 'loaiDiemHienThi', label: 'Loại điểm'},
           {key: 'tyLe', label: 'Tỷ lệ %'},
           {key: 'diemToiDa', label: 'Điểm tối đa'},
           {key: 'thuTu', label: 'Thứ tự'},
@@ -3932,7 +4503,7 @@ const groups = computed(() => {
         columns: [
           {key: 'tenSyllabusmauHienThi', label: 'Syllabus mẫu'},
           {key: 'tenCotDiem', label: 'Tên cột điểm'},
-          {key: 'loaiDiem', label: 'Loại điểm'},
+          {key: 'loaiDiemHienThi', label: 'Loại điểm'},
           {key: 'tyLe', label: 'Tỷ lệ %'},
           {key: 'diemToiDa', label: 'Điểm tối đa'},
           {key: 'thuTu', label: 'Thứ tự'},
@@ -4026,7 +4597,7 @@ const groups = computed(() => {
         readOnly: true,
         columns: [
           {key: 'ma', label: 'Mã điều kiện'},
-          {key: 'loai', label: 'Loại điều kiện'},
+          {key: 'loaiHienThi', label: 'Loại điều kiện'},
           {key: 'noiDung', label: 'Nội dung'},
               {key: 'ghiChu', label: 'Ghi chú'},
           {key: 'createdAt', label: 'Ngày tạo'},
@@ -4196,6 +4767,7 @@ const configs = {
       tongGioLyThuyet: null,
       tongGioThucHanh: null,
       tongGioKiemTra: null,
+      trangThai: 'DANG_SOAN',
       laHienHanh: false
     },
     fields: [
@@ -4211,7 +4783,9 @@ const configs = {
       {key: 'maVersion', label: 'Mã version', required: true},
       {key: 'tenVersion', label: 'Tên version', required: true},
       {
-        key: 'ngayApDung', label: 'Ngày áp dụng', type: 'date',
+        key: 'ngayApDung',
+        label: 'Ngày áp dụng',
+        type: 'date',
         validate: (value, form) => {
           if (value && form.ngayHetHieuLuc && value > form.ngayHetHieuLuc)
             return 'Ngày áp dụng không được sau ngày hết hiệu lực.'
@@ -4219,7 +4793,9 @@ const configs = {
         }
       },
       {
-        key: 'ngayHetHieuLuc', label: 'Ngày hết hiệu lực', type: 'date',
+        key: 'ngayHetHieuLuc',
+        label: 'Ngày hết hiệu lực',
+        type: 'date',
         validate: (value, form) => {
           if (value && form.ngayApDung && value < form.ngayApDung)
             return 'Ngày hết hiệu lực không được trước ngày áp dụng.'
@@ -4230,15 +4806,21 @@ const configs = {
       {key: 'ngayQuyetDinh', label: 'Ngày quyết định', type: 'date'},
       {key: 'nguoiKy', label: 'Người ký'},
       {key: 'coQuanBanHanh', label: 'Cơ quan ban hành'},
+
+      {
+        key: 'trangThai',
+        label: 'Trạng thái',
+        type: 'select',
+        lookup: 'trangThaiChuongTrinhVersion',
+        labelKey: ['ten']
+      },
+
       {key: 'tongTinChi', label: 'Tổng tín chỉ', type: 'number', max: 9999.9, step: 0.1, locked: true},
       {key: 'tongSoGio', label: 'Tổng giờ', type: 'number', max: 999999.9, step: 0.1, locked: true},
       {key: 'tongGioLyThuyet', label: 'Giờ LT', type: 'number', max: 999999.9, step: 0.1, locked: true},
       {key: 'tongGioThucHanh', label: 'Giờ TH', type: 'number', max: 999999.9, step: 0.1, locked: true},
       {key: 'tongGioKiemTra', label: 'Giờ KT', type: 'number', max: 999999.9, step: 0.1, locked: true},
-      {key: 'laHienHanh', label: 'Hiện hành', type: 'boolean'}
-    ],
-    uniqueRules: [
-      {field: 'maVersion', scopeKeys: ['chuongTrinhId'], message: 'Mã version đã tồn tại trong Chương trình đang chọn.'}
+      {key: 'laHienHanh', label: 'Hiện hành', type: 'boolean', locked: true}
     ],
     columns: [
       {key: 'maVersion', label: 'Mã version'},
@@ -4246,12 +4828,19 @@ const configs = {
       {key: 'tenChuongTrinh', label: 'Chương trình'},
       {key: 'ngayApDung', label: 'Ngày áp dụng'},
       {key: 'ngayHetHieuLuc', label: 'Ngày hết hiệu lực'},
+      {key: 'trangThaiHienThi', label: 'Trạng thái', width: '120px'},
+      {key: 'laHienHanh', label: 'Hiện hành', width: '90px'},
+      {key: 'conHieuLucTheoNgay', label: 'Còn hiệu lực', width: '100px'},
+      {key: 'duocPhepChinhSua', label: 'Được sửa', width: '90px'},
+      {key: 'duocPhepVanHanh', label: 'Được vận hành', width: '110px'},
       {key: 'tongTinChi', label: 'Tín chỉ'},
       {key: 'tongSoGio', label: 'Tổng giờ'},
       {key: 'tongGioLyThuyet', label: 'Giờ LT'},
       {key: 'tongGioThucHanh', label: 'Giờ TH'},
       {key: 'tongGioKiemTra', label: 'Giờ KT'},
-      {key: 'laHienHanh', label: 'Hiện hành'}
+      {key: 'soMonChuaCoSyllabus', label: 'Môn thiếu SB', width: '100px'},
+      {key: 'canhBaoTongHop', label: 'Cảnh báo'},
+      {key: 'lyDoTrangThai', label: 'Lý do trạng thái'}
     ]
   },
   mucTieuChuongTrinhmau: {
@@ -4269,7 +4858,7 @@ const configs = {
     ],
     columns: [
       {key: 'ma', label: 'Mã'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại'},
       {key: 'noiDung', label: 'Nội dung'},
       {key: 'ghiChu', label: 'Ghi chú'},
       {key: 'createdAt', label: 'Ngày tạo'},
@@ -4305,7 +4894,7 @@ const configs = {
     columns: [
       {key: 'tenVersion', label: 'Version'},
       {key: 'ma', label: 'Mã mục tiêu mẫu'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại'},
       {key: 'noiDung', label: 'Nội dung'},
       {key: 'ghiChu', label: 'Ghi chú'},
       {key: 'createdAt', label: 'Ngày tạo'},
@@ -4328,12 +4917,9 @@ const configs = {
     ],
     columns: [
       {key: 'ma', label: 'Mã'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại'},
       {key: 'noiDung', label: 'Nội dung'},
-      {key: 'tongGio', label: 'Tổng giờ'},
-      {key: 'gioLyThuyet', label: 'Giờ lý thuyết'},
-      {key: 'gioThucHanh', label: 'Giờ thực hành'},
-      {key: 'gioKiemTra', label: 'Giờ kiểm tra'},
+
       {key: 'ghiChu', label: 'Ghi chú'},
       {key: 'createdAt', label: 'Ngày tạo'},
       {key: 'updatedAt', label: 'Ngày cập nhật'}
@@ -4361,7 +4947,7 @@ const configs = {
     columns: [
       {key: 'tenVersion', label: 'Version'},
       {key: 'ma', label: 'Mã'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại'},
       {key: 'noiDung', label: 'Nội dung'},
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
@@ -5091,9 +5677,9 @@ const configs = {
       {key: 'tenVersion', label: 'Version'},
       {key: 'tenKy', label: 'Kỳ'},
       {key: 'tenNhomKienThuc', label: 'Nhóm KT'},
-      {key: 'loai', label: 'Loại'},
-      {key: 'loaiHocPhan', label: 'Loại học phần'},
-      {key: 'loaiPhamVi', label: 'Phạm vi'},
+      {key: 'loaiHienThi', label: 'Loại'},
+      {key: 'loaiHocPhanHienThi', label: 'Loại học phần'},
+      {key: 'loaiPhamViHienThi', label: 'Phạm vi'},
       {key: 'laMonDieuKien', label: 'Môn điều kiện'},
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
@@ -5158,7 +5744,7 @@ const configs = {
     columns: [
       {key: 'tenMon', label: 'Môn chính'},
       {key: 'tenMonDieuKien', label: 'Môn điều kiện'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại'},
       {key: 'ghiChu', label: 'Ghi chú'}
     ]
   },
@@ -5304,11 +5890,11 @@ const configs = {
     columns: [
       {key: 'ma', label: 'Mã mẫu quy đổi'},
       {key: 'ten', label: 'Tên mẫu quy đổi'},
-      {key: 'loaiMau', label: 'Loại quy đổi'},
+      {key: 'loaiMauHienThi', label: 'Loại quy đổi'},
       {key: 'nguongTu', label: 'Ngưỡng từ'},
       {key: 'nguongDen', label: 'Ngưỡng đến'},
       {key: 'diemQuyDoi', label: 'Điểm quy đổi'},
-      {key: 'ketQua', label: 'Kết quả'},
+      {key: 'ketQuaHienThi', label: 'Kết quả'},
       {key: 'congThuc', label: 'Công thức'},
       {key: 'ghiChu', label: 'Ghi chú mẫu'}
     ]
@@ -5326,11 +5912,11 @@ const configs = {
       {key: 'tenChuongTrinhMon', label: 'Môn trong chương trình'},
       {key: 'maQuyDoiDiemMau', label: 'Mã mẫu quy đổi'},
       {key: 'tenQuyDoiDiemMau', label: 'Tên mẫu quy đổi'},
-      {key: 'loaiMau', label: 'Loại quy đổi'},
+      {key: 'loaiMauHienThi', label: 'Loại quy đổi'},
       {key: 'nguongTu', label: 'Ngưỡng từ'},
       {key: 'nguongDen', label: 'Ngưỡng đến'},
       {key: 'diemQuyDoi', label: 'Điểm quy đổi'},
-      {key: 'ketQua', label: 'Kết quả'},
+      {key: 'ketQuaHienThi', label: 'Kết quả'},
       {key: 'congThuc', label: 'Công thức'},
       {key: 'ghiChuMau', label: 'Ghi chú mẫu'},
       {key: 'ghiChu', label: 'Ghi chú gán'}
@@ -5403,6 +5989,10 @@ const configs = {
       {key: 'ten', label: 'Tên syllabus mẫu'},
       {key: 'tenMonHoc', label: 'Môn học'},
       {key: 'soTinChi', label: 'Số tín chỉ'},
+      {key: 'tongGio', label: 'Tổng giờ'},
+      {key: 'gioLyThuyet', label: 'Giờ lý thuyết'},
+      {key: 'gioThucHanh', label: 'Giờ thực hành'},
+      {key: 'gioKiemTra', label: 'Giờ kiểm tra'},
       {key: 'viTri', label: 'Vị trí'},
       {key: 'tinhChat', label: 'Tính chất'},
       {key: 'soBuoiHoc', label: 'Số buổi'},
@@ -5459,6 +6049,7 @@ const configs = {
     ],
     columns: [
       {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
+      {key: 'thuTu', label: 'Thứ tự'},
       {key: 'maChuong', label: 'Mã chương'},
       {key: 'ten', label: 'Tên chương/bài'},
       {key: 'mucTieu', label: 'Mục tiêu'},
@@ -5540,7 +6131,7 @@ const configs = {
       {key: 'tenSyllabusMonHocmau', label: 'Syllabus mẫu'},
       {key: 'ma', label: 'Mã tài liệu'},
       {key: 'ten', label: 'Tên tài liệu'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại điều kiện'},
       {key: 'tacGia', label: 'Tác giả'},
       {key: 'nhaXuatBan', label: 'Nhà xuất bản'},
       {key: 'namXuatBan', label: 'Năm xuất bản'},
@@ -5682,7 +6273,7 @@ const configs = {
     ],
     columns: [
       {key: 'tenSyllabusMon', label: 'Syllabus môn'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại điều kiện'},
       {key: 'ten', label: 'Tên điều kiện'},
       {key: 'noiDung', label: 'Nội dung'},
       {key: 'soLuong', label: 'Số lượng'},
@@ -5709,7 +6300,7 @@ const configs = {
     ],
     columns: [
       {key: 'ma', label: 'Mã'},
-      {key: 'loai', label: 'Loại điều kiện'},
+      {key: 'loaiHienThi', label: 'Loại điều kiện'},
       {key: 'noiDung', label: 'Nội dung'},
       {key: 'ghiChu', label: 'Ghi chú'},
       {key: 'createdAt', label: 'Ngày tạo'},
@@ -5794,6 +6385,7 @@ const configs = {
     ],
     columns: [
       {key: 'tenSyllabusMon', label: 'Syllabus môn'},
+      {key: 'thuTu', label: 'Thứ tự'},
       {key: 'maChuong', label: 'Mã chương'},
       {key: 'ten', label: 'Tên chương/bài'},
       {key: 'mucTieu', label: 'Mục tiêu'},
@@ -5842,7 +6434,7 @@ const configs = {
     columns: [
       {key: 'ma', label: 'Mã'},
       {key: 'ten', label: 'Tên tài liệu'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại điều kiện'},
       {key: 'tacGia', label: 'Tác giả'},
       {key: 'nhaXuatBan', label: 'Nhà xuất bản'},
       {key: 'namXuatBan', label: 'Năm xuất bản'},
@@ -5942,7 +6534,7 @@ const configs = {
       {key: 'tenSyllabusMon', label: 'Syllabus môn'},
       {key: 'ma', label: 'Mã tài liệu'},
       {key: 'ten', label: 'Tên tài liệu'},
-      {key: 'loai', label: 'Loại'},
+      {key: 'loaiHienThi', label: 'Loại điều kiện'},
       {key: 'tacGia', label: 'Tác giả'},
       {key: 'nhaXuatBan', label: 'Nhà xuất bản'},
       {key: 'namXuatBan', label: 'Năm xuất bản'},
@@ -5953,6 +6545,95 @@ const configs = {
     ]
   },
 }
+
+// ===== FILE SYLLABUS MÔN HỌC (tang 9) =====
+
+const fileSyllabusLoading = ref(false)
+const fileSyllabusUploading = ref(false)
+const fileSyllabusThayId = ref(null)  // id file đang được thay thế
+const fileSyllabusThongBao = ref('')
+const fileSyllabusLoaiThongBao = ref('') // 'success' | 'error'
+
+const danhSachFileDaGanSyllabus = computed(() => duLieu.value.syllabusMonHocFile || [])
+
+function formatKichThuocFile(bytes) {
+  if (!bytes && bytes !== 0) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+async function thayFileSyllabus(fileId, event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  event.target.value = ''
+  fileSyllabusThayId.value = fileId
+  fileSyllabusThongBao.value = ''
+  try {
+    await services.syllabusMonHocFile.replace(fileId, file)
+    fileSyllabusThongBao.value = `Đã cập nhật file thành công.`
+    fileSyllabusLoaiThongBao.value = 'success'
+    await taiDuLieuTheoSyllabusMonHocApDung(selected.syllabusMonHoc)
+  } catch (e) {
+    fileSyllabusThongBao.value = `Lỗi: ${layThongBaoLoi(e)}`
+    fileSyllabusLoaiThongBao.value = 'error'
+  } finally {
+    fileSyllabusThayId.value = null
+  }
+}
+
+async function xoaFileSyllabus(file) {
+  if (!confirm(`Xóa file "${file.tenFile}"?`)) return
+  fileSyllabusLoading.value = true
+  fileSyllabusThongBao.value = ''
+  try {
+    await services.syllabusMonHocFile.delete(file.id)
+    fileSyllabusThongBao.value = `Đã xóa file "${file.tenFile}".`
+    fileSyllabusLoaiThongBao.value = 'success'
+    await taiDuLieuTheoSyllabusMonHocApDung(selected.syllabusMonHoc)
+  } catch (e) {
+    fileSyllabusThongBao.value = `Lỗi: ${layThongBaoLoi(e)}`
+    fileSyllabusLoaiThongBao.value = 'error'
+  } finally {
+    fileSyllabusLoading.value = false
+  }
+}
+
+async function uploadFileSyllabusApDung(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  event.target.value = ''
+  const syllabusMonHocId = selected.syllabusMonHoc?.id
+  if (!syllabusMonHocId) return
+  fileSyllabusUploading.value = true
+  fileSyllabusThongBao.value = ''
+  try {
+    await services.syllabusMonHocFile.upload(syllabusMonHocId, file)
+    fileSyllabusThongBao.value = `Đã tải lên file "${file.name}".`
+    fileSyllabusLoaiThongBao.value = 'success'
+    await taiDuLieuTheoSyllabusMonHocApDung(selected.syllabusMonHoc)
+  } catch (e) {
+    fileSyllabusThongBao.value = `Lỗi tải file: ${layThongBaoLoi(e)}`
+    fileSyllabusLoaiThongBao.value = 'error'
+  } finally {
+    fileSyllabusUploading.value = false
+  }
+}
+
+function xemFileSyllabus(fileId) {
+  router.push({
+    name: 'DaoTao.XemChuongTrinh.SyllabusTep',
+    params: route.params,
+    query: {
+      ...route.query,
+      tepNguon: 'syllabusMonHocFile',
+      syllabusMonHocFileId: fileId,
+      fileIndex: 0
+    }
+  })
+}
+
+// ===== END FILE SYLLABUS MÔN HỌC =====
 
 </script>
 <style scoped>
@@ -6008,6 +6689,82 @@ const configs = {
 .goi-y-ky-badge.da-tao  { background: #d4f5d4; color: #1a6b1a; border: 1px solid #7ec87e; }
 .goi-y-ky-badge.chua-tao { background: #f0f0f0; color: #888; border: 1px dashed #bbb; }
 /* ===== END KHUNG KỲ GỢI Ý PANEL ===== */
+
+/* ===== CẢNH BÁO TẢI HỌC PANEL ===== */
+.tai-hoc-panel {
+  margin: 4px 0 12px;
+  border-radius: 6px;
+  border: 1px solid #d0d8e8;
+  background: #f8fafc;
+  font-size: 13px;
+  overflow: hidden;
+}
+.tai-hoc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  user-select: none;
+  background: #eef2f8;
+  flex-wrap: wrap;
+}
+.tai-hoc-header:hover { background: #e4eaf5; }
+.tai-hoc-title { font-weight: 600; color: #344; margin-right: 4px; }
+.tai-hoc-summary { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.tai-hoc-toggle { margin-left: auto; color: #888; font-size: 11px; }
+.tai-canh-bao-chung {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 14px;
+  background: #fff8e1;
+  border-bottom: 1px solid #f0c040;
+}
+.tai-cb-item { color: #7a4a00; font-size: 12px; }
+.tai-tong-hop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: #445;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e0e6ef;
+}
+.tai-nguong { color: #888; margin-left: auto; }
+.tai-hoc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.tai-hoc-table th {
+  background: #e8edf5;
+  padding: 5px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: #344;
+  border-bottom: 1px solid #ccd4e0;
+}
+.tai-hoc-table td { padding: 5px 10px; border-bottom: 1px solid #eef0f4; }
+.tai-row:last-child td { border-bottom: none; }
+.tai-row-qua_tai { background: #fff0f0; }
+.tai-row-nhe_tai { background: #fffaf0; }
+.tai-row-chua_tao_ky { background: #f5f5f5; color: #aaa; }
+.tai-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tai-binh_thuong { background: #d4f5d4; color: #1a6b1a; border: 1px solid #7ec87e; }
+.tai-qua_tai     { background: #ffd6d6; color: #a00;    border: 1px solid #f99; }
+.tai-nhe_tai     { background: #fff0cc; color: #7a4a00; border: 1px solid #f0c060; }
+.tai-chua_tao_ky { background: #f0f0f0; color: #888;    border: 1px dashed #bbb; }
+.tai-chua_xep_ky { background: #e8f0ff; color: #3355aa; border: 1px solid #99b3ee; }
+/* ===== END CẢNH BÁO TẢI HỌC PANEL ===== */
 
 .xay-dung-page {
   box-sizing: border-box;
@@ -6230,6 +6987,20 @@ const configs = {
     flex-direction: column;
   }
 }
+
+.bang-chuong-trinh-mon-tang-7 :deep(.col-action-wide) {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  white-space: nowrap;
+}
+
+.dao-tao-xem-page .flow-group.mau-xam :deep(.col-action-wide) {
+  width: 155px;
+  min-width: 155px;
+  max-width: 155px;
+  white-space: nowrap;
+}
 </style>
 
 
@@ -6237,8 +7008,8 @@ const configs = {
 
 
 .tang-nav {
-  display: grid;
-  grid-template-columns: repeat(9, minmax(135px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 8px;
   overflow-x: auto;
   margin-bottom: 10px;
@@ -6249,6 +7020,7 @@ const configs = {
 }
 
 .tang-btn {
+  flex: 0 0 135px;
   min-height: 58px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -6546,7 +7318,7 @@ const configs = {
 
 @media (max-width: 1000px) {
   .tang-nav {
-    grid-template-columns: repeat(9, 150px);
+    /* flex layout — không cần override grid-template-columns */
   }
 
   .tang-current,
@@ -6807,9 +7579,24 @@ const configs = {
 }
 
 .dao-tao-xem-page .bang-da-gan-tang-2 table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 900px;
   max-width: none;
+  table-layout: fixed;
+}
+
+.bang-da-gan-tang-2 th:nth-child(1) { width: 14%; }
+.bang-da-gan-tang-2 th:nth-child(2) { width: 18%; }
+.bang-da-gan-tang-2 th:nth-child(3) { width: 11%; }
+.bang-da-gan-tang-2 th:nth-child(4) { width: 8%; }
+.bang-da-gan-tang-2 th:nth-child(5) { width: 20%; }
+.bang-da-gan-tang-2 th:nth-child(6) { width: 10%; }
+.bang-da-gan-tang-2 th:nth-child(7) { width: 19%; }
+
+.bang-da-gan-tang-2 td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 
@@ -6943,4 +7730,147 @@ const configs = {
 .dao-tao-xem-page > .flow-group:first-of-type {
   margin-top: 6px;
 }
+
+/* Tầng 5 (tong-quan): thu nhỏ cột trạng thái ở các bảng mẫu */
+.dao-tao-xem-page .flow-group.mau-hong :deep(.col-action-wide) {
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
+  white-space: nowrap;
+}
+
+/* ===== FILE SYLLABUS PANEL ===== */
+.bang-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+
+.bang-header-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  flex: 1;
+}
+
+.file-loading-text {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.bang-tieu-de {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  padding: 6px 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.bang-rong-text {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 0 0 4px 4px;
+}
+
+.bang-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0 0 4px 4px;
+  overflow: hidden;
+}
+
+.bang-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  padding: 5px 8px;
+  border-bottom: 1px solid #cbd5e1;
+  text-align: left;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.bang-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.bang-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bang-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.file-ten-col {
+  max-width: 220px;
+  word-break: break-word;
+}
+
+.file-action-cell {
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.badge-da-gan {
+  font-size: 0.78rem;
+  color: #16a34a;
+  font-weight: 600;
+  background: #dcfce7;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid #bbf7d0;
+}
+
+.btn.danger {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+/* Ví dụ cho nút có class .save-status */
+/* Ví dụ cho nút có class .save-status */
+.save-status {
+  display: inline-block;       /* để nó co theo nội dung */
+  background-color: #2563eb;   /* xanh dương */
+  color: #fff;
+  border: none;
+  border-radius: 8px;          /* bo tròn góc */
+  padding: 4px 10px;           /* giảm padding cho gọn */
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: auto;                 /* bỏ width 100% nếu có */
+  min-width: unset;            /* bỏ ép min-width */
+}
+
+.save-status:hover {
+  background-color: #1d4ed8;   /* xanh đậm hơn khi hover */
+}
+
+/* ===== END FILE SYLLABUS PANEL ===== */
 </style>
