@@ -1,12 +1,11 @@
 <template>
-  <div class="dao-tao-tong-quan-page" @click="dongMenuVersion">
+  <div class="dao-tao-tong-quan-page">
     <section class="page-header">
-      <div>
+      <div class="page-title">
         <p class="eyebrow">Chương trình đào tạo</p>
         <h1>Tổng quan chương trình đào tạo</h1>
         <p class="subtitle">
-          Xem cấu trúc phân cấp Ngành → Chương trình đào tạo → Version.
-          Chọn version để xem kỳ hoặc syllabus chương trình.
+          Xem nhanh Ngành → Chương trình đào tạo → Version. Bấm vào chương trình đào tạo để mở danh sách version.
         </p>
       </div>
 
@@ -18,8 +17,11 @@
     </section>
 
     <section v-if="errorMessage" class="state-card error">
-      <h3>Không tải được dữ liệu</h3>
-      <p>{{ errorMessage }}</p>
+      <div>
+        <h3>Không tải được dữ liệu</h3>
+        <p>{{ errorMessage }}</p>
+      </div>
+
       <button type="button" class="btn primary" @click.stop="taiDuLieuTongQuan">
         Thử lại
       </button>
@@ -45,12 +47,12 @@
           </select>
         </label>
 
-        <label>
+        <label class="search-field">
           <span>Tìm kiếm</span>
           <input
               v-model.trim="boLoc.keyword"
               type="text"
-              placeholder="Nhập ngành, chương trình hoặc version..."
+              placeholder="Tìm ngành, chương trình hoặc version..."
           />
         </label>
 
@@ -70,7 +72,9 @@
       <div class="section-title">
         <div>
           <h2>Danh sách theo ngành</h2>
-          <p>Mỗi ngành gồm các chương trình đào tạo, mỗi chương trình có danh sách version riêng.</p>
+          <p>
+            Mỗi ngành là một nhóm nhỏ. Chương trình đào tạo và version được hiển thị gọn để dễ theo dõi.
+          </p>
         </div>
 
         <span class="badge neutral">{{ danhSachNganhGroupDaLoc.length }} ngành</span>
@@ -95,19 +99,19 @@
             class="industry-card"
         >
           <header class="industry-header">
-            <div>
+            <div class="industry-title">
               <p class="industry-label">Ngành</p>
               <h3>{{ nganhGroup.tenNganh }}</h3>
             </div>
 
             <span class="program-count">
-              {{ nganhGroup.chuongTrinhList.length }} chương trình đào tạo
+              {{ nganhGroup.chuongTrinhList.length }} CTĐT
             </span>
           </header>
 
           <div class="program-list">
             <div v-if="!nganhGroup.chuongTrinhList.length" class="program-empty">
-              Ngành này chưa có chương trình đào tạo.
+              Chưa có chương trình đào tạo.
             </div>
 
             <section
@@ -115,17 +119,31 @@
                 v-else
                 :key="chuongTrinh.rowKey"
                 class="program-item"
+                :class="{ active: dangMoChuongTrinh(chuongTrinh.rowKey) }"
             >
-              <div class="program-header">
-                <span class="program-name">{{ chuongTrinh.tenChuongTrinh }}</span>
-                <span class="version-count">{{ chuongTrinh.versionList.length }} version</span>
-              </div>
+              <button
+                  type="button"
+                  class="program-toggle"
+                  @click="toggleChuongTrinh(chuongTrinh.rowKey)"
+              >
+                <span class="program-main">
+                  <span class="program-name">
+                    {{ chuongTrinh.tenChuongTrinh }}
+                  </span>
 
-              <div class="version-box">
-                <div class="version-box-title">Version</div>
+                  <span class="program-meta">
+                    {{ chuongTrinh.versionList.length }} version
+                  </span>
+                </span>
 
+                <span class="toggle-icon">
+                  {{ dangMoChuongTrinh(chuongTrinh.rowKey) ? '−' : '+' }}
+                </span>
+              </button>
+
+              <div v-if="dangMoChuongTrinh(chuongTrinh.rowKey)" class="version-box">
                 <div v-if="!chuongTrinh.versionList.length" class="version-empty">
-                  Chương trình này chưa có version.
+                  Không có version phù hợp quyền xem hiện tại.
                 </div>
 
                 <div
@@ -136,29 +154,28 @@
                 >
                   <div class="version-info">
                     <strong>{{ version.tenVersion }}</strong>
+
                     <span :class="['current-badge', version.hienHanhClass]">
-                      Hiện hành: {{ version.hienHanhText }}
+                      {{ version.hienHanhText }}
                     </span>
                   </div>
 
-                  <div class="version-actions" @click.stop>
+                  <div class="version-actions">
                     <button
                         type="button"
-                        class="icon-btn"
-                        title="Thao tác"
-                        @click="toggleMenuVersion(version.rowKey)"
+                        class="action-btn soft"
+                        @click="diDenTrangKy(chuongTrinh, version)"
                     >
-                      ⋮
+                      Xem kỳ
                     </button>
 
-                    <div v-if="menuVersionDangMo === version.rowKey" class="menu-popover">
-                      <button type="button" @click="diDenTrangKy(chuongTrinh, version)">
-                        Xem kỳ
-                      </button>
-                      <button type="button" @click="diDenSyllabusChuongTrinh(nganhGroup, chuongTrinh, version)">
-                        Xem syllabus chương trình
-                      </button>
-                    </div>
+                    <button
+                        type="button"
+                        class="action-btn primary"
+                        @click="diDenSyllabusChuongTrinh(nganhGroup, chuongTrinh, version)"
+                    >
+                      Xem syllabus
+                    </button>
                   </div>
                 </div>
               </div>
@@ -191,7 +208,7 @@ const danhSachNganh = ref([])
 const danhSachChuongTrinh = ref([])
 const danhSachVersion = ref([])
 
-const menuVersionDangMo = ref(null)
+const chuongTrinhDangMo = ref(null)
 
 const laAdmin = computed(() => {
   return authService.hasAnyRole([ROLES.ADMIN, ROLES.DAO_TAO])
@@ -289,7 +306,11 @@ const danhSachNganhGroupDaLoc = computed(() => {
                   : true
 
               const versionList = chuongTrinh.versionList.filter((version) => {
-                // Sinh viên / giảng viên / khách: chỉ xem version hiện hành
+                /*
+                  Phân quyền xem version:
+                  - Admin / Đào tạo: xem được toàn bộ version, có thể lọc Có / Không / Không rõ.
+                  - Vai trò khác: chỉ xem được version đang hiện hành Có.
+                */
                 if (!laAdmin.value && version.hienHanhText !== 'Có') return false
 
                 if (laAdmin.value && boLoc.hienHanh === 'co' && version.hienHanhText !== 'Có') return false
@@ -314,7 +335,7 @@ const danhSachNganhGroupDaLoc = computed(() => {
 
               return {
                 ...chuongTrinh,
-                versionList: matchChuongTrinh ? chuongTrinh.versionList : versionList
+                versionList
               }
             })
             .filter(Boolean)
@@ -322,7 +343,7 @@ const danhSachNganhGroupDaLoc = computed(() => {
         /*
           Vẫn hiển thị ngành mới tạo dù chưa có chương trình đào tạo.
           Chỉ ẩn ngành rỗng khi đang lọc theo trạng thái hiện hành,
-          vì ngành rỗng không có version để lọc Có/Không/Không rõ.
+          vì ngành rỗng không có version để lọc Có / Không / Không rõ.
         */
         if (!chuongTrinhList.length) {
           if (boLoc.hienHanh) return null
@@ -350,7 +371,7 @@ async function taiDuLieuTongQuan() {
   loading.value = true
   errorMessage.value = ''
   thongBao.value = ''
-  menuVersionDangMo.value = null
+  chuongTrinhDangMo.value = null
 
   try {
     const [nganhRes, chuongTrinhRes, versionRes] = await Promise.all([
@@ -369,18 +390,17 @@ async function taiDuLieuTongQuan() {
   }
 }
 
-function toggleMenuVersion(rowKey) {
-  menuVersionDangMo.value = menuVersionDangMo.value === rowKey ? null : rowKey
+function toggleChuongTrinh(rowKey) {
+  chuongTrinhDangMo.value = chuongTrinhDangMo.value === rowKey ? null : rowKey
 }
 
-function dongMenuVersion() {
-  menuVersionDangMo.value = null
+function dangMoChuongTrinh(rowKey) {
+  return chuongTrinhDangMo.value === rowKey
 }
 
 function diDenTrangKy(chuongTrinh, version) {
   if (!chuongTrinh?.chuongTrinhId) {
     thongBao.value = 'Không xác định được chương trình đào tạo để xem kỳ.'
-    menuVersionDangMo.value = null
     return
   }
 
@@ -396,12 +416,11 @@ function diDenTrangKy(chuongTrinh, version) {
     routePayload.query.versionId = version.versionId
   }
 
-  menuVersionDangMo.value = null
-
   router.push(routePayload).catch(() => {
     thongBao.value = 'Route xem kỳ chưa được cấu hình. Vui lòng kiểm tra tongTheRoutes.'
   })
 }
+
 function diDenSyllabusChuongTrinh(nganhGroup, chuongTrinh, version) {
   const nganhId = nganhGroup?.nganhId || layId(nganhGroup?.rawNganh)
   const chuongTrinhId = chuongTrinh?.chuongTrinhId || layId(chuongTrinh?.rawChuongTrinh)
@@ -409,23 +428,18 @@ function diDenSyllabusChuongTrinh(nganhGroup, chuongTrinh, version) {
 
   if (!nganhId) {
     thongBao.value = 'Không xác định được ngành để xem syllabus chương trình.'
-    menuVersionDangMo.value = null
     return
   }
 
   if (!chuongTrinhId) {
     thongBao.value = 'Không xác định được chương trình đào tạo để xem syllabus chương trình.'
-    menuVersionDangMo.value = null
     return
   }
 
   if (!versionId) {
     thongBao.value = 'Không xác định được version chương trình để xem syllabus chương trình.'
-    menuVersionDangMo.value = null
     return
   }
-
-  menuVersionDangMo.value = null
 
   router.push({
     name: TEN_ROUTE_SYLLABUS_CHUONG_TRINH,
@@ -440,12 +454,6 @@ function diDenSyllabusChuongTrinh(nganhGroup, chuongTrinh, version) {
   }).catch(() => {
     thongBao.value = 'Route xem syllabus chương trình chưa được cấu hình. Vui lòng kiểm tra tongTheRoutes.'
   })
-}
-
-
-function baoChucNangSau(tenChucNang) {
-  thongBao.value = `Chức năng "${tenChucNang}" sẽ được bổ sung sau.`
-  menuVersionDangMo.value = null
 }
 
 function normalizeVersion(version, chuongTrinhId, index) {
@@ -639,15 +647,43 @@ function coGiaTri(value) {
 
 <style scoped>
 .dao-tao-tong-quan-page {
+  --primary: #007a4d;
+  --primary-dark: #005f3b;
+  --primary-deep: #00452c;
+  --primary-light: #12a66a;
+  --primary-soft: #e8f7ef;
+  --primary-soft-2: #f4fbf7;
+  --primary-border: #93d9b8;
+  --primary-border-soft: #ccebdd;
+
+  --surface: #ffffff;
+  --surface-soft: #fbfffd;
+  --page-bg: #eef8f3;
+
+  --text-main: #102019;
+  --text-soft: #263f34;
+  --text-muted: #667a70;
+
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+
+  --warning-bg: #fff8e6;
+  --warning-border: #f3d58a;
+  --warning-text: #7c5608;
+
   min-height: calc(100vh - var(--header-height, 60px));
-  padding: 12px 16px 20px;
-  background: #f1f7ff;
-  color: #0f172a;
+  padding: 14px;
+  background:
+      radial-gradient(circle at top left, rgba(0, 122, 77, 0.16), transparent 26%),
+      radial-gradient(circle at bottom right, rgba(18, 166, 106, 0.09), transparent 30%),
+      linear-gradient(180deg, #f3fbf7 0%, #eaf6f0 100%);
+  color: var(--text-main);
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
 /* =========================
-   HEADER / FILTER / STATE
+   COMMON
 ========================= */
 
 .page-header,
@@ -655,43 +691,71 @@ function coGiaTri(value) {
 .state-card,
 .empty-card,
 .industry-card {
-  border: 1px solid #bfdbfe;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(15, 82, 143, 0.10);
+  border: 1px solid var(--primary-border-soft);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 10px 26px rgba(0, 95, 59, 0.09);
 }
+
+button,
+input,
+select {
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+}
+
+/* =========================
+   HEADER
+========================= */
 
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 18px;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
   margin-bottom: 12px;
-  background: linear-gradient(135deg, #ffffff 0%, #eaf4ff 100%);
+  border-color: rgba(0, 122, 77, 0.24);
+  background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(232, 247, 239, 0.96) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
+}
+
+.page-title {
+  min-width: 0;
+  padding-left: 4px;
 }
 
 .eyebrow {
   margin: 0 0 4px;
-  color: #0b5a92;
-  font-size: 12px;
+  color: var(--primary);
+  font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 
 .page-header h1 {
   margin: 0;
-  color: #0f172a;
-  font-size: 22px;
+  color: var(--text-main);
+  font-size: 21px;
   line-height: 1.25;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .subtitle {
-  margin: 6px 0 0;
-  color: #42637f;
-  font-size: 13px;
+  max-width: 780px;
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -702,53 +766,66 @@ function coGiaTri(value) {
 }
 
 .btn {
-  min-height: 32px;
-  border: 1px solid #9fc5e8;
+  min-height: 34px;
+  border: 1px solid var(--primary);
   border-radius: 12px;
   background: #ffffff;
-  color: #0f3d64;
-  padding: 7px 12px;
+  color: var(--primary-dark);
+  padding: 8px 14px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+      background 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease,
+      box-shadow 0.16s ease,
+      transform 0.16s ease;
 }
 
 .btn:hover {
-  border-color: #0b5a92;
-  background: #eaf4ff;
-  color: #0b5a92;
-  box-shadow: 0 3px 10px rgba(15, 82, 143, 0.12);
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(0, 122, 77, 0.2);
+  transform: translateY(-1px);
 }
 
 .btn:disabled {
   cursor: not-allowed;
   opacity: 0.65;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn.primary {
-  border-color: #0b5a92;
-  background: #0b5a92;
+  border-color: var(--primary);
+  background: var(--primary);
   color: #ffffff;
 }
 
 .btn.primary:hover {
-  border-color: #08456f;
-  background: #08456f;
-  color: #ffffff;
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
 }
+
+/* =========================
+   FILTER
+========================= */
 
 .filter-card {
   padding: 12px;
   margin-bottom: 14px;
-  background: #ffffff;
+  border-color: rgba(0, 122, 77, 0.18);
+  background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 251, 247, 0.98));
 }
 
 .filter-grid {
   display: grid;
-  grid-template-columns: 260px minmax(240px, 1fr) 200px;
+  grid-template-columns: 240px minmax(260px, 1fr) 170px;
   gap: 10px;
+  align-items: end;
 }
 
 .filter-grid label {
@@ -757,89 +834,103 @@ function coGiaTri(value) {
 }
 
 .filter-grid span {
-  color: #0f3d64;
-  font-size: 12px;
-  font-weight: 800;
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .filter-grid input,
 .filter-grid select {
-  min-height: 34px;
-  border: 1px solid #b7d3ec;
-  border-radius: 12px;
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #bfe4d4;
+  border-radius: 11px;
   background: #ffffff;
-  color: #0f172a;
-  padding: 7px 10px;
-  font-size: 13px;
+  color: var(--text-main);
+  padding: 8px 11px;
+  font-size: 12px;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  transition:
+      border-color 0.16s ease,
+      box-shadow 0.16s ease,
+      background 0.16s ease;
+}
+
+.filter-grid input::placeholder {
+  color: #8aa098;
 }
 
 .filter-grid input:focus,
 .filter-grid select:focus {
-  border-color: #0b5a92;
-  box-shadow: 0 0 0 3px rgba(11, 90, 146, 0.14);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(0, 122, 77, 0.13);
 }
+
+/* =========================
+   STATE / NOTICE
+========================= */
 
 .notice-card {
   margin-bottom: 12px;
-  padding: 10px 12px;
-  border: 1px solid #fde68a;
-  border-radius: 14px;
-  background: #fffbeb;
-  color: #92400e;
-  font-size: 13px;
+  padding: 10px 13px;
+  border: 1px solid var(--warning-border);
+  border-radius: 13px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .state-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
+  padding: 14px;
 }
 
 .state-card h3 {
   margin: 0 0 4px;
-  color: #0f172a;
-  font-size: 16px;
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 900;
 }
 
 .state-card p {
   margin: 0;
-  color: #42637f;
-  font-size: 13px;
+  color: var(--text-muted);
+  font-size: 12px;
   line-height: 1.45;
 }
 
 .state-card.error {
-  display: block;
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 12px;
-  border-color: #fecaca;
-  background: #fef2f2;
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
 }
 
 .state-card.error p {
-  margin-bottom: 10px;
-  color: #991b1b;
+  color: var(--danger-text);
 }
 
 .loading-card {
-  min-height: 90px;
+  min-height: 88px;
 }
 
 .empty-card {
   padding: 18px;
-  color: #42637f;
+  color: var(--text-muted);
   font-size: 13px;
+  font-weight: 800;
   text-align: center;
 }
 
 .spinner {
   width: 26px;
   height: 26px;
-  border: 3px solid #dbeafe;
-  border-top-color: #0b5a92;
+  border: 3px solid #d5f0e4;
+  border-top-color: var(--primary);
   border-radius: 999px;
   animation: spin 0.8s linear infinite;
   flex-shrink: 0;
@@ -857,7 +948,7 @@ function coGiaTri(value) {
 
 .overview-section {
   display: grid;
-  gap: 14px;
+  gap: 11px;
 }
 
 .section-title {
@@ -865,347 +956,459 @@ function coGiaTri(value) {
   justify-content: space-between;
   gap: 12px;
   align-items: flex-start;
+  padding: 0 2px;
 }
 
 .section-title h2 {
   margin: 0;
-  color: #0f172a;
-  font-size: 17px;
-  font-weight: 700;
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 900;
 }
 
 .section-title p {
-  margin: 4px 0 0;
-  color: #42637f;
+  margin: 3px 0 0;
+  color: var(--text-muted);
   font-size: 12px;
+  line-height: 1.4;
 }
 
 .badge,
 .program-count,
-.version-count,
 .current-badge {
   display: inline-flex;
   align-items: center;
-  min-height: 23px;
+  justify-content: center;
   border-radius: 999px;
-  padding: 3px 9px;
-  font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
 }
 
-.badge.neutral,
-.version-count,
-.current-badge.neutral {
-  border: 1px solid #b7d3ec;
-  background: #f8fbff;
-  color: #0f3d64;
+.badge.neutral {
+  min-height: 26px;
+  border: 1px solid var(--primary-border);
+  background: var(--primary);
+  color: #ffffff;
+  padding: 5px 11px;
+  font-size: 11px;
+  box-shadow: 0 7px 18px rgba(0, 122, 77, 0.16);
 }
 
 /* =========================
-   INDUSTRY GRID: 3 cols
+   INDUSTRY GRID
 ========================= */
 
 .industry-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
   align-items: start;
 }
 
 .industry-card {
   min-width: 0;
-  overflow: visible;
-  border-color: #9fc5e8;
+  overflow: hidden;
+  border-color: rgba(0, 122, 77, 0.22);
   background: #ffffff;
-  box-shadow: 0 10px 28px rgba(15, 82, 143, 0.13);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition:
+      border-color 0.16s ease,
+      box-shadow 0.16s ease,
+      transform 0.16s ease;
 }
 
 .industry-card:hover {
   transform: translateY(-2px);
-  border-color: #0b5a92;
-  box-shadow: 0 16px 34px rgba(15, 82, 143, 0.18);
+  border-color: var(--primary);
+  box-shadow: 0 16px 32px rgba(0, 95, 59, 0.15);
 }
 
 .industry-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  padding: 16px;
-  border-bottom: 1px solid #9fc5e8;
-  border-radius: 18px 18px 0 0;
-  background: linear-gradient(135deg, #0b5a92 0%, #106ba8 55%, #2d93d1 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 13px;
+  background:
+      linear-gradient(135deg, var(--primary-deep) 0%, var(--primary-dark) 46%, var(--primary) 100%);
+  position: relative;
+}
+
+.industry-header::after {
+  content: '';
+  position: absolute;
+  right: -32px;
+  top: -36px;
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.industry-title {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .industry-label {
-  margin: 0 0 4px;
-  color: #d8ecff;
-  font-size: 11px;
+  margin: 0 0 3px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 
 .industry-header h3 {
   margin: 0;
   color: #ffffff;
-  font-size: 17px;
-  line-height: 1.35;
-  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.28;
+  font-weight: 900;
   word-break: break-word;
 }
 
 .program-count {
-  width: fit-content;
-  border: 1px solid #bfdbfe;
-  background: #ffffff;
-  color: #0b5a92;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  min-height: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--primary-dark);
+  padding: 5px 9px;
+  font-size: 10px;
+  box-shadow: 0 7px 16px rgba(0, 69, 44, 0.18);
 }
 
 /* =========================
-   PROGRAM ACCORDION
+   PROGRAM LIST
 ========================= */
 
 .program-list {
   display: grid;
   gap: 8px;
-  padding: 12px;
+  padding: 9px;
+  background:
+      linear-gradient(180deg, #ffffff 0%, #f5fbf8 100%);
 }
 
 .program-item {
-  border: 1px solid #d8ecff;
-  border-radius: 14px;
+  border: 1px solid #d7eee3;
+  border-radius: 13px;
   background: #ffffff;
-  overflow: visible;
+  overflow: hidden;
+  transition:
+      border-color 0.16s ease,
+      box-shadow 0.16s ease,
+      background 0.16s ease;
 }
 
-.program-header {
+.program-item:hover {
+  border-color: var(--primary-border);
+  box-shadow: 0 8px 18px rgba(0, 122, 77, 0.09);
+}
+
+.program-item.active {
+  border-color: var(--primary);
+  box-shadow: 0 10px 22px rgba(0, 122, 77, 0.13);
+}
+
+.program-toggle {
+  width: 100%;
+  border: 0;
+  background: #ffffff;
+  padding: 10px 10px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
+  gap: 9px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+
+.program-toggle:hover {
+  background: var(--primary-soft-2);
+}
+
+.program-main {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid #d8ecff;
-  border-radius: 14px 14px 0 0;
-  background: #f0f7ff;
 }
 
 .program-name {
-  flex: 1;
-  min-width: 0;
-  color: #0f172a;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.35;
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.38;
   word-break: break-word;
 }
 
-.version-count {
+.program-meta {
   flex-shrink: 0;
-  width: fit-content;
+  border: 1px solid #bde6d3;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.toggle-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--primary-border);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-dark);
   background: #ffffff;
-  color: #0f3d64;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  transition:
+      background 0.16s ease,
+      color 0.16s ease,
+      border-color 0.16s ease;
+}
+
+.program-item.active .toggle-icon {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 /* =========================
-   VERSION BOX / ROW
+   VERSION
 ========================= */
 
 .version-box {
-  border: 0;
-  border-top: 0;
-  background: #ffffff;
-  overflow: visible;
-}
-
-.version-box-title {
-  padding: 10px 12px;
-  border-bottom: 1px solid #bfdbfe;
-  border-radius: 14px 14px 0 0;
-  background: #eaf4ff;
-  color: #0b5a92;
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.version-empty {
-  padding: 12px;
-  color: #42637f;
-  font-size: 13px;
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border-top: 1px solid #d7eee3;
+  background: #f3faf6;
 }
 
 .version-row {
-  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 36px;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  min-height: 58px;
-  padding: 10px;
-  border-top: 1px solid #e5effa;
-}
-
-.version-row:first-of-type {
-  border-top: 0;
-}
-
-.version-row:hover {
-  background: #f8fbff;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid #d9eee4;
+  border-radius: 12px;
+  background: #ffffff;
 }
 
 .version-info {
-  display: grid;
-  gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
   min-width: 0;
 }
 
 .version-info strong {
-  color: #0f172a;
-  font-size: 13px;
+  min-width: 0;
+  color: var(--text-main);
+  font-size: 12px;
   line-height: 1.35;
-  font-weight: 700;
+  font-weight: 900;
   word-break: break-word;
 }
 
+.current-badge {
+  flex-shrink: 0;
+  min-height: 22px;
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
 .current-badge.success {
-  width: fit-content;
-  border: 1px solid #86efac;
-  background: #dcfce7;
-  color: #166534;
+  border: 1px solid #76d09f;
+  background: #dcf8e9;
+  color: #075f3d;
 }
 
 .current-badge.muted {
-  width: fit-content;
   border: 1px solid #d1d5db;
   background: #f8fafc;
   color: #64748b;
 }
 
-.version-actions {
-  position: relative;
-  justify-self: end;
+.current-badge.neutral {
+  border: 1px solid var(--primary-border);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
 }
 
-.icon-btn {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #b7d3ec;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #0f3d64;
-  font-size: 18px;
+.version-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  min-height: 28px;
+  border-radius: 9px;
+  padding: 6px 10px;
+  font-size: 11px;
   font-weight: 900;
   cursor: pointer;
-  line-height: 1;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  line-height: 1.15;
+  transition:
+      background 0.16s ease,
+      border-color 0.16s ease,
+      color 0.16s ease,
+      box-shadow 0.16s ease,
+      transform 0.16s ease;
+  white-space: nowrap;
 }
 
-.icon-btn:hover {
-  border-color: #0b5a92;
-  background: #eaf4ff;
-  color: #0b5a92;
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.action-btn.soft {
+  border: 1px solid var(--primary-border);
+  background: #ffffff;
+  color: var(--primary-dark);
+}
+
+.action-btn.soft:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.action-btn.primary {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.action-btn.primary:hover {
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
+  box-shadow: 0 6px 16px rgba(0, 122, 77, 0.2);
 }
 
 /* =========================
-   VERSION MENU
+   EMPTY
 ========================= */
 
-.menu-popover {
-  position: absolute;
-  top: 34px;
-  right: 0;
-  z-index: 30;
-  display: grid;
-  min-width: 190px;
-  border: 1px solid #b7d3ec;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 14px 32px rgba(15, 82, 143, 0.20);
-  overflow: hidden;
-}
-
-.menu-popover button {
-  border: 0;
-  background: #ffffff;
-  color: #0f172a;
-  padding: 10px 12px;
-  text-align: left;
+.program-empty,
+.version-empty {
+  border: 1px dashed var(--primary-border);
+  border-radius: 12px;
+  background:
+      repeating-linear-gradient(
+          -45deg,
+          rgba(232, 247, 239, 0.8),
+          rgba(232, 247, 239, 0.8) 8px,
+          rgba(244, 251, 247, 0.8) 8px,
+          rgba(244, 251, 247, 0.8) 16px
+      );
+  color: var(--primary-dark);
+  padding: 12px;
   font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
-}
-
-.menu-popover button:hover {
-  background: #eaf4ff;
-  color: #0b5a92;
+  font-weight: 900;
+  text-align: center;
 }
 
 /* =========================
    RESPONSIVE
 ========================= */
 
-@media (max-width: 1280px) {
-  .industry-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 960px) {
+@media (max-width: 1320px) {
   .industry-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (max-width: 860px) {
-  .filter-grid {
+  .version-row {
     grid-template-columns: 1fr;
   }
 
+  .version-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 1040px) {
+  .filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .search-field {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .dao-tao-tong-quan-page {
+    padding: 10px;
+  }
+
   .page-header,
-  .section-title {
+  .section-title,
+  .state-card {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .header-actions {
     width: 100%;
   }
-}
 
-@media (max-width: 640px) {
-  .dao-tao-tong-quan-page {
-    padding: 10px;
+  .btn {
+    width: 100%;
   }
 
+  .filter-grid,
   .industry-list {
     grid-template-columns: 1fr;
   }
 
+  .search-field {
+    grid-column: auto;
+  }
+
+  .program-main {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .program-meta {
+    width: fit-content;
+  }
+
+  .version-info {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .version-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
   .page-header h1 {
-    font-size: 19px;
+    font-size: 20px;
   }
 
-  .version-row {
-    grid-template-columns: minmax(0, 1fr) 34px;
+  .industry-header h3 {
+    font-size: 14px;
   }
-
-  .menu-popover {
-    right: 0;
-    min-width: 180px;
-  }
-}
-
-.program-empty {
-  border: 1px dashed #9fc5e8;
-  border-radius: 14px;
-  background: #f8fbff;
-  color: #42637f;
-  padding: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
 }
 </style>

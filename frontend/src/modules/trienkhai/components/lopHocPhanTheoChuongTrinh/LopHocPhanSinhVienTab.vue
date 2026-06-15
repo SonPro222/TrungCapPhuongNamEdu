@@ -45,15 +45,49 @@ function hienThiTrangThai(value) {
 </script>
 
 <style scoped>
-.tab-card { padding: 18px; }
-.tab-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-p { margin: 0 0 4px; color: #2563eb; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; }
-h4 { margin: 0; color: #0f172a; font-size: 20px; }
-.student-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.student-card { display: flex; gap: 12px; align-items: center; padding: 14px; border: 1px solid #e2e8f0; border-radius: 18px; background: linear-gradient(180deg, #fff, #f8fafc); }
-.avatar { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 16px; display: grid; place-items: center; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; font-weight: 900; }
-strong { display: block; color: #0f172a; font-size: 14px; }
-span, small { display: block; margin-top: 3px; color: #64748b; font-size: 12px; font-weight: 700; }
-.loading-box, .empty { padding: 28px; text-align: center; border-radius: 18px; background: #f8fafc; color: #64748b; font-weight: 700; }
+.tab-card { font-family: 'Roboto', Arial, sans-serif; }
+.tab-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+p { margin: 0 0 2px; color: #1a5c36; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; }
+h4 { margin: 0; color: #1a2e1f; font-size: 15px; font-weight: 600; }
+
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.student-card {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #d1e7d9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.avatar {
+  flex: 0 0 auto;
+  width: 36px; height: 36px;
+  border-radius: 7px;
+  display: grid; place-items: center;
+  background: #e8f5ec;
+  color: #1a5c36;
+  font-size: 12px; font-weight: 600;
+}
+
+strong { display: block; color: #1a2e1f; font-size: 13px; font-weight: 500; }
+span { display: block; margin-top: 2px; color: #7a9a82; font-size: 12px; font-weight: 400; }
+small { display: block; margin-top: 2px; color: #aab8ae; font-size: 11px; font-weight: 400; }
+
+.loading-box, .empty {
+  padding: 28px;
+  text-align: center;
+  border: 1px dashed #d1e7d9;
+  border-radius: 8px;
+  color: #7a9a82;
+  font-size: 13px;
+}
+
 @media (max-width: 820px) { .student-grid { grid-template-columns: 1fr; } }
 </style>

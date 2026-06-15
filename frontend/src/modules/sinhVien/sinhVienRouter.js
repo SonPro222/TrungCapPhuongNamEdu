@@ -8,6 +8,7 @@ import AdminSinhVienBaoLuuPage from './pages/AdminSinhVienBaoLuuPage.vue'
 import AdminSinhVienDanhSachPage from './pages/AdminSinhVienDanhSachPage.vue'
 import AdminSinhVienChiTietPage from './pages/AdminSinhVienChiTietPage.vue'
 import AdminSinhVienChiTietDiemPage from './pages/AdminSinhVienChiTietDiemPage.vue'
+import AdminSinhVienLopHocPhanSinhVienPage from './pages/AdminSinhVienLopHocPhanSinhVienPage.vue'
 
 export const sinhVienRoutes = [
     {
@@ -80,6 +81,15 @@ export const sinhVienRoutes = [
                 component: AdminSinhVienChiTietPage,
                 meta: {
                     title: 'Chi tiết hồ sơ sinh viên',
+                    roles: [ROLES.ADMIN]
+                }
+            },
+            {
+                path: 'lop-hoc-phan/:lopHocPhanId/sinh-vien',
+                name: 'AdminSinhVienLopHocPhanSinhVien',
+                component: AdminSinhVienLopHocPhanSinhVienPage,
+                meta: {
+                    title: 'Sinh viên lớp học phần',
                     roles: [ROLES.ADMIN]
                 }
             }

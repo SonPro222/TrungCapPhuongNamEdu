@@ -100,8 +100,6 @@
           <option value="id">ID</option>
           <option value="maLop">Mã lớp</option>
           <option value="tenLop">Tên lớp</option>
-          <option value="ngayBatDau">Ngày bắt đầu</option>
-          <option value="ngayKetThuc">Ngày kết thúc</option>
           <option value="trangThai">Trạng thái</option>
         </select>
       </label>
@@ -180,15 +178,7 @@
           <small>Số buổi học được lấy tự động từ syllabus, không nhập tay tại lớp học phần.</small>
         </label>
 
-        <label>
-          <span>Ngày bắt đầu</span>
-          <input v-model="form.ngayBatDau" type="date" />
-        </label>
-
-        <label>
-          <span>Ngày kết thúc</span>
-          <input v-model="form.ngayKetThuc" type="date" />
-        </label>
+        <!-- Ngày bắt đầu/kết thúc bỏ: thời gian học thuộc lịch học, tính từ MIN/MAX ngày lịch -->
 
         <label>
           <span>Trạng thái</span>
@@ -274,7 +264,6 @@
           <th>Môn học</th>
           <th>Sĩ số</th>
           <th>Số buổi</th>
-          <th>Thời gian</th>
           <th>Trạng thái</th>
           <th>Ghi chú</th>
           <th>Thao tác</th>
@@ -283,11 +272,11 @@
 
         <tbody>
         <tr v-if="dangTai">
-          <td colspan="12">Đang tải dữ liệu...</td>
+          <td colspan="11">Đang tải dữ liệu...</td>
         </tr>
 
         <tr v-else-if="!danhSach.length">
-          <td colspan="12">Không có dữ liệu</td>
+          <td colspan="11">Không có dữ liệu</td>
         </tr>
 
         <tr v-for="item in danhSach" v-else :key="item.id">
@@ -312,7 +301,6 @@
 
           <td>{{ item.soLuongHienTai ?? 0 }}/{{ item.soLuongToiDa ?? '-' }}</td>
           <td>{{ item.soBuoiHoc ?? '-' }}</td>
-          <td>{{ item.ngayBatDau || '-' }} → {{ item.ngayKetThuc || '-' }}</td>
           <td>{{ hienThiTrangThai(item.trangThai) }}</td>
           <td>{{ item.ghiChu || '-' }}</td>
           <td>
@@ -372,8 +360,7 @@ const form = reactive({
   soLuongToiDa: 40,
   soLuongHienTai: 0,
   soBuoiHoc: 1,
-  ngayBatDau: '',
-  ngayKetThuc: '',
+  // ngayBatDau/ngayKetThuc đã bỏ: thời gian học thuộc lịch học
   trangThai: 'du_kien',
   ghiChu: ''
 })
@@ -496,8 +483,7 @@ async function capNhatLopHocPhan() {
     siSoToiThieu: Number(form.siSoToiThieu),
     soLuongToiDa: Number(form.soLuongToiDa),
     soLuongHienTai: form.soLuongHienTai === '' ? 0 : Number(form.soLuongHienTai),
-    ngayBatDau: form.ngayBatDau || null,
-    ngayKetThuc: form.ngayKetThuc || null,
+    // ngayBatDau/ngayKetThuc đã bỏ: thời gian học thuộc lịch học
     trangThai: form.trangThai,
     ghiChu: form.ghiChu || null
   }
@@ -523,8 +509,7 @@ function chonSua(item) {
   form.soLuongToiDa = item.soLuongToiDa ?? 40
   form.soLuongHienTai = item.soLuongHienTai ?? 0
   form.soBuoiHoc = item.soBuoiHoc ?? 1
-  form.ngayBatDau = item.ngayBatDau || ''
-  form.ngayKetThuc = item.ngayKetThuc || ''
+  // ngayBatDau/ngayKetThuc đã bỏ: thời gian học thuộc lịch học
   form.trangThai = item.trangThai || 'du_kien'
   form.ghiChu = item.ghiChu || ''
 }
@@ -540,8 +525,7 @@ function resetForm() {
   form.soLuongToiDa = 40
   form.soLuongHienTai = 0
   form.soBuoiHoc = 1
-  form.ngayBatDau = ''
-  form.ngayKetThuc = ''
+  // ngayBatDau/ngayKetThuc đã bỏ
   form.trangThai = 'du_kien'
   form.ghiChu = ''
 }

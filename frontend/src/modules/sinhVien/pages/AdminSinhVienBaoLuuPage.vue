@@ -2,8 +2,12 @@
   <section class="sv-bl-page">
     <div class="page-title">
       <div>
+        <p class="page-eyebrow">Quản lý học vụ</p>
         <h2>Bảo lưu sinh viên</h2>
-        <p>Quản lý bảo lưu toàn chương trình, đi học lại, chuyển version học lại và lớp hành chính học lại.</p>
+        <p>
+          Quản lý bảo lưu toàn chương trình, đi học lại, chuyển version học lại
+          và lớp hành chính học lại.
+        </p>
       </div>
     </div>
 
@@ -11,73 +15,98 @@
       {{ thongBao }}
     </div>
 
-    <section class="panel">
+    <section class="panel create-panel">
       <div class="panel-title">
-        <h2>Tạo hồ sơ bảo lưu</h2>
+        <div>
+          <h2>Tạo hồ sơ bảo lưu</h2>
+          <p>Tìm sinh viên, chọn hồ sơ chương trình và khai báo thời gian bảo lưu.</p>
+        </div>
         <span>Bảo lưu tối đa 2 kỳ</span>
       </div>
 
-      <form class="form-grid" @submit.prevent="taoBaoLuu">
-        <div class="span-2 tim-sinh-vien-box">
-          <label>
+      <form class="create-form" @submit.prevent="taoBaoLuu">
+        <div class="quick-row">
+          <label class="student-search-field">
             Nhập mã sinh viên hoặc Gmail xin bảo lưu
-            <input
-                v-model.trim="tuKhoaTaoBaoLuu"
-                placeholder="Nhập mã sinh viên hoặc Gmail"
-                @keyup.enter="timSinhVienTaoBaoLuu"
-            />
+            <div class="search-inline">
+              <input
+                  v-model.trim="tuKhoaTaoBaoLuu"
+                  placeholder="Nhập mã sinh viên hoặc Gmail"
+                  @keyup.enter="timSinhVienTaoBaoLuu"
+              />
+              <button type="button" class="btn-search" @click="timSinhVienTaoBaoLuu">
+                Tìm sinh viên
+              </button>
+            </div>
           </label>
 
-          <button type="button" @click="timSinhVienTaoBaoLuu">
-            Tìm sinh viên
-          </button>
+          <label>
+            Hồ sơ chương trình
+            <select v-model="form.sinhVienChuongTrinhId" required>
+              <option value="">Chọn hồ sơ chương trình</option>
+              <option
+                  v-for="item in sinhVienChuongTrinhTheoSinhVien"
+                  :key="item.id"
+                  :value="item.id"
+              >
+                Version {{ item.chuongTrinhVersionId }} - Lớp HC
+                {{ item.lopHanhChinhId || 'chưa có' }} - {{ item.trangThai }}
+              </option>
+            </select>
+          </label>
+
+          <label>
+            Ngày bắt đầu
+            <input v-model="form.ngayBatDau" type="date" required />
+          </label>
+
+          <label>
+            Số kỳ
+            <select v-model.number="form.soKyBaoLuu" required>
+              <option :value="1">1 kỳ</option>
+              <option :value="2">2 kỳ</option>
+            </select>
+          </label>
+
+          <label>
+            Ngày kết thúc dự kiến
+            <input v-model="form.ngayKetThucDuKien" type="date" />
+          </label>
         </div>
 
-        <div v-if="sinhVienTimThay" class="span-2 sinh-vien-da-chon">
-          <strong>Sinh viên đã chọn:</strong>
-          <span>{{ sinhVienTimThay.maSinhVien }} - {{ sinhVienTimThay.hoTen }}</span>
-          <span>Gmail: {{ sinhVienTimThay.email }}</span>
+        <div v-if="sinhVienTimThay" class="sinh-vien-da-chon">
+          <div>
+            <span>Sinh viên đã chọn</span>
+            <strong>{{ sinhVienTimThay.maSinhVien }} - {{ sinhVienTimThay.hoTen }}</strong>
+          </div>
+          <div>
+            <span>Gmail</span>
+            <strong>{{ sinhVienTimThay.email || '-' }}</strong>
+          </div>
         </div>
 
-        <label>
-          Hồ sơ chương trình
-          <select v-model="form.sinhVienChuongTrinhId" required>
-            <option value="">Chọn hồ sơ chương trình</option>
-            <option v-for="item in sinhVienChuongTrinhTheoSinhVien" :key="item.id" :value="item.id">
-              Version {{ item.chuongTrinhVersionId }} - Lớp HC {{ item.lopHanhChinhId || 'chưa có' }} - {{ item.trangThai }}
-            </option>
-          </select>
-        </label>
+        <div class="note-row">
+          <label>
+            Lý do bảo lưu
+            <textarea
+                v-model.trim="form.lyDo"
+                rows="2"
+                placeholder="Nhập lý do bảo lưu"
+                required
+            ></textarea>
+          </label>
 
-        <label>
-          Ngày bắt đầu bảo lưu
-          <input v-model="form.ngayBatDau" type="date" required />
-        </label>
+          <label>
+            Ghi chú
+            <textarea
+                v-model.trim="form.ghiChu"
+                rows="2"
+                placeholder="Ghi chú thêm nếu có"
+            ></textarea>
+          </label>
+        </div>
 
-        <label>
-          Số kỳ bảo lưu
-          <select v-model.number="form.soKyBaoLuu" required>
-            <option :value="1">1 kỳ</option>
-            <option :value="2">2 kỳ</option>
-          </select>
-        </label>
-
-        <label>
-          Ngày kết thúc dự kiến
-          <input v-model="form.ngayKetThucDuKien" type="date" />
-        </label>
-
-        <label class="span-2">
-          Lý do bảo lưu
-          <textarea v-model.trim="form.lyDo" rows="3" required></textarea>
-        </label>
-
-        <label class="span-2">
-          Ghi chú
-          <textarea v-model.trim="form.ghiChu" rows="2"></textarea>
-        </label>
-
-        <div class="span-2 actions">
+        <div class="actions">
           <button type="submit" :disabled="dangLuu">
             {{ dangLuu ? 'Đang lưu...' : 'Tạo bảo lưu' }}
           </button>
@@ -88,9 +117,12 @@
       </form>
     </section>
 
-    <section class="panel">
+    <section class="panel list-panel">
       <div class="panel-title">
-        <h2>Danh sách sinh viên bảo lưu</h2>
+        <div>
+          <h2>Danh sách sinh viên bảo lưu</h2>
+          <p>Lọc nhanh theo ngành, chương trình, version, lớp hành chính và trạng thái.</p>
+        </div>
         <span>{{ danhSachBaoLuuHienThi.length }} hồ sơ</span>
       </div>
 
@@ -137,7 +169,7 @@
 
         <label>
           Tìm sinh viên
-          <input v-model.trim="tuKhoa" placeholder="Mã sinh viên, họ tên, Gmail" />
+          <input v-model.trim="tuKhoa" placeholder="Mã SV, họ tên, Gmail" />
         </label>
 
         <label>
@@ -170,38 +202,38 @@
             <th>Thao tác</th>
           </tr>
           </thead>
+
           <tbody>
           <tr v-for="item in danhSachBaoLuuHienThi" :key="item.id">
-            <td>{{ item.maSinhVien }}</td>
-            <td>{{ item.hoTen }}</td>
+            <td class="student-code">{{ item.maSinhVien }}</td>
+            <td class="student-name">{{ item.hoTen }}</td>
             <td>{{ item.chuongTrinhVersionIdCu }}</td>
             <td>{{ item.lopHanhChinhIdCu || '-' }}</td>
             <td>
-              {{ item.ngayBatDau }} -> {{ item.ngayKetThucDuKien }}
-              <br />
-              <small>{{ item.soKyBaoLuu }} kỳ</small>
+              <div class="time-cell">
+                <span>{{ item.ngayBatDau }} → {{ item.ngayKetThucDuKien }}</span>
+                <small>{{ item.soKyBaoLuu }} kỳ</small>
+              </div>
             </td>
             <td>
               <template v-if="item.trangThai === 'da_di_hoc_lai'">
-                Ngày: {{ item.ngayDiHocLai || '-' }}
-                <br />
-                Version: {{ item.chuongTrinhVersionIdHocLai || '-' }}
-                <br />
-                Kỳ: {{ item.khungKyIdHocLai || '-' }}
-                <br />
-                Lớp HC: {{ item.lopHanhChinhIdHocLai || '-' }}
-                <br />
-                Công nhận: {{ item.soMonDuocCongNhan || 0 }} môn
+                <div class="hoc-lai-info">
+                  <span>Ngày: {{ item.ngayDiHocLai || '-' }}</span>
+                  <span>Version: {{ item.chuongTrinhVersionIdHocLai || '-' }}</span>
+                  <span>Kỳ: {{ item.khungKyIdHocLai || '-' }}</span>
+                  <span>Lớp HC: {{ item.lopHanhChinhIdHocLai || '-' }}</span>
+                  <span>Công nhận: {{ item.soMonDuocCongNhan || 0 }} môn</span>
+                </div>
               </template>
               <template v-else>
                 -
               </template>
             </td>
-            <td>{{ item.lyDo }}</td>
+            <td class="reason-cell">{{ item.lyDo }}</td>
             <td>
-              <span class="status" :class="item.trangThai">
-                {{ hienThiTrangThai(item.trangThai) }}
-              </span>
+                <span class="status" :class="item.trangThai">
+                  {{ hienThiTrangThai(item.trangThai) }}
+                </span>
             </td>
             <td>
               <div class="row-actions">
@@ -254,7 +286,11 @@
 
           <label>
             Version học lại
-            <select v-model="formDiHocLai.chuongTrinhVersionIdHocLai" required @change="doiVersionHocLai">
+            <select
+                v-model="formDiHocLai.chuongTrinhVersionIdHocLai"
+                required
+                @change="doiVersionHocLai"
+            >
               <option value="">Chọn version</option>
               <option v-for="version in danhSachVersion" :key="version.id" :value="version.id">
                 {{ version.maVersion }} - {{ version.tenVersion || 'Version' }}
@@ -708,197 +744,240 @@ function baoLoi(message) {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap');
-.sv-page,
+
 .sv-bl-page,
-.sv-lhp-page,
-.sv-page *,
-.sv-bl-page *,
-.sv-lhp-page * {
+.sv-bl-page * {
+  box-sizing: border-box;
   font-family: 'Roboto', Arial, sans-serif;
   letter-spacing: normal;
-  box-sizing: border-box;
 }
 
-.sv-page,
-.sv-bl-page,
-.sv-lhp-page {
+.sv-bl-page {
+  --primary: #077149;
+  --primary-dark: #045b3a;
+  --primary-soft: #e8f6ef;
+  --primary-border: #b9e4ce;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #dbe5ef;
+  --border-strong: #cbd5e1;
+  --bg-soft: #f5f8fa;
+  --danger: #dc2626;
+
   display: grid;
   gap: 14px;
+  padding: 0;
+  color: var(--text-main);
 }
 
-.sv-header,
-.sv-card,
-.sv-filter-card,
-.sv-account-box,
+/* Header */
 .page-title,
 .panel {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055);
 }
 
-.sv-header {
-  background: linear-gradient(135deg, #f8fafc, #eff6ff);
-  border-color: #bfdbfe;
+.page-title {
+  position: relative;
+  overflow: hidden;
+  padding: 16px 18px;
+  border-color: var(--primary-border);
+  background:
+      linear-gradient(135deg, rgba(7, 113, 73, 0.1), rgba(255, 255, 255, 0.9)),
+      #ffffff;
 }
 
-.sv-header h1,
+.page-title::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--primary);
+}
+
+.page-eyebrow {
+  margin: 0 0 4px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .page-title h2,
-.sv-card-title h2,
 .panel-title h2,
-.sv-card h2,
-.modal-header h2,
-.sv-modal-header h2 {
+.modal-header h2 {
   margin: 0;
-  color: #0f172a;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: normal;
+  color: var(--text-main);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
-.sv-header p,
 .page-title p,
-.sv-card-title p,
 .panel-title p,
-.panel-subtitle,
-.sv-card p,
-.modal-header p,
-.sv-modal-header p {
+.modal-header p {
   margin: 5px 0 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 400;
   line-height: 1.45;
-  letter-spacing: normal;
 }
 
-.sv-eyebrow {
-  margin: 0 0 4px;
-  color: #1d4ed8 !important;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: none;
-  letter-spacing: normal;
+/* Panels */
+.panel {
+  padding: 16px;
 }
 
-.sv-card-title,
 .panel-title {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .panel-title span {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border: 1px solid var(--primary-border);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
-.sv-grid,
-.form-grid,
-.filter-grid {
+/* Form */
+.create-form {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
-.sv-grid.two,
-.form-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.sv-grid.three {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.sv-grid.four,
-.filter-grid,
-.bao-luu-filter {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.sv-filter-card {
+.quick-row {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr auto;
+  grid-template-columns: minmax(280px, 1.45fr) minmax(240px, 1.15fr) minmax(150px, 0.7fr) minmax(120px, 0.55fr) minmax(170px, 0.75fr);
   gap: 10px;
   align-items: end;
 }
 
-.content-grid {
+.note-row {
   display: grid;
-  grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.35fr);
-  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .span-2 {
   grid-column: span 2;
 }
 
-.span-3 {
-  grid-column: span 3;
-}
-
-.span-4 {
-  grid-column: span 4;
-}
-
 label {
   display: grid;
   gap: 5px;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: normal;
+  color: #243449;
+  font-size: 12.5px;
+  font-weight: 800;
 }
 
 input,
 select,
 textarea {
   width: 100%;
-  min-height: 38px;
-  border: 1px solid #cbd5e1;
+  min-height: 36px;
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 7px 10px;
   background: #ffffff;
-  color: #0f172a;
+  color: var(--text-main);
   font: inherit;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 400;
-  letter-spacing: normal;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background-color 0.15s ease;
 }
 
 textarea {
-  min-height: 76px;
+  min-height: 64px;
+  max-height: 120px;
   resize: vertical;
+  line-height: 1.45;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(7, 113, 73, 0.13);
 }
 
 input:disabled,
 select:disabled,
 textarea:disabled {
   background: #f8fafc;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
-.sv-actions,
+.search-inline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.student-search-field input {
+  min-width: 0;
+}
+
+/* Selected student */
+.sinh-vien-da-chon {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(260px, 1fr);
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--primary-border);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-soft), #ffffff);
+}
+
+.sinh-vien-da-chon div {
+  display: grid;
+  gap: 2px;
+}
+
+.sinh-vien-da-chon span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sinh-vien-da-chon strong {
+  color: var(--primary-dark);
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+/* Buttons */
 .actions,
-.form-actions,
-.row-actions,
-.sv-row-actions,
-.sv-modal-actions {
+.row-actions {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -906,306 +985,241 @@ textarea:disabled {
   flex-wrap: wrap;
 }
 
-button,
-.sv-action-link {
+.actions {
+  margin-top: 2px;
+}
+
+button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 36px;
   border: 0;
   border-radius: 10px;
-  padding: 8px 12px;
-  background: #1d4ed8;
+  padding: 8px 14px;
+  background: var(--primary);
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: normal;
-  text-transform: none;
+  font-size: 13.5px;
+  font-weight: 800;
   line-height: 1;
-  text-decoration: none;
   cursor: pointer;
-  transition: transform 0.12s ease, filter 0.12s ease, background 0.12s ease;
+  transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease,
+      background 0.12s ease,
+      opacity 0.12s ease;
 }
 
-button:hover,
-.sv-action-link:hover {
-  filter: brightness(0.97);
+button:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 8px 18px rgba(7, 113, 73, 0.22);
   transform: translateY(-1px);
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.62;
   cursor: not-allowed;
+  box-shadow: none;
   transform: none;
 }
 
 button.secondary {
-  background: #e2e8f0;
+  background: #e7edf3;
   color: #334155;
+}
+
+button.secondary:hover {
+  background: #dbe5ef;
+  box-shadow: none;
 }
 
 button.danger {
-  background: #dc2626;
+  background: var(--danger);
   color: #ffffff;
+}
+
+button.danger:hover {
+  background: #b91c1c;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.18);
 }
 
 button.small {
-  min-height: 30px;
+  min-height: 29px;
   padding: 6px 9px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 12.5px;
 }
 
-button.selected {
-  background: #047857;
-  color: #ffffff;
+.btn-search {
+  min-width: 108px;
+  white-space: nowrap;
 }
 
-.sv-action-link {
-  background: #f59e0b;
-  color: #ffffff;
+.btn-tai-lai {
+  width: auto;
+  min-width: 86px;
+  min-height: 36px;
+  align-self: end;
+  justify-self: start;
+  padding: 8px 13px;
+  border-radius: 10px;
 }
 
-.sv-tabs {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.sv-tabs button {
-  background: #e2e8f0;
-  color: #334155;
-}
-
-.sv-tabs button.active {
-  background: #1d4ed8;
-  color: #ffffff;
-}
-
-.sv-message,
+/* Message */
 .message {
   border-radius: 12px;
   padding: 10px 12px;
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: normal;
-}
-
-.sv-message.success,
-.message.success {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
-
-.sv-message.error,
-.message.error {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-}
-
-.sv-account-box {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  background: #fffbeb;
-  border-color: #fbbf24;
-  color: #78350f;
-}
-
-.sv-class-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.sv-class-summary div,
-.sv-flow-item,
-.sv-selected,
-.sinh-vien-da-chon {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 10px;
-  background: #f8fafc;
-}
-
-.sv-class-summary span {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.sv-class-summary strong {
-  color: #0f172a;
-  font-size: 14px;
   font-weight: 700;
 }
 
-.sv-flow {
+.message.success {
+  border: 1px solid var(--primary-border);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.message.error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* Filters */
+.bao-luu-filter {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns:
+    minmax(170px, 1fr)
+    minmax(190px, 1.1fr)
+    minmax(160px, 0.9fr)
+    minmax(180px, 1fr)
+    minmax(190px, 1fr)
+    minmax(145px, 0.75fr)
+    auto;
   gap: 10px;
+  align-items: end;
+  margin-bottom: 12px;
 }
 
-.sv-flow-item {
-  display: grid;
-  gap: 5px;
-}
-
-.sv-flow-item.active {
-  border-color: #93c5fd;
-  background: #eff6ff;
-}
-
-.sv-list-filter {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
-}
-
-.sv-table-wrap,
+/* Table */
 .table-wrap {
   width: 100%;
   overflow: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
   background: #ffffff;
 }
 
-.sv-table,
 table {
   width: 100%;
+  min-width: 1080px;
   border-collapse: collapse;
   font-size: 13px;
 }
 
-.bang-lop-hoc-phan {
-  min-width: 1500px;
-}
-
 th,
-td,
-.sv-table th,
-.sv-table td {
-  border-bottom: 1px solid #e2e8f0;
-  padding: 8px 10px;
+td {
+  border-bottom: 1px solid #e8eef5;
+  padding: 9px 10px;
   text-align: left;
   vertical-align: top;
 }
 
-th,
-.sv-table th {
+th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #f8fafc;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: none;
-  letter-spacing: normal;
+  background: #f3f8f6;
+  color: #123225;
+  font-size: 12.5px;
+  font-weight: 800;
   white-space: nowrap;
 }
 
-td,
-.sv-table td {
+td {
   color: #334155;
   font-size: 13px;
   font-weight: 400;
-  letter-spacing: normal;
+  line-height: 1.45;
 }
 
-td.diem,
-td.cot-diem,
-td[data-label*='Điểm'],
-td[data-label*='điểm'],
-.sv-table td.diem,
-.sv-table td.cot-diem,
-.sv-table td[data-label*='Điểm'],
-.sv-table td[data-label*='điểm'] {
-  font-weight: 700;
-  color: #0f172a;
+tbody tr:hover td {
+  background: #fbfdfc;
 }
 
-tbody tr:hover td,
-.clickable-row:hover td {
-  background: #f8fafc;
+tbody tr:last-child td {
+  border-bottom: 0;
 }
 
-tr.selected td,
-.sv-table tr.selected td {
-  background: #eff6ff;
-}
-
-.clickable-row {
-  cursor: pointer;
-}
-
-.empty {
-  text-align: center;
-  color: #64748b;
-  padding: 18px;
-  font-weight: 600;
-}
-
-.sv-avatar {
-  width: 42px;
-  height: 42px;
-  object-fit: cover;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background: #f8fafc;
-}
-
-.sv-status,
-.status {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 4px 9px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: normal;
+.student-code {
+  color: var(--primary-dark);
+  font-weight: 800;
   white-space: nowrap;
 }
 
-.sv-status.done,
-.status.da_di_hoc_lai {
-  background: #ecfdf5;
-  color: #047857;
+.student-name {
+  color: var(--text-main);
+  font-weight: 600;
 }
 
-.sv-status.partial,
+.time-cell,
+.hoc-lai-info {
+  display: grid;
+  gap: 2px;
+}
+
+.time-cell small {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hoc-lai-info span {
+  white-space: nowrap;
+}
+
+.reason-cell {
+  max-width: 220px;
+  color: #475569;
+}
+
+.empty {
+  padding: 22px 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* Status */
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .status.dang_bao_luu {
-  background: #fffbeb;
-  color: #b45309;
+  background: #fff7ed;
+  color: #c2410c;
 }
 
-.sv-status.pending,
+.status.da_di_hoc_lai {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
 .status.da_huy {
   background: #fef2f2;
   color: #b91c1c;
 }
 
-.tim-sinh-vien-box {
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) auto;
-  gap: 10px;
-  align-items: end;
-}
-
-.sinh-vien-da-chon {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1e3a8a;
-}
-
-.modal-overlay,
-.sv-modal-overlay {
+/* Modal */
+.modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -1216,101 +1230,129 @@ tr.selected td,
   background: rgba(15, 23, 42, 0.55);
 }
 
-.modal,
-.sv-modal {
+.modal {
   width: min(900px, 100%);
   max-height: calc(100vh - 40px);
   overflow: auto;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 16px;
   background: #ffffff;
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.32);
 }
 
-.modal-header,
-.sv-modal-header {
+.modal-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 14px;
   margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
-.modal-close,
-.sv-modal-close {
+.modal-close {
   width: 34px;
   height: 34px;
   min-height: 34px;
   border-radius: 999px;
   padding: 0;
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #e7edf3;
+  color: var(--text-main);
   font-size: 22px;
   font-weight: 400;
   line-height: 1;
 }
-.btn-tai-lai {
-  width: auto;
-  min-width: 84px;
-  min-height: 34px;
-  align-self: end;
-  justify-self: end;
-  padding: 7px 12px;
-  font-size: 13px;
-  font-weight: 700;
-  border-radius: 9px;
+
+.modal-close:hover {
+  background: #dbe5ef;
+  box-shadow: none;
 }
+
+/* Responsive */
+@media (max-width: 1500px) {
+  .quick-row {
+    grid-template-columns: minmax(280px, 1.4fr) minmax(240px, 1.1fr) repeat(3, minmax(140px, 0.75fr));
+  }
+
+  .bao-luu-filter {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .btn-tai-lai {
+    justify-self: end;
+  }
+}
+
 @media (max-width: 1200px) {
-  .sv-filter-card,
-  .sv-grid.four,
-  .filter-grid,
+  .quick-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-search-field {
+    grid-column: span 2;
+  }
+
+  .note-row,
   .form-grid,
   .bao-luu-filter,
-  .content-grid,
-  .sv-class-summary,
-  .sv-flow {
+  .sinh-vien-da-chon {
     grid-template-columns: 1fr;
   }
 
-  .span-2,
-  .span-3,
-  .span-4 {
+  .span-2 {
     grid-column: span 1;
+  }
+
+  .btn-tai-lai {
+    justify-self: stretch;
   }
 }
 
 @media (max-width: 700px) {
-  .sv-header,
-  .sv-card,
-  .sv-filter-card,
-  .sv-account-box,
   .page-title,
   .panel {
-    padding: 12px;
-    border-radius: 12px;
+    border-radius: 14px;
+    padding: 13px;
   }
 
-  .sv-card-title,
+  .page-title h2,
+  .panel-title h2 {
+    font-size: 18px;
+  }
+
   .panel-title {
     display: grid;
   }
 
-  .sv-actions,
+  .panel-title span {
+    width: fit-content;
+  }
+
+  .quick-row {
+    grid-template-columns: 1fr;
+  }
+
+  .student-search-field {
+    grid-column: span 1;
+  }
+
+  .search-inline {
+    grid-template-columns: 1fr;
+  }
+
   .actions,
-  .form-actions,
-  .row-actions,
-  .sv-row-actions,
-  .sv-modal-actions {
+  .row-actions {
     justify-content: stretch;
   }
 
   button,
-  .sv-action-link {
+  .btn-search,
+  .btn-tai-lai {
     width: 100%;
   }
 
-  .tim-sinh-vien-box {
-    grid-template-columns: 1fr;
+  textarea {
+    min-height: 58px;
   }
 }
 </style>

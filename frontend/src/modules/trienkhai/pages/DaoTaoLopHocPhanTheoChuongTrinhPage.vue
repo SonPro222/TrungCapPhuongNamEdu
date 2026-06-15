@@ -1,17 +1,14 @@
 <template>
   <main class="tk-page">
     <section class="page-hero">
-      <div>
+      <div class="hero-left">
         <p class="hero-kicker">Triển khai đào tạo</p>
-        <h1>Lớp học phần theo chương trình</h1>
-        <p class="hero-desc">
-          Theo dõi lớp học phần, sinh viên, giảng viên, lịch học và điểm theo đúng cây
-          ngành → hệ đào tạo → chương trình → version hiện hành → kỳ.
-        </p>
+        <h1>Chương trình đào tạo</h1>
+        <p class="hero-desc">Theo dõi lớp học phần, sinh viên, giảng viên và lịch học theo ngành → hệ → chương trình → kỳ.</p>
       </div>
       <div class="hero-badge">
         <strong>{{ lopHocPhans.length }}</strong>
-        <span>lớp đang hiển thị</span>
+        <span>lớp hiển thị</span>
       </div>
     </section>
 
@@ -389,40 +386,78 @@ function layThongBaoLoi(error, fallback) {
 
 <style scoped>
 .tk-page {
-  min-height: 100vh;
-  padding: 28px;
+  padding: 20px 24px;
   display: grid;
-  gap: 22px;
-  background:
-    radial-gradient(circle at 8% 0%, rgba(37, 99, 235, .12), transparent 28%),
-    radial-gradient(circle at 100% 18%, rgba(124, 58, 237, .12), transparent 26%),
-    linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+  gap: 16px;
+  background: #f4f7f4;
+  font-family: 'Roboto', Arial, sans-serif;
 }
+
 .page-hero {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 30px;
-  border-radius: 32px;
-  color: white;
-  background:
-    linear-gradient(135deg, rgba(15, 23, 42, .94), rgba(30, 64, 175, .92)),
-    radial-gradient(circle at top right, rgba(96, 165, 250, .45), transparent 40%);
-  box-shadow: 0 30px 80px rgba(15, 23, 42, .22);
-  overflow: hidden;
+  gap: 16px;
+  padding: 18px 24px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1a5c36 0%, #2d8a55 100%);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(26,92,54,0.18);
 }
-.hero-kicker { margin: 0 0 8px; color: #93c5fd; text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 900; }
-h1 { margin: 0; font-size: clamp(32px, 4vw, 54px); line-height: 1.02; letter-spacing: -.04em; }
-.hero-desc { max-width: 760px; margin: 14px 0 0; color: #dbeafe; font-size: 16px; line-height: 1.7; font-weight: 650; }
-.hero-badge { min-width: 160px; align-self: stretch; display: grid; place-items: center; align-content: center; border: 1px solid rgba(255,255,255,.18); border-radius: 28px; background: rgba(255,255,255,.12); backdrop-filter: blur(10px); }
-.hero-badge strong { font-size: 44px; line-height: 1; }
-.hero-badge span { margin-top: 8px; color: #dbeafe; font-weight: 800; }
-.alert-card { display: flex; gap: 10px; align-items: center; padding: 14px 18px; border-radius: 18px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; box-shadow: 0 12px 32px rgba(245,158,11,.08); }
-.alert-card strong { font-weight: 900; }
+
+.hero-left { flex: 1; min-width: 0; }
+.hero-kicker {
+  margin: 0 0 4px;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: 500;
+}
+h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.hero-desc {
+  margin: 0;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.hero-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+  flex-shrink: 0;
+}
+.hero-badge strong { font-size: 30px; font-weight: 700; line-height: 1; }
+.hero-badge span { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 4px; font-weight: 400; }
+
+.alert-card {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 13px;
+}
+.alert-card strong { font-weight: 600; }
+
 @media (max-width: 820px) {
-  .tk-page { padding: 16px; }
-  .page-hero { flex-direction: column; padding: 22px; }
-  .hero-badge { min-height: 120px; }
+  .tk-page { padding: 12px 16px; }
+  .page-hero { flex-direction: column; align-items: flex-start; padding: 16px; }
 }
 </style>

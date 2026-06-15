@@ -106,34 +106,138 @@ function classTrangThai(value) {
 </script>
 
 <style scoped>
-.table-card { border: 1px solid rgba(15, 23, 42, .08); border-radius: 28px; background: #fff; box-shadow: 0 22px 60px rgba(15,23,42,.07); overflow: hidden; }
-.table-head { padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #eef2f7; }
-.eyebrow { margin: 0 0 5px; color: #2563eb; text-transform: uppercase; font-weight: 900; font-size: 12px; letter-spacing: .12em; }
-h3 { margin: 0; color: #0f172a; font-size: 22px; }
-.counter { display: inline-flex; align-items: center; border-radius: 999px; padding: 9px 14px; background: #eff6ff; color: #1d4ed8; font-weight: 900; }
+.table-card {
+  border: 1px solid #d1e7d9;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(26,92,54,0.07);
+  overflow: hidden;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+
+.table-head {
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e8f0ea;
+}
+
+.eyebrow {
+  margin: 0 0 2px;
+  color: #1a5c36;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+h3 {
+  margin: 0;
+  color: #1a2e1f;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 5px;
+  padding: 4px 10px;
+  background: #e8f5ec;
+  color: #1a5c36;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .table-wrap { width: 100%; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 980px; }
-th { text-align: left; padding: 14px 18px; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; background: #f8fafc; }
-td { padding: 16px 18px; border-top: 1px solid #eef2f7; color: #0f172a; vertical-align: middle; }
-tbody tr { cursor: pointer; transition: .18s ease; }
-tbody tr:hover { background: #f8fbff; transform: translateY(-1px); }
-strong { display: block; font-size: 14px; }
-small { display: block; color: #64748b; margin-top: 4px; font-weight: 650; }
-.code { display: inline-flex; border-radius: 999px; padding: 7px 10px; background: #eef2ff; color: #3730a3; font-weight: 900; }
-.capacity span { font-size: 13px; font-weight: 900; color: #334155; }
-.bar { width: 92px; height: 7px; margin-top: 7px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
-.bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #22c55e, #2563eb); }
-.status { display: inline-flex; border-radius: 999px; padding: 7px 10px; font-size: 12px; font-weight: 900; }
-.status.active { background: #dcfce7; color: #047857; }
-.status.done { background: #e0f2fe; color: #0369a1; }
+
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+th {
+  text-align: left;
+  padding: 10px 14px;
+  color: #5a7a63;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  background: #f5faf6;
+  font-weight: 500;
+}
+
+td {
+  padding: 11px 14px;
+  border-top: 1px solid #edf3ee;
+  color: #1a2e1f;
+  vertical-align: middle;
+}
+
+tbody tr { cursor: pointer; transition: background 0.12s; }
+tbody tr:hover { background: #f5faf6; }
+
+strong { display: block; font-size: 13px; font-weight: 500; }
+small { display: block; color: #7a9a82; margin-top: 2px; font-size: 12px; font-weight: 400; }
+
+.code {
+  display: inline-flex;
+  border-radius: 4px;
+  padding: 3px 8px;
+  background: #e8f5ec;
+  color: #1a5c36;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.capacity span { font-size: 12px; font-weight: 500; color: #3a5a42; }
+.bar { width: 80px; height: 5px; margin-top: 5px; background: #e2ede6; border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2d8a55, #1a5c36); }
+
+.status {
+  display: inline-flex;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.status.active { background: #d6f0e0; color: #1a5c36; }
+.status.done { background: #dbeafe; color: #1e40af; }
 .status.danger { background: #fee2e2; color: #b91c1c; }
-.status.neutral { background: #f1f5f9; color: #475569; }
-.detail-btn { border: 0; border-radius: 999px; padding: 8px 12px; background: #0f172a; color: #fff; font-weight: 900; cursor: pointer; }
-.empty-state { padding: 58px 24px; text-align: center; color: #64748b; }
-.empty-icon { width: 64px; height: 64px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 22px; background: #eff6ff; font-size: 30px; }
-.empty-state h4 { margin: 0 0 8px; color: #0f172a; font-size: 20px; }
-.empty-state p { margin: 0 auto; max-width: 520px; }
-.skeleton-list { padding: 18px 24px 24px; display: grid; gap: 12px; }
-.skeleton-row { height: 58px; border-radius: 16px; background: linear-gradient(90deg, #f1f5f9, #e2e8f0, #f1f5f9); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+.status.neutral { background: #f0f4f1; color: #5a7a63; }
+
+.detail-btn {
+  border: 1px solid #d1e7d9;
+  border-radius: 5px;
+  padding: 5px 12px;
+  background: #fff;
+  color: #1a5c36;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+.detail-btn:hover { background: #f0f9f3; }
+
+.empty-state { padding: 48px 24px; text-align: center; color: #7a9a82; }
+.empty-icon {
+  width: 56px; height: 56px;
+  display: grid; place-items: center;
+  margin: 0 auto 12px;
+  border-radius: 10px;
+  background: #e8f5ec;
+  font-size: 26px;
+}
+.empty-state h4 { margin: 0 0 6px; color: #1a2e1f; font-size: 16px; font-weight: 600; }
+.empty-state p { margin: 0 auto; max-width: 480px; font-size: 13px; line-height: 1.6; }
+
+.skeleton-list { padding: 14px 20px 20px; display: grid; gap: 8px; }
+.skeleton-row {
+  height: 48px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f4f1, #e2ede6, #f0f4f1);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
 @keyframes shimmer { to { background-position: -200% 0; } }
 </style>

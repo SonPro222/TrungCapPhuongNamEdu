@@ -526,6 +526,7 @@ const {
   dangTaiNghiChuyenKy,
   dangLuuNghiChuyenKy,
   luuNghiChuyenKyTheoVersion,
+  taiDuLieuTongQuanVersion,
 } = useDaoTaoXemChuongTrinh({
   autoLoad: false
 })
@@ -4489,6 +4490,7 @@ const groups = computed(() => {
       mau: 'mau-nmau',
       tables: [
         taoBang('monHoc', {
+          title: 'Môn học trong Version',
           parentValues: {},
           filterValues: {},
           displayRows: danhSachMonHocTang7DaLoc.value,

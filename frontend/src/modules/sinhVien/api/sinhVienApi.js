@@ -37,6 +37,12 @@ export const sinhVienApi = {
         ...createCrudApi(DAO_TAO_URL, 'lop-hanh-chinh'),
         getTheoVersion(chuongTrinhVersionId, params = {}) {
             return apiClient.get(`${DAO_TAO_URL}/lop-hanh-chinh/theo-version/${chuongTrinhVersionId}`, { params })
+        },
+        chotTuyenSinh(id) {
+            return apiClient.post(`${DAO_TAO_URL}/lop-hanh-chinh/${id}/chot-tuyen-sinh`)
+        },
+        huyChoTuyenSinh(id) {
+            return apiClient.post(`${DAO_TAO_URL}/lop-hanh-chinh/${id}/huy-chot-tuyen-sinh`)
         }
     },
 
@@ -124,7 +130,12 @@ export const sinhVienApi = {
     },
 
     // ── GIẢNG DẠY ────────────────────────────────────────────────────────────
-    lopHocPhan: createCrudApi(GIANG_DAY_URL, 'lop-hoc-phan'),
+    lopHocPhan: {
+        ...createCrudApi(GIANG_DAY_URL, 'lop-hoc-phan'),
+        autoTaoTheoKy(payload) {
+            return apiClient.post(`${GIANG_DAY_URL}/lop-hoc-phan/auto-tao-theo-ky`, payload)
+        }
+    },
 
     lopHocPhanChuongTrinhMon: {
         ...createCrudApi(GIANG_DAY_URL, 'lop-hoc-phan-chuong-trinh-mon'),

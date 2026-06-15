@@ -33,11 +33,39 @@
       </label>
 
       <label>
+        <span>Ngành hệ đào tạo</span>
+        <select v-model="nganhHeDaoTaoIdDangChon" :disabled="!nganhIdDangChon">
+          <option value="">-- Chọn ngành hệ đào tạo --</option>
+          <option
+              v-for="he in danhSachNganhHeDaoTao"
+              :key="he.id"
+              :value="he.id"
+          >
+            {{ he.label || ((he.maHe || he.id) + ' - ' + (he.tenHe || he.id)) }}
+          </option>
+        </select>
+      </label>
+
+      <label>
+        <span>Chương trình</span>
+        <select v-model="chuongTrinhIdDangChon" :disabled="!nganhHeDaoTaoIdDangChon">
+          <option value="">-- Chọn chương trình --</option>
+          <option
+              v-for="ct in danhSachChuongTrinh"
+              :key="ct.id"
+              :value="ct.id"
+          >
+            {{ ct.maChuongTrinh || ct.id }} - {{ ct.tenChuongTrinh || ct.id }}
+          </option>
+        </select>
+      </label>
+
+      <label>
         <span>Version chương trình</span>
-        <select v-model="versionIdDangChon" :disabled="!nganhIdDangChon">
+        <select v-model="versionIdDangChon" :disabled="!chuongTrinhIdDangChon">
           <option value="">-- Chọn version --</option>
           <option
-              v-for="version in danhSachVersionTheoNganh"
+              v-for="version in danhSachVersionTheoChuongTrinh"
               :key="version.id"
               :value="version.id"
           >
@@ -51,8 +79,16 @@
       Chọn ngành để bắt đầu.
     </section>
 
+    <section v-else-if="!nganhHeDaoTaoIdDangChon" class="hop-rong">
+      Chọn ngành hệ đào tạo.
+    </section>
+
+    <section v-else-if="!chuongTrinhIdDangChon" class="hop-rong">
+      Chọn chương trình đào tạo.
+    </section>
+
     <section v-else-if="!versionIdDangChon" class="hop-rong">
-      Chọn version chương trình của ngành.
+      Chọn version chương trình.
     </section>
 
     <template v-else>
@@ -397,6 +433,8 @@ import { layThongBaoLoi } from '@/modules/daoTao/utils/layThongBaoLoi'
 const services = daoTaoService
 
 const nganhIdDangChon = ref('')
+const nganhHeDaoTaoIdDangChon = ref('')
+const chuongTrinhIdDangChon = ref('')
 const versionIdDangChon = ref('')
 const nhomKienThucIdDangChon = ref('')
 const thongBao = ref('')
@@ -406,6 +444,7 @@ const dangTai = ref(false)
 const tuKhoaMonmau = ref('')
 
 const danhSachNganhRaw = ref([])
+const danhSachNganhHeDaoTaoRaw = ref([])
 const danhSachChuongTrinhRaw = ref([])
 const danhSachVersionRaw = ref([])
 const danhSachNhomKienThucRaw = ref([])
@@ -430,22 +469,21 @@ const danhSachNganh = computed(() => {
       .sort((a, b) => String(a.tenNganh || a.ten || '').localeCompare(String(b.tenNganh || b.ten || ''), 'vi'))
 })
 
-const danhSachChuongTrinhTheoNganh = computed(() => {
-  if (!nganhIdDangChon.value) return []
-
-  return danhSachChuongTrinhRaw.value
-      .filter((item) => String(item.nganhId || '') === String(nganhIdDangChon.value))
+const danhSachNganhHeDaoTao = computed(() => {
+  return [...danhSachNganhHeDaoTaoRaw.value]
+      .sort((a, b) => String(a.tenHe || a.ten || '').localeCompare(String(b.tenHe || b.ten || ''), 'vi'))
 })
 
-const danhSachVersionTheoNganh = computed(() => {
-  if (!nganhIdDangChon.value) return []
+const danhSachChuongTrinh = computed(() => {
+  return [...danhSachChuongTrinhRaw.value]
+      .sort((a, b) => String(a.tenChuongTrinh || a.ten || '').localeCompare(String(b.tenChuongTrinh || b.ten || ''), 'vi'))
+})
 
-  const chuongTrinhIds = new Set(
-      danhSachChuongTrinhTheoNganh.value.map((item) => String(item.id))
-  )
+const danhSachVersionTheoChuongTrinh = computed(() => {
+  if (!chuongTrinhIdDangChon.value) return []
 
   return danhSachVersionRaw.value
-      .filter((version) => chuongTrinhIds.has(String(version.chuongTrinhId || '')))
+      .filter((version) => String(version.chuongTrinhId || '') === String(chuongTrinhIdDangChon.value))
       .sort((a, b) => String(a.maVersion || a.id).localeCompare(String(b.maVersion || b.id), 'vi'))
 })
 
@@ -529,8 +567,12 @@ const soMonTrongNhomDangChon = computed(() => {
 })
 
 watch(nganhIdDangChon, async () => {
+  nganhHeDaoTaoIdDangChon.value = ''
+  chuongTrinhIdDangChon.value = ''
   versionIdDangChon.value = ''
   nhomKienThucIdDangChon.value = ''
+  danhSachNganhHeDaoTaoRaw.value = []
+  danhSachChuongTrinhRaw.value = []
   danhSachVersionRaw.value = []
   danhSachNhomKienThucRaw.value = []
   danhSachMonTheoVersionRaw.value = []
@@ -538,6 +580,34 @@ watch(nganhIdDangChon, async () => {
 
   if (nganhIdDangChon.value) {
     await taiDuLieuTheoNganh()
+  }
+})
+
+watch(nganhHeDaoTaoIdDangChon, async () => {
+  chuongTrinhIdDangChon.value = ''
+  versionIdDangChon.value = ''
+  nhomKienThucIdDangChon.value = ''
+  danhSachChuongTrinhRaw.value = []
+  danhSachVersionRaw.value = []
+  danhSachNhomKienThucRaw.value = []
+  danhSachMonTheoVersionRaw.value = []
+  resetFormNhom()
+
+  if (nganhHeDaoTaoIdDangChon.value) {
+    await taiDuLieuTheoNganhHeDaoTao()
+  }
+})
+
+watch(chuongTrinhIdDangChon, async () => {
+  versionIdDangChon.value = ''
+  nhomKienThucIdDangChon.value = ''
+  danhSachVersionRaw.value = []
+  danhSachNhomKienThucRaw.value = []
+  danhSachMonTheoVersionRaw.value = []
+  resetFormNhom()
+
+  if (chuongTrinhIdDangChon.value) {
+    await taiDuLieuTheoChuongTrinh()
   }
 })
 
@@ -581,29 +651,45 @@ async function taiDuLieuTheoNganh() {
   dangTai.value = true
 
   try {
-    const chuongTrinhResult = await services.chuongTrinh.getAll({
+    const result = await services.nganhHeDaoTao.getAll({
       size: 1000,
       nganhId: nganhIdDangChon.value
     })
-
-    const chuongTrinhList = layItems(chuongTrinhResult)
-    danhSachChuongTrinhRaw.value = chuongTrinhList
-
-    if (!chuongTrinhList.length) {
-      danhSachVersionRaw.value = []
-      return
-    }
-
-    const versionResults = await Promise.all(
-        chuongTrinhList.map((chuongTrinh) => services.chuongTrinhVersion.getAll({
-          size: 1000,
-          chuongTrinhId: chuongTrinh.id
-        }))
-    )
-
-    danhSachVersionRaw.value = versionResults.flatMap((result) => layItems(result))
+    danhSachNganhHeDaoTaoRaw.value = layItems(result)
   } catch (error) {
-    baoTin(layThongBaoLoi(error, 'Không tải được chương trình/version theo ngành.'), 'error')
+    baoTin(layThongBaoLoi(error, 'Không tải được ngành hệ đào tạo theo ngành.'), 'error')
+  } finally {
+    dangTai.value = false
+  }
+}
+
+async function taiDuLieuTheoNganhHeDaoTao() {
+  dangTai.value = true
+
+  try {
+    const result = await services.chuongTrinh.getAll({
+      size: 1000,
+      nganhHeDaoTaoId: nganhHeDaoTaoIdDangChon.value
+    })
+    danhSachChuongTrinhRaw.value = layItems(result)
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không tải được chương trình theo ngành hệ đào tạo.'), 'error')
+  } finally {
+    dangTai.value = false
+  }
+}
+
+async function taiDuLieuTheoChuongTrinh() {
+  dangTai.value = true
+
+  try {
+    const result = await services.chuongTrinhVersion.getAll({
+      size: 1000,
+      chuongTrinhId: chuongTrinhIdDangChon.value
+    })
+    danhSachVersionRaw.value = layItems(result)
+  } catch (error) {
+    baoTin(layThongBaoLoi(error, 'Không tải được version theo chương trình.'), 'error')
   } finally {
     dangTai.value = false
   }
@@ -678,6 +764,14 @@ async function taiDuLieu() {
 
     if (nganhIdDangChon.value) {
       await taiDuLieuTheoNganh()
+    }
+
+    if (nganhHeDaoTaoIdDangChon.value) {
+      await taiDuLieuTheoNganhHeDaoTao()
+    }
+
+    if (chuongTrinhIdDangChon.value) {
+      await taiDuLieuTheoChuongTrinh()
     }
 
     if (versionIdDangChon.value) {
@@ -1097,7 +1191,7 @@ onMounted(taiDuLieu)
 
 .bo-loc {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.5fr) minmax(0, 2fr);
   gap: 10px;
   padding: 12px;
   max-width: 100%;
@@ -1406,6 +1500,10 @@ tr.dang-chon td {
 
   .form-gan-version {
     grid-template-columns: 1fr;
+  }
+
+  .bo-loc {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

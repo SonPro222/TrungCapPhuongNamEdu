@@ -2,14 +2,22 @@
   <section class="page cap-nhat-tai-khoan-page">
     <header class="page-head">
       <div>
+        <p class="eyebrow">Quản trị tài khoản</p>
         <h1>Cập nhật tài khoản</h1>
         <p>Nhập Gmail tài khoản cần cập nhật. Sau khi tìm thấy mới hiển thị thông tin chỉnh sửa.</p>
       </div>
     </header>
 
-    <section class="panel tim-kiem-panel">
+    <section class="panel search-panel">
+      <div class="panel-title">
+        <div>
+          <h2>Tìm tài khoản</h2>
+          <p>Tra cứu theo Gmail tài khoản cần chỉnh sửa.</p>
+        </div>
+      </div>
+
       <div class="search-row">
-        <label>
+        <label class="field">
           <span>Gmail tài khoản</span>
           <input
               v-model.trim="emailTimKiem"
@@ -29,19 +37,30 @@
     </section>
 
     <form v-if="taiKhoanDangChon" class="panel form-panel" @submit.prevent="capNhatTaiKhoan">
-      <div class="info-box">
-        <strong>Tài khoản đang cập nhật</strong>
-        <span>ID: {{ taiKhoanDangChon.id }}</span>
-        <span>Gmail hiện tại: {{ taiKhoanDangChon.email }}</span>
+      <div class="account-strip">
+        <div class="account-left">
+          <div class="avatar">
+            {{ taiKhoanDangChon.email?.charAt(0)?.toUpperCase() || 'T' }}
+          </div>
+
+          <div class="account-text">
+            <strong>{{ taiKhoanDangChon.email }}</strong>
+            <span>Tài khoản đang cập nhật</span>
+          </div>
+        </div>
+
+        <div class="account-id">
+          ID: {{ taiKhoanDangChon.id }}
+        </div>
       </div>
 
       <div class="form-grid">
-        <label>
+        <label class="field email-field">
           <span>Gmail</span>
           <input v-model.trim="form.email" type="email" required />
         </label>
 
-        <label>
+        <label class="field">
           <span>Loại tài khoản</span>
           <select v-model="form.loaiTaiKhoan" required>
             <option value="">-- Chọn loại tài khoản --</option>
@@ -53,7 +72,7 @@
           </select>
         </label>
 
-        <label>
+        <label class="field">
           <span>Trạng thái</span>
           <select v-model="form.trangThai" required>
             <option value="">-- Chọn trạng thái --</option>
@@ -63,7 +82,7 @@
           </select>
         </label>
 
-        <label>
+        <label class="field roles-field">
           <span>Vai trò</span>
           <select v-model="form.roles" multiple required>
             <option v-for="role in vaiTroList" :key="role.id" :value="role.maVaiTro">
@@ -75,12 +94,12 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn primary" :disabled="dangLuu">
-          {{ dangLuu ? 'Đang lưu...' : 'Lưu cập nhật' }}
+        <button type="button" class="btn ghost" @click="boChon" :disabled="dangLuu">
+          Hủy
         </button>
 
-        <button type="button" class="btn" @click="boChon" :disabled="dangLuu">
-          Hủy
+        <button type="submit" class="btn primary" :disabled="dangLuu">
+          {{ dangLuu ? 'Đang lưu...' : 'Lưu cập nhật' }}
         </button>
       </div>
     </form>
@@ -203,119 +222,365 @@ function layDanhSach(result) {
 </script>
 
 <style scoped>
-.page {
+.cap-nhat-tai-khoan-page {
+  --primary: #077149;
+  --primary-dark: #055d3c;
+  --primary-soft: #e8f6f0;
+  --primary-soft-2: #f6fbf8;
+  --primary-border: #9bd8c1;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #d7e2ec;
+  --surface: #ffffff;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+
+  width: 100%;
+  max-width: 1040px;
   display: grid;
-  gap: 18px;
+  gap: 14px;
+  color: var(--text-main);
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
 }
 
 .page-head h1 {
-  margin: 0;
+  margin: 2px 0 0;
   font-size: 24px;
-  font-weight: 700;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #102033;
 }
 
 .page-head p {
-  margin: 6px 0 0;
-  color: #64748b;
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .panel {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  width: 100%;
+  display: grid;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--primary);
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  padding: 14px 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.055);
 }
 
-.tim-kiem-panel,
-.form-panel {
-  max-width: 900px;
-  display: grid;
-  gap: 16px;
+.panel-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-title h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.panel-title p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .search-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) 120px;
   gap: 12px;
   align-items: end;
 }
 
-.form-grid {
+.field {
+  min-width: 0;
   display: grid;
-  gap: 14px;
+  gap: 6px;
 }
 
-label {
-  display: grid;
-  gap: 8px;
-  font-weight: 600;
+.field > span {
   color: #334155;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 input,
 select {
-  min-height: 42px;
+  width: 100%;
+  min-height: 40px;
   border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: 11px;
+  background: #ffffff;
+  padding: 8px 11px;
+  color: #111827;
   outline: none;
   font-size: 14px;
+  font-weight: 600;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+select {
+  cursor: pointer;
 }
 
 select[multiple] {
-  min-height: 140px;
+  min-height: 116px;
+  padding: 7px;
+  overflow: auto;
+}
+
+select[multiple] option {
+  padding: 6px 8px;
+  border-radius: 7px;
+  margin-bottom: 2px;
 }
 
 input:focus,
 select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(7, 113, 73, 0.13);
 }
 
 small {
-  color: #64748b;
-  font-weight: 500;
+  margin-top: -1px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 600;
 }
 
-.info-box {
-  display: grid;
-  gap: 4px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 12px 14px;
+.btn {
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #ffffff;
+  padding: 0 15px;
   color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 16px rgba(15, 23, 42, 0.08);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.btn.primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn.ghost {
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.alert {
+  border-radius: 11px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+
+.alert.success {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  border: 1px solid var(--primary-border);
+}
+
+.alert.error {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+}
+
+.account-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #dbe9e3;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary-soft-2), #ffffff);
+  padding: 10px 12px;
+}
+
+.account-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 900;
+  box-shadow: 0 7px 16px rgba(7, 113, 73, 0.2);
+}
+
+.account-text {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.account-text strong {
+  overflow: hidden;
+  color: #102033;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-text span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.account-id {
+  flex: 0 0 auto;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--primary-border);
+  background: var(--primary-soft);
+  padding: 0 11px;
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.25fr) minmax(180px, 0.85fr) minmax(180px, 0.85fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.email-field {
+  grid-column: 1 / 2;
+}
+
+.roles-field {
+  grid-column: 1 / -1;
 }
 
 .form-actions {
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
-  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 2px;
 }
 
-.alert {
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-weight: 600;
-}
+@media (max-width: 900px) {
+  .cap-nhat-tai-khoan-page {
+    max-width: 100%;
+  }
 
-.alert.success {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
-.alert.error {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  .email-field,
+  .roles-field {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 720px) {
-  .search-row {
+  .panel {
+    padding: 14px;
+    border-radius: 15px;
+  }
+
+  .search-row,
+  .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .email-field,
+  .roles-field {
+    grid-column: auto;
+  }
+
+  .account-strip {
+    align-items: flex-start;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+}
+
+@media (max-width: 520px) {
+  .page-head h1 {
+    font-size: 21px;
+  }
+
+  .account-strip {
+    display: grid;
+  }
+
+  .account-id {
+    width: fit-content;
   }
 }
 </style>

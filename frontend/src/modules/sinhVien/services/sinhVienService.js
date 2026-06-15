@@ -193,6 +193,11 @@ export const sinhVienService = {
         return sinhVienApi.lopHocPhan.delete(id)
     },
 
+    async autoTaoLopHocPhanTheoKy(payload) {
+        const response = await sinhVienApi.lopHocPhan.autoTaoTheoKy(payload)
+        return response?.data?.data || response?.data || response
+    },
+
     async layKhungKy() {
         return layNoiDungPage(await sinhVienApi.khungKy.getAll(PAGE_KHUNG))
     },
@@ -211,6 +216,16 @@ export const sinhVienService = {
 
     async huyBaoLuu(id) {
         return sinhVienApi.baoLuu.huy(id)
+    },
+
+    async laySinhVienTrongLopHocPhan(lopHocPhanId) {
+        if (!lopHocPhanId) return []
+        return layNoiDungPage(await sinhVienApi.sinhVienLopHocPhan.getSinhVienTrongLop(lopHocPhanId))
+    },
+
+    async layDangKyTheoLopHocPhan(lopHocPhanId) {
+        if (!lopHocPhanId) return []
+        return layNoiDungPage(await sinhVienApi.sinhVienLopHocPhan.getTheoLopHocPhan(lopHocPhanId))
     },
 }
 
@@ -362,5 +377,41 @@ Object.assign(sinhVienService, {
                 sortDir: 'asc'
             })
         )
+    },
+})
+
+// ── AUTO TẠO LỚP HỌC PHẦN + CHỐT TUYỂN SINH ────────────────────────────────
+
+Object.assign(sinhVienService, {
+
+    // POST /api/giang-day/lop-hoc-phan/auto-tao-theo-ky
+    // payload.mode: PREVIEW | DU_KIEN | CHINH_THUC
+    async autoTaoLopHocPhanTheoKy(payload) {
+        const res = await sinhVienApi.lopHocPhan.autoTaoTheoKy(payload)
+        return res?.data?.data ?? res?.data ?? res
+    },
+
+    async previewAutoTaoLopHocPhanTheoKy(payload) {
+        return sinhVienService.autoTaoLopHocPhanTheoKy({ ...payload, mode: 'PREVIEW' })
+    },
+
+    async autoTaoLopHocPhanDuKien(payload) {
+        return sinhVienService.autoTaoLopHocPhanTheoKy({ ...payload, mode: 'DU_KIEN' })
+    },
+
+    async autoTaoLopHocPhanChinhThuc(payload) {
+        return sinhVienService.autoTaoLopHocPhanTheoKy({ ...payload, mode: 'CHINH_THUC' })
+    },
+
+    // POST /api/dao-tao/lop-hanh-chinh/{id}/chot-tuyen-sinh
+    async chotTuyenSinh(id) {
+        const res = await sinhVienApi.lopHanhChinh.chotTuyenSinh(id)
+        return res?.data?.data ?? res?.data ?? res
+    },
+
+    // POST /api/dao-tao/lop-hanh-chinh/{id}/huy-chot-tuyen-sinh
+    async huyChoTuyenSinhLopHanhChinh(id) {
+        const res = await sinhVienApi.lopHanhChinh.huyChoTuyenSinh(id)
+        return res?.data?.data ?? res?.data ?? res
     },
 })

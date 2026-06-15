@@ -9,820 +9,1009 @@
         <p>Quản lý hồ sơ sinh viên, lớp hành chính, danh sách sinh viên toàn trường và sinh viên bảo lưu.</p>
       </header>
 
-    <!-- ===== BREADCRUMB cho các bước sâu (giữ điều hướng quay lại) ===== -->
-    <nav v-if="!dangOBuocQuanLy" class="sv-summary-bar sv-breadcrumb-sticky">
-      <button
-          v-for="(item, i) in summaryItems"
-          :key="i"
-          type="button"
-          class="sv-summary-chip"
-          :class="{ active: i === summaryItems.length - 1, clickable: item.clickable }"
-          @click="item.clickable && quayVeBuoc(item.step)"
+      <!-- ===== BREADCRUMB cho các bước sâu (giữ điều hướng quay lại) ===== -->
+      <nav v-if="!dangOBuocQuanLy" class="sv-summary-bar sv-breadcrumb-sticky">
+        <button
+            v-for="(item, i) in summaryItems"
+            :key="i"
+            type="button"
+            class="sv-summary-chip"
+            :class="{ active: i === summaryItems.length - 1, clickable: item.clickable }"
+            @click="item.clickable && quayVeBuoc(item.step)"
+        >
+          <span class="sv-summary-name">{{ item.name }}:</span>
+          <strong class="sv-summary-value">{{ item.value }}</strong>
+        </button>
+      </nav>
+
+      <!-- ===== THÔNG BÁO ===== -->
+      <div
+          v-if="thongBao && thongBaoBuoc === buoc"
+          class="sv-message"
+          :class="thongBaoLoai"
       >
-        <span class="sv-summary-name">{{ item.name }}:</span>
-        <strong class="sv-summary-value">{{ item.value }}</strong>
-      </button>
-    </nav>
+        {{ thongBao }}
+      </div>
 
-    <!-- ===== THÔNG BÁO ===== -->
-    <div
-        v-if="thongBao && thongBaoBuoc === buoc"
-        class="sv-message"
-        :class="thongBaoLoai"
-    >
-      {{ thongBao }}
-    </div>
+      <!-- ===================================================================== -->
+      <!-- KHU QUẢN LÝ: nội dung bên trái – panel gợi ý bên phải (như ảnh)        -->
+      <!-- ===================================================================== -->
+      <template v-if="dangOBuocQuanLy">
+        <div class="sv-manage-layout">
 
-    <!-- ===================================================================== -->
-    <!-- KHU QUẢN LÝ: nội dung bên trái – panel gợi ý bên phải (như ảnh)        -->
-    <!-- ===================================================================== -->
-    <template v-if="dangOBuocQuanLy">
-      <div class="sv-manage-layout">
+          <!-- CỘT TRÁI: NỘI DUNG -->
+          <div class="sv-manage-main">
 
-        <!-- CỘT TRÁI: NỘI DUNG -->
-        <div class="sv-manage-main">
+            <!-- BỘ LỌC + THỐNG KÊ GỌN -->
+            <div class="sv-filter-card sv-filter-card-with-stats">
+              <div class="sv-filter-grid">
+                <label class="sv-filter-field">
+                  <span>Ngành</span>
+                  <select v-model="nganhSelectId">
+                    <option value="">Chọn ngành...</option>
+                    <option v-for="ng in danhSachNganh" :key="ng.id" :value="ng.id">
+                      {{ ng.tenNganh }}
+                    </option>
+                  </select>
+                </label>
 
-          <!-- THẺ THỐNG KÊ -->
-          <div class="sv-stat-cards">
-            <div class="sv-stat-card">
-              <div class="sv-stat-icon stat-blue">👥</div>
-              <div class="sv-stat-body">
-                <span class="sv-stat-label">Tổng sinh viên</span>
-                <strong class="sv-stat-value">{{ soSinhVienToanTruong }}</strong>
-                <small class="sv-stat-sub">Toàn hệ thống</small>
+                <label class="sv-filter-field">
+                  <span>Chương trình</span>
+                  <select v-model="chuongTrinhSelectId" :disabled="!nganhDangChon">
+                    <option value="">Chọn chương trình...</option>
+                    <option v-for="ct in chuongTrinhTheoNganh" :key="ct.id" :value="ct.id">
+                      {{ ct.maChuongTrinh }}
+                    </option>
+                  </select>
+                </label>
+
+                <label class="sv-filter-field">
+                  <span>Phiên bản</span>
+                  <select v-model="versionSelectId" :disabled="!chuongTrinhDangChon">
+                    <option value="">Chọn phiên bản...</option>
+                    <option v-for="v in versionTheoCT" :key="v.id" :value="v.id">
+                      {{ v.maVersion }}{{ v.tenVersion ? ' - ' + v.tenVersion : '' }}
+                    </option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="sv-filter-bottom-row">
+                <div class="sv-filter-hint">
+                  <span class="sv-filter-hint-ico">ℹ️</span>
+                  <span>
+                  Chọn lần lượt <strong>Ngành → Chương trình → Phiên bản</strong> để mở danh sách lớp hành chính,
+                  sau đó <strong>Tiếp nhận sinh viên</strong> hoặc <strong>Mở lớp học phần</strong>.
+                </span>
+                </div>
+
+                <div class="sv-mini-stats" aria-label="Thống kê nhanh">
+                  <div class="sv-mini-stat">
+                    <span class="sv-mini-stat-icon stat-blue">👥</span>
+                    <span class="sv-mini-stat-text">Tổng sinh viên</span>
+                    <strong>{{ soSinhVienToanTruong }}</strong>
+                  </div>
+                  <div class="sv-mini-stat">
+                    <span class="sv-mini-stat-icon stat-violet">🏫</span>
+                    <span class="sv-mini-stat-text">Lớp hành chính</span>
+                    <strong>{{ danhSachLHC.length }}</strong>
+                  </div>
+                  <div class="sv-mini-stat">
+                    <span class="sv-mini-stat-icon stat-orange">📌</span>
+                    <span class="sv-mini-stat-text">Bảo lưu</span>
+                    <strong>{{ soSinhVienBaoLuu }}</strong>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="sv-stat-card">
-              <div class="sv-stat-icon stat-violet">🏫</div>
-              <div class="sv-stat-body">
-                <span class="sv-stat-label">Lớp hành chính</span>
-                <strong class="sv-stat-value">{{ danhSachLHC.length }}</strong>
-                <small class="sv-stat-sub">Đang hoạt động</small>
-              </div>
-            </div>
-            <div class="sv-stat-card">
-              <div class="sv-stat-icon stat-green">🎓</div>
-              <div class="sv-stat-body">
-                <span class="sv-stat-label">Sinh viên toàn trường</span>
-                <strong class="sv-stat-value sv-stat-value-green">{{ soSinhVienToanTruong }}</strong>
-                <small class="sv-stat-sub">Đang theo học</small>
-              </div>
-            </div>
-            <div class="sv-stat-card">
-              <div class="sv-stat-icon stat-orange">📌</div>
-              <div class="sv-stat-body">
-                <span class="sv-stat-label">Sinh viên bảo lưu</span>
-                <strong class="sv-stat-value">{{ soSinhVienBaoLuu }}</strong>
-                <small class="sv-stat-sub">Hiện tại</small>
-              </div>
-            </div>
-          </div>
 
-          <!-- BỘ LỌC DROPDOWN -->
-          <div class="sv-filter-card">
-            <div class="sv-filter-grid">
-              <label class="sv-filter-field">
-                <span>Ngành</span>
-                <select v-model="nganhSelectId">
-                  <option value="">Chọn ngành...</option>
-                  <option v-for="ng in danhSachNganh" :key="ng.id" :value="ng.id">
-                    {{ ng.tenNganh }}
-                  </option>
-                </select>
-              </label>
-
-              <label class="sv-filter-field">
-                <span>Chương trình</span>
-                <select v-model="chuongTrinhSelectId" :disabled="!nganhDangChon">
-                  <option value="">Chọn chương trình...</option>
-                  <option v-for="ct in chuongTrinhTheoNganh" :key="ct.id" :value="ct.id">
-                    {{ ct.maChuongTrinh }}
-                  </option>
-                </select>
-              </label>
-
-              <label class="sv-filter-field">
-                <span>Version</span>
-                <select v-model="versionSelectId" :disabled="!chuongTrinhDangChon">
-                  <option value="">Chọn version...</option>
-                  <option v-for="v in versionTheoCT" :key="v.id" :value="v.id">
-                    {{ v.maVersion }}{{ v.tenVersion ? ' - ' + v.tenVersion : '' }}
-                  </option>
-                </select>
-              </label>
-
-              <label class="sv-filter-field">
-                <span>Lớp hành chính</span>
-                <select v-model="lhcSelectId" :disabled="!versionDangChon">
-                  <option value="">Chưa chọn</option>
-                  <option v-for="lop in danhSachLHC" :key="lop.id" :value="lop.id">
-                    {{ lop.maLop }} - {{ lop.tenLop }}
-                  </option>
-                </select>
-              </label>
+            <!-- TRẠNG THÁI: CHƯA CHỌN ĐỦ -->
+            <div v-if="!versionDangChon" class="sv-card sv-empty-state">
+              <div class="sv-empty-ico">🗂️</div>
+              <h2>Chọn ngành, chương trình và phiên bản</h2>
+              <p>Hãy chọn đủ <strong>Ngành → Chương trình → Phiên bản</strong> ở bộ lọc phía trên để tạo và quản lý lớp hành chính.</p>
             </div>
 
-            <div class="sv-filter-hint">
-              <span class="sv-filter-hint-ico">ℹ️</span>
-              <span>
-                Chọn lần lượt <strong>Ngành → Chương trình → Version</strong> để mở danh sách lớp hành chính,
-                sau đó <strong>Tiếp nhận SV</strong> hoặc <strong>Mở LHP</strong>.
-              </span>
+            <!-- FORM TẠO / SỬA LỚP HÀNH CHÍNH -->
+            <div v-if="versionDangChon" class="sv-card">
+              <div class="sv-card-title sv-card-title-toolbar">
+                <div>
+                  <h2>{{ idLHCSua ? 'Sửa lớp hành chính' : 'Tạo lớp hành chính' }}</h2>
+                  <p>Tạo lớp hành chính để tiếp nhận sinh viên và mở lớp học phần.</p>
+                </div>
+                <div class="sv-title-tools">
+                  <button type="submit" form="form-lhc" class="sv-btn-primary" :disabled="dangLuu">
+                    + {{ dangLuu ? 'Đang lưu...' : (idLHCSua ? 'Cập nhật' : 'Tạo lớp') }}
+                  </button>
+                  <button type="button" class="secondary" @click="resetFormLHC">↻ Làm mới</button>
+                </div>
+              </div>
+              <form id="form-lhc" class="sv-grid sv-grid-4" @submit.prevent="luuLopHanhChinh">
+                <label>Mã lớp<input v-model.trim="formLHC.maLop" placeholder="Nhập mã lớp" required/></label>
+                <label>Tên lớp<input v-model.trim="formLHC.tenLop" placeholder="Nhập tên lớp" required/></label>
+                <label>Sĩ số tối đa<input v-model.number="formLHC.siSo" type="number" min="0" placeholder="Nhập số lượng"/></label>
+                <label>Trạng thái
+                  <select v-model="formLHC.trangThai">
+                    <option value="du_kien">Dự kiến</option>
+                    <option value="dang_hoc">Đang học</option>
+                    <option value="tam_dung">Tạm dừng</option>
+                    <option value="da_tot_nghiep">Đã tốt nghiệp</option>
+                    <option value="huy">Hủy</option>
+                  </select>
+                </label>
+                <label>Ngày bắt đầu nhận sinh viên<input v-model="formLHC.ngayBatDauNhanSinhVien" type="date"/></label>
+                <label>Ngày kết thúc nhận sinh viên<input v-model="formLHC.ngayKetThucNhanSinhVien" type="date"/></label>
+                <label v-if="idLHCSua" class="sv-span-2">
+                  Chốt tuyển sinh
+                  <div class="sv-chot-tuyen-sinh-info">
+                    <span v-if="formLHC.daChotTuyenSinh" class="sv-status-pill status-da_chot">✔ Đã chốt</span>
+                    <span v-else class="sv-status-pill status-chua_chot">Chưa chốt</span>
+                    <span v-if="formLHC.ngayChotTuyenSinh" class="sv-note-text">&nbsp;{{ dinhDangNgay(formLHC.ngayChotTuyenSinh) }}</span>
+                  </div>
+                </label>
+                <label class="sv-span-4">Ghi chú<input v-model.trim="formLHC.ghiChu" placeholder="Nhập ghi chú (nếu có)"/></label>
+              </form>
             </div>
-          </div>
 
-          <!-- TRẠNG THÁI: CHƯA CHỌN ĐỦ -->
-          <div v-if="!versionDangChon" class="sv-card sv-empty-state">
-            <div class="sv-empty-ico">🗂️</div>
-            <h2>Chọn ngành, chương trình và version</h2>
-            <p>Hãy chọn đủ <strong>Ngành → Chương trình → Version</strong> ở bộ lọc phía trên để tạo và quản lý lớp hành chính.</p>
-          </div>
-
-          <!-- FORM TẠO / SỬA LỚP HÀNH CHÍNH -->
-          <div v-if="versionDangChon" class="sv-card">
-            <div class="sv-card-title sv-card-title-toolbar">
-              <div>
-                <h2>{{ idLHCSua ? 'Sửa lớp hành chính' : 'Tạo lớp hành chính' }}</h2>
-                <p>Tạo lớp hành chính để tiếp nhận sinh viên và mở lớp học phần.</p>
-              </div>
-              <div class="sv-title-tools">
-                <button type="submit" form="form-lhc" class="sv-btn-primary" :disabled="dangLuu">
-                  + {{ dangLuu ? 'Đang lưu...' : (idLHCSua ? 'Cập nhật' : 'Tạo lớp') }}
-                </button>
-                <button type="button" class="secondary" @click="resetFormLHC">↻ Làm mới</button>
-              </div>
-            </div>
-            <form id="form-lhc" class="sv-grid sv-grid-4" @submit.prevent="luuLopHanhChinh">
-              <label>Mã lớp<input v-model.trim="formLHC.maLop" placeholder="Nhập mã lớp" required/></label>
-              <label>Tên lớp<input v-model.trim="formLHC.tenLop" placeholder="Nhập tên lớp" required/></label>
-              <label>Sĩ số tối đa<input v-model.number="formLHC.siSo" type="number" min="0" placeholder="Nhập số lượng"/></label>
-              <label>Trạng thái
-                <select v-model="formLHC.trangThai">
-                  <option value="du_kien">Dự kiến</option>
-                  <option value="dang_hoc">Đang học</option>
-                  <option value="tam_dung">Tạm dừng</option>
-                  <option value="da_tot_nghiep">Đã tốt nghiệp</option>
-                  <option value="huy">Hủy</option>
-                </select>
-              </label>
-              <label class="sv-span-4">Ghi chú<input v-model.trim="formLHC.ghiChu" placeholder="Nhập ghi chú (nếu có)"/></label>
-            </form>
-          </div>
-
-          <!-- DANH SÁCH LỚP HÀNH CHÍNH -->
-          <div v-if="versionDangChon" class="sv-card sv-lhc-list-card">
-            <div class="sv-card-title sv-card-title-toolbar">
-              <div>
-                <h2>Danh sách lớp hành chính</h2>
-                <p>
-                  Chọn lớp để tiếp nhận sinh viên hoặc mở lớp học phần.
-                  Sĩ số hiển thị theo dạng <strong>hiện tại / tối đa</strong>.
-                </p>
-              </div>
-              <div class="sv-title-tools">
-                <input
-                    v-model.trim="tuKhoaLHC"
-                    class="sv-search-input"
-                    placeholder="Tìm mã lớp, tên lớp..."
-                />
-                <span class="so-ban-ghi">
+            <!-- DANH SÁCH LỚP HÀNH CHÍNH -->
+            <div v-if="versionDangChon" class="sv-card sv-lhc-list-card">
+              <div class="sv-card-title sv-card-title-toolbar">
+                <div>
+                  <h2>Danh sách lớp hành chính</h2>
+                  <p>
+                    Chọn lớp để tiếp nhận sinh viên hoặc mở lớp học phần.
+                    Sĩ số hiển thị theo dạng <strong>hiện tại / tối đa</strong>.
+                  </p>
+                </div>
+                <div class="sv-title-tools">
+                  <input
+                      v-model.trim="tuKhoaLHC"
+                      class="sv-search-input"
+                      placeholder="Tìm mã lớp, tên lớp..."
+                  />
+                  <span class="so-ban-ghi">
                   {{ danhSachLHCHienThi.length }} / {{ danhSachLHC.length }} lớp
                 </span>
+                </div>
               </div>
-            </div>
 
-            <div class="sv-table-wrap sv-table-wrap-full sv-lhc-table-wrap">
-              <table class="sv-table sv-lhc-table">
-                <thead>
-                <tr>
-                  <th>STT</th>
-                  <th>Mã lớp</th>
-                  <th>Tên lớp</th>
-                  <th>Sĩ số</th>
-                  <th>Trạng thái</th>
-                  <th>Ghi chú</th>
-                  <th>Thao tác</th>
-                </tr>
-                </thead>
+              <div class="sv-table-wrap sv-table-wrap-full sv-lhc-table-wrap">
+                <table class="sv-table sv-lhc-table">
+                  <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Mã lớp</th>
+                    <th>Tên lớp</th>
+                    <th>Sĩ số</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày nhận sinh viên</th>
+                    <th>Tuyển sinh</th>
+                    <th>Ghi chú</th>
+                    <th>Thao tác</th>
+                  </tr>
+                  </thead>
 
-                <tbody>
-                <tr v-for="(lop, i) in danhSachLHCHienThi" :key="lop.id">
-                  <td>{{ i + 1 }}</td>
+                  <tbody>
+                  <tr v-for="(lop, i) in danhSachLHCHienThi" :key="lop.id">
+                    <td>{{ i + 1 }}</td>
 
-                  <td>
-                    <strong class="sv-code">{{ lop.maLop }}</strong>
-                  </td>
+                    <td>
+                      <strong class="sv-code">{{ lop.maLop }}</strong>
+                    </td>
 
-                  <td>
-                    <div class="sv-main-text">{{ lop.tenLop }}</div>
-                  </td>
+                    <td>
+                      <div class="sv-main-text">{{ lop.tenLop }}</div>
+                    </td>
 
-                  <td>
+                    <td>
                     <span class="sv-capacity-badge">
                       <strong>{{ demSiSoHienTaiLHC(lop) }}</strong>
                       <span>/</span>
                       <span>{{ laySiSoToiDaLHC(lop) }}</span>
                     </span>
-                  </td>
+                    </td>
 
-                  <td>
+                    <td>
                     <span class="sv-status-pill" :class="`status-${lop.trangThai || 'none'}`">
                       {{ nhanTrangThaiLHC(lop.trangThai) }}
                     </span>
-                  </td>
+                    </td>
 
+                    <td>
+                      <div v-if="lop.ngayBatDauNhanSinhVien || lop.ngayKetThucNhanSinhVien" class="sv-note-text">
+                        <div v-if="lop.ngayBatDauNhanSinhVien">Từ: {{ dinhDangNgay(lop.ngayBatDauNhanSinhVien) }}</div>
+                        <div v-if="lop.ngayKetThucNhanSinhVien">Đến: {{ dinhDangNgay(lop.ngayKetThucNhanSinhVien) }}</div>
+                      </div>
+                      <span v-else class="sv-note-text">—</span>
+                    </td>
+
+                    <td>
+                      <span v-if="lop.daChotTuyenSinh" class="sv-status-pill status-da_chot">✔ Đã chốt</span>
+                      <span v-else class="sv-status-pill status-chua_chot">Chưa chốt</span>
+                      <div v-if="lop.ngayChotTuyenSinh" class="sv-note-text" style="font-size:11px;margin-top:2px">
+                        {{ dinhDangNgay(lop.ngayChotTuyenSinh) }}
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="sv-note-text">{{ lop.ghiChu || '—' }}</span>
+                    </td>
+
+                    <td>
+                      <div class="sv-row-actions sv-row-actions-nowrap">
+                        <button type="button" class="small btn-nhanh1" @click="chonLHCNhanhTiepNhan(lop)">
+                          Tiếp nhận sinh viên →
+                        </button>
+
+                        <button type="button" class="small btn-nhanh2" @click="chonLHCNhanhLHP(lop)">
+                          Mở lớp học phần →
+                        </button>
+
+                        <button
+                            v-if="!lop.daChotTuyenSinh"
+                            type="button"
+                            class="small btn-chot-ts"
+                            @click="chotTuyenSinhLHC(lop)"
+                        >
+                          Chốt tuyển sinh
+                        </button>
+
+                        <button
+                            v-if="lop.daChotTuyenSinh"
+                            type="button"
+                            class="small btn-huy-chot-ts"
+                            @click="huyChoTuyenSinhLHC(lop)"
+                        >
+                          Hủy chốt
+                        </button>
+
+                        <button type="button" class="secondary small" @click="suaLopHanhChinh(lop)">
+                          Sửa
+                        </button>
+
+                        <button type="button" class="danger small" @click="xoaLopHanhChinh(lop)">
+                          Xóa
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr v-if="!danhSachLHCHienThi.length">
+                    <td colspan="9" class="empty">
+                      Không tìm thấy lớp hành chính phù hợp.
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="sv-table-footer">
+                Hiển thị {{ danhSachLHCHienThi.length }} / {{ danhSachLHC.length }} lớp
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </template>
+
+      <!-- ===== BƯỚC 4.1: TIẾP NHẬN SINH VIÊN ===== -->
+      <template v-if="buoc === 'tiepNhan'">
+        <div v-if="taiKhoanMoi && taiKhoanMoi.lopHanhChinhId === lopHanhChinhDangChon?.id" class="sv-account-box">
+          <strong>Tài khoản vừa cấp:</strong>
+          <span>Mã sinh viên: {{ taiKhoanMoi.maSinhVien }}</span>
+          <span>Gmail: {{ taiKhoanMoi.emailTaiKhoan }}</span>
+          <span>Mật khẩu tạm: {{ taiKhoanMoi.matKhauTam }}</span>
+        </div>
+        <div class="sv-card sv-student-receive-card">
+          <div class="sv-card-title">
+            <div>
+              <h2>{{ idSVSua ? 'Cập nhật hồ sơ sinh viên' : 'Tiếp nhận hồ sơ sinh viên' }}</h2>
+              <p>
+                Lớp hành chính:
+                <strong>{{ lopHanhChinhDangChon?.maLop }} - {{ lopHanhChinhDangChon?.tenLop }}</strong>
+                | Hệ thống tự sinh mã sinh viên và cấp tài khoản.
+              </p>
+            </div>
+          </div>
+
+          <form class="sv-receive-layout" @submit.prevent="luuSinhVien">
+            <!-- CỘT TRÁI: HÌNH ẢNH & GIẤY TỜ -->
+            <aside class="sv-file-panel">
+              <div class="sv-file-panel-title">
+                <h3>Hình ảnh & giấy tờ</h3>
+                <p>Kiểm tra ảnh trước khi lưu hồ sơ.</p>
+              </div>
+
+              <div class="sv-document-grid">
+                <div class="sv-document-row sv-document-row-main">
+                  <div class="sv-document-left">
+                    <button
+                        v-if="filesSV.anhChanDung"
+                        type="button"
+                        class="sv-remove-file"
+                        @click="boTep('anhChanDung')"
+                    >
+                      Bỏ
+                    </button>
+
+                    <div class="sv-document-preview sv-portrait-preview">
+                      <img
+                          v-if="previewAnhChanDung"
+                          :src="previewAnhChanDung"
+                          alt="Ảnh chân dung"
+                      />
+                      <div v-else class="sv-document-placeholder">
+                        Chưa có ảnh
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="sv-document-right">
+                    <div class="sv-document-title">Ảnh chân dung</div>
+
+                    <label class="sv-file-picker">
+                      <input type="file" accept="image/*" @change="chonTep($event,'anhChanDung')" />
+                      <span>Chọn ảnh</span>
+                    </label>
+
+                    <div class="sv-file-meta">
+                      <strong>{{ layTenFile(filesSV.anhChanDung) }}</strong>
+                      <small>{{ layDungLuongFile(filesSV.anhChanDung) }}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sv-document-row">
+                  <div class="sv-document-left">
+                    <button
+                        v-if="filesSV.cccdTruoc"
+                        type="button"
+                        class="sv-remove-file"
+                        @click="boTep('cccdTruoc')"
+                    >
+                      Bỏ
+                    </button>
+
+                    <div class="sv-document-preview">
+                      <img
+                          v-if="previewCccdTruoc"
+                          :src="previewCccdTruoc"
+                          alt="CCCD mặt trước"
+                      />
+                      <div v-else-if="filesSV.cccdTruoc" class="sv-document-pdf">
+                        PDF
+                      </div>
+                      <div v-else class="sv-document-placeholder">
+                        Chưa có tệp
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="sv-document-right">
+                    <div class="sv-document-title">CCCD mặt trước</div>
+
+                    <label class="sv-file-picker">
+                      <input type="file" accept="image/*,.pdf" @change="chonTep($event,'cccdTruoc')" />
+                      <span>Chọn tệp</span>
+                    </label>
+
+                    <div class="sv-file-meta">
+                      <strong>{{ layTenFile(filesSV.cccdTruoc) }}</strong>
+                      <small>{{ layDungLuongFile(filesSV.cccdTruoc) }}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sv-document-row">
+                  <div class="sv-document-left">
+                    <button
+                        v-if="filesSV.cccdSau"
+                        type="button"
+                        class="sv-remove-file"
+                        @click="boTep('cccdSau')"
+                    >
+                      Bỏ
+                    </button>
+
+                    <div class="sv-document-preview">
+                      <img
+                          v-if="previewCccdSau"
+                          :src="previewCccdSau"
+                          alt="CCCD mặt sau"
+                      />
+                      <div v-else-if="filesSV.cccdSau" class="sv-document-pdf">
+                        PDF
+                      </div>
+                      <div v-else class="sv-document-placeholder">
+                        Chưa có tệp
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="sv-document-right">
+                    <div class="sv-document-title">CCCD mặt sau</div>
+
+                    <label class="sv-file-picker">
+                      <input type="file" accept="image/*,.pdf" @change="chonTep($event,'cccdSau')" />
+                      <span>Chọn tệp</span>
+                    </label>
+
+                    <div class="sv-file-meta">
+                      <strong>{{ layTenFile(filesSV.cccdSau) }}</strong>
+                      <small>{{ layDungLuongFile(filesSV.cccdSau) }}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sv-document-row">
+                  <div class="sv-document-left">
+                    <button
+                        v-if="filesSV.bangCap"
+                        type="button"
+                        class="sv-remove-file"
+                        @click="boTep('bangCap')"
+                    >
+                      Bỏ
+                    </button>
+
+                    <div class="sv-document-preview">
+                      <img
+                          v-if="previewBangCap"
+                          :src="previewBangCap"
+                          alt="Bằng cấp"
+                      />
+                      <div v-else-if="filesSV.bangCap" class="sv-document-pdf">
+                        PDF
+                      </div>
+                      <div v-else class="sv-document-placeholder">
+                        Chưa có tệp
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="sv-document-right">
+                    <div class="sv-document-title">Bằng cấp</div>
+
+                    <label class="sv-file-picker">
+                      <input type="file" accept="image/*,.pdf" @change="chonTep($event,'bangCap')" />
+                      <span>Chọn tệp</span>
+                    </label>
+
+                    <div class="sv-file-meta">
+                      <strong>{{ layTenFile(filesSV.bangCap) }}</strong>
+                      <small>{{ layDungLuongFile(filesSV.bangCap) }}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sv-document-row sv-document-row-other">
+                  <div class="sv-document-right sv-document-right-full">
+                    <div class="sv-document-title">Giấy tờ khác</div>
+
+                    <label class="sv-file-picker sv-file-picker-small">
+                      <input type="file" multiple @change="chonTepKhac" />
+                      <span>Chọn nhiều tệp</span>
+                    </label>
+
+                    <div class="sv-other-files">
+                      <span v-if="!filesSV.giayToKhac.length">Chưa chọn tệp</span>
+
+                      <span
+                          v-for="(file, index) in filesSV.giayToKhac"
+                          :key="file.name"
+                          class="sv-other-file-item"
+                      >
+            <strong>{{ file.name }}</strong>
+            <small>{{ layDungLuongFile(file) }}</small>
+            <button type="button" @click="boGiayToKhac(index)">Bỏ</button>
+          </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <!-- CỘT PHẢI: THÔNG TIN SINH VIÊN -->
+            <section class="sv-info-panel">
+              <div class="sv-section-box">
+                <h3>Thông tin sinh viên</h3>
+
+                <div class="sv-form-table sv-form-table-3">
+                  <label>Họ tên<input v-model.trim="formSV.hoTen" required /></label>
+                  <label>Gmail<input v-model.trim="formSV.email" type="email" required /></label>
+                  <label>Số điện thoại<input v-model.trim="formSV.soDienThoai" required /></label>
+
+                  <label>Ngày sinh<input v-model="formSV.ngaySinh" type="date" required /></label>
+                  <label>Giới tính
+                    <select v-model="formSV.gioiTinh" required>
+                      <option value="">Chọn</option>
+                      <option value="nam">Nam</option>
+                      <option value="nu">Nữ</option>
+                      <option value="khac">Khác</option>
+                    </select>
+                  </label>
+                  <label>Ngày nhập học<input v-model="formSV.ngayNhapHoc" type="date" /></label>
+
+                  <label class="sv-col-span-3">Địa chỉ liên hệ
+                    <textarea v-model.trim="formSV.diaChi" rows="2" required></textarea>
+                  </label>
+
+                  <label class="sv-col-span-3">Địa chỉ thường trú
+                    <textarea v-model.trim="formSV.diaChiThuongTru" rows="2" required></textarea>
+                  </label>
+                </div>
+              </div>
+
+              <div class="sv-section-box">
+                <h3>CCCD & bằng cấp</h3>
+
+                <div class="sv-form-table sv-form-table-3">
+                  <label>Số CCCD<input v-model.trim="formSV.soCccd" required /></label>
+                  <label>Ngày cấp<input v-model="formSV.ngayCapCccd" type="date" required /></label>
+                  <label>Nơi cấp<input v-model.trim="formSV.noiCapCccd" required /></label>
+
+                  <label>Bằng cấp<input v-model.trim="formSV.bangCap" required /></label>
+                  <label>Năm tốt nghiệp <span class="bat-buoc">*</span>
+                    <input v-model.number="formSV.namTotNghiep" type="number" min="1950" required />
+                  </label>
+                  <label>Trường tốt nghiệp<input v-model.trim="formSV.truongTotNghiep" required /></label>
+                </div>
+              </div>
+
+              <div class="sv-section-box">
+                <h3>Thông tin cha</h3>
+
+                <div class="sv-form-table sv-form-table-4">
+                  <label>Họ tên cha <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.hoTenCha" required />
+                  </label>
+                  <label>Nghề nghiệp cha
+                    <input v-model.trim="formSV.ngheNghiepCha" />
+                  </label>
+                  <label>Số điện thoại cha <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.sdtCha" required />
+                  </label>
+                  <label>Gmail cha
+                    <input v-model.trim="formSV.emailCha" type="email" placeholder="Không bắt buộc" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="sv-section-box">
+                <h3>Thông tin mẹ</h3>
+
+                <div class="sv-form-table sv-form-table-4">
+                  <label>Họ tên mẹ <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.hoTenMe" required />
+                  </label>
+                  <label>Nghề nghiệp mẹ
+                    <input v-model.trim="formSV.ngheNghiepMe" />
+                  </label>
+                  <label>Số điện thoại mẹ <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.sdtMe" required />
+                  </label>
+                  <label>Gmail mẹ
+                    <input v-model.trim="formSV.emailMe" type="email" placeholder="Không bắt buộc" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="sv-section-box">
+                <h3>Người thân liên hệ</h3>
+
+                <div class="sv-form-table sv-form-table-4">
+                  <label>Họ tên người thân <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.hoTenNguoiThan" required />
+                  </label>
+                  <label>Quan hệ <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.quanHeNguoiThan" required />
+                  </label>
+                  <label>Số điện thoại người thân <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.sdtNguoiThan" required />
+                  </label>
+                  <label>Gmail người thân <span class="bat-buoc">*</span>
+                    <input v-model.trim="formSV.emailNguoiThan" type="email" required />
+                  </label>
+                </div>
+              </div>
+
+              <div class="sv-section-box">
+                <label>Ghi chú hồ sơ
+                  <textarea v-model.trim="formSV.ghiChuHoSo" rows="2"></textarea>
+                </label>
+              </div>
+
+              <div class="sv-actions sv-receive-actions">
+                <button type="submit" :disabled="dangLuu">
+                  {{ dangLuu ? 'Đang lưu...' : (idSVSua ? 'Cập nhật sinh viên' : 'Tiếp nhận sinh viên') }}
+                </button>
+                <button type="button" class="secondary" @click="resetFormSV">Làm mới</button>
+              </div>
+            </section>
+          </form>
+        </div>
+
+        <div class="sv-card">
+          <div class="sv-card-title">
+            <div><h2>Danh sách sinh viên trong lớp</h2>
+              <p>Sĩ số: {{ danhSachSVTrongLop.length }} / {{ lopHanhChinhDangChon?.siSo || '?' }}</p></div>
+            <input v-model.trim="tuKhoaSV" placeholder="Tìm mã sinh viên, họ tên, gmail..." style="max-width:260px"/>
+          </div>
+          <div class="sv-table-wrap">
+            <table class="sv-table">
+              <thead>
+              <tr>
+                <th>Ảnh</th>
+                <th>Mã sinh viên</th>
+                <th>Họ tên</th>
+                <th>Gmail</th>
+                <th>Số điện thoại</th>
+                <th>CCCD</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="sv in svHienThi" :key="sv.id">
+                <td>
+                  <img
+                      v-if="layIdAnhChanDung(sv)"
+                      class="sv-avatar"
+                      :src="urlTep(layIdAnhChanDung(sv))"
+                      alt="Ảnh sinh viên"
+                      @error="anAnhLoi"
+                  />
+                  <span v-else>—</span>
+                </td>
+                <td>{{ sv.maSinhVien }}</td>
+                <td>{{ sv.hoTen }}</td>
+                <td>{{ sv.email }}</td>
+                <td>{{ sv.soDienThoai }}</td>
+                <td>{{ sv.soCccd }}</td>
+                <td>{{ sv.trangThai }}</td>
+                <td>
+                  <div class="sv-row-actions">
+                    <button type="button" class="secondary small" @click="suaSinhVien(sv)">Sửa</button>
+                    <button type="button" class="danger small" @click="xoaSinhVien(sv)">Xóa</button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="!svHienThi.length">
+                <td colspan="8" class="empty">Chưa có sinh viên trong lớp này.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+
+      <!-- ===== BƯỚC 4.2: MỞ LỚP HỌC PHẦN ===== -->
+      <template v-if="buoc === 'lopHocPhan'">
+
+        <!-- ── AUTO MỞ LỚP HỌC PHẦN THEO KỲ / VERSION ── -->
+        <div class="sv-card sv-auto-tao-card sv-auto-compact-card">
+          <div class="sv-card-title sv-card-title-toolbar sv-auto-compact-title">
+            <div>
+              <h2>⚡ Auto mở lớp học phần theo kỳ / phiên bản</h2>
+              <p>Hệ thống tự động tính toán và tạo lớp học phần cho từng môn trong kỳ dựa trên sĩ số sinh viên.</p>
+            </div>
+          </div>
+
+          <form class="sv-auto-tao-form" @submit.prevent>
+            <!-- Chọn kỳ -->
+            <label class="sv-auto-field sv-auto-field-ky">
+              Kỳ học <span class="sv-required">*</span>
+              <select v-model="formAutoTao.khungKyId">
+                <option value="">— Chọn kỳ —</option>
+                <option v-for="ky in khungKyTheoVersion" :key="ky.id" :value="ky.id">
+                  {{ ky.maKy }} - {{ ky.tenKy }}
+                </option>
+              </select>
+            </label>
+
+            <!-- Sĩ số tối thiểu -->
+            <label class="sv-auto-field sv-auto-field-min">
+              Sĩ số tối thiểu / lớp <span class="sv-required">*</span>
+              <input v-model.number="formAutoTao.siSoToiThieu" type="number" min="1" placeholder="VD: 10"/>
+            </label>
+
+            <!-- Sĩ số tối đa -->
+            <label class="sv-auto-field sv-auto-field-max">
+              Sĩ số tối đa / lớp <span class="sv-required">*</span>
+              <input v-model.number="formAutoTao.siSoToiDa" type="number" min="1" placeholder="VD: 40"/>
+            </label>
+
+            <!-- Tiền tố mã lớp -->
+            <label class="sv-auto-field sv-auto-field-prefix">
+              Tiền tố mã lớp
+              <input v-model.trim="formAutoTao.tienToMaLop" placeholder="VD: LHP"/>
+            </label>
+
+            <!-- Checkbox phân bổ SV -->
+            <label class="sv-auto-check sv-checkbox-label">
+              <input type="checkbox" class="sv-check" v-model="formAutoTao.tuDongPhanBoSinhVien"/>
+              Tự động phân bổ sinh viên vào lớp
+            </label>
+
+            <!-- Chọn lớp hành chính: dạng dropdown để tiết kiệm diện tích -->
+            <details class="sv-auto-lhc-dropdown sv-lhc-chon-wrap">
+              <summary>
+                <span class="sv-auto-lhc-summary-left">
+                  <strong>Lớp hành chính tham gia</strong>
+                  <span class="sv-required">*</span>
+                </span>
+                <span class="sv-auto-lhc-summary-count">
+                  {{ formAutoTao.lopHanhChinhIds.length }} / {{ danhSachLHC.length }} đã chọn
+                </span>
+              </summary>
+
+              <div class="sv-lhc-checkbox-list sv-lhc-checkbox-dropdown-list">
+                <label
+                    v-for="lhc in danhSachLHC"
+                    :key="lhc.id"
+                    class="sv-lhc-chon-item"
+                    :class="{ 'sv-lhc-chon-item--chot': lhc.daChotTuyenSinh }"
+                >
+                  <input
+                      type="checkbox"
+                      class="sv-check"
+                      :value="lhc.id"
+                      v-model="formAutoTao.lopHanhChinhIds"
+                  />
+                  <span class="sv-lhc-name">{{ lhc.maLop }} - {{ lhc.tenLop }}</span>
+                  <span v-if="lhc.daChotTuyenSinh" class="sv-status-pill status-da_chot">✔ Đã chốt</span>
+                  <span v-else class="sv-status-pill status-chua_chot">Chưa chốt</span>
+                </label>
+
+                <span v-if="!danhSachLHC.length" class="sv-note-text">Chưa có lớp hành chính nào.</span>
+              </div>
+            </details>
+          </form>
+
+          <!-- 3 Nút hành động -->
+          <div class="sv-auto-tao-actions">
+            <button
+                type="button"
+                class="secondary"
+                :disabled="dangAutoTao"
+                @click="xuLyAutoTao('PREVIEW')"
+            >
+              🔍 Xem trước (Preview)
+            </button>
+            <button
+                type="button"
+                class="sv-btn-du-kien"
+                :disabled="dangAutoTao"
+                @click="xuLyAutoTao('DU_KIEN')"
+            >
+              📋 Auto xếp dự kiến
+            </button>
+            <button
+                type="button"
+                class="sv-btn-chinh-thuc"
+                :disabled="dangAutoTao"
+                @click="xuLyAutoTao('CHINH_THUC')"
+            >
+              ✅ Auto xếp chính thức
+            </button>
+            <span v-if="dangAutoTao" class="sv-note-text" style="margin-left:8px">Đang xử lý...</span>
+          </div>
+
+          <!-- Kết quả -->
+          <div v-if="ketQuaAutoTao" class="sv-auto-tao-result">
+            <!-- Tóm tắt -->
+            <div class="sv-auto-tao-summary">
+              <span>Mode: <strong>{{ ketQuaAutoTao.mode }}</strong></span>
+              <span>Tổng sinh viên: <strong>{{ ketQuaAutoTao.tongSinhVien }}</strong></span>
+              <span>Số môn trong kỳ: <strong>{{ ketQuaAutoTao.tongMonTrongKy }}</strong></span>
+              <span>Lớp học phần dự kiến tạo: <strong>{{ ketQuaAutoTao.tongLopHocPhanDuKien }}</strong></span>
+              <span v-if="ketQuaAutoTao.tongLopHocPhanDaTao !== undefined">
+              Lớp học phần đã tạo/cập nhật: <strong>{{ ketQuaAutoTao.tongLopHocPhanDaTao }}</strong>
+            </span>
+            </div>
+
+            <!-- Cảnh báo -->
+            <div v-if="ketQuaAutoTao.canhBao?.length" class="sv-auto-tao-warnings">
+              <strong>⚠ Cảnh báo:</strong>
+              <ul>
+                <li v-for="(cb, i) in ketQuaAutoTao.canhBao" :key="i">{{ cb }}</li>
+              </ul>
+            </div>
+
+            <!-- Lỗi -->
+            <div v-if="ketQuaAutoTao.loi?.length" class="sv-auto-tao-errors">
+              <strong>✘ Lỗi:</strong>
+              <ul>
+                <li v-for="(l, i) in ketQuaAutoTao.loi" :key="i">{{ l }}</li>
+              </ul>
+            </div>
+
+            <!-- Bảng chi tiết theo môn -->
+            <div v-if="ketQuaAutoTao.monResults?.length" class="sv-table-wrap" style="margin-top:12px">
+              <table class="sv-table">
+                <thead>
+                <tr>
+                  <th>Môn học</th>
+                  <th>Tổng sinh viên</th>
+                  <th>Số lớp</th>
+                  <th>Lớp học phần</th>
+                  <th>Cảnh báo / Lỗi</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="mon in ketQuaAutoTao.monResults" :key="mon.chuongTrinhMonId">
                   <td>
-                    <span class="sv-note-text">{{ lop.ghiChu || '—' }}</span>
+                    <strong class="sv-code">{{ mon.maMon }}</strong>
+                    <div class="sv-main-text">{{ mon.tenMon }}</div>
                   </td>
-
+                  <td>{{ mon.tongSinhVien }}</td>
+                  <td>{{ mon.soLopCanTao }}</td>
                   <td>
-                    <div class="sv-row-actions sv-row-actions-nowrap">
-                      <button type="button" class="small btn-nhanh1" @click="chonLHCNhanhTiepNhan(lop)">
-                        Tiếp nhận SV →
-                      </button>
-
-                      <button type="button" class="small btn-nhanh2" @click="chonLHCNhanhLHP(lop)">
-                        Mở LHP →
-                      </button>
-
-                      <button type="button" class="secondary small" @click="suaLopHanhChinh(lop)">
-                        Sửa
-                      </button>
-
-                      <button type="button" class="danger small" @click="xoaLopHanhChinh(lop)">
-                        Xóa
-                      </button>
+                    <div v-for="lhp in mon.lopHocPhanResults" :key="lhp.maLop" style="margin-bottom:3px">
+                      <span class="sv-code">{{ lhp.maLop }}</span>
+                      <span class="sv-note-text"> ({{ lhp.siSoDaPhanBo || lhp.siSoDuKien }} sinh viên)</span>
+                      <span v-if="lhp.trangThai" class="sv-status-pill" :class="`status-${lhp.trangThai}`" style="font-size:10px;padding:1px 5px;margin-left:3px">{{ ({du_kien: 'Dự kiến', dang_mo: 'Đang mở', dang_hoc: 'Đang học', da_ket_thuc: 'Đã kết thúc', huy: 'Hủy'}[lhp.trangThai]) || lhp.trangThai }}</span>
                     </div>
                   </td>
-                </tr>
-
-                <tr v-if="!danhSachLHCHienThi.length">
-                  <td colspan="7" class="empty">
-                    Không tìm thấy lớp hành chính phù hợp.
+                  <td>
+                    <div v-if="mon.canhBao" class="sv-note-text" style="color:#b45309">⚠ {{ mon.canhBao }}</div>
+                    <div v-if="mon.loi" class="sv-note-text" style="color:#dc2626">✘ {{ mon.loi }}</div>
+                    <span v-if="!mon.canhBao && !mon.loi" class="sv-note-text">—</span>
                   </td>
                 </tr>
                 </tbody>
               </table>
             </div>
-
-            <div class="sv-table-footer">
-              Hiển thị {{ danhSachLHCHienThi.length }} / {{ danhSachLHC.length }} lớp
-            </div>
           </div>
         </div>
+        <!-- ── KẾT THÚC AUTO MỞ LHP ── -->
 
-      </div>
-    </template>
-
-    <!-- ===== BƯỚC 4.1: TIẾP NHẬN SINH VIÊN ===== -->
-    <template v-if="buoc === 'tiepNhan'">
-      <div v-if="taiKhoanMoi && taiKhoanMoi.lopHanhChinhId === lopHanhChinhDangChon?.id" class="sv-account-box">
-        <strong>Tài khoản vừa cấp:</strong>
-        <span>Mã SV: {{ taiKhoanMoi.maSinhVien }}</span>
-        <span>Gmail: {{ taiKhoanMoi.emailTaiKhoan }}</span>
-        <span>Mật khẩu tạm: {{ taiKhoanMoi.matKhauTam }}</span>
-      </div>
-      <div class="sv-card sv-student-receive-card">
-        <div class="sv-card-title">
-          <div>
-            <h2>{{ idSVSua ? 'Cập nhật hồ sơ sinh viên' : 'Tiếp nhận hồ sơ sinh viên' }}</h2>
-            <p>
-              Lớp HC:
-              <strong>{{ lopHanhChinhDangChon?.maLop }} - {{ lopHanhChinhDangChon?.tenLop }}</strong>
-              | Hệ thống tự sinh mã SV và cấp tài khoản.
-            </p>
+        <div class="sv-card sv-lhp-open-card">
+          <div class="sv-card-title sv-lhp-open-title">
+            <div><h2>{{ idLHPSua ? 'Sửa lớp học phần' : 'Mở lớp học phần' }}</h2>
+              <p>Phiên bản: <strong>{{ versionDangChon?.maVersion }}</strong> | Lớp hành chính:
+                <strong>{{ lopHanhChinhDangChon?.maLop }} - {{ lopHanhChinhDangChon?.tenLop }}</strong></p></div>
           </div>
-        </div>
+          <form class="sv-lhp-open-form" @submit.prevent="luuLopHocPhan">
+            <label>Khung kỳ
+              <select v-model="formLHP.khungKyId" required @change="khiDoiKhungKyMoLop">
+                <option value="">Chọn kỳ</option>
+                <option v-for="ky in khungKyTheoVersion" :key="ky.id" :value="ky.id">
+                  {{ ky.maKy }} - {{ ky.tenKy }}
+                </option>
+              </select>
+            </label>
 
-        <form class="sv-receive-layout" @submit.prevent="luuSinhVien">
-          <!-- CỘT TRÁI: HÌNH ẢNH & GIẤY TỜ -->
-          <aside class="sv-file-panel">
-            <div class="sv-file-panel-title">
-              <h3>Hình ảnh & giấy tờ</h3>
-              <p>Kiểm tra ảnh trước khi lưu hồ sơ.</p>
-            </div>
+            <label>Môn trong kỳ
+              <select v-model="formLHP.chuongTrinhMonId" required :disabled="!formLHP.khungKyId">
+                <option value="">Chọn môn trong kỳ</option>
+                <option v-for="mon in chuongTrinhMonTheoKhungKyDangChon" :key="mon.id" :value="mon.id">
+                  {{ mon.maMonTrongCt || mon.maMon || mon.monHocMa || mon.id }} -
+                  {{ mon.tenMonHoc || mon.monHocTen || mon.ghiChu || 'Môn thuộc kỳ đã chọn' }}
+                </option>
+              </select>
+            </label>
 
-            <div class="sv-document-grid">
-              <div class="sv-document-row sv-document-row-main">
-                <div class="sv-document-left">
-                  <button
-                      v-if="filesSV.anhChanDung"
-                      type="button"
-                      class="sv-remove-file"
-                      @click="boTep('anhChanDung')"
-                  >
-                    Bỏ
-                  </button>
+            <label>Loại lớp
+              <select v-model="formLHP.loaiLopHocPhan">
+                <option value="CHUYEN_NGANH">Chuyên ngành</option>
+                <option value="HOC_CHUNG">Học chung</option>
+              </select>
+            </label>
 
-                  <div class="sv-document-preview sv-portrait-preview">
-                    <img
-                        v-if="previewAnhChanDung"
-                        :src="previewAnhChanDung"
-                        alt="Ảnh chân dung"
-                    />
-                    <div v-else class="sv-document-placeholder">
-                      Chưa có ảnh
-                    </div>
-                  </div>
-                </div>
+            <label>Trạng thái
+              <select v-model="formLHP.trangThai">
+                <option value="du_kien">Dự kiến</option>
+                <option value="dang_mo">Đang mở</option>
+                <option value="dang_hoc">Đang học</option>
+                <option value="da_ket_thuc">Đã kết thúc</option>
+                <option value="huy">Hủy</option>
+              </select>
+            </label>
 
-                <div class="sv-document-right">
-                  <div class="sv-document-title">Ảnh chân dung</div>
+            <label>Mã lớp học phần
+              <input v-model.trim="formLHP.maLop" required/>
+            </label>
 
-                  <label class="sv-file-picker">
-                    <input type="file" accept="image/*" @change="chonTep($event,'anhChanDung')" />
-                    <span>Chọn ảnh</span>
-                  </label>
+            <label>Tên lớp học phần
+              <input v-model.trim="formLHP.tenLop" required/>
+            </label>
 
-                  <div class="sv-file-meta">
-                    <strong>{{ layTenFile(filesSV.anhChanDung) }}</strong>
-                    <small>{{ layDungLuongFile(filesSV.anhChanDung) }}</small>
-                  </div>
-                </div>
-              </div>
+            <label>Sĩ số tối thiểu
+              <input v-model.number="formLHP.siSoToiThieu" type="number" min="1"/>
+            </label>
 
-              <div class="sv-document-row">
-                <div class="sv-document-left">
-                  <button
-                      v-if="filesSV.cccdTruoc"
-                      type="button"
-                      class="sv-remove-file"
-                      @click="boTep('cccdTruoc')"
-                  >
-                    Bỏ
-                  </button>
+            <label>Sĩ số tối đa
+              <input v-model.number="formLHP.soLuongToiDa" type="number" min="1"/>
+            </label>
 
-                  <div class="sv-document-preview">
-                    <img
-                        v-if="previewCccdTruoc"
-                        :src="previewCccdTruoc"
-                        alt="CCCD mặt trước"
-                    />
-                    <div v-else-if="filesSV.cccdTruoc" class="sv-document-pdf">
-                      PDF
-                    </div>
-                    <div v-else class="sv-document-placeholder">
-                      Chưa có tệp
-                    </div>
-                  </div>
-                </div>
+            <label>Số buổi học
+              <input
+                  :value="soBuoiHocTuSyllabusDangChon"
+                  type="number"
+                  readonly
+                  disabled
+                  placeholder="Tự lấy từ syllabus"
+              />
+              <small class="sv-field-hint">
+                Tự lấy từ syllabus môn học đã lưu vào phiên bản.
+              </small>
+            </label>
 
-                <div class="sv-document-right">
-                  <div class="sv-document-title">CCCD mặt trước</div>
-
-                  <label class="sv-file-picker">
-                    <input type="file" accept="image/*,.pdf" @change="chonTep($event,'cccdTruoc')" />
-                    <span>Chọn tệp</span>
-                  </label>
-
-                  <div class="sv-file-meta">
-                    <strong>{{ layTenFile(filesSV.cccdTruoc) }}</strong>
-                    <small>{{ layDungLuongFile(filesSV.cccdTruoc) }}</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="sv-document-row">
-                <div class="sv-document-left">
-                  <button
-                      v-if="filesSV.cccdSau"
-                      type="button"
-                      class="sv-remove-file"
-                      @click="boTep('cccdSau')"
-                  >
-                    Bỏ
-                  </button>
-
-                  <div class="sv-document-preview">
-                    <img
-                        v-if="previewCccdSau"
-                        :src="previewCccdSau"
-                        alt="CCCD mặt sau"
-                    />
-                    <div v-else-if="filesSV.cccdSau" class="sv-document-pdf">
-                      PDF
-                    </div>
-                    <div v-else class="sv-document-placeholder">
-                      Chưa có tệp
-                    </div>
-                  </div>
-                </div>
-
-                <div class="sv-document-right">
-                  <div class="sv-document-title">CCCD mặt sau</div>
-
-                  <label class="sv-file-picker">
-                    <input type="file" accept="image/*,.pdf" @change="chonTep($event,'cccdSau')" />
-                    <span>Chọn tệp</span>
-                  </label>
-
-                  <div class="sv-file-meta">
-                    <strong>{{ layTenFile(filesSV.cccdSau) }}</strong>
-                    <small>{{ layDungLuongFile(filesSV.cccdSau) }}</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="sv-document-row">
-                <div class="sv-document-left">
-                  <button
-                      v-if="filesSV.bangCap"
-                      type="button"
-                      class="sv-remove-file"
-                      @click="boTep('bangCap')"
-                  >
-                    Bỏ
-                  </button>
-
-                  <div class="sv-document-preview">
-                    <img
-                        v-if="previewBangCap"
-                        :src="previewBangCap"
-                        alt="Bằng cấp"
-                    />
-                    <div v-else-if="filesSV.bangCap" class="sv-document-pdf">
-                      PDF
-                    </div>
-                    <div v-else class="sv-document-placeholder">
-                      Chưa có tệp
-                    </div>
-                  </div>
-                </div>
-
-                <div class="sv-document-right">
-                  <div class="sv-document-title">Bằng cấp</div>
-
-                  <label class="sv-file-picker">
-                    <input type="file" accept="image/*,.pdf" @change="chonTep($event,'bangCap')" />
-                    <span>Chọn tệp</span>
-                  </label>
-
-                  <div class="sv-file-meta">
-                    <strong>{{ layTenFile(filesSV.bangCap) }}</strong>
-                    <small>{{ layDungLuongFile(filesSV.bangCap) }}</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="sv-document-row sv-document-row-other">
-                <div class="sv-document-right sv-document-right-full">
-                  <div class="sv-document-title">Giấy tờ khác</div>
-
-                  <label class="sv-file-picker sv-file-picker-small">
-                    <input type="file" multiple @change="chonTepKhac" />
-                    <span>Chọn nhiều tệp</span>
-                  </label>
-
-                  <div class="sv-other-files">
-                    <span v-if="!filesSV.giayToKhac.length">Chưa chọn tệp</span>
-
-                    <span
-                        v-for="(file, index) in filesSV.giayToKhac"
-                        :key="file.name"
-                        class="sv-other-file-item"
-                    >
-            <strong>{{ file.name }}</strong>
-            <small>{{ layDungLuongFile(file) }}</small>
-            <button type="button" @click="boGiayToKhac(index)">Bỏ</button>
-          </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          <!-- CỘT PHẢI: THÔNG TIN SINH VIÊN -->
-          <section class="sv-info-panel">
-            <div class="sv-section-box">
-              <h3>Thông tin sinh viên</h3>
-
-              <div class="sv-form-table sv-form-table-3">
-                <label>Họ tên<input v-model.trim="formSV.hoTen" required /></label>
-                <label>Gmail<input v-model.trim="formSV.email" type="email" required /></label>
-                <label>Số điện thoại<input v-model.trim="formSV.soDienThoai" required /></label>
-
-                <label>Ngày sinh<input v-model="formSV.ngaySinh" type="date" required /></label>
-                <label>Giới tính
-                  <select v-model="formSV.gioiTinh" required>
-                    <option value="">Chọn</option>
-                    <option value="nam">Nam</option>
-                    <option value="nu">Nữ</option>
-                    <option value="khac">Khác</option>
-                  </select>
-                </label>
-                <label>Ngày nhập học<input v-model="formSV.ngayNhapHoc" type="date" /></label>
-
-                <label class="sv-col-span-3">Địa chỉ liên hệ
-                  <textarea v-model.trim="formSV.diaChi" rows="2" required></textarea>
-                </label>
-
-                <label class="sv-col-span-3">Địa chỉ thường trú
-                  <textarea v-model.trim="formSV.diaChiThuongTru" rows="2" required></textarea>
-                </label>
-              </div>
-            </div>
-
-            <div class="sv-section-box">
-              <h3>CCCD & bằng cấp</h3>
-
-              <div class="sv-form-table sv-form-table-3">
-                <label>Số CCCD<input v-model.trim="formSV.soCccd" required /></label>
-                <label>Ngày cấp<input v-model="formSV.ngayCapCccd" type="date" required /></label>
-                <label>Nơi cấp<input v-model.trim="formSV.noiCapCccd" required /></label>
-
-                <label>Bằng cấp<input v-model.trim="formSV.bangCap" required /></label>
-                <label>Năm tốt nghiệp <span class="bat-buoc">*</span>
-                  <input v-model.number="formSV.namTotNghiep" type="number" min="1950" required />
-                </label>
-                <label>Trường tốt nghiệp<input v-model.trim="formSV.truongTotNghiep" required /></label>
-              </div>
-            </div>
-
-            <div class="sv-section-box">
-              <h3>Thông tin cha</h3>
-
-              <div class="sv-form-table sv-form-table-4">
-                <label>Họ tên cha <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.hoTenCha" required />
-                </label>
-                <label>Nghề nghiệp cha
-                  <input v-model.trim="formSV.ngheNghiepCha" />
-                </label>
-                <label>SĐT cha <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.sdtCha" required />
-                </label>
-                <label>Gmail cha
-                  <input v-model.trim="formSV.emailCha" type="email" placeholder="Không bắt buộc" />
-                </label>
-              </div>
-            </div>
-
-            <div class="sv-section-box">
-              <h3>Thông tin mẹ</h3>
-
-              <div class="sv-form-table sv-form-table-4">
-                <label>Họ tên mẹ <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.hoTenMe" required />
-                </label>
-                <label>Nghề nghiệp mẹ
-                  <input v-model.trim="formSV.ngheNghiepMe" />
-                </label>
-                <label>SĐT mẹ <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.sdtMe" required />
-                </label>
-                <label>Gmail mẹ
-                  <input v-model.trim="formSV.emailMe" type="email" placeholder="Không bắt buộc" />
-                </label>
-              </div>
-            </div>
-
-            <div class="sv-section-box">
-              <h3>Người thân liên hệ</h3>
-
-              <div class="sv-form-table sv-form-table-4">
-                <label>Họ tên người thân <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.hoTenNguoiThan" required />
-                </label>
-                <label>Quan hệ <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.quanHeNguoiThan" required />
-                </label>
-                <label>SĐT người thân <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.sdtNguoiThan" required />
-                </label>
-                <label>Gmail người thân <span class="bat-buoc">*</span>
-                  <input v-model.trim="formSV.emailNguoiThan" type="email" required />
-                </label>
-              </div>
-            </div>
-
-            <div class="sv-section-box">
-              <label>Ghi chú hồ sơ
-                <textarea v-model.trim="formSV.ghiChuHoSo" rows="2"></textarea>
-              </label>
-            </div>
-
-            <div class="sv-actions sv-receive-actions">
+            <div class="sv-actions sv-lhp-open-actions">
               <button type="submit" :disabled="dangLuu">
-                {{ dangLuu ? 'Đang lưu...' : (idSVSua ? 'Cập nhật sinh viên' : 'Tiếp nhận sinh viên') }}
+                {{ dangLuu ? 'Đang lưu...' : (idLHPSua ? 'Cập nhật' : 'Mở lớp') }}
               </button>
-              <button type="button" class="secondary" @click="resetFormSV">Làm mới</button>
+              <button type="button" class="secondary" @click="resetFormLHP">Làm mới</button>
             </div>
-          </section>
-        </form>
-      </div>
-
-      <div class="sv-card">
-        <div class="sv-card-title">
-          <div><h2>Danh sách sinh viên trong lớp</h2>
-            <p>Sĩ số: {{ danhSachSVTrongLop.length }} / {{ lopHanhChinhDangChon?.siSo || '?' }}</p></div>
-          <input v-model.trim="tuKhoaSV" placeholder="Tìm mã SV, họ tên, gmail..." style="max-width:260px"/>
+          </form>
         </div>
-        <div class="sv-table-wrap">
-          <table class="sv-table">
-            <thead>
-            <tr>
-              <th>Ảnh</th>
-              <th>Mã SV</th>
-              <th>Họ tên</th>
-              <th>Gmail</th>
-              <th>SĐT</th>
-              <th>CCCD</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="sv in svHienThi" :key="sv.id">
-              <td>
-                <img
-                    v-if="layIdAnhChanDung(sv)"
-                    class="sv-avatar"
-                    :src="urlTep(layIdAnhChanDung(sv))"
-                    alt="Ảnh sinh viên"
-                    @error="anAnhLoi"
-                />
-                <span v-else>—</span>
-              </td>
-              <td>{{ sv.maSinhVien }}</td>
-              <td>{{ sv.hoTen }}</td>
-              <td>{{ sv.email }}</td>
-              <td>{{ sv.soDienThoai }}</td>
-              <td>{{ sv.soCccd }}</td>
-              <td>{{ sv.trangThai }}</td>
-              <td>
-                <div class="sv-row-actions">
-                  <button type="button" class="secondary small" @click="suaSinhVien(sv)">Sửa</button>
-                  <button type="button" class="danger small" @click="xoaSinhVien(sv)">Xóa</button>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="!svHienThi.length">
-              <td colspan="8" class="empty">Chưa có sinh viên trong lớp này.</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </template>
 
-    <!-- ===== BƯỚC 4.2: MỞ LỚP HỌC PHẦN ===== -->
-    <template v-if="buoc === 'lopHocPhan'">
-      <div class="sv-card">
-        <div class="sv-card-title">
-          <div><h2>{{ idLHPSua ? 'Sửa lớp học phần' : 'Mở lớp học phần' }}</h2>
-            <p>Version: <strong>{{ versionDangChon?.maVersion }}</strong> | Lớp HC:
-              <strong>{{ lopHanhChinhDangChon?.maLop }} - {{ lopHanhChinhDangChon?.tenLop }}</strong></p></div>
-        </div>
-        <form class="sv-grid sv-grid-3" @submit.prevent="luuLopHocPhan">
-          <label>Khung kỳ
-            <select v-model="formLHP.khungKyId" required @change="khiDoiKhungKyMoLop">
-              <option value="">Chọn kỳ</option>
-              <option v-for="ky in khungKyTheoVersion" :key="ky.id" :value="ky.id">
-                {{ ky.maKy }} - {{ ky.tenKy }}
-              </option>
-            </select>
-          </label>
+        <div class="sv-card sv-lhp-list-card">
+          <div class="sv-card-title sv-card-title-toolbar">
+            <div>
+              <h2>Danh sách lớp học phần theo phiên bản</h2>
+              <p>Chọn lớp để phân bổ sinh viên. Danh sách được sắp xếp theo kỳ.</p>
+            </div>
 
-          <label>Môn trong kỳ
-            <select v-model="formLHP.chuongTrinhMonId" required :disabled="!formLHP.khungKyId">
-              <option value="">Chọn môn trong kỳ</option>
-              <option v-for="mon in chuongTrinhMonTheoKhungKyDangChon" :key="mon.id" :value="mon.id">
-                {{ mon.maMonTrongCt || mon.maMon || mon.monHocMa || mon.id }} -
-                {{ mon.tenMonHoc || mon.monHocTen || mon.ghiChu || 'Môn thuộc kỳ đã chọn' }}
-              </option>
-            </select>
-          </label>
-
-          <label>Loại lớp
-            <select v-model="formLHP.loaiLopHocPhan">
-              <option value="CHUYEN_NGANH">Chuyên ngành</option>
-              <option value="HOC_CHUNG">Học chung</option>
-            </select>
-          </label>
-
-          <label>Trạng thái
-            <select v-model="formLHP.trangThai">
-              <option value="du_kien">Dự kiến</option>
-              <option value="dang_mo">Đang mở</option>
-              <option value="dang_hoc">Đang học</option>
-              <option value="da_ket_thuc">Đã kết thúc</option>
-              <option value="huy">Hủy</option>
-            </select>
-          </label>
-
-          <label>Mã lớp học phần
-            <input v-model.trim="formLHP.maLop" required/>
-          </label>
-
-          <label>Tên lớp học phần
-            <input v-model.trim="formLHP.tenLop" required/>
-          </label>
-
-          <label>Sĩ số tối thiểu
-            <input v-model.number="formLHP.siSoToiThieu" type="number" min="1"/>
-          </label>
-
-          <label>Sĩ số tối đa
-            <input v-model.number="formLHP.soLuongToiDa" type="number" min="1"/>
-          </label>
-
-          <label>Số buổi học
-            <input
-                :value="soBuoiHocTuSyllabusDangChon"
-                type="number"
-                readonly
-                disabled
-                placeholder="Tự lấy từ syllabus"
-            />
-            <small class="sv-field-hint">
-              Tự lấy từ syllabus môn học đã lưu vào version.
-            </small>
-          </label>
-
-          <label>Ngày bắt đầu
-            <input v-model="formLHP.ngayBatDau" type="date"/>
-          </label>
-
-          <label>Ngày kết thúc
-            <input v-model="formLHP.ngayKetThuc" type="date"/>
-          </label>
-
-          <div class="sv-actions sv-span-3">
-            <button type="submit" :disabled="dangLuu">
-              {{ dangLuu ? 'Đang lưu...' : (idLHPSua ? 'Cập nhật' : 'Mở lớp') }}
-            </button>
-            <button type="button" class="secondary" @click="resetFormLHP">Làm mới</button>
+            <div class="sv-title-tools">
+              <select v-model="filterKhungKyId" class="sv-search-input" style="min-width:140px;max-width:180px">
+                <option value="">Tất cả kỳ</option>
+                <option v-for="ky in khungKyTheoVersion" :key="ky.id" :value="String(ky.id)">
+                  {{ ky.maKy }}{{ ky.tenKy ? ' - ' + ky.tenKy : '' }}
+                </option>
+              </select>
+              <input
+                  v-model.trim="tuKhoaLHP"
+                  class="sv-search-input"
+                  placeholder="Lọc mã môn, tên môn, mã lớp..."
+              />
+              <span class="so-ban-ghi">
+              {{ danhSachLHPTheoVersion.length }} lớp
+            </span>
+            </div>
           </div>
-        </form>
-      </div>
+          <div class="sv-table-wrap sv-lhp-table-wrap">
+            <table class="sv-table sv-lhp-table">
+              <thead>
+              <tr>
+                <th>#</th>
+                <th>Kỳ</th>
+                <th>Mã môn</th>
+                <th>Tên môn</th>
+                <th>Mã lớp</th>
+                <th>Tên lớp</th>
+                <th>Loại</th>
+                <th>Sĩ số</th>
+                <th>Số buổi</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(lhp, i) in danhSachLHPTheoVersion" :key="lhp.id">
+                <td>{{ i + 1 }}</td>
+                <td>{{ layTenKyCuaLHP(lhp) }}</td>
+                <td>{{ layMaMonCuaLHP(lhp) }}</td>
+                <td>{{ layTenMonCuaLHP(lhp) }}</td>
+                <td>{{ lhp.maLopHocPhan || lhp.maLop }}</td>
+                <td>{{ lhp.tenLopHocPhan || lhp.tenLop }}</td>
+                <td>{{ layLoaiCuaLHP(lhp) }}</td>
+                <td>{{ laySiSoHienTaiLHP(lhp) }} / {{ lhp.soLuongToiDa || lhp.siSoToiDa || 0 }}</td>
+                <td>{{ lhp.soBuoiHoc || '—' }}</td>
+                <td><span class="sv-status-pill" :class="`status-${lhp.trangThai || 'none'}`">{{ ({du_kien: 'Dự kiến', dang_mo: 'Đang mở', dang_hoc: 'Đang học', da_ket_thuc: 'Đã kết thúc', huy: 'Hủy'}[lhp.trangThai]) || lhp.trangThai || '—' }}</span></td>
+                <td>
+                  <div class="sv-row-actions">
+                    <RouterLink
+                        class="small btn-xem-sv"
+                        :to="{ path: '/giang-day', query: { lopHocPhanId: lhp.id, tab: 'sinh-vien' } }"
+                    >Sinh viên</RouterLink>
 
-      <div class="sv-card sv-lhp-list-card">
-        <div class="sv-card-title sv-card-title-toolbar">
-          <div>
-            <h2>Danh sách lớp học phần theo version</h2>
-            <p>Chọn lớp để phân bổ sinh viên. Danh sách được sắp xếp theo kỳ.</p>
-          </div>
+                    <button type="button" class="small btn-nhanh2" @click="chonLHPPhanBo(lhp)">Phân bổ →</button>
 
-          <div class="sv-title-tools">
-            <input
-                v-model.trim="tuKhoaLHP"
-                class="sv-search-input"
-                placeholder="Lọc mã môn, tên môn, mã lớp, tên lớp..."
-            />
-            <span class="so-ban-ghi">
-      {{ danhSachLHPTheoVersion.length }} lớp
-    </span>
-          </div>
-        </div>
-        <div class="sv-table-wrap sv-lhp-table-wrap">
-          <table class="sv-table sv-lhp-table">
-            <thead>
-            <tr>
-              <th>STT</th>
-              <th>Kỳ</th>
-              <th>Mã môn</th>
-              <th>Tên môn</th>
-              <th>Mã lớp</th>
-              <th>Tên lớp</th>
-              <th>Loại</th>
-              <th>Sĩ số</th>
-              <th>Số buổi</th>
-              <th>Ngày bắt đầu</th>
-              <th>Ngày kết thúc</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(lhp, i) in danhSachLHPTheoVersion" :key="lhp.id">
-              <td>{{ i + 1 }}</td>
-              <td>{{ layTenKyCuaLHP(lhp) }}</td>
-              <td>{{ layMaMonCuaLHP(lhp) }}</td>
-              <td>{{ layTenMonCuaLHP(lhp) }}</td>
-              <td>{{ lhp.maLopHocPhan || lhp.maLop }}</td>
-              <td>{{ lhp.tenLopHocPhan || lhp.tenLop }}</td>
-              <td>{{ layLoaiCuaLHP(lhp) }}</td>
-              <td>{{ laySiSoHienTaiLHP(lhp) }} / {{ lhp.soLuongToiDa || lhp.siSoToiDa || 0 }}</td>
-              <td>{{ lhp.soBuoiHoc || '—' }}</td>
-              <td>{{ dinhDangNgay(lhp.ngayBatDau) }}</td>
-              <td>{{ dinhDangNgay(lhp.ngayKetThuc) }}</td>
-              <td>{{ lhp.trangThai }}</td>
-              <td>
-                <div class="sv-row-actions">
-                  <RouterLink
-                      class="small btn-xem-sv"
-                      :to="{ path: '/giang-day', query: { lopHocPhanId: lhp.id, tab: 'sinh-vien' } }"
-                  >
-                    Xem SV
-                  </RouterLink>
-
-                  <button type="button" class="small btn-nhanh2" @click="chonLHPPhanBo(lhp)">
-                    Phân bổ SV →
-                  </button>
-
-                  <RouterLink
-                      class="small btn-giangday"
-                      :to="{
+                    <RouterLink
+                        class="small btn-giangday"
+                        :to="{
   name: 'GiangDay.ChiTietLopHocPhan',
   params: { id: lhp.id },
   query: {
@@ -832,40 +1021,40 @@
     khungKyId: layKhungKyIdCuaChuongTrinhMon(layChuongTrinhMonCuaLHP(lhp))
   }
 }"
-                  >
-                    Giảng dạy →
-                  </RouterLink>
+                    >
+                      Giảng dạy →
+                    </RouterLink>
 
-                  <button type="button" class="secondary small" @click="suaLopHocPhan(lhp)">Sửa</button>
-                  <button type="button" class="danger small" @click="xoaLopHocPhan(lhp)">Xóa</button>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="!danhSachLHPTheoVersion.length">
-              <td colspan="13" class="empty">Chưa có lớp học phần theo version này.</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </template>
-    <!-- ===== BƯỚC 4.3: PHÂN BỔ SINH VIÊN ===== -->
-    <template v-if="buoc === 'phanBo'">
-      <div class="sv-card">
-        <div class="sv-card-title">
-          <div>
-            <h2>Phân bổ sinh viên vào lớp học phần</h2>
-            <p>LHP: <strong>{{ lhpDangPhanBo?.maLopHocPhan || lhpDangPhanBo?.maLop }}</strong> —
-              {{ lhpDangPhanBo?.tenLopHocPhan || lhpDangPhanBo?.tenLop }}</p>
+                    <button type="button" class="secondary small" @click="suaLopHocPhan(lhp)">Sửa</button>
+                    <button type="button" class="danger small" @click="xoaLopHocPhan(lhp)">Xóa</button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="!danhSachLHPTheoVersion.length">
+                <td colspan="13" class="empty">Chưa có lớp học phần theo phiên bản này.</td>
+              </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="sv-row-actions">
-            <button type="button" @click="phanBoSinhVien" :disabled="dangLuu || svDaChon.length === 0">
-              {{ dangLuu ? 'Đang phân bổ...' : `Phân bổ ${svDaChon.length} sinh viên` }}
-            </button>
-            <RouterLink
-                v-if="lhpDangPhanBo"
-                class="btn-giangday"
-                :to="{
+        </div>
+      </template>
+      <!-- ===== BƯỚC 4.3: PHÂN BỔ SINH VIÊN ===== -->
+      <template v-if="buoc === 'phanBo'">
+        <div class="sv-card">
+          <div class="sv-card-title">
+            <div>
+              <h2>Phân bổ sinh viên vào lớp học phần</h2>
+              <p>Lớp học phần: <strong>{{ lhpDangPhanBo?.maLopHocPhan || lhpDangPhanBo?.maLop }}</strong> —
+                {{ lhpDangPhanBo?.tenLopHocPhan || lhpDangPhanBo?.tenLop }}</p>
+            </div>
+            <div class="sv-row-actions">
+              <button type="button" @click="phanBoSinhVien" :disabled="dangLuu || svDaChon.length === 0">
+                {{ dangLuu ? 'Đang phân bổ...' : `Phân bổ ${svDaChon.length} sinh viên` }}
+              </button>
+              <RouterLink
+                  v-if="lhpDangPhanBo"
+                  class="btn-giangday"
+                  :to="{
     name: 'GiangDay.ChiTietLopHocPhan',
     params: { id: lhpDangPhanBo.id },
     query: {
@@ -875,62 +1064,62 @@
       khungKyId: layKhungKyIdCuaChuongTrinhMon(layChuongTrinhMonCuaLHP(lhpDangPhanBo))
     }
   }"
-            >
-              → Điều phối giảng dạy
-            </RouterLink>
+              >
+                → Điều phối giảng dạy
+              </RouterLink>
+            </div>
+          </div>
+          <div class="sv-table-wrap">
+            <table class="sv-table">
+              <thead>
+              <tr>
+                <th>
+                  <input
+                      type="checkbox"
+                      class="sv-check sv-check-all"
+                      title="Chọn tất cả sinh viên chưa phân bổ"
+                      @change="chonTatCaSV($event)"
+                      :checked="daBamChonTatCaSV"
+                  />
+                </th>
+                <th>Mã sinh viên</th>
+                <th>Họ tên</th>
+                <th>Gmail</th>
+                <th>Số điện thoại</th>
+                <th>Trạng thái phân bổ</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="sv in danhSachSVTrongLop" :key="sv.id"
+                  :class="{ 'da-phan-bo': svDaPhanBoIds.has(String(sv.id)) }">
+                <td>
+                  <input
+                      type="checkbox"
+                      class="sv-check sv-check-row"
+                      title="Chọn sinh viên này"
+                      :value="sv.id"
+                      v-model="svDaChon"
+                      :disabled="svDaPhanBoIds.has(String(sv.id))"
+                      @change="khiChonTungSinhVien"
+                  />
+                </td>
+                <td>{{ sv.maSinhVien }}</td>
+                <td>{{ sv.hoTen }}</td>
+                <td>{{ sv.email }}</td>
+                <td>{{ sv.soDienThoai }}</td>
+                <td>
+                  <span v-if="svDaPhanBoIds.has(String(sv.id))" class="sv-status done">Đã phân bổ</span>
+                  <span v-else class="sv-status pending">Chưa phân bổ</span>
+                </td>
+              </tr>
+              <tr v-if="!danhSachSVTrongLop.length">
+                <td colspan="6" class="empty">Không có sinh viên trong lớp hành chính này.</td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="sv-table-wrap">
-          <table class="sv-table">
-            <thead>
-            <tr>
-              <th>
-                <input
-                    type="checkbox"
-                    class="sv-check sv-check-all"
-                    title="Chọn tất cả sinh viên chưa phân bổ"
-                    @change="chonTatCaSV($event)"
-                    :checked="daBamChonTatCaSV"
-                />
-              </th>
-              <th>Mã SV</th>
-              <th>Họ tên</th>
-              <th>Gmail</th>
-              <th>SĐT</th>
-              <th>Trạng thái phân bổ</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="sv in danhSachSVTrongLop" :key="sv.id"
-                :class="{ 'da-phan-bo': svDaPhanBoIds.has(String(sv.id)) }">
-              <td>
-                <input
-                    type="checkbox"
-                    class="sv-check sv-check-row"
-                    title="Chọn sinh viên này"
-                    :value="sv.id"
-                    v-model="svDaChon"
-                    :disabled="svDaPhanBoIds.has(String(sv.id))"
-                    @change="khiChonTungSinhVien"
-                />
-              </td>
-              <td>{{ sv.maSinhVien }}</td>
-              <td>{{ sv.hoTen }}</td>
-              <td>{{ sv.email }}</td>
-              <td>{{ sv.soDienThoai }}</td>
-              <td>
-                <span v-if="svDaPhanBoIds.has(String(sv.id))" class="sv-status done">Đã phân bổ</span>
-                <span v-else class="sv-status pending">Chưa phân bổ</span>
-              </td>
-            </tr>
-            <tr v-if="!danhSachSVTrongLop.length">
-              <td colspan="6" class="empty">Không có sinh viên trong lớp hành chính này.</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </template>
+      </template>
 
     </div>
   </section>
@@ -964,14 +1153,12 @@ const danhSachSVTrongLop = ref([])
 const danhSachSVChuongTrinh = ref([])
 const danhSachLHP = ref([])
 const danhSachLHPChuongTrinhMon = ref([])
-const svDaPhanBoIds = ref(new Set())
 const siSoTheoLopHocPhan = ref({})
 // Context đang chọn
 const nganhDangChon = ref(null)
 const chuongTrinhDangChon = ref(null)
 const versionDangChon = ref(null)
 const lopHanhChinhDangChon = ref(null)
-const lhpDangPhanBo = ref(null)
 
 // Form ngành
 const idNganhSua = ref(null)
@@ -983,7 +1170,23 @@ const formCT = reactive({maChuongTrinh: '', tenChuongTrinh: '', ghiChu: ''})
 
 // Form lớp hành chính
 const idLHCSua = ref(null)
-const formLHC = reactive({maLop: '', tenLop: '', siSo: 0, trangThai: 'du_kien', ghiChu: ''})
+const formLHC = reactive({
+  maLop: '', tenLop: '', siSo: 0, trangThai: 'du_kien', ghiChu: '',
+  ngayBatDauNhanSinhVien: '', ngayKetThucNhanSinhVien: '',
+  daChotTuyenSinh: false, ngayChotTuyenSinh: null
+})
+
+// Auto tạo lớp học phần
+const formAutoTao = reactive({
+  khungKyId: '',
+  lopHanhChinhIds: [],
+  siSoToiThieu: 10,
+  siSoToiDa: 40,
+  tienToMaLop: 'LHP',
+  tuDongPhanBoSinhVien: true
+})
+const ketQuaAutoTao = ref(null)
+const dangAutoTao = ref(false)
 
 // Form sinh viên
 const idSVSua = ref(null)
@@ -994,12 +1197,10 @@ const filesSV = reactive({anhChanDung: null, cccdTruoc: null, cccdSau: null, ban
 const idLHPSua = ref(null)
 const formLHP = reactive(taoFormLHPMacDinh())
 
-// Phân bổ
-const svDaChon = ref([])
-const daBamChonTatCaSV = ref(false)
 const tuKhoaSV = ref('')
 const tuKhoaLHC = ref('')
 const tuKhoaLHP = ref('')
+const filterKhungKyId = ref('')
 
 const danhSachLHCHienThi = computed(() => {
   const kw = tuKhoaLHC.value.trim().toLowerCase()
@@ -1045,13 +1246,6 @@ const versionSelectId = computed({
   }
 })
 
-const lhcSelectId = computed({
-  get: () => lopHanhChinhDangChon.value?.id ?? '',
-  set: (id) => {
-    lopHanhChinhDangChon.value =
-        danhSachLHC.value.find(x => String(x.id) === String(id)) || null
-  }
-})
 
 const soSinhVienToanTruong = computed(() => danhSachSVChuongTrinh.value.length)
 const soSinhVienBaoLuu = computed(() =>
@@ -1099,7 +1293,7 @@ const summaryItems = computed(() => {
           ? `${lopHanhChinhDangChon.value.maLop || ''} - ${lopHanhChinhDangChon.value.tenLop || ''}`.trim()
           : 'Chưa chọn',
       step: 'lopHanhChinh',
-      clickable: ['tiepNhan', 'lopHocPhan', 'phanBo'].includes(buoc.value)
+      clickable: ['tiepNhan', 'lopHocPhan'].includes(buoc.value)
     })
   }
 
@@ -1117,24 +1311,6 @@ const summaryItems = computed(() => {
       name: 'Chức năng',
       value: 'Mở lớp học phần',
       step: 'lopHocPhan',
-      clickable: false
-    })
-  }
-
-  if (buoc.value === 'phanBo') {
-    list.push({
-      name: 'Lớp học phần',
-      value: lhpDangPhanBo.value
-          ? `${lhpDangPhanBo.value.maLopHocPhan || lhpDangPhanBo.value.maLop || ''} - ${lhpDangPhanBo.value.tenLopHocPhan || lhpDangPhanBo.value.tenLop || ''}`.trim()
-          : 'Chưa chọn',
-      step: 'lopHocPhan',
-      clickable: true
-    })
-
-    list.push({
-      name: 'Chức năng',
-      value: 'Phân bổ sinh viên',
-      step: 'phanBo',
       clickable: false
     })
   }
@@ -1210,12 +1386,18 @@ const danhSachLHPTheoVersion = computed(() => {
   )
 
   const kw = tuKhoaLHP.value.trim().toLowerCase()
+  const filterKy = filterKhungKyId.value
 
   return danhSachLHP.value
       .filter(lhp =>
           chuongTrinhMonIdsTrongVersion.has(String(lhp.chuongTrinhMonId))
           || lopHocPhanIdsHocChungTrongVersion.has(String(lhp.id))
       )
+      .filter(lhp => {
+        if (!filterKy) return true
+        const mon = layChuongTrinhMonCuaLHP(lhp)
+        return String(layKhungKyIdCuaChuongTrinhMon(mon)) === filterKy
+      })
       .filter(lhp => {
         if (!kw) return true
 
@@ -1253,10 +1435,6 @@ const svHienThi = computed(() => {
   )
 })
 
-const danhSachSVChuaVaoLop = computed(() =>
-    danhSachSVTrongLop.value.filter(sv => !svDaPhanBoIds.value.has(String(sv.id)))
-)
-
 // ─── MOUNTED ──────────────────────────────────────────────────────────────────
 onMounted(async () => {
   await taiDuLieuNen()
@@ -1270,7 +1448,6 @@ watch(
       chuongTrinhDangChon,
       versionDangChon,
       lopHanhChinhDangChon,
-      lhpDangPhanBo
     ],
     luuTrangThaiFlow,
     {deep: true}
@@ -1301,8 +1478,7 @@ function luuTrangThaiFlow() {
     nganhId: nganhDangChon.value?.id || null,
     chuongTrinhId: chuongTrinhDangChon.value?.id || null,
     versionId: versionDangChon.value?.id || null,
-    lopHanhChinhId: lopHanhChinhDangChon.value?.id || null,
-    lopHocPhanId: lhpDangPhanBo.value?.id || null
+    lopHanhChinhId: lopHanhChinhDangChon.value?.id || null
   }
 
   localStorage.setItem(SINH_VIEN_FLOW_STORAGE_KEY, JSON.stringify(state))
@@ -1320,43 +1496,52 @@ async function khoiPhucTrangThaiFlow() {
     versionDangChon.value = danhSachVersion.value.find(x => String(x.id) === String(state.versionId)) || null
 
     if (versionDangChon.value) {
-      const [lhc, lhp, svCT, lhpCTM] = await Promise.all([
-        sinhVienService.layLopHanhChinhTheoVersion(versionDangChon.value.id),
-        sinhVienService.layLopHocPhan(),
-        sinhVienService.laySinhVienChuongTrinh({chuongTrinhVersionId: versionDangChon.value.id}),
-        sinhVienService.layLopHocPhanChuongTrinhMon()
-      ])
+      const versionId = versionDangChon.value.id
 
-      danhSachLHC.value = lhc
-      danhSachLHP.value = lhp
-      danhSachSVChuongTrinh.value = svCT
-      danhSachLHPChuongTrinhMon.value = lhpCTM
+      // Tải LHC + SV — dữ liệu cốt lõi
+      try {
+        const [lhc, svCT] = await Promise.all([
+          sinhVienService.layLopHanhChinhTheoVersion(versionId),
+          sinhVienService.laySinhVienChuongTrinh({ chuongTrinhVersionId: versionId })
+        ])
+        danhSachLHC.value = lhc
+        danhSachSVChuongTrinh.value = svCT
+      } catch (e) {
+        baoLoi('Không tải được lớp hành chính/sinh viên: ' + e.message)
+      }
 
-      const syllabus = await sinhVienService.laySyllabusMonHoc()
-      danhSachSyllabusMonHoc.value = layDanhSachTuResponse(syllabus)
+      // Tải LHP riêng — lỗi không làm mất LHC/SV
+      try {
+        const [lhp, lhpCTM] = await Promise.all([
+          sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionId }),
+          sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionId })
+        ])
+        danhSachLHP.value = lhp
+        danhSachLHPChuongTrinhMon.value = lhpCTM
+      } catch (e) {
+        danhSachLHP.value = []
+        danhSachLHPChuongTrinhMon.value = []
+        baoLoi('Không tải được lớp học phần: ' + e.message)
+      }
 
-      await taiSiSoLopHocPhanTheoVersion()
+      // Syllabus + sĩ số
+      try {
+        const syllabus = await sinhVienService.laySyllabusMonHoc()
+        danhSachSyllabusMonHoc.value = layDanhSachTuResponse(syllabus)
+        await taiSiSoLopHocPhanTheoVersion()
+      } catch (e) {
+        console.warn('Không tải được syllabus/sĩ số:', e)
+      }
 
       lopHanhChinhDangChon.value = danhSachLHC.value.find(x => String(x.id) === String(state.lopHanhChinhId)) || null
-      lhpDangPhanBo.value = danhSachLHP.value.find(x => String(x.id) === String(state.lopHocPhanId)) || null
     }
 
     if (state.buoc && coTheDungOBuoc(state.buoc)) {
       buoc.value = state.buoc
     }
 
-    if (buoc.value === 'tiepNhan' || buoc.value === 'phanBo') {
+    if (buoc.value === 'tiepNhan') {
       await taiSinhVienTrongLop()
-    }
-
-    if (buoc.value === 'phanBo' && lhpDangPhanBo.value) {
-      const svTrongLHP = await sinhVienService.laySinhVienLopHocPhan({lopHocPhanId: lhpDangPhanBo.value.id})
-      const danhSachDangKy = layDanhSachTuResponse(svTrongLHP)
-      svDaPhanBoIds.value = new Set(danhSachDangKy.map(x => String(x.sinhVienId)))
-      siSoTheoLopHocPhan.value = {
-        ...siSoTheoLopHocPhan.value,
-        [String(lhpDangPhanBo.value.id)]: danhSachDangKy.length
-      }
     }
   } catch (e) {
     localStorage.removeItem(SINH_VIEN_FLOW_STORAGE_KEY)
@@ -1370,7 +1555,6 @@ function coTheDungOBuoc(step) {
   if (step === 'lopHanhChinh') return !!versionDangChon.value
   if (step === 'tiepNhan') return !!lopHanhChinhDangChon.value
   if (step === 'lopHocPhan') return !!lopHanhChinhDangChon.value
-  if (step === 'phanBo') return !!lopHanhChinhDangChon.value && !!lhpDangPhanBo.value
   return false
 }
 
@@ -1382,25 +1566,18 @@ function quayVeBuoc(step) {
     chuongTrinhDangChon.value = null;
     versionDangChon.value = null;
     lopHanhChinhDangChon.value = null;
-    lhpDangPhanBo.value = null
   }
   if (step === 'chuongTrinh') {
     chuongTrinhDangChon.value = null;
     versionDangChon.value = null;
     lopHanhChinhDangChon.value = null;
-    lhpDangPhanBo.value = null
   }
   if (step === 'version') {
     versionDangChon.value = null;
     lopHanhChinhDangChon.value = null;
-    lhpDangPhanBo.value = null
   }
   if (step === 'lopHanhChinh') {
     lopHanhChinhDangChon.value = null;
-    lhpDangPhanBo.value = null
-  }
-  if (step === 'lopHocPhan') {
-    lhpDangPhanBo.value = null
   }
   buoc.value = step
   xoaThongBao()
@@ -1510,26 +1687,43 @@ async function chonVersion(v) {
   versionDangChon.value = v
   buoc.value = 'lopHanhChinh'
   xoaThongBao()
+  filterKhungKyId.value = ''
 
+  const versionId = v.id
+
+  // Tải LHC + SV (dữ liệu cốt lõi — lỗi ở đây sẽ hiện cảnh báo nhưng không chặn bước tiếp)
   try {
-    const [lhc, lhp, svCT, lhpCTM] = await Promise.all([
-      sinhVienService.layLopHanhChinhTheoVersion(v.id),
-      sinhVienService.layLopHocPhan(),
-      sinhVienService.laySinhVienChuongTrinh({chuongTrinhVersionId: v.id}),
-      sinhVienService.layLopHocPhanChuongTrinhMon()
+    const [lhc, svCT] = await Promise.all([
+      sinhVienService.layLopHanhChinhTheoVersion(versionId),
+      sinhVienService.laySinhVienChuongTrinh({ chuongTrinhVersionId: versionId })
     ])
-
     danhSachLHC.value = lhc
-    danhSachLHP.value = lhp
     danhSachSVChuongTrinh.value = svCT
-    danhSachLHPChuongTrinhMon.value = lhpCTM
+  } catch (e) {
+    baoLoi('Không tải được lớp hành chính/sinh viên: ' + e.message)
+  }
 
+  // Tải LHP riêng — lỗi ở đây không làm mất dữ liệu LHC/SV bên trên
+  try {
+    const [lhp, lhpCTM] = await Promise.all([
+      sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionId }),
+      sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionId })
+    ])
+    danhSachLHP.value = lhp
+    danhSachLHPChuongTrinhMon.value = lhpCTM
+  } catch (e) {
+    danhSachLHP.value = []
+    danhSachLHPChuongTrinhMon.value = []
+    baoLoi('Không tải được lớp học phần: ' + e.message)
+  }
+
+  // Syllabus + sĩ số — không chặn nếu lỗi
+  try {
     const syllabus = await sinhVienService.laySyllabusMonHoc()
     danhSachSyllabusMonHoc.value = layDanhSachTuResponse(syllabus)
-
     await taiSiSoLopHocPhanTheoVersion()
   } catch (e) {
-    baoLoi(e.message)
+    console.warn('Không tải được syllabus/sĩ số:', e)
   }
 }
 
@@ -1552,9 +1746,10 @@ async function chonLHCNhanhLHP(lop) {
   xoaThongBao()
 
   try {
+    const versionId = versionDangChon.value?.id
     const [lhp, lhpCTM] = await Promise.all([
-      sinhVienService.layLopHocPhan(),
-      sinhVienService.layLopHocPhanChuongTrinhMon()
+      sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionId }),
+      sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionId })
     ])
 
     danhSachLHP.value = lhp
@@ -1591,7 +1786,11 @@ function suaLopHanhChinh(lop) {
     tenLop: lop.tenLop,
     siSo: lop.siSo || 0,
     trangThai: lop.trangThai || 'du_kien',
-    ghiChu: lop.ghiChu || ''
+    ghiChu: lop.ghiChu || '',
+    ngayBatDauNhanSinhVien: lop.ngayBatDauNhanSinhVien || '',
+    ngayKetThucNhanSinhVien: lop.ngayKetThucNhanSinhVien || '',
+    daChotTuyenSinh: lop.daChotTuyenSinh || false,
+    ngayChotTuyenSinh: lop.ngayChotTuyenSinh || null
   })
 }
 
@@ -1607,8 +1806,85 @@ async function xoaLopHanhChinh(lop) {
 }
 
 function resetFormLHC() {
-  idLHCSua.value = null;
-  Object.assign(formLHC, {maLop: '', tenLop: '', siSo: 0, trangThai: 'du_kien', ghiChu: ''})
+  idLHCSua.value = null
+  Object.assign(formLHC, {
+    maLop: '', tenLop: '', siSo: 0, trangThai: 'du_kien', ghiChu: '',
+    ngayBatDauNhanSinhVien: '', ngayKetThucNhanSinhVien: '',
+    daChotTuyenSinh: false, ngayChotTuyenSinh: null
+  })
+}
+
+async function chotTuyenSinhLHC(lop) {
+  if (!confirm(`Chốt tuyển sinh lớp "${lop.tenLop}"?\nSau khi chốt, lớp này đủ điều kiện dùng cho Auto mở LHP chính thức.`)) return
+  try {
+    await sinhVienService.chotTuyenSinh(lop.id)
+    danhSachLHC.value = await sinhVienService.layLopHanhChinhTheoVersion(versionDangChon.value.id)
+    baoThanhCong('Đã chốt tuyển sinh: ' + lop.tenLop)
+  } catch (e) {
+    baoLoi(e.response?.data?.message || e.message)
+  }
+}
+
+async function huyChoTuyenSinhLHC(lop) {
+  if (!confirm(`Hủy chốt tuyển sinh lớp "${lop.tenLop}"?\nChỉ được hủy nếu lớp chưa phát sinh lớp học phần.`)) return
+  try {
+    await sinhVienService.huyChoTuyenSinhLopHanhChinh(lop.id)
+    danhSachLHC.value = await sinhVienService.layLopHanhChinhTheoVersion(versionDangChon.value.id)
+    baoThanhCong('Đã hủy chốt tuyển sinh: ' + lop.tenLop)
+  } catch (e) {
+    baoLoi(e.response?.data?.message || e.message)
+  }
+}
+
+function validateAutoTao() {
+  if (!versionDangChon.value) return 'Phải chọn version'
+  if (!formAutoTao.khungKyId) return 'Phải chọn kỳ học'
+  if (!formAutoTao.lopHanhChinhIds.length) return 'Phải chọn ít nhất 1 lớp hành chính'
+  if (!formAutoTao.siSoToiThieu || formAutoTao.siSoToiThieu < 1) return 'Sĩ số tối thiểu phải > 0'
+  if (!formAutoTao.siSoToiDa || formAutoTao.siSoToiDa < 1) return 'Sĩ số tối đa phải > 0'
+  if (formAutoTao.siSoToiDa < formAutoTao.siSoToiThieu) return 'Sĩ số tối đa phải >= sĩ số tối thiểu'
+  // ngayBatDau/ngayKetThuc đã bỏ: thời gian học thuộc lịch học
+  return null
+}
+
+async function xuLyAutoTao(mode) {
+  const loi = validateAutoTao()
+  if (loi) { baoLoi(loi); return }
+  if (mode === 'CHINH_THUC' && !confirm(
+    'Bạn đang xác nhận lớp học phần CHÍNH THỨC.\n' +
+    '- Nếu đã có lớp dự kiến an toàn (chưa có lịch/điểm): sẽ được chốt sang dang_mo.\n' +
+    '- Lớp dư (không đủ SV) sẽ bị hủy.\n' +
+    'Lớp hành chính chưa chốt tuyển sinh sẽ báo lỗi.\nTiếp tục?'
+  )) return
+
+  dangAutoTao.value = true
+  ketQuaAutoTao.value = null
+  try {
+    const payload = {
+      chuongTrinhVersionId: versionDangChon.value.id,
+      khungKyId: formAutoTao.khungKyId,
+      lopHanhChinhIds: formAutoTao.lopHanhChinhIds,
+      siSoToiThieu: formAutoTao.siSoToiThieu,
+      siSoToiDa: formAutoTao.siSoToiDa,
+      tuDongPhanBoSinhVien: formAutoTao.tuDongPhanBoSinhVien,
+      choPhepMoDuKien: true,
+      mode,
+      tienToMaLop: formAutoTao.tienToMaLop || 'LHP'
+    }
+    const data = await sinhVienService.autoTaoLopHocPhanTheoKy(payload)
+    ketQuaAutoTao.value = data
+    if (mode !== 'PREVIEW') {
+      danhSachLHP.value = await sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionDangChon.value.id })
+      danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionDangChon.value.id })
+      baoThanhCong(mode === 'DU_KIEN' ? 'Auto xếp dự kiến hoàn tất!' : 'Auto xếp chính thức hoàn tất!')
+    } else {
+      baoThanhCong('Xem trước hoàn tất!')
+    }
+  } catch (e) {
+    baoLoi(e.response?.data?.message || e.message)
+  } finally {
+    dangAutoTao.value = false
+  }
 }
 
 const NHAN_TRANG_THAI_LHC = {
@@ -1922,21 +2198,21 @@ async function luuLopHocPhan() {
       siSoToiThieu: Number(formLHP.siSoToiThieu || 1),
       soLuongToiDa: Number(formLHP.soLuongToiDa || 40),
       soLuongHienTai: idLHPSua.value ? undefined : 0,
-      soBuoiHoc: Number(soBuoiHocSyllabus),
-      ngayBatDau: formLHP.ngayBatDau,
-      ngayKetThuc: formLHP.ngayKetThuc
+      soBuoiHoc: Number(soBuoiHocSyllabus)
     })
     idLHPSua.value ? await sinhVienService.capNhatLopHocPhan(idLHPSua.value, p) : await sinhVienService.taoLopHocPhan(p)
     baoThanhCong(idLHPSua.value ? 'Đã cập nhật lớp học phần' : 'Đã mở lớp học phần')
     resetFormLHP()
-    danhSachLHP.value = await sinhVienService.layLopHocPhan()
-    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
+    const versionId = versionDangChon.value?.id
+    danhSachLHP.value = await sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionId })
+    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionId })
     await taiSiSoLopHocPhanTheoVersion()
   } catch (e) {
     baoLoi(e.message)
     try {
-      danhSachLHP.value = await sinhVienService.layLopHocPhan()
-      danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
+      const versionId = versionDangChon.value?.id
+      danhSachLHP.value = await sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionId })
+      danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionId })
       await taiSiSoLopHocPhanTheoVersion()
     } catch (_) {
     }
@@ -1961,18 +2237,17 @@ function suaLopHocPhan(lhp) {
     tenLop: lhp.tenLop || lhp.tenLopHocPhan || '',
     siSoToiThieu: lhp.siSoToiThieu || 1,
     soLuongToiDa: lhp.soLuongToiDa || lhp.siSoToiDa || 40,
-    soBuoiHoc: lhp.soBuoiHoc || laySoBuoiHocTuSyllabus(lhp.chuongTrinhMonId) || '',
-    ngayBatDau: lhp.ngayBatDau || '',
-    ngayKetThuc: lhp.ngayKetThuc || ''
+    soBuoiHoc: lhp.soBuoiHoc || laySoBuoiHocTuSyllabus(lhp.chuongTrinhMonId) || ''
   })
 }
 
 async function xoaLopHocPhan(lhp) {
   if (!confirm(`Xóa lớp ${lhp.maLopHocPhan || lhp.maLop}?`)) return
   try {
-    await sinhVienService.xoaLopHocPhan(lhp.id);
-    danhSachLHP.value = await sinhVienService.layLopHocPhan();
-    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
+    await sinhVienService.xoaLopHocPhan(lhp.id)
+    const versionId = versionDangChon.value?.id
+    danhSachLHP.value = await sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionId })
+    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionId })
     baoThanhCong('Đã xóa')
   } catch (e) {
     baoLoi(e.message)
@@ -1982,91 +2257,6 @@ async function xoaLopHocPhan(lhp) {
 function resetFormLHP() {
   idLHPSua.value = null
   Object.assign(formLHP, taoFormLHPMacDinh())
-}
-
-async function chonLHPPhanBo(lhp) {
-  lhpDangPhanBo.value = lhp
-  buoc.value = 'phanBo'
-  svDaChon.value = []
-  daBamChonTatCaSV.value = false
-  xoaThongBao()
-
-  try {
-    await taiSinhVienTrongLop()
-
-    const svTrongLHP = await sinhVienService.laySinhVienLopHocPhan({
-      lopHocPhanId: lhp.id
-    })
-
-    const danhSachDangKy = layDanhSachTuResponse(svTrongLHP)
-
-    svDaPhanBoIds.value = new Set(
-        danhSachDangKy.map(x => String(x.sinhVienId))
-    )
-
-    siSoTheoLopHocPhan.value = {
-      ...siSoTheoLopHocPhan.value,
-      [String(lhp.id)]: danhSachDangKy.length
-    }
-  } catch (e) {
-    baoLoi(e.message, 'phanBo')
-  }
-}
-
-// ─── BƯỚC 4.3: PHÂN BỔ ───────────────────────────────────────────────────────
-function chonTatCaSV(e) {
-  daBamChonTatCaSV.value = e.target.checked
-  svDaChon.value = e.target.checked
-      ? danhSachSVChuaVaoLop.value.map(sv => sv.id)
-      : []
-}
-
-function khiChonTungSinhVien() {
-  daBamChonTatCaSV.value = false
-}
-
-async function phanBoSinhVien() {
-  if (!lhpDangPhanBo.value || !svDaChon.value.length) return
-
-  dangLuu.value = true
-
-  try {
-    await Promise.all(
-        svDaChon.value.map(svId =>
-            sinhVienService.dangKyLopHocPhan({
-              sinhVienId: svId,
-              lopHocPhanId: lhpDangPhanBo.value.id
-            })
-        )
-    )
-
-    svDaChon.value.forEach(id => svDaPhanBoIds.value.add(String(id)))
-    svDaChon.value = []
-    daBamChonTatCaSV.value = false
-
-    siSoTheoLopHocPhan.value = {
-      ...siSoTheoLopHocPhan.value,
-      [String(lhpDangPhanBo.value.id)]: svDaPhanBoIds.value.size
-    }
-
-    danhSachLHP.value = await sinhVienService.layLopHocPhan()
-    danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon()
-    await taiSiSoLopHocPhanTheoVersion()
-
-    const lopHocPhanMoi = danhSachLHP.value.find(lhp =>
-        String(lhp.id) === String(lhpDangPhanBo.value.id)
-    )
-
-    if (lopHocPhanMoi) {
-      lhpDangPhanBo.value = lopHocPhanMoi
-    }
-
-    baoThanhCong('Đã phân bổ sinh viên vào lớp học phần thành công', 'phanBo')
-  } catch (e) {
-    baoLoi(e.message, 'phanBo')
-  } finally {
-    dangLuu.value = false
-  }
 }
 
 function kiemTraFormSinhVien() {
@@ -2230,9 +2420,7 @@ function taoFormLHPMacDinh() {
     tenLop: '',
     siSoToiThieu: 1,
     soLuongToiDa: 40,
-    soBuoiHoc: '',
-    ngayBatDau: '',
-    ngayKetThuc: ''
+    soBuoiHoc: ''
   }
 }
 
@@ -2335,750 +2523,417 @@ function xoaThongBao() {
 }
 </script>
 
+
+
+
+
+
+
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap');
+
+/* =========================================================
+   Quản lý sinh viên - giao diện compact
+   - Chỉ tinh chỉnh template text + style, không đổi script/logic/API.
+   - Màu chủ đạo Trung cấp Phương Nam: #077149.
+   ========================================================= */
 .sv-flow-page,
 .sv-flow-page * {
-  font-family: 'Roboto', Arial, sans-serif;
-  letter-spacing: normal;
   box-sizing: border-box;
+  font-family: 'Roboto', Arial, sans-serif;
+  letter-spacing: 0;
 }
 
 .sv-flow-page {
-  display: grid;
-  gap: 16px;
+  --pn-green: #077149;
+  --pn-green-dark: #045f3d;
+  --pn-green-soft: #e8f6ef;
+  --pn-green-line: #b7e1cc;
+  --pn-text: #0f172a;
+  --pn-muted: #64748b;
+  --pn-border: #d8e2ee;
+  --pn-bg: #f6f9fc;
+  --pn-card: #ffffff;
+  --pn-blue: #1d4ed8;
+  --pn-shadow: 0 8px 24px rgba(15, 23, 42, .055);
+
+  display: block;
+  width: 100%;
+  min-width: 0;
+  background: var(--pn-bg);
+  color: var(--pn-text);
+  font-size: 13px;
 }
+
 .sv-content {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
 }
 
-/* ===== CỘT TRÁI: ACCORDION CHUYỂN TAB ===== */
-.sv-side-nav {
-  position: sticky;
-  top: 16px;
-  align-self: start;
-  display: grid;
-  gap: 8px;
-}
-.sv-acc-item {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #fff;
-  overflow: hidden;
-}
-.sv-acc-item.active { border-color: #bfdbfe; }
-.sv-acc-head {
-  width: 100%;
+/* ===== Header gọn ===== */
+.sv-page-header {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  color: #334155;
-  text-align: left;
-}
-.sv-acc-item.active .sv-acc-head { color: #2563eb; background: #eff6ff; }
-.sv-acc-head:hover { background: #f8fafc; }
-.sv-acc-item.active .sv-acc-head:hover { background: #e0edff; }
-.sv-acc-ico { font-size: 15px; flex-shrink: 0; }
-.sv-acc-label { flex: 1; line-height: 1.25; }
-.sv-acc-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 17px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: #e2e8f0;
-  color: #475569;
-  font-size: 11px;
-  font-weight: 700;
-}
-.sv-acc-arrow { font-size: 11px; color: #94a3b8; transition: transform .15s; }
-.sv-acc-item.open .sv-acc-arrow { transform: rotate(180deg); }
-.sv-acc-body {
-  padding: 0 12px 12px;
-  display: grid;
-  gap: 8px;
-}
-.sv-acc-body p { margin: 0; font-size: 12.5px; color: #64748b; line-height: 1.4; }
-.sv-acc-link {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #2563eb;
-  text-decoration: none;
-}
-.sv-acc-link:hover { text-decoration: underline; }
-
-@media (max-width: 900px) {
-  .sv-flow-page { grid-template-columns: 1fr; }
-  .sv-side-nav { position: static; }
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0 0;
 }
 
-/* ===== HEADER ===== */
 .sv-page-header h1 {
   margin: 0;
-  font-size: 26px;
+  color: var(--pn-text);
+  font-size: 24px;
+  line-height: 1.15;
   font-weight: 800;
-  color: #0f172a;
 }
+
 .sv-page-header p {
-  margin: 6px 0 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
-/* ===== TABS (dọc, bên trái, nhỏ gọn) ===== */
-.sv-tabs {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
-  align-self: flex-start;
-  gap: 4px;
-  width: fit-content;
-  max-width: 260px;
-  padding: 4px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-}
-.sv-tab {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  padding: 7px 10px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  text-decoration: none;
-  text-align: left;
-  line-height: 1.25;
-  white-space: nowrap;
-}
-.sv-tab:hover { color: #2563eb; background: #e2e8f0; }
-.sv-tab.active {
-  color: #2563eb;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
-}
-.sv-tab-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 17px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: #e2e8f0;
-  color: #475569;
-  font-size: 11px;
-  font-weight: 700;
-}
-.sv-tab.active .sv-tab-badge,
-.sv-tab:hover .sv-tab-badge { background: #dbeafe; color: #2563eb; }
-
-/* ===== LAYOUT 2 CỘT: NỘI DUNG TRÁI – GỢI Ý PHẢI ===== */
-.sv-manage-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  align-items: start;
-}
-.sv-manage-main {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
-}
-
-/* ===== THẺ THỐNG KÊ ===== */
-.sv-stat-cards {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-.sv-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, .05);
-}
-.sv-stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
-}
-.stat-blue   { background: #dbeafe; }
-.stat-violet { background: #ede9fe; }
-.stat-green  { background: #d1fae5; }
-.stat-orange { background: #ffedd5; }
-.sv-stat-body { display: flex; flex-direction: column; min-width: 0; }
-.sv-stat-label { font-size: 13px; color: #64748b; font-weight: 600; }
-.sv-stat-value { font-size: 26px; font-weight: 800; color: #0f172a; line-height: 1.15; }
-.sv-stat-value-green { color: #059669; }
-.sv-stat-sub { font-size: 12px; color: #94a3b8; }
-
-/* ===== BỘ LỌC ===== */
-.sv-filter-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 16px;
-}
-.sv-filter-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-}
-.sv-filter-field { display: flex; flex-direction: column; gap: 6px; }
-.sv-filter-field > span {
+  margin: 4px 0 0;
+  color: var(--pn-muted);
   font-size: 13px;
-  font-weight: 600;
-  color: #334155;
-}
-.sv-filter-field select {
-  height: 40px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 0 12px;
-  background: #fff;
-  color: #0f172a;
-  font-size: 14px;
-}
-.sv-filter-field select:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
-.sv-filter-field select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
-.sv-filter-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-top: 14px;
-  font-size: 13px;
-  color: #1d4ed8;
-}
-.sv-filter-hint-ico { flex-shrink: 0; }
-
-/* ===== EMPTY STATE ===== */
-.sv-empty-state { text-align: center; padding: 40px 20px; }
-.sv-empty-ico { font-size: 40px; }
-.sv-empty-state h2 { margin: 12px 0 6px; font-size: 18px; color: #0f172a; }
-.sv-empty-state p { margin: 0; color: #64748b; }
-
-/* ===== NÚT PRIMARY (toolbar tạo lớp) ===== */
-.sv-btn-primary {
-  height: 38px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 10px;
-  background: #2563eb;
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-}
-.sv-btn-primary:hover { background: #1d4ed8; }
-.sv-btn-primary:disabled { opacity: .6; cursor: not-allowed; }
-
-/* ===== FOOTER BẢNG ===== */
-.sv-table-footer {
-  padding: 12px 4px 2px;
-  font-size: 13px;
-  color: #64748b;
+  line-height: 1.35;
 }
 
-/* ===== PANEL GỢI Ý ===== */
-.sv-tips-panel {
-  position: sticky;
-  top: 16px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, .05);
-}
-.sv-tips-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.sv-tips-head h3 { margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; }
-.sv-tips-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-.sv-tips-list li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: #475569; line-height: 1.4; }
-.sv-tip-dot {
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; flex-shrink: 0; color: #fff;
-}
-.dot-blue   { background: #3b82f6; }
-.dot-green  { background: #10b981; }
-.dot-orange { background: #f59e0b; }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1100px) {
-  .sv-manage-layout { grid-template-columns: 1fr; }
-  .sv-tips-panel { position: static; }
-  .sv-stat-cards { grid-template-columns: repeat(2, 1fr); }
-  .sv-filter-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 640px) {
-  .sv-stat-cards, .sv-filter-grid { grid-template-columns: 1fr; }
-  .sv-tabs { gap: 16px; overflow-x: auto; }
-}
-
-/* Breadcrumb / Summary sticky */
-/* Summary sticky */
+/* ===== Breadcrumb ===== */
 .sv-summary-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #bfdbfe;
-  border-radius: 16px;
-  padding: 10px 12px;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  padding: 8px 10px;
+  border: 1px solid var(--pn-green-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: var(--pn-shadow);
   backdrop-filter: blur(10px);
 }
 
 .sv-breadcrumb-sticky {
   position: sticky;
-  top: 60px;
-  z-index: 999;
+  top: 56px;
+  z-index: 50;
 }
 
 .sv-summary-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 34px;
-  border: 1px solid #dbeafe;
+  gap: 5px;
+  min-height: 28px;
+  padding: 4px 10px;
+  border: 1px solid #dbe7df;
   border-radius: 999px;
-  padding: 6px 12px;
-  background: #eff6ff;
-  color: #0f172a;
-  box-shadow: none;
-  transform: none;
+  background: #fff;
+  color: var(--pn-text);
   cursor: default;
 }
 
-.sv-summary-chip:hover {
-  filter: none;
-  transform: none;
+.sv-summary-chip.clickable { cursor: pointer; }
+.sv-summary-chip.clickable:hover { border-color: var(--pn-green-line); background: var(--pn-green-soft); }
+.sv-summary-chip.active { border-color: var(--pn-green-line); background: var(--pn-green-soft); }
+.sv-summary-name { color: var(--pn-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.sv-summary-value { color: var(--pn-text); font-size: 12px; font-weight: 800; }
+.sv-summary-chip.active .sv-summary-value { color: var(--pn-green); }
+
+/* ===== Layout ===== */
+.sv-manage-layout,
+.sv-manage-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  min-width: 0;
 }
 
-.sv-summary-chip.clickable {
-  cursor: pointer;
+/* ===== Stats: một hàng, nhỏ gọn ===== */
+.sv-stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.sv-summary-chip.clickable:hover {
-  border-color: #93c5fd;
-  background: #dbeafe;
+.sv-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 66px;
+  padding: 10px 14px;
+  border: 1px solid var(--pn-border);
+  border-radius: 14px;
+  background: var(--pn-card);
+  box-shadow: var(--pn-shadow);
+  overflow: hidden;
 }
 
-.sv-summary-chip.active {
-  border-color: #bbf7d0;
-  background: #ecfdf5;
+.sv-stat-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 18px;
 }
 
-.sv-summary-name {
-  color: #64748b;
+.stat-blue { background: #e8f6ef; color: var(--pn-green); }
+.stat-violet { background: #eef2ff; color: #4f46e5; }
+.stat-green { background: #dcfce7; color: #15803d; }
+.stat-orange { background: #fff1dd; color: #c2410c; }
+
+.sv-stat-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'label value' 'sub value';
+  align-items: center;
+  column-gap: 10px;
+  min-width: 0;
+  width: 100%;
+}
+
+.sv-stat-label {
+  grid-area: label;
+  color: #47617a;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-stat-value {
+  grid-area: value;
+  color: var(--pn-text);
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.sv-stat-value-green { color: var(--pn-green); }
+.sv-stat-sub { grid-area: sub; color: #8aa0b5; font-size: 11px; white-space: nowrap; }
+
+/* ===== Bộ lọc compact ===== */
+.sv-filter-card {
+  padding: 12px 14px;
+  border: 1px solid var(--pn-border);
+  border-radius: 14px;
+  background: #f9fbfd;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .035);
+}
+
+.sv-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  align-items: end;
+}
+
+.sv-filter-field,
+label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: #21314a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sv-filter-field > span {
+  color: #21314a;
   font-size: 12px;
   font-weight: 800;
-  text-transform: uppercase;
 }
 
-.sv-summary-value {
-  color: #0f172a;
-  font-size: 13px;
-  font-weight: 800;
+.sv-filter-hint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  color: var(--pn-green);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
-.sv-summary-chip.active .sv-summary-value {
-  color: #047857;
-}
+.sv-filter-hint-ico { flex: 0 0 auto; }
 
-/* Card */
+/* ===== Card/form ===== */
 .sv-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  padding: 14px 16px;
+  border: 1px solid var(--pn-border);
   border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, .05);
+  background: var(--pn-card);
+  box-shadow: var(--pn-shadow);
+  min-width: 0;
 }
 
 .sv-card-title {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
-}
-
-.sv-card-title h2 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.sv-card-title p {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 13px;
-}
-
-.so-ban-ghi {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Grid */
-.sv-grid {
-  display: grid;
-  gap: 10px;
   margin-bottom: 10px;
 }
 
-.sv-grid-2 {
-  grid-template-columns: repeat(2, 1fr);
+.sv-card-title-toolbar { align-items: center; }
+.sv-card-title h2 { margin: 0; color: var(--pn-text); font-size: 16px; line-height: 1.25; font-weight: 800; }
+.sv-card-title p { margin: 3px 0 0; color: var(--pn-muted); font-size: 12px; line-height: 1.35; }
+
+.sv-title-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
-.sv-grid-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
+.sv-grid { display: grid; gap: 8px; margin: 0; }
+.sv-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sv-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sv-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.sv-span-2 { grid-column: span 2; }
+.sv-span-3 { grid-column: span 3; }
+.sv-span-4 { grid-column: span 4; }
 
-.sv-grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.sv-span-2 {
-  grid-column: span 2;
-}
-
-.sv-span-3 {
-  grid-column: span 3;
-}
-
-.sv-span-4 {
-  grid-column: span 4;
-}
-
-/* Form */
-label {
+/* Tạo lớp hành chính: gom về một hàng để tránh phí khoảng trống */
+#form-lhc.sv-grid,
+form#form-lhc {
   display: grid;
-  gap: 5px;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 600;
+  grid-template-columns: 1fr 1.35fr .72fr 1fr 1.03fr 1.03fr 1.35fr;
+  gap: 8px;
+  align-items: end;
 }
 
-input, select, textarea {
-  width: 100%;
-  min-height: 38px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 8px 10px;
-  background: #fff;
-  color: #0f172a;
-  font: inherit;
-  font-size: 14px;
-  outline: none;
-  transition: border-color .15s, box-shadow .15s;
+#form-lhc .sv-span-2,
+#form-lhc .sv-span-4 {
+  grid-column: auto;
 }
 
+#form-lhc label { min-width: 0; }
+#form-lhc .sv-chot-tuyen-sinh-info { min-height: 34px; display: flex; align-items: center; gap: 5px; }
+
+input,
+select,
 textarea {
-  min-height: 72px;
-  resize: vertical;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid #cbd7e4;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--pn-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.25;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
 }
 
+textarea { min-height: 62px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: #8aa0b5; }
 input:focus, select:focus, textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+  border-color: var(--pn-green);
+  box-shadow: 0 0 0 3px rgba(7, 113, 73, .12);
 }
+select:disabled, input:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
 
-h3 {
-  margin: 14px 0 6px;
-  color: #334155;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-/* Buttons */
-button, .btn-giangday, .btn-xem-sv {
+/* ===== Buttons - giữ màu chức năng hiện có, chỉ nén kích thước ===== */
+button,
+.btn-giangday,
+.btn-xem-sv {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 32px;
+  padding: 6px 11px;
   border: 0;
-  border-radius: 10px;
-  padding: 8px 14px;
+  border-radius: 9px;
   background: #1d4ed8;
   color: #fff;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.2;
   text-decoration: none;
-  cursor: pointer;
   white-space: nowrap;
-  transition: filter .12s, transform .12s;
+  cursor: pointer;
+  transition: filter .12s, transform .12s, box-shadow .12s;
 }
 
-button:hover, .btn-giangday:hover, .btn-xem-sv:hover {
-  filter: brightness(.94);
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  opacity: .6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-button.secondary {
-  background: #e2e8f0;
-  color: #334155;
-}
-
-button.danger {
-  background: #dc2626;
-}
-
+button:hover,
+.btn-giangday:hover,
+.btn-xem-sv:hover { filter: brightness(.96); transform: translateY(-1px); }
+button:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+button.secondary { background: #e2e8f0; color: #334155; }
+button.danger { background: #dc2626; color: #fff; }
 button.small,
 .btn-giangday.small,
-.btn-xem-sv.small {
-  min-height: 30px;
-  padding: 5px 10px;
-  font-size: 13px;
-}
+.btn-xem-sv.small { min-height: 28px; padding: 5px 8px; border-radius: 8px; font-size: 12px; }
+.sv-btn-primary { background: var(--pn-green); color: #fff; }
+.sv-btn-primary:hover { background: var(--pn-green-dark); }
+.btn-nhanh1 { background: #1d4ed8; }
+.btn-nhanh2 { background: #059669; }
+.btn-giangday { background: #f59e0b; }
+.btn-xem-sv { background: #0f766e; }
+.btn-chot-ts { background: #16a34a; }
+.btn-huy-chot-ts { background: #f97316; }
 
-.btn-nhanh1 {
-  background: #1d4ed8;
-}
-
-.btn-nhanh2 {
-  background: #059669;
-}
-
-.btn-giangday {
-  background: #f59e0b;
-}
-
-/* Actions */
-.sv-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
+.sv-actions,
 .sv-row-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 5px;
   flex-wrap: wrap;
 }
+.sv-row-actions-nowrap { flex-wrap: nowrap; }
 
-/* Table */
+/* ===== Bảng: nhỏ hơn, xem được nhiều dữ liệu hơn ===== */
 .sv-table-wrap {
   width: 100%;
   overflow: auto;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--pn-border);
   border-radius: 12px;
+  background: #fff;
 }
+
+.sv-table-wrap-full { border: 0; border-radius: 0; }
 
 .sv-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  min-width: 600px;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+  line-height: 1.3;
 }
 
-.sv-table th, .sv-table td {
-  border-bottom: 1px solid #e2e8f0;
-  padding: 8px 10px;
+.sv-table th,
+.sv-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e6edf4;
   text-align: left;
   vertical-align: middle;
 }
 
 .sv-table th {
-  background: #f8fafc;
-  color: #334155;
-  font-weight: 700;
-  white-space: nowrap;
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 5;
+  background: #edf3f0;
+  color: #1f3347;
+  font-size: 11.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: inset 0 -1px 0 #d7e2ec;
 }
 
-.sv-table tbody tr:hover td {
-  background: #f8fafc;
-}
-
-.sv-table tr.da-phan-bo td {
-  color: #94a3b8;
-}
-
-.empty {
-  text-align: center;
-  color: #64748b;
-  padding: 20px;
-}
-
-/* Avatar */
-.sv-avatar {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-/* Status */
-.sv-status {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 3px 9px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.sv-status.done {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-.sv-status.pending {
-  background: #fef2f2;
-  color: #b91c1c;
-}
-
-/* Messages */
-.sv-message {
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.sv-message.success {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
-
-.sv-message.error {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-}
-
-.sv-account-box {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  background: #fffbeb;
-  border: 1px solid #fbbf24;
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: #78350f;
-  font-size: 13px;
-}
-
-/* Responsive */
-@media (max-width: 1100px) {
-  .sv-grid-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .sv-grid-3 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .sv-span-3, .sv-span-4 {
-    grid-column: span 2;
-  }
-}
-
-@media (max-width: 680px) {
-  .sv-grid-2, .sv-grid-3, .sv-grid-4 {
-    grid-template-columns: 1fr;
-  }
-
-  .sv-span-2, .sv-span-3, .sv-span-4 {
-    grid-column: span 1;
-  }
-
-  .sv-card-title {
-    flex-direction: column;
-  }
-}
-
-.bat-buoc {
-  color: #dc2626;
-  font-weight: 700;
-}
-
-.sv-check {
-  width: 16px;
-  min-width: 16px;
-  height: 16px;
-  min-height: 16px;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  accent-color: #1d4ed8;
-}
-
-.sv-check-all {
-  width: 17px;
-  min-width: 17px;
-  height: 17px;
-  min-height: 17px;
-}
-
-.sv-check-row {
-  width: 15px;
-  min-width: 15px;
-  height: 15px;
-  min-height: 15px;
-}
-
-.sv-check:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
+.sv-table tbody tr:hover td { background: #f8fbfa; }
+.sv-table tr.da-phan-bo td { color: #94a3b8; }
 .sv-table th:first-child,
-.sv-table td:first-child {
-  width: 44px;
-  text-align: center;
-}
+.sv-table td:first-child { width: 44px; text-align: center; }
 
-.btn-xem-sv {
-  background: #0f766e;
-}
-
-/* ===== BẢNG LỚP HÀNH CHÍNH ===== */
-
+/* Danh sách lớp hành chính */
 .sv-lhc-list-card {
   width: 100%;
   max-width: none;
@@ -3087,778 +2942,1459 @@ button.small,
 }
 
 .sv-lhc-list-card .sv-card-title {
-  padding: 16px 18px 12px;
-  margin-bottom: 0;
-  border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-}
-
-.sv-card-title-toolbar {
-  align-items: center;
-}
-
-.sv-title-tools {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
-  min-width: 360px;
-}
-
-.sv-search-input {
-  width: 280px;
-  min-width: 240px;
-  min-height: 38px;
-  border-radius: 999px;
-  background: #ffffff;
-  padding-left: 14px;
-}
-
-.sv-table-wrap-full {
-  border: 0;
-  border-radius: 0;
+  margin: 0;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--pn-border);
+  background: linear-gradient(180deg, #fff 0%, #f8fbfa 100%);
 }
 
 .sv-lhc-table-wrap {
-  max-height: none;
-  overflow-x: auto;
-  overflow-y: visible;
+  max-height: calc(100vh - 300px);
+  overflow: auto;
 }
 
 .sv-lhc-table {
-  min-width: 1120px;
+  min-width: 1240px;
+  table-layout: fixed;
 }
 
-.sv-lhc-table th {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background: #f1f5f9;
-  box-shadow: inset 0 -1px 0 #e2e8f0;
+.sv-lhc-table th:nth-child(1), .sv-lhc-table td:nth-child(1) { width: 46px; }
+.sv-lhc-table th:nth-child(2), .sv-lhc-table td:nth-child(2) { width: 98px; }
+.sv-lhc-table th:nth-child(3), .sv-lhc-table td:nth-child(3) { width: 230px; }
+.sv-lhc-table th:nth-child(4), .sv-lhc-table td:nth-child(4) { width: 90px; text-align: center; }
+.sv-lhc-table th:nth-child(5), .sv-lhc-table td:nth-child(5) { width: 100px; }
+.sv-lhc-table th:nth-child(6), .sv-lhc-table td:nth-child(6) { width: 120px; }
+.sv-lhc-table th:nth-child(7), .sv-lhc-table td:nth-child(7) { width: 120px; }
+.sv-lhc-table th:nth-child(8), .sv-lhc-table td:nth-child(8) { width: 230px; }
+.sv-lhc-table th:nth-child(9), .sv-lhc-table td:nth-child(9) { width: 370px; }
+
+.sv-lhp-list-card { width: 100%; max-width: none; overflow: hidden; }
+.sv-lhp-table-wrap { max-height: calc(100vh - 320px); overflow: auto; }
+.sv-lhp-table { min-width: 1250px; table-layout: fixed; }
+.sv-lhp-table th, .sv-lhp-table td { padding: 5px 7px; font-size: 11.7px; }
+.sv-lhp-table th:nth-child(1), .sv-lhp-table td:nth-child(1) { width: 42px; }
+.sv-lhp-table th:nth-child(2), .sv-lhp-table td:nth-child(2) { width: 92px; }
+.sv-lhp-table th:nth-child(3), .sv-lhp-table td:nth-child(3) { width: 76px; }
+.sv-lhp-table th:nth-child(4), .sv-lhp-table td:nth-child(4) { width: 170px; }
+.sv-lhp-table th:nth-child(5), .sv-lhp-table td:nth-child(5) { width: 145px; }
+.sv-lhp-table th:nth-child(6), .sv-lhp-table td:nth-child(6) { width: 220px; }
+.sv-lhp-table th:nth-child(7), .sv-lhp-table td:nth-child(7) { width: 150px; }
+.sv-lhp-table th:nth-child(8), .sv-lhp-table td:nth-child(8) { width: 72px; text-align: center; }
+.sv-lhp-table th:nth-child(9), .sv-lhp-table td:nth-child(9) { width: 70px; text-align: center; }
+.sv-lhp-table th:nth-child(10), .sv-lhp-table td:nth-child(10) { width: 100px; }
+.sv-lhp-table th:nth-child(11), .sv-lhp-table td:nth-child(11) { width: 380px; }
+
+.sv-table-footer {
+  padding: 9px 12px;
+  color: var(--pn-muted);
+  font-size: 12px;
 }
 
-.sv-lhc-table th:first-child,
-.sv-lhc-table td:first-child {
-  width: 64px;
-  text-align: center;
+.sv-search-input {
+  width: 250px;
+  min-width: 210px;
+  min-height: 34px;
+  padding-left: 13px;
+  border-radius: 999px;
 }
 
-.sv-lhc-table th:nth-child(2),
-.sv-lhc-table td:nth-child(2) {
-  width: 150px;
+.so-ban-ghi {
+  color: #52677d;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.sv-lhc-table th:nth-child(3),
-.sv-lhc-table td:nth-child(3) {
-  min-width: 260px;
-}
-
-.sv-lhc-table th:nth-child(4),
-.sv-lhc-table td:nth-child(4) {
-  width: 130px;
-  text-align: center;
-}
-
-.sv-lhc-table th:nth-child(5),
-.sv-lhc-table td:nth-child(5) {
-  width: 140px;
-}
-
-.sv-lhc-table th:nth-child(7),
-.sv-lhc-table td:nth-child(7) {
-  width: 360px;
-}
-
+/* ===== Badges/text ===== */
 .sv-code {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 3px 9px;
   border-radius: 999px;
-  padding: 4px 10px;
   background: #eff6ff;
   color: #1d4ed8;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sv-main-text {
-  color: #0f172a;
-  font-weight: 700;
-  line-height: 1.35;
+  color: var(--pn-text);
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.3;
 }
 
 .sv-note-text {
   display: inline-block;
-  max-width: 360px;
-  color: #64748b;
-  line-height: 1.35;
+  max-width: 100%;
+  color: var(--pn-muted);
+  font-size: 11.5px;
+  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sv-capacity-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 78px;
-  border-radius: 999px;
-  padding: 5px 10px;
-  background: #ecfdf5;
-  color: #047857;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.sv-capacity-badge strong {
-  font-size: 14px;
-}
-
+.sv-capacity-badge,
+.sv-status,
 .sv-status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 28px;
+  min-height: 24px;
+  padding: 3px 9px;
   border-radius: 999px;
-  padding: 4px 10px;
-  background: #f1f5f9;
-  color: #475569;
-  font-size: 12px;
+  font-size: 11.5px;
+  line-height: 1.2;
   font-weight: 800;
   white-space: nowrap;
 }
 
-.sv-status-pill.status-dang_hoc {
-  background: #ecfdf5;
-  color: #047857;
-}
+.sv-capacity-badge { gap: 4px; min-width: 66px; background: #e8f6ef; color: var(--pn-green); }
+.sv-capacity-badge strong { font-size: 12.5px; }
+.sv-status-pill { background: #f1f5f9; color: #475569; }
+.sv-status-pill.status-dang_hoc,
+.sv-status.done,
+.sv-status-pill.status-da_chot { background: #e8f6ef; color: var(--pn-green); border: 1px solid var(--pn-green-line); }
+.sv-status-pill.status-du_kien { background: #eff6ff; color: #1d4ed8; }
+.sv-status-pill.status-tam_dung { background: #fffbeb; color: #b45309; }
+.sv-status-pill.status-da_tot_nghiep { background: #f5f3ff; color: #6d28d9; }
+.sv-status-pill.status-huy,
+.sv-status.pending { background: #fef2f2; color: #b91c1c; }
+.sv-status-pill.status-chua_chot { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
 
-.sv-status-pill.status-du_kien {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.sv-status-pill.status-tam_dung {
-  background: #fffbeb;
-  color: #b45309;
-}
-
-.sv-status-pill.status-da_tot_nghiep {
-  background: #f5f3ff;
-  color: #6d28d9;
-}
-
-.sv-status-pill.status-huy {
-  background: #fef2f2;
-  color: #b91c1c;
-}
-
-.sv-row-actions-nowrap {
-  flex-wrap: nowrap;
-}
-
-/* ===== BẢNG LỚP HỌC PHẦN THEO VERSION ===== */
-
-.sv-lhp-list-card {
-  width: 100%;
-  max-width: none;
-  overflow: hidden;
-}
-
-.sv-lhp-table-wrap {
-  width: 100%;
-  max-height: calc(100vh - 330px);
-  overflow: auto;
-  border-radius: 12px;
-}
-
-.sv-lhp-table {
-  width: 100%;
-  min-width: 1180px;
-  table-layout: fixed;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.sv-lhp-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: #f1f5f9;
-  box-shadow: inset 0 -1px 0 #cbd5e1;
-}
-
-.sv-lhp-table th,
-.sv-lhp-table td {
-  padding: 6px 7px;
-  font-size: 12px;
-  line-height: 1.3;
-  vertical-align: middle;
-}
-
-.sv-lhp-table th {
-  white-space: nowrap;
-}
-
-.sv-lhp-table td {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* STT */
-.sv-lhp-table th:nth-child(1),
-.sv-lhp-table td:nth-child(1) {
-  width: 44px;
+.empty {
+  padding: 18px 12px !important;
+  color: var(--pn-muted);
   text-align: center;
 }
 
-/* Kỳ */
-.sv-lhp-table th:nth-child(2),
-.sv-lhp-table td:nth-child(2) {
-  width: 92px;
-}
-
-/* Mã môn */
-.sv-lhp-table th:nth-child(3),
-.sv-lhp-table td:nth-child(3) {
-  width: 70px;
-}
-
-/* Tên môn */
-.sv-lhp-table th:nth-child(4),
-.sv-lhp-table td:nth-child(4) {
-  width: 150px;
-  white-space: normal;
-}
-
-/* Mã lớp */
-.sv-lhp-table th:nth-child(5),
-.sv-lhp-table td:nth-child(5) {
-  width: 145px;
-}
-
-/* Tên lớp */
-.sv-lhp-table th:nth-child(6),
-.sv-lhp-table td:nth-child(6) {
-  width: 190px;
-  white-space: normal;
-}
-
-/* Loại */
-.sv-lhp-table th:nth-child(7),
-.sv-lhp-table td:nth-child(7) {
-  width: 120px;
-  white-space: normal;
-}
-
-/* Sĩ số */
-.sv-lhp-table th:nth-child(8),
-.sv-lhp-table td:nth-child(8) {
-  width: 72px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Số buổi */
-.sv-lhp-table th:nth-child(9),
-.sv-lhp-table td:nth-child(9) {
-  width: 70px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Ngày bắt đầu */
-.sv-lhp-table th:nth-child(10),
-.sv-lhp-table td:nth-child(10) {
-  width: 92px;
-  white-space: nowrap;
-}
-
-/* Ngày kết thúc */
-.sv-lhp-table th:nth-child(11),
-.sv-lhp-table td:nth-child(11) {
-  width: 92px;
-  white-space: nowrap;
-}
-
-/* Trạng thái */
-.sv-lhp-table th:nth-child(12),
-.sv-lhp-table td:nth-child(12) {
-  width: 82px;
-  white-space: nowrap;
-}
-
-/* Thao tác */
-.sv-lhp-table th:nth-child(13),
-.sv-lhp-table td:nth-child(13) {
-  width: 130px;
-  min-width: 130px;
-  max-width: 130px;
-  overflow: visible;
-}
-
-.sv-lhp-table td:nth-child(13) .sv-row-actions {
+/* ===== Tiếp nhận sinh viên ===== */
+.sv-account-box {
   display: flex;
+  gap: 10px;
   flex-wrap: wrap;
-  gap: 3px;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.sv-lhp-table td:nth-child(13) .small,
-.sv-lhp-table td:nth-child(13) .btn-xem-sv,
-.sv-lhp-table td:nth-child(13) .btn-giangday {
-  width: auto;
-  min-width: 46px;
-  max-width: 86px;
-  min-height: 22px;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 10px;
-  line-height: 1.15;
-  font-weight: 600;
-  justify-content: center;
-}
-
-.sv-lhp-table td:nth-child(13) .btn-xem-sv {
-  background: #0f766e;
-}
-
-.sv-lhp-table td:nth-child(13) .btn-giangday {
-  background: #f59e0b;
-}
-
-.sv-lhp-list-card .sv-card-title-toolbar {
-  align-items: center;
-}
-
-.sv-lhp-list-card .sv-title-tools {
-  min-width: 420px;
-}
-
-.sv-lhp-list-card .sv-search-input {
-  width: 340px;
-  min-width: 260px;
-}
-
-@media (max-width: 900px) {
-  .sv-lhp-list-card .sv-title-tools {
-    width: 100%;
-    min-width: 0;
-    justify-content: stretch;
-  }
-
-  .sv-lhp-list-card .sv-search-input {
-    width: 100%;
-    min-width: 0;
-  }
-}/* ===== TIẾP NHẬN SINH VIÊN: LAYOUT 3/7 ===== */
-
-.sv-student-receive-card {
-  padding: 14px;
+  padding: 10px 12px;
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: 12px;
 }
 
 .sv-receive-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 3fr) minmax(0, 7fr);
-  gap: 14px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 12px;
   align-items: start;
+}
+
+.sv-file-panel,
+.sv-info-panel,
+.sv-section-box {
+  min-width: 0;
 }
 
 .sv-file-panel {
   position: sticky;
-  top: 142px;
-  align-self: start;
-  border: 1px solid #dbeafe;
-  border-radius: 14px;
+  top: 76px;
+  display: grid;
+  gap: 10px;
   padding: 12px;
-  background: #f8fafc;
+  border: 1px solid var(--pn-border);
+  border-radius: 12px;
+  background: #f8fbfa;
 }
 
 .sv-file-panel-title h3,
-.sv-section-box h3 {
-  margin: 0 0 4px;
-  color: #0f172a;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.sv-file-panel-title p {
-  margin: 0 0 10px;
-  color: #64748b;
-  font-size: 12px;
-}.sv-document-grid {
-   display: grid;
-   gap: 8px;
- }
-.sv-document-row {
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
-}
-
-.sv-document-row-main {
-  grid-template-columns: 200px minmax(0, 1fr);
-}
-.sv-document-row-other {
-  grid-template-columns: 1fr;
-  background: #f8fafc;
-}
-
-.sv-document-left {
-  position: relative;
-}
-
-.sv-document-right {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-}
-
-.sv-document-right-full {
-  width: 100%;
-}
-
-.sv-document-title {
-  color: #0f172a;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.sv-document-preview {
-  width: 180px;
-  aspect-ratio: 4 / 3;
-  height: auto;
-  border: 1px dashed #cbd5e1;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #f8fafc;
-  display: grid;
-  place-items: center;
-}
-
-.sv-portrait-preview {
-  width: 180px;
-  aspect-ratio: 4 / 3;
-  height: auto;
-}
-.sv-document-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #ffffff;
-}
-
-.sv-document-placeholder {
-  padding: 4px;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.sv-document-pdf {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 52px;
-  border-radius: 8px;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.sv-remove-file {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  min-height: 20px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: rgba(220, 38, 38, 0.92);
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1;
-  z-index: 2;
-}
-
-.sv-remove-file:hover {
-  transform: none;
-  filter: brightness(0.95);
-}
-
-.sv-file-picker {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  margin-top: 0;
-}
-
-.sv-file-picker input[type="file"] {
-  display: none;
-}
-
-.sv-file-picker span {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 76px;
-  width: auto;
-  min-height: 24px;
-  border-radius: 7px;
-  padding: 3px 9px;
-  background: #1d4ed8;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.sv-file-picker-small span {
-  min-width: 96px;
-}
-
-.sv-file-meta {
-  display: grid;
-  gap: 1px;
-  min-width: 0;
-}
-
-.sv-file-meta strong {
-  max-width: 100%;
-  color: #0f172a;
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sv-file-meta small {
-  min-height: 10px;
-  color: #64748b;
-  font-size: 9px;
-}
-
-.sv-other-files {
-  display: grid;
-  gap: 4px;
-  margin-top: 4px;
-  color: #334155;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.sv-other-files > span {
-  padding: 5px 7px;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-}
-
-.sv-other-file-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 5px;
-  align-items: center;
-}
-
-.sv-other-file-item strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sv-other-file-item small {
-  color: #64748b;
-  white-space: nowrap;
-}
-
-.sv-other-file-item button {
-  min-height: 20px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: #dc2626;
-  color: #ffffff;
-  font-size: 10px;
-}
-
-.sv-other-files span {
-  padding: 5px 7px;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sv-other-files small {
-  color: #64748b;
-}
-.sv-photo-placeholder {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  color: #1d4ed8;
+.sv-section-box h3,
+h3 {
+  margin: 0 0 8px;
+  color: #21314a;
   font-size: 13px;
   font-weight: 800;
 }
 
-.sv-file-list {
-  display: grid;
-  gap: 8px;
+.sv-file-panel-title p { margin: 2px 0 0; color: var(--pn-muted); font-size: 12px; }
+.sv-document-grid { display: grid; gap: 8px; }
+.sv-document-row { display: grid; grid-template-columns: 70px 1fr; gap: 8px; align-items: center; padding: 8px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+.sv-document-row-main { grid-template-columns: 88px 1fr; }
+.sv-document-left { position: relative; min-width: 0; }
+.sv-document-preview { width: 70px; height: 48px; display: grid; place-items: center; border: 1px dashed #cbd5e1; border-radius: 9px; overflow: hidden; background: #f8fafc; color: #94a3b8; font-size: 11px; text-align: center; }
+.sv-portrait-preview { width: 88px; height: 88px; border-radius: 12px; }
+.sv-document-preview img { width: 100%; height: 100%; object-fit: cover; }
+.sv-document-title { color: var(--pn-text); font-size: 12px; font-weight: 800; }
+.sv-file-picker { display: inline-flex; align-items: center; justify-content: center; width: fit-content; min-height: 28px; padding: 5px 9px; border-radius: 8px; background: var(--pn-green); color: #fff; font-size: 12px; font-weight: 800; cursor: pointer; }
+.sv-file-picker input { display: none; }
+.sv-file-meta { display: grid; gap: 1px; margin-top: 4px; color: var(--pn-muted); font-size: 11px; }
+.sv-file-meta strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv-remove-file { position: absolute; top: -6px; right: -6px; min-height: 22px; padding: 2px 6px; border-radius: 999px; background: #ef4444; font-size: 10px; z-index: 2; }
+.sv-other-files { display: grid; gap: 5px; margin-top: 5px; color: var(--pn-muted); font-size: 11px; }
+.sv-other-file-item { display: flex; align-items: center; gap: 5px; justify-content: space-between; padding: 5px 6px; border-radius: 8px; background: #f1f5f9; }
+.sv-document-pdf { font-weight: 800; color: #dc2626; }
+
+.sv-info-panel { display: grid; gap: 10px; }
+.sv-section-box { padding: 12px; border: 1px solid var(--pn-border); border-radius: 12px; background: #fff; }
+.sv-form-table { display: grid; gap: 8px; }
+.sv-form-table-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sv-form-table-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.sv-col-span-3 { grid-column: span 3; }
+.sv-receive-actions { justify-content: flex-end; padding-top: 4px; }
+
+.sv-avatar { width: 34px; height: 34px; object-fit: cover; border: 1px solid var(--pn-border); border-radius: 8px; }
+
+/* ===== Auto tạo lớp học phần ===== */
+.sv-auto-tao-card { border-left: 4px solid var(--pn-green); }
+.sv-checkbox-label { display: flex; align-items: center; gap: 7px; }
+.sv-check { width: 15px; min-width: 15px; height: 15px; min-height: 15px; padding: 0; margin: 0; accent-color: var(--pn-green); cursor: pointer; }
+.sv-check-all { width: 16px; min-width: 16px; height: 16px; min-height: 16px; }
+.sv-check:disabled { cursor: not-allowed; opacity: .45; }
+.sv-lhc-checkbox-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.sv-lhc-chon-item { display: inline-flex; align-items: center; gap: 4px; width: auto; padding: 6px 8px; border: 1px solid var(--pn-border); border-radius: 999px; background: #fff; font-size: 12px; font-weight: 700; }
+.sv-lhc-chon-item--chot { border-color: var(--pn-green-line); background: var(--pn-green-soft); }
+.sv-auto-tao-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.sv-btn-du-kien { background: #2563eb; }
+.sv-btn-chinh-thuc { background: var(--pn-green); }
+.sv-auto-tao-result { margin-top: 10px; display: grid; gap: 8px; }
+.sv-auto-tao-summary { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #f1f5f9; color: #334155; font-size: 12px; }
+.sv-auto-tao-warnings, .sv-auto-tao-errors { padding: 8px 10px; border-radius: 10px; font-size: 12px; }
+.sv-auto-tao-warnings { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.sv-auto-tao-errors { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+.sv-auto-tao-warnings ul, .sv-auto-tao-errors ul { margin: 4px 0 0 16px; padding: 0; }
+
+/* ===== Misc ===== */
+.sv-empty-state { padding: 28px 18px; text-align: center; }
+.sv-empty-ico { font-size: 32px; }
+.sv-empty-state h2 { margin: 8px 0 4px; color: var(--pn-text); font-size: 16px; }
+.sv-empty-state p { margin: 0; color: var(--pn-muted); font-size: 13px; }
+.sv-message { padding: 9px 12px; border-radius: 11px; font-size: 12.5px; font-weight: 700; }
+.sv-message.success { border: 1px solid var(--pn-green-line); background: var(--pn-green-soft); color: var(--pn-green); }
+.sv-message.error { border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; }
+.bat-buoc, .sv-required { color: #dc2626; font-weight: 800; }
+.sv-field-hint { color: var(--pn-muted); font-size: 11px; font-weight: 500; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1280px) {
+  #form-lhc.sv-grid,
+  form#form-lhc { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #form-lhc .sv-span-4 { grid-column: span 4; }
+  .sv-row-actions-nowrap { flex-wrap: wrap; }
 }
 
-.sv-file-item {
+@media (max-width: 1100px) {
+  .sv-stat-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sv-filter-grid { grid-template-columns: 1fr; }
+  .sv-grid-4, .sv-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sv-span-3, .sv-span-4 { grid-column: span 2; }
+  .sv-receive-layout { grid-template-columns: 1fr; }
+  .sv-file-panel { position: static; }
+  .sv-form-table-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .sv-page-header, .sv-card-title { flex-direction: column; align-items: stretch; }
+  .sv-stat-cards { grid-template-columns: 1fr; }
+  .sv-grid-2, .sv-grid-3, .sv-grid-4,
+  #form-lhc.sv-grid,
+  form#form-lhc,
+  .sv-form-table-3,
+  .sv-form-table-4 { grid-template-columns: 1fr; }
+  .sv-span-2, .sv-span-3, .sv-span-4, .sv-col-span-3,
+  #form-lhc .sv-span-2, #form-lhc .sv-span-4 { grid-column: span 1; }
+  .sv-title-tools { flex-wrap: wrap; justify-content: flex-start; }
+  .sv-search-input { width: 100%; min-width: 0; }
+}
+
+
+/* ===== OVERRIDE COMPACT V2: gom thống kê vào bộ lọc + bảng dày dữ liệu hơn ===== */
+.sv-content,
+.sv-manage-main {
+  gap: 10px;
+}
+
+.sv-page-header {
+  margin-bottom: -2px;
+}
+
+.sv-page-header h1 {
+  font-size: 22px;
+}
+
+.sv-page-header p {
+  margin-top: 3px;
+  font-size: 12.5px;
+}
+
+.sv-filter-card-with-stats {
+  padding: 10px 12px 9px;
+  border-color: #cfe1dc;
+  background: linear-gradient(180deg, #fbfefd 0%, #f6faf8 100%);
+}
+
+.sv-filter-card-with-stats .sv-filter-grid {
+  grid-template-columns: minmax(220px, 1.1fr) minmax(220px, 1.1fr) minmax(260px, 1.1fr);
+  gap: 9px;
+}
+
+.sv-filter-card-with-stats .sv-filter-field > span {
+  font-size: 11.5px;
+  line-height: 1.15;
+}
+
+.sv-filter-card-with-stats select,
+.sv-filter-card-with-stats input {
+  min-height: 32px;
+  height: 32px;
+  padding: 5px 9px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.sv-filter-bottom-row {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 7px;
+}
+
+.sv-filter-bottom-row .sv-filter-hint {
+  margin: 0;
+  min-width: 0;
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+
+.sv-mini-stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sv-mini-stat {
+  display: grid;
+  grid-template-columns: 22px minmax(72px, auto) auto;
+  align-items: center;
   gap: 5px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 8px;
-  background: #ffffff;
+  min-height: 28px;
+  padding: 3px 7px 3px 4px;
+  border: 1px solid #d9e8e3;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 5px rgba(15, 23, 42, .035);
+  white-space: nowrap;
 }
 
-.sv-file-label {
-  color: #334155;
+.sv-mini-stat-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
   font-size: 12px;
+}
+
+.sv-mini-stat-text {
+  color: #41556c;
+  font-size: 11px;
   font-weight: 800;
 }
 
-.sv-file-item input[type="file"] {
-  min-height: 30px;
-  padding: 4px;
+.sv-mini-stat strong {
+  color: #071827;
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+/* Form tạo lớp hành chính gọn hơn */
+.sv-card {
+  padding: 11px 13px;
+}
+
+.sv-card-title {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sv-card-title h2 {
+  font-size: 15px;
+}
+
+.sv-card-title p {
+  font-size: 11.5px;
+}
+
+#form-lhc.sv-grid,
+form#form-lhc {
+  grid-template-columns: 1fr 1.25fr .62fr .9fr 1fr 1fr 1.35fr;
+  gap: 6px;
+}
+
+#form-lhc label,
+.sv-grid label {
+  gap: 3px;
+  font-size: 11.5px;
+}
+
+input,
+select,
+textarea {
+  min-height: 31px;
+  padding: 5px 8px;
   border-radius: 8px;
+  font-size: 12.5px;
+}
+
+/* Bảng lớp hành chính: chống đè ghi chú, giảm khoảng trống, nút nhỏ lại */
+.sv-lhc-list-card .sv-card-title {
+  padding: 9px 12px 8px;
+}
+
+.sv-lhc-table-wrap {
+  max-height: calc(100vh - 238px);
+}
+
+.sv-table {
+  font-size: 11.5px;
+  line-height: 1.18;
+}
+
+.sv-table th,
+.sv-table td {
+  padding: 4px 6px;
+  height: 34px;
+  overflow: hidden;
+}
+
+.sv-table th {
   font-size: 11px;
 }
 
-.sv-file-name {
+.sv-lhc-table {
+  min-width: 1120px;
+  table-layout: fixed;
+}
+
+.sv-lhc-table th:nth-child(1), .sv-lhc-table td:nth-child(1) { width: 40px; }
+.sv-lhc-table th:nth-child(2), .sv-lhc-table td:nth-child(2) { width: 86px; }
+.sv-lhc-table th:nth-child(3), .sv-lhc-table td:nth-child(3) { width: 190px; }
+.sv-lhc-table th:nth-child(4), .sv-lhc-table td:nth-child(4) { width: 74px; text-align: center; }
+.sv-lhc-table th:nth-child(5), .sv-lhc-table td:nth-child(5) { width: 84px; }
+.sv-lhc-table th:nth-child(6), .sv-lhc-table td:nth-child(6) { width: 110px; }
+.sv-lhc-table th:nth-child(7), .sv-lhc-table td:nth-child(7) { width: 102px; }
+.sv-lhc-table th:nth-child(8), .sv-lhc-table td:nth-child(8) { width: 220px; }
+.sv-lhc-table th:nth-child(9), .sv-lhc-table td:nth-child(9) { width: 314px; }
+
+.sv-lhc-table td:nth-child(8) {
+  white-space: nowrap;
+}
+
+.sv-lhc-table td:nth-child(8) .sv-note-text {
   display: block;
+  width: 100%;
   max-width: 100%;
-  color: #0f172a;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sv-file-item small {
-  min-height: 12px;
-  color: #64748b;
-  font-size: 10px;
+.sv-code {
+  min-height: 21px;
+  padding: 2px 7px;
+  font-size: 11.3px;
 }
 
-.sv-mini-preview {
-  width: 100%;
-  height: 72px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #f1f5f9;
+.sv-main-text {
+  font-size: 11.8px;
+  line-height: 1.18;
 }
 
-.sv-mini-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.sv-note-text {
+  font-size: 11px;
+  line-height: 1.18;
 }
 
-.sv-info-panel {
-  display: grid;
-  gap: 10px;
-  min-width: 0;
+.sv-capacity-badge,
+.sv-status,
+.sv-status-pill {
+  min-height: 21px;
+  padding: 2px 7px;
+  font-size: 10.8px;
 }
 
-.sv-section-box {
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 12px;
-  background: #ffffff;
+.sv-capacity-badge {
+  min-width: 56px;
 }
 
-.sv-form-table {
-  display: grid;
-  gap: 8px;
+.sv-capacity-badge strong {
+  font-size: 11.5px;
 }
 
-.sv-form-table-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.sv-form-table-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.sv-form-table label {
-  gap: 4px;
-  color: #334155;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.sv-form-table input,
-.sv-form-table select,
-.sv-form-table textarea {
-  min-height: 32px;
+button,
+.btn-giangday,
+.btn-xem-sv {
+  min-height: 29px;
+  padding: 5px 9px;
   border-radius: 8px;
-  padding: 6px 8px;
+  font-size: 11.5px;
+}
+
+button.small,
+.btn-giangday.small,
+.btn-xem-sv.small,
+.sv-row-actions .small {
+  min-height: 24px;
+  padding: 3px 6px;
+  border-radius: 7px;
+  font-size: 10.8px;
+  line-height: 1.1;
+}
+
+.sv-row-actions {
+  gap: 4px;
+}
+
+.sv-row-actions-nowrap {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.sv-search-input {
+  min-height: 31px;
+  width: 220px;
+  min-width: 180px;
   font-size: 12px;
 }
 
-.sv-form-table textarea {
-  min-height: 58px;
+.sv-table-footer {
+  padding: 7px 10px;
+  font-size: 11.5px;
 }
 
-.sv-col-span-3 {
-  grid-column: span 3;
+/* Bảng lớp học phần cũng nén đồng bộ */
+.sv-lhp-table-wrap {
+  max-height: calc(100vh - 260px);
 }
 
-.sv-receive-actions {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
-  padding: 10px;
-  border: 1px solid #dbeafe;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.08);
+.sv-lhp-table {
+  min-width: 1160px;
 }
 
-@media (max-width: 1180px) {
-  .sv-receive-layout {
+.sv-lhp-table th,
+.sv-lhp-table td {
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+.sv-lhp-table th:nth-child(11), .sv-lhp-table td:nth-child(11) { width: 318px; }
+
+@media (max-width: 1280px) {
+  .sv-filter-bottom-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .sv-mini-stats {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  #form-lhc.sv-grid,
+  form#form-lhc {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .sv-filter-card-with-stats .sv-filter-grid {
     grid-template-columns: 1fr;
   }
 
-  .sv-file-panel {
-    position: static;
+  .sv-mini-stat {
+    grid-template-columns: 22px 1fr auto;
+    flex: 1 1 180px;
+  }
+}
+
+
+/* ===== OVERRIDE COMPACT V3: auto mở lớp, mở lớp học phần và bảng lớp học phần ===== */
+.sv-auto-compact-card {
+  padding: 9px 11px;
+  border-left-width: 3px;
+}
+
+.sv-auto-compact-title {
+  margin-bottom: 6px;
+}
+
+.sv-auto-compact-title h2 {
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.sv-auto-compact-title p {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.sv-auto-tao-form {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.08fr) 92px 92px 86px minmax(145px, .8fr) minmax(320px, 2fr);
+  gap: 6px;
+  align-items: end;
+  min-width: 0;
+}
+
+.sv-auto-tao-form label,
+.sv-auto-tao-form .sv-auto-lhc-inline {
+  min-width: 0;
+}
+
+.sv-auto-tao-form .sv-auto-field > span,
+.sv-auto-tao-form label {
+  font-size: 10.8px;
+  line-height: 1.1;
+}
+
+.sv-auto-tao-form input,
+.sv-auto-tao-form select {
+  height: 29px;
+  min-height: 29px;
+  padding: 4px 7px;
+  font-size: 11.5px;
+  border-radius: 8px;
+}
+
+.sv-auto-check {
+  display: inline-flex;
+  align-items: center;
+  align-self: end;
+  gap: 5px;
+  height: 29px;
+  min-height: 29px;
+  padding: 0 7px;
+  border: 1px solid #cfe1dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f5134;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-auto-lhc-inline {
+  align-self: stretch;
+  display: grid;
+  gap: 4px;
+}
+
+.sv-auto-lhc-inline > label {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  margin: 0 !important;
+  font-size: 10.8px !important;
+  line-height: 1.1;
+}
+
+.sv-auto-lhc-inline > label .sv-note-text {
+  font-size: 10.5px;
+}
+
+.sv-auto-lhc-inline .sv-lhc-checkbox-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 1px;
+}
+
+.sv-auto-lhc-inline .sv-lhc-chon-item {
+  flex: 0 0 auto;
+  max-width: 220px;
+  min-height: 25px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 10.8px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.sv-auto-lhc-inline .sv-lhc-chon-item .sv-status-pill {
+  min-height: 18px !important;
+  padding: 1px 5px !important;
+  font-size: 9.5px !important;
+}
+
+.sv-auto-tao-actions {
+  margin-top: 7px;
+  gap: 5px;
+}
+
+.sv-auto-tao-actions button {
+  min-height: 25px;
+  padding: 3px 7px;
+  border-radius: 7px;
+  font-size: 10.8px;
+}
+
+.sv-lhp-open-card {
+  padding: 9px 11px;
+}
+
+.sv-lhp-open-title {
+  margin-bottom: 6px;
+}
+
+.sv-lhp-open-title h2 {
+  font-size: 14px;
+}
+
+.sv-lhp-open-title p {
+  font-size: 11px;
+}
+
+.sv-lhp-open-form {
+  display: grid;
+  grid-template-columns: minmax(128px, 1fr) minmax(160px, 1.25fr) minmax(110px, .9fr) minmax(98px, .8fr) minmax(120px, .95fr) minmax(150px, 1.15fr) 74px 74px 94px auto;
+  gap: 6px;
+  align-items: end;
+  min-width: 0;
+}
+
+.sv-lhp-open-form label {
+  min-width: 0;
+  gap: 2px;
+  font-size: 10.8px;
+  line-height: 1.1;
+}
+
+.sv-lhp-open-form input,
+.sv-lhp-open-form select {
+  min-height: 29px;
+  height: 29px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  font-size: 11.5px;
+}
+
+.sv-lhp-open-form .sv-field-hint {
+  display: none;
+}
+
+.sv-lhp-open-actions {
+  align-self: end;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 5px;
+  min-width: max-content;
+}
+
+.sv-lhp-open-actions button {
+  min-height: 29px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.sv-lhp-list-card .sv-card-title {
+  padding: 9px 11px 8px;
+  margin: -11px -13px 8px;
+  border-bottom: 1px solid var(--pn-border);
+  background: linear-gradient(180deg, #fff 0%, #f8fbfa 100%);
+}
+
+.sv-lhp-table-wrap {
+  max-height: calc(100vh - 244px);
+  overflow: auto;
+}
+
+.sv-lhp-table {
+  min-width: 1390px;
+  table-layout: fixed;
+}
+
+.sv-lhp-table th,
+.sv-lhp-table td {
+  height: 30px;
+  padding: 3px 5px;
+  font-size: 10.8px;
+  line-height: 1.12;
+  vertical-align: middle;
+}
+
+.sv-lhp-table th:nth-child(1), .sv-lhp-table td:nth-child(1) { width: 38px; }
+.sv-lhp-table th:nth-child(2), .sv-lhp-table td:nth-child(2) { width: 82px; }
+.sv-lhp-table th:nth-child(3), .sv-lhp-table td:nth-child(3) { width: 68px; }
+.sv-lhp-table th:nth-child(4), .sv-lhp-table td:nth-child(4) { width: 158px; }
+.sv-lhp-table th:nth-child(5), .sv-lhp-table td:nth-child(5) { width: 130px; }
+.sv-lhp-table th:nth-child(6), .sv-lhp-table td:nth-child(6) { width: 200px; }
+.sv-lhp-table th:nth-child(7), .sv-lhp-table td:nth-child(7) { width: 136px; }
+.sv-lhp-table th:nth-child(8), .sv-lhp-table td:nth-child(8) { width: 64px; text-align: center; }
+.sv-lhp-table th:nth-child(9), .sv-lhp-table td:nth-child(9) { width: 62px; text-align: center; }
+.sv-lhp-table th:nth-child(10), .sv-lhp-table td:nth-child(10) { width: 88px; }
+.sv-lhp-table th:nth-child(11), .sv-lhp-table td:nth-child(11) {
+  width: 364px;
+  min-width: 364px;
+  overflow: visible;
+}
+
+.sv-lhp-table td:nth-child(4),
+.sv-lhp-table td:nth-child(5),
+.sv-lhp-table td:nth-child(6),
+.sv-lhp-table td:nth-child(7) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-lhp-table td:nth-child(10) .sv-status-pill {
+  min-height: 20px;
+  padding: 2px 6px;
+  font-size: 10.2px;
+}
+
+.sv-lhp-table td:nth-child(11) .sv-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.sv-lhp-table td:nth-child(11) button.small,
+.sv-lhp-table td:nth-child(11) .btn-giangday.small,
+.sv-lhp-table td:nth-child(11) .btn-xem-sv.small {
+  min-height: 22px;
+  padding: 3px 5px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.sv-lhp-table .sv-status-pill.status-dang_mo {
+  background: #e8f6ef;
+  color: var(--pn-green);
+  border: 1px solid var(--pn-green-line);
+}
+
+@media (max-width: 1360px) {
+  .sv-auto-tao-form,
+  .sv-lhp-open-form {
+    overflow-x: auto;
+    padding-bottom: 2px;
   }
 
-  .sv-photo-preview-main {
-    max-height: 220px;
-    aspect-ratio: 16 / 9;
+  .sv-auto-tao-form {
+    grid-template-columns: 170px 96px 96px 88px 160px 410px;
   }
 
-  .sv-form-table-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .sv-lhp-open-form {
+    grid-template-columns: 138px 190px 120px 105px 130px 170px 80px 80px 100px 130px;
+  }
+}
+
+@media (max-width: 920px) {
+  .sv-auto-compact-title,
+  .sv-lhp-open-title {
+    align-items: flex-start;
+  }
+
+  .sv-lhp-list-card .sv-card-title {
+    margin: -11px -13px 8px;
+  }
+}
+
+/* ===== OVERRIDE COMPACT V4: dropdown lớp hành chính + bảng lớp học phần cân bằng màu ===== */
+.sv-auto-compact-card {
+  padding: 9px 11px 10px;
+}
+
+.sv-auto-compact-title {
+  margin-bottom: 6px;
+}
+
+.sv-auto-compact-title h2 {
+  font-size: 14.5px;
+}
+
+.sv-auto-compact-title p {
+  font-size: 11.2px;
+  margin-top: 2px;
+}
+
+.sv-auto-tao-form {
+  display: grid;
+  grid-template-columns: 220px 118px 118px 120px minmax(220px, 1fr) 420px;
+  gap: 7px;
+  align-items: end;
+}
+
+.sv-auto-field,
+.sv-auto-check,
+.sv-auto-lhc-dropdown {
+  min-width: 0;
+}
+
+.sv-auto-field-ky select {
+  max-width: 220px;
+}
+
+.sv-auto-field-min input,
+.sv-auto-field-max input,
+.sv-auto-field-prefix input {
+  text-align: left;
+}
+
+.sv-auto-check {
+  align-self: end;
+  min-height: 31px;
+  padding: 6px 8px;
+  border: 1px solid #dbe8e2;
+  border-radius: 9px;
+  background: #fbfefd;
+  color: #064e3b;
+  font-size: 11.6px;
+  white-space: nowrap;
+}
+
+.sv-auto-lhc-dropdown {
+  position: relative;
+  align-self: end;
+}
+
+.sv-auto-lhc-dropdown summary {
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid #b7e1cc;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #ffffff 0%, #eefaf4 100%);
+  color: #064e3b;
+  font-size: 11.8px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.sv-auto-lhc-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.sv-auto-lhc-dropdown summary::after {
+  content: '▾';
+  color: #077149;
+  font-size: 12px;
+  transition: transform .15s ease;
+}
+
+.sv-auto-lhc-dropdown[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.sv-auto-lhc-summary-left,
+.sv-auto-lhc-summary-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.sv-auto-lhc-summary-count {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sv-lhc-checkbox-dropdown-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  width: min(620px, calc(100vw - 48px));
+  max-height: 260px;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #b7e1cc;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, .16);
+}
+
+.sv-lhc-checkbox-dropdown-list .sv-lhc-chon-item {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 10px;
+  padding: 6px 8px;
+  background: #fbfefd;
+}
+
+.sv-lhc-checkbox-dropdown-list .sv-lhc-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sv-auto-tao-actions {
+  margin-top: 7px;
+  gap: 7px;
+}
+
+.sv-auto-tao-actions button {
+  min-height: 29px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+}
+
+/* Mở lớp học phần: tiếp tục nén form ngang */
+.sv-lhp-open-card {
+  padding: 9px 11px;
+}
+
+.sv-lhp-open-title {
+  margin-bottom: 6px;
+}
+
+.sv-lhp-open-form {
+  grid-template-columns: 150px minmax(260px, 1fr) 135px 118px 150px minmax(210px, 1fr) 92px 92px 92px auto;
+  gap: 6px;
+  align-items: end;
+}
+
+.sv-lhp-open-form label {
+  gap: 2px;
+  font-size: 11.2px;
+}
+
+.sv-lhp-open-form input,
+.sv-lhp-open-form select {
+  min-height: 30px;
+  height: 30px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.sv-lhp-open-actions {
+  align-self: end;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.sv-lhp-open-actions button {
+  min-height: 30px;
+  padding: 5px 9px;
+  font-size: 11.5px;
+}
+
+/* Danh sách lớp học phần: màu cột nhẹ, dễ quét mắt */
+.sv-lhp-table {
+  min-width: 1460px;
+}
+
+.sv-lhp-table th,
+.sv-lhp-table td {
+  border-right: 1px solid #edf2f7;
+}
+
+.sv-lhp-table th:last-child,
+.sv-lhp-table td:last-child {
+  border-right: 0;
+}
+
+.sv-lhp-table th:nth-child(1),
+.sv-lhp-table td:nth-child(1) { width: 42px; background-color: #fbfcfe; }
+.sv-lhp-table th:nth-child(2),
+.sv-lhp-table td:nth-child(2) { width: 105px; background-color: #f0fdf4; }
+.sv-lhp-table th:nth-child(3),
+.sv-lhp-table td:nth-child(3) { width: 88px; background-color: #eff6ff; }
+.sv-lhp-table th:nth-child(4),
+.sv-lhp-table td:nth-child(4) { width: 190px; background-color: #f8fafc; }
+.sv-lhp-table th:nth-child(5),
+.sv-lhp-table td:nth-child(5) { width: 155px; background-color: #fff7ed; }
+.sv-lhp-table th:nth-child(6),
+.sv-lhp-table td:nth-child(6) { width: 235px; background-color: #f7fee7; }
+.sv-lhp-table th:nth-child(7),
+.sv-lhp-table td:nth-child(7) { width: 165px; background-color: #faf5ff; }
+.sv-lhp-table th:nth-child(8),
+.sv-lhp-table td:nth-child(8) { width: 82px; text-align: center; background-color: #ecfdf5; }
+.sv-lhp-table th:nth-child(9),
+.sv-lhp-table td:nth-child(9) { width: 78px; text-align: center; background-color: #fefce8; }
+.sv-lhp-table th:nth-child(10),
+.sv-lhp-table td:nth-child(10) { width: 116px; background-color: #eef2ff; }
+.sv-lhp-table th:nth-child(11),
+.sv-lhp-table td:nth-child(11) { width: 430px; background-color: #ffffff; }
+
+.sv-lhp-table thead th {
+  color: #123047;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.72), rgba(232,246,239,.72));
+}
+
+.sv-lhp-table tbody tr:hover td {
+  filter: saturate(1.04) brightness(.985);
+}
+
+.sv-lhp-table .sv-row-actions {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 7px;
+  min-width: max-content;
+}
+
+.sv-lhp-table .sv-row-actions .small,
+.sv-lhp-table .sv-row-actions button.small,
+.sv-lhp-table .sv-row-actions a.small {
+  min-height: 26px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 11px;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, .06);
+}
+
+.sv-lhp-table td:nth-child(11) {
+  overflow: visible;
+}
+
+@media (max-width: 1500px) {
+  .sv-auto-tao-form {
+    grid-template-columns: 190px 104px 104px 110px minmax(210px, 1fr) 360px;
+  }
+
+  .sv-lhp-open-form {
+    grid-template-columns: 140px minmax(240px, 1fr) 125px 110px 140px minmax(190px, 1fr) 86px 86px 86px auto;
+  }
+}
+
+@media (max-width: 1180px) {
+  .sv-auto-tao-form,
+  .sv-lhp-open-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sv-auto-lhc-dropdown,
+  .sv-auto-check,
+  .sv-lhp-open-actions {
+    grid-column: span 3;
+  }
+
+  .sv-lhc-checkbox-dropdown-list {
+    left: 0;
+    right: auto;
+    width: min(620px, calc(100vw - 48px));
   }
 }
 
 @media (max-width: 760px) {
-  .sv-form-table-3,
-  .sv-form-table-4 {
+  .sv-auto-tao-form,
+  .sv-lhp-open-form {
     grid-template-columns: 1fr;
   }
 
-  .sv-col-span-3 {
+  .sv-auto-lhc-dropdown,
+  .sv-auto-check,
+  .sv-lhp-open-actions {
     grid-column: span 1;
+  }
+
+  .sv-lhc-checkbox-dropdown-list {
+    position: static;
+    width: 100%;
+    max-height: 240px;
+    grid-template-columns: 1fr;
+    margin-top: 6px;
+    box-shadow: none;
+  }
+}
+
+
+
+/* ===== OVERRIDE COMPACT V5: dropdown lớp dọc + thao tác dễ nhìn, ít phải kéo ngang ===== */
+.sv-auto-compact-card {
+  overflow: visible;
+}
+
+.sv-auto-tao-form {
+  grid-template-columns: 168px 88px 88px 96px minmax(190px, 1fr) minmax(260px, 300px) !important;
+  gap: 6px !important;
+  align-items: end;
+}
+
+.sv-auto-field-ky select {
+  min-width: 0;
+}
+
+.sv-auto-lhc-dropdown {
+  position: relative;
+  align-self: end;
+  min-width: 0;
+  max-width: 300px;
+}
+
+.sv-auto-lhc-dropdown summary {
+  min-height: 31px;
+  padding: 5px 10px;
+  border: 1px solid #b7e1cc;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #fbfffd 0%, #eefaf4 100%);
+  color: #075f3e;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 12px;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgba(7, 113, 73, .08);
+}
+
+.sv-auto-lhc-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.sv-auto-lhc-dropdown summary::after {
+  content: '▾';
+  font-size: 10px;
+  color: #077149;
+  transform: translateY(-1px);
+}
+
+.sv-auto-lhc-dropdown[open] summary::after {
+  content: '▴';
+}
+
+.sv-auto-lhc-summary-left,
+.sv-auto-lhc-summary-count {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-auto-lhc-summary-left strong {
+  font-size: 11.3px;
+  font-weight: 900;
+}
+
+.sv-auto-lhc-summary-count {
+  color: #64748b;
+  font-size: 10.8px;
+  font-weight: 800;
+}
+
+.sv-lhc-checkbox-dropdown-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 80;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 6px !important;
+  width: min(430px, calc(100vw - 54px)) !important;
+  max-height: 288px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+  border: 1px solid #b7e1cc;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, .16);
+}
+
+.sv-lhc-checkbox-dropdown-list .sv-lhc-chon-item {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 11.6px;
+  line-height: 1.25;
+}
+
+.sv-lhc-checkbox-dropdown-list .sv-lhc-chon-item:hover {
+  border-color: #8fd2b2;
+  background: #f2fbf6;
+}
+
+.sv-lhc-checkbox-dropdown-list .sv-lhc-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sv-lhc-checkbox-dropdown-list .sv-status-pill {
+  min-height: 21px;
+  padding: 2px 7px;
+  font-size: 10.5px;
+}
+
+/* Bảng lớp học phần: giảm độ rộng tổng, giữ cột thao tác luôn nhìn thấy */
+.sv-lhp-table {
+  min-width: 1180px !important;
+  table-layout: fixed;
+}
+
+.sv-lhp-table th,
+.sv-lhp-table td {
+  padding: 5px 6px !important;
+}
+
+.sv-lhp-table th:nth-child(1),
+.sv-lhp-table td:nth-child(1) { width: 38px !important; }
+.sv-lhp-table th:nth-child(2),
+.sv-lhp-table td:nth-child(2) { width: 78px !important; }
+.sv-lhp-table th:nth-child(3),
+.sv-lhp-table td:nth-child(3) { width: 70px !important; }
+.sv-lhp-table th:nth-child(4),
+.sv-lhp-table td:nth-child(4) { width: 145px !important; }
+.sv-lhp-table th:nth-child(5),
+.sv-lhp-table td:nth-child(5) { width: 120px !important; }
+.sv-lhp-table th:nth-child(6),
+.sv-lhp-table td:nth-child(6) { width: 175px !important; }
+.sv-lhp-table th:nth-child(7),
+.sv-lhp-table td:nth-child(7) { width: 120px !important; }
+.sv-lhp-table th:nth-child(8),
+.sv-lhp-table td:nth-child(8) { width: 72px !important; }
+.sv-lhp-table th:nth-child(9),
+.sv-lhp-table td:nth-child(9) { width: 64px !important; }
+.sv-lhp-table th:nth-child(10),
+.sv-lhp-table td:nth-child(10) { width: 94px !important; }
+.sv-lhp-table th:nth-child(11),
+.sv-lhp-table td:nth-child(11) {
+  width: 275px !important;
+  min-width: 275px !important;
+  position: sticky;
+  right: 0;
+  z-index: 6;
+  background: linear-gradient(90deg, #ffffff 0%, #f8fffb 100%) !important;
+  box-shadow: -8px 0 14px rgba(15, 23, 42, .06);
+}
+
+.sv-lhp-table thead th:nth-child(11) {
+  z-index: 12;
+  background: linear-gradient(180deg, #edf8f2 0%, #e6f5ee 100%) !important;
+}
+
+.sv-lhp-table td:nth-child(4),
+.sv-lhp-table td:nth-child(5),
+.sv-lhp-table td:nth-child(6),
+.sv-lhp-table td:nth-child(7) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-lhp-table td:nth-child(11) .sv-row-actions,
+.sv-lhp-table .sv-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  min-width: 0 !important;
+  width: max-content;
+}
+
+.sv-lhp-table td:nth-child(11) button.small,
+.sv-lhp-table td:nth-child(11) .btn-giangday.small,
+.sv-lhp-table td:nth-child(11) .btn-xem-sv.small,
+.sv-lhp-table .sv-row-actions .small,
+.sv-lhp-table .sv-row-actions button.small,
+.sv-lhp-table .sv-row-actions a.small {
+  min-height: 25px !important;
+  padding: 5px 7px !important;
+  border-radius: 7px !important;
+  font-size: 10.8px !important;
+  letter-spacing: -.1px;
+}
+
+.sv-lhp-table .btn-xem-sv.small {
+  min-width: 60px;
+}
+
+.sv-lhp-table .btn-nhanh2.small {
+  min-width: 68px;
+}
+
+.sv-lhp-table .btn-giangday.small {
+  min-width: 72px;
+}
+
+.sv-lhp-table td:nth-child(11) button.secondary.small,
+.sv-lhp-table td:nth-child(11) button.danger.small {
+  min-width: 34px;
+}
+
+.sv-lhp-table-wrap {
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 1500px) {
+  .sv-auto-tao-form {
+    grid-template-columns: 158px 84px 84px 92px minmax(170px, 1fr) minmax(250px, 292px) !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .sv-auto-tao-form {
+    grid-template-columns: 150px 82px 82px 92px minmax(170px, 1fr) minmax(230px, 280px) !important;
+  }
+
+  .sv-auto-lhc-dropdown {
+    max-width: 280px;
+  }
+
+  .sv-lhc-checkbox-dropdown-list {
+    right: 0;
+    left: auto;
+    width: min(390px, calc(100vw - 42px)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .sv-auto-tao-form {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .sv-auto-lhc-dropdown,
+  .sv-auto-check {
+    grid-column: span 2;
+    max-width: 100%;
+  }
+
+  .sv-lhc-checkbox-dropdown-list {
+    left: 0;
+    right: auto;
+    width: min(100%, calc(100vw - 32px)) !important;
   }
 }
 </style>
+
+
+
+
+

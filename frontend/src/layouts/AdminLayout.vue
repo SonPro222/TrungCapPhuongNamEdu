@@ -1,16 +1,15 @@
 <template>
   <div class="admin-layout">
     <header class="admin-header">
-      <div class="admin-brand">
+      <RouterLink to="/dashboard" class="admin-brand">
         {{ appName }}
-      </div>
+      </RouterLink>
 
       <nav class="admin-nav">
         <RouterLink to="/admin/dao-tao/xem-chuong-trinh">Quản lý đào tạo</RouterLink>
         <RouterLink to="/admin/sinh-vien">Quản lý sinh viên</RouterLink>
         <RouterLink to="/admin/giang-day/lop-hoc-phan">Quản lý giảng dạy</RouterLink>
         <RouterLink to="/admin/he-thong/tai-khoan">Quản lý Hệ thống</RouterLink>
-        <RouterLink to="/admin/xem-chuong-trinh-dao-tao">Xem chương trình đào tạo</RouterLink>
         <RouterLink to="/admin/lms/tong-quan">LMS</RouterLink>
         <RouterLink to="/chuong-trinh/tong-quan">
           Xem tổng quan CTĐT - Kho học liệu

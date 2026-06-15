@@ -1,23 +1,33 @@
 <template>
   <div class="dao-tao-xem-ky-page">
     <section class="page-header">
-      <div>
-        <button type="button" class="back-btn" @click="quayLaiTongQuan">
-          ← Quay lại tổng quan
-        </button>
+      <div class="page-title">
+        <div class="top-line">
+          <button type="button" class="back-btn" @click="quayLaiTongQuan">
+            ← Quay lại tổng quan
+          </button>
+
+          <span class="version-pill">
+            Version: <strong>{{ tenVersion }}</strong>
+          </span>
+        </div>
 
         <p class="eyebrow">Chương trình đào tạo</p>
+
         <h1>{{ tenChuongTrinh }}</h1>
-        <p class="version-text">
-          Version: <strong>{{ tenVersion }}</strong>
-        </p>
+
         <p class="subtitle">
-          Mỗi block là một kỳ, mỗi dòng trong bảng là một môn học thuộc kỳ đó.
+          Mỗi block là một kỳ, mỗi dòng là một môn học thuộc kỳ đó.
         </p>
       </div>
 
       <div class="header-actions">
-        <button type="button" class="btn" :disabled="loading || !chuongTrinhId" @click="taiDuLieu">
+        <button
+            type="button"
+            class="btn"
+            :disabled="loading || !chuongTrinhId"
+            @click="taiDuLieu"
+        >
           Tải lại
         </button>
       </div>
@@ -26,7 +36,12 @@
     <section v-if="errorMessage" class="state-card error">
       <h3>Không tải được dữ liệu</h3>
       <p>{{ errorMessage }}</p>
-      <button type="button" class="btn primary" :disabled="!chuongTrinhId" @click="taiDuLieu">
+      <button
+          type="button"
+          class="btn primary"
+          :disabled="!chuongTrinhId"
+          @click="taiDuLieu"
+      >
         Thử lại
       </button>
     </section>
@@ -66,7 +81,7 @@
         <div class="spinner"></div>
         <div>
           <h3>Đang tải danh sách kỳ...</h3>
-          <p>Hệ thống chỉ lấy kỳ và môn trong kỳ. Chi tiết syllabus sẽ tải riêng khi bấm Xem syllabus.</p>
+          <p>Hệ thống chỉ lấy kỳ và môn trong kỳ. Chi tiết syllabus tải riêng khi bấm Xem.</p>
         </div>
       </div>
 
@@ -85,7 +100,7 @@
             class="semester-card"
         >
           <header class="semester-header">
-            <div>
+            <div class="semester-title">
               <p class="semester-eyebrow">Kỳ học</p>
               <h3>{{ layTenKyHienThi(ky, index) }}</h3>
             </div>
@@ -96,9 +111,9 @@
           </header>
 
           <div class="semester-summary">
-            <span>Tín chỉ: <b>{{ hienThi(ky.tongTinChi) }}</b></span>
-            <span>Tổng giờ: <b>{{ hienThi(ky.tongGio) }}</b></span>
-            <span>Buổi học: <b>{{ hienThi(ky.tongBuoiHoc) }}</b></span>
+            <span>TC: <b>{{ hienThi(ky.tongTinChi) }}</b></span>
+            <span>Giờ: <b>{{ hienThi(ky.tongGio) }}</b></span>
+            <span>Buổi: <b>{{ hienThi(ky.tongBuoiHoc) }}</b></span>
           </div>
 
           <div class="table-wrap">
@@ -107,7 +122,7 @@
               <tr>
                 <th class="col-subject">Môn học</th>
                 <th>Buổi</th>
-                <th>Tổng giờ</th>
+                <th>Giờ</th>
                 <th>LT</th>
                 <th>TH</th>
                 <th>KT</th>
@@ -127,12 +142,14 @@
                 <td class="subject-cell">
                   <strong>{{ mon.tenMon }}</strong>
                 </td>
+
                 <td>{{ hienThi(mon.soBuoiHoc) }}</td>
                 <td>{{ hienThi(mon.tongGio) }}</td>
                 <td>{{ hienThi(mon.gioLyThuyet) }}</td>
                 <td>{{ hienThi(mon.gioThucHanh) }}</td>
                 <td>{{ hienThi(mon.gioKiemTra) }}</td>
                 <td>{{ hienThi(mon.soTinChi) }}</td>
+
                 <td>
                   <button
                       v-if="mon.coSyllabus"
@@ -140,7 +157,7 @@
                       class="link-btn"
                       @click="diDenTrangSyllabus(mon)"
                   >
-                    Xem syllabus
+                    Xem
                   </button>
 
                   <span v-else class="muted-text">
@@ -650,15 +667,35 @@ function hienThi(value) {
 
 <style scoped>
 .dao-tao-xem-ky-page {
+  --primary: #077149;
+  --primary-dark: #045f3c;
+  --primary-deep: #034d31;
+  --primary-light: #149565;
+  --primary-soft: #e8f6ef;
+  --primary-soft-2: #f5fcf8;
+  --primary-border: #a8dbc4;
+  --primary-border-2: #d8ece2;
+  --text-main: #102018;
+  --text-muted: #5f7469;
+  --surface: #ffffff;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+  --warning-bg: #fff9e8;
+  --warning-border: #f4d37f;
+  --warning-text: #875c09;
+
   min-height: calc(100vh - var(--header-height, 60px));
-  padding: 12px 16px 20px;
-  background: #f1f7ff;
-  color: #0f172a;
+  padding: 8px 10px 14px;
+  background:
+      radial-gradient(circle at top left, rgba(7, 113, 73, 0.08), transparent 28%),
+      linear-gradient(180deg, #f5fbf8 0%, #eef8f3 100%);
+  color: var(--text-main);
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
 /* =========================
-   HEADER / STATE / CARD BASE
+   BASE
 ========================= */
 
 .page-header,
@@ -666,43 +703,59 @@ function hienThi(value) {
 .empty-card,
 .semester-card,
 .overview-strip article {
-  border: 1px solid #bfdbfe;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(15, 82, 143, 0.10);
+  border: 1px solid var(--primary-border-2);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 6px 16px rgba(7, 113, 73, 0.055);
 }
 
+/* =========================
+   COMPACT HEADER
+========================= */
+
 .page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 9px 11px;
+  margin-bottom: 7px;
+  background: linear-gradient(135deg, #ffffff 0%, #eef9f4 100%);
+}
+
+.page-title {
+  min-width: 0;
+}
+
+.top-line {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 18px;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, #ffffff 0%, #eaf4ff 100%);
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
 }
 
 .back-btn {
-  margin-bottom: 10px;
   border: 0;
   background: transparent;
-  color: #0b5a92;
-  font-size: 13px;
-  font-weight: 800;
+  color: var(--primary-dark);
+  font-size: 10px;
+  font-weight: 900;
   cursor: pointer;
   padding: 0;
+  line-height: 1.2;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
 .back-btn:hover {
-  color: #08456f;
+  color: var(--primary);
   text-decoration: underline;
 }
 
 .eyebrow {
-  margin: 0 0 4px;
-  color: #0b5a92;
-  font-size: 12px;
+  margin: 0 0 2px;
+  color: var(--primary);
+  font-size: 9px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -710,39 +763,56 @@ function hienThi(value) {
 
 .page-header h1 {
   margin: 0;
-  color: #0f172a;
-  font-size: 22px;
-  line-height: 1.3;
-  font-weight: 700;
-}
-
-.version-text {
-  margin: 6px 0 0;
-  color: #0f3d64;
-  font-size: 13px;
+  color: var(--text-main);
+  font-size: 16px;
+  line-height: 1.22;
+  font-weight: 900;
+  word-break: break-word;
 }
 
 .subtitle {
-  margin: 6px 0 0;
-  color: #42637f;
-  font-size: 13px;
-  line-height: 1.45;
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.version-pill {
+  flex-shrink: 0;
+  max-width: 300px;
+  min-height: 21px;
+  border: 1px solid var(--primary-border);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--primary-dark);
+  padding: 3px 8px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.version-pill strong {
+  font-weight: 900;
 }
 
 .header-actions {
   display: flex;
+  align-items: flex-start;
   flex-shrink: 0;
 }
 
 .btn {
-  min-height: 32px;
-  border: 1px solid #9fc5e8;
-  border-radius: 12px;
+  min-height: 27px;
+  border: 1px solid var(--primary-border);
+  border-radius: 8px;
   background: #ffffff;
-  color: #0f3d64;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 800;
+  color: var(--primary-dark);
+  padding: 5px 10px;
+  font-size: 10px;
+  font-weight: 900;
   cursor: pointer;
   white-space: nowrap;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
@@ -750,10 +820,10 @@ function hienThi(value) {
 }
 
 .btn:hover {
-  border-color: #0b5a92;
-  background: #eaf4ff;
-  color: #0b5a92;
-  box-shadow: 0 3px 10px rgba(15, 82, 143, 0.12);
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+  box-shadow: 0 3px 10px rgba(7, 113, 73, 0.12);
 }
 
 .btn:disabled {
@@ -762,55 +832,122 @@ function hienThi(value) {
 }
 
 .btn.primary {
-  border-color: #0b5a92;
-  background: #0b5a92;
+  border-color: var(--primary);
+  background: var(--primary);
   color: #ffffff;
 }
 
 .btn.primary:hover {
-  border-color: #08456f;
-  background: #08456f;
-  color: #ffffff;
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
 }
 
 /* =========================
-   NOTICE / OVERVIEW
+   NOTICE / STATE
 ========================= */
 
 .notice-card {
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border: 1px solid #fde68a;
-  border-radius: 14px;
-  background: #fffbeb;
-  color: #92400e;
+  margin-bottom: 7px;
+  padding: 7px 9px;
+  border: 1px solid var(--warning-border);
+  border-radius: 10px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.state-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+}
+
+.state-card h3 {
+  margin: 0 0 3px;
+  color: var(--text-main);
   font-size: 13px;
 }
+
+.state-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.state-card.error {
+  display: block;
+  margin-bottom: 7px;
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+}
+
+.state-card.error p {
+  margin-bottom: 8px;
+  color: var(--danger-text);
+}
+
+.loading-card {
+  min-height: 70px;
+}
+
+.empty-card {
+  padding: 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #d9f0e5;
+  border-top-color: var(--primary);
+  border-radius: 999px;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   COMPACT STATS
+========================= */
 
 .overview-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 7px;
+  margin-bottom: 8px;
 }
 
 .overview-strip article {
-  padding: 14px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  min-height: 33px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 10px;
+  background: #ffffff;
 }
 
 .overview-strip span {
-  display: block;
-  color: #42637f;
-  font-size: 12px;
-  font-weight: 800;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 900;
 }
 
 .overview-strip strong {
-  display: block;
-  margin-top: 4px;
-  color: #0b5a92;
-  font-size: 21px;
+  color: var(--primary);
+  font-size: 17px;
+  line-height: 1;
   font-weight: 900;
 }
 
@@ -820,89 +957,90 @@ function hienThi(value) {
 
 .semester-section {
   display: grid;
-  gap: 14px;
+  gap: 8px;
 }
 
 .section-title {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-start;
 }
 
 .section-title h2 {
   margin: 0;
-  color: #0f172a;
-  font-size: 17px;
-  font-weight: 700;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .section-title p {
-  margin: 4px 0 0;
-  color: #42637f;
-  font-size: 12px;
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
 }
 
 .badge,
 .subject-count {
   display: inline-flex;
   align-items: center;
-  min-height: 23px;
   border-radius: 999px;
-  padding: 3px 9px;
-  font-size: 11px;
   font-weight: 900;
   white-space: nowrap;
 }
 
-.badge.neutral,
-.subject-count {
-  border: 1px solid #b7d3ec;
-  background: #f8fbff;
-  color: #0f3d64;
+.badge.neutral {
+  min-height: 20px;
+  border: 1px solid var(--primary-border);
+  background: var(--primary-soft-2);
+  color: var(--primary-dark);
+  padding: 2px 7px;
+  font-size: 9px;
 }
 
 /* =========================
-   KỲ GRID
+   SEMESTER GRID
 ========================= */
 
 .semester-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 8px;
   align-items: start;
 }
 
 .semester-card {
   min-width: 0;
   overflow: hidden;
-  border-color: #9fc5e8;
+  border-color: var(--primary-border);
   background: #ffffff;
-  box-shadow: 0 10px 28px rgba(15, 82, 143, 0.13);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 7px 18px rgba(7, 113, 73, 0.07);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .semester-card:hover {
-  transform: translateY(-2px);
-  border-color: #0b5a92;
-  box-shadow: 0 16px 34px rgba(15, 82, 143, 0.18);
+  transform: translateY(-1px);
+  border-color: var(--primary);
+  box-shadow: 0 10px 22px rgba(7, 113, 73, 0.105);
 }
 
 .semester-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
-  padding: 16px;
-  border-bottom: 1px solid #9fc5e8;
-  border-radius: 18px 18px 0 0;
-  background: linear-gradient(135deg, #0b5a92 0%, #106ba8 55%, #2d93d1 100%);
+  gap: 8px;
+  padding: 7px 9px;
+  background: linear-gradient(135deg, var(--primary-deep) 0%, var(--primary) 68%, var(--primary-light) 100%);
+}
+
+.semester-title {
+  min-width: 0;
 }
 
 .semester-eyebrow {
-  margin: 0 0 4px;
-  color: #d8ecff;
-  font-size: 11px;
+  margin: 0 0 2px;
+  color: #dff6eb;
+  font-size: 8px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -911,43 +1049,48 @@ function hienThi(value) {
 .semester-header h3 {
   margin: 0;
   color: #ffffff;
-  font-size: 17px;
-  line-height: 1.35;
-  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 900;
   word-break: break-word;
 }
 
 .subject-count {
-  border-color: #bfdbfe;
+  flex-shrink: 0;
+  min-height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.84);
   background: #ffffff;
-  color: #0b5a92;
+  color: var(--primary);
+  padding: 2px 7px;
+  font-size: 9px;
 }
 
 /* =========================
-   KỲ SUMMARY
+   SEMESTER SUMMARY
 ========================= */
 
 .semester-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-bottom: 1px solid #bfdbfe;
-  background: #eaf4ff;
+  border-bottom: 1px solid var(--primary-border-2);
+  background: var(--primary-soft-2);
 }
 
 .semester-summary span {
-  padding: 8px;
-  color: #0f3d64;
-  font-size: 11px;
-  font-weight: 700;
+  padding: 4px 5px;
+  color: var(--primary-dark);
+  font-size: 9px;
+  font-weight: 900;
   text-align: center;
+  line-height: 1.2;
 }
 
 .semester-summary span + span {
-  border-left: 1px solid #bfdbfe;
+  border-left: 1px solid var(--primary-border-2);
 }
 
 .semester-summary b {
-  color: #0f172a;
+  color: var(--text-main);
 }
 
 /* =========================
@@ -962,19 +1105,19 @@ function hienThi(value) {
 
 table {
   width: 100%;
-  min-width: 760px;
+  min-width: 640px;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 10px;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
 th,
 td {
-  padding: 8px 9px;
-  border-top: 1px solid #e5effa;
-  border-right: 1px solid #e5effa;
+  padding: 4px 5px;
+  border-top: 1px solid #e7f2ec;
+  border-right: 1px solid #e7f2ec;
   text-align: center;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 th:last-child,
@@ -983,23 +1126,26 @@ td:last-child {
 }
 
 thead th {
-  background: #f8fbff;
-  color: #0f3d64;
-  font-size: 11px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f4fbf8;
+  color: var(--primary-dark);
+  font-size: 9px;
   font-weight: 900;
   white-space: nowrap;
 }
 
 td {
-  color: #0f172a;
+  color: var(--text-main);
 }
 
 tbody tr:hover {
-  background: #f8fbff;
+  background: #f8fdfb;
 }
 
 .col-subject {
-  width: 190px;
+  width: 220px;
   text-align: left;
 }
 
@@ -1008,109 +1154,76 @@ tbody tr:hover {
 }
 
 .subject-cell strong {
-  color: #0f172a;
-  line-height: 1.35;
+  display: -webkit-box;
+  color: var(--text-main);
+  line-height: 1.25;
+  font-weight: 900;
   word-break: break-word;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .link-btn {
-  border: 0;
-  background: transparent;
-  color: #0b5a92;
-  padding: 0;
-  font-size: 12px;
-  font-weight: 800;
+  min-height: 21px;
+  border: 1px solid var(--primary-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--primary-dark);
+  padding: 2px 7px;
+  font-size: 9px;
+  font-weight: 900;
   cursor: pointer;
+  white-space: nowrap;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .link-btn:hover {
-  color: #08456f;
-  text-decoration: underline;
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .muted-text {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 700;
+  color: #7a8b83;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .empty-cell {
-  color: #64748b;
+  color: var(--text-muted);
   text-align: center;
-}
-
-/* =========================
-   STATE
-========================= */
-
-.state-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-}
-
-.state-card h3 {
-  margin: 0 0 4px;
-  color: #0f172a;
-  font-size: 16px;
-}
-
-.state-card p {
-  margin: 0;
-  color: #42637f;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.state-card.error {
-  display: block;
-  margin-bottom: 12px;
-  border-color: #fecaca;
-  background: #fef2f2;
-}
-
-.state-card.error p {
-  margin-bottom: 10px;
-  color: #991b1b;
-}
-
-.loading-card {
-  min-height: 90px;
-}
-
-.empty-card {
-  padding: 18px;
-  color: #42637f;
-  font-size: 13px;
-  text-align: center;
-}
-
-.spinner {
-  width: 26px;
-  height: 26px;
-  border: 3px solid #dbeafe;
-  border-top-color: #0b5a92;
-  border-radius: 999px;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  font-size: 10px;
+  font-weight: 800;
 }
 
 /* =========================
    RESPONSIVE
 ========================= */
 
+@media (max-width: 1080px) {
+  .semester-grid {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    min-width: 700px;
+  }
+}
+
 @media (max-width: 860px) {
-  .page-header,
-  .section-title {
-    flex-direction: column;
+  .page-header {
+    grid-template-columns: 1fr;
+  }
+
+  .top-line {
+    align-items: flex-start;
+  }
+
+  .version-pill {
+    max-width: 100%;
   }
 
   .header-actions {
@@ -1121,22 +1234,18 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
-  .semester-grid {
-    grid-template-columns: 1fr;
+  .section-title {
+    flex-direction: column;
   }
 }
 
 @media (max-width: 640px) {
   .dao-tao-xem-ky-page {
-    padding: 10px;
-  }
-
-  .semester-grid {
-    grid-template-columns: 1fr;
+    padding: 8px;
   }
 
   .page-header h1 {
-    font-size: 19px;
+    font-size: 15px;
   }
 
   .semester-summary {
@@ -1145,7 +1254,11 @@ tbody tr:hover {
 
   .semester-summary span + span {
     border-left: 0;
-    border-top: 1px solid #bfdbfe;
+    border-top: 1px solid var(--primary-border-2);
+  }
+
+  table {
+    min-width: 700px;
   }
 }
 </style>

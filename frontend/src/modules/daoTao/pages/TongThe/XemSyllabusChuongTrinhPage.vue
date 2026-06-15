@@ -1,21 +1,28 @@
 <template>
   <div class="dao-tao-xem-syllabus-chuong-trinh-page">
-    <section class="page-header">
-      <div>
+    <section class="top-shell">
+      <div class="top-left">
         <button type="button" class="back-btn" @click="quayLaiTongQuan">
           ← Quay lại tổng quan
         </button>
 
-        <p class="eyebrow">Syllabus chương trình</p>
-        <h1>{{ tenChuongTrinh }}</h1>
-        <p class="version-text">
-          Version: <strong>{{ tenVersion }}</strong>
-        </p>
+        <div class="top-title-row">
+          <p class="eyebrow">Syllabus chương trình</p>
+          <h1>{{ tenChuongTrinh }}</h1>
+        </div>
 
+        <div class="top-meta-row">
+          <span>Version: <strong>{{ tenVersion }}</strong></span>
+          <span v-if="maChuongTrinh">Mã CT: <strong>{{ maChuongTrinh }}</strong></span>
+          <span v-if="maSyllabus">Mã SYL: <strong>{{ maSyllabus }}</strong></span>
+          <span :class="['status-badge', syllabusChuongTrinh ? 'success' : 'muted']">
+            {{ syllabusChuongTrinh ? 'Có syllabus' : 'Chưa có syllabus' }}
+          </span>
+        </div>
       </div>
 
-      <div class="header-actions">
-        <button type="button" class="btn" :disabled="loading || !chuongTrinhId" @click="taiDuLieu">
+      <div class="top-actions">
+        <button type="button" class="btn ghost" :disabled="loading || !chuongTrinhId" @click="taiDuLieu">
           Tải lại
         </button>
       </div>
@@ -33,7 +40,7 @@
       <div class="spinner"></div>
       <div>
         <h3>Đang tải syllabus chương trình...</h3>
-        <p>Hệ thống đang lấy syllabus chương trình và các bảng liên quan cùng tầng.</p>
+        <p>Hệ thống đang lấy syllabus chương trình và các bảng liên quan.</p>
       </div>
     </section>
 
@@ -43,17 +50,10 @@
     </section>
 
     <template v-else>
-      <section class="summary-card">
-        <div class="summary-main">
+      <section class="overview-strip">
+        <div class="overview-name">
           <p class="eyebrow">Chương trình đào tạo</p>
           <h2>{{ tenChuongTrinh }}</h2>
-          <div class="summary-badges">
-            <span :class="['status-badge', syllabusChuongTrinh ? 'success' : 'muted']">
-              {{ syllabusChuongTrinh ? 'Có syllabus chương trình' : 'Chưa có syllabus chương trình' }}
-            </span>
-            <span v-if="maChuongTrinh" class="status-badge neutral">Mã chương trình: {{ maChuongTrinh }}</span>
-            <span v-if="maSyllabus" class="status-badge neutral">Mã syllabus: {{ maSyllabus }}</span>
-          </div>
         </div>
 
         <div class="metric-grid">
@@ -62,51 +62,47 @@
             <strong>{{ danhSachMucTieu.length }}</strong>
           </article>
           <article>
-            <span>Năng lực đầu ra</span>
+            <span>Năng lực</span>
             <strong>{{ danhSachNangLuc.length }}</strong>
           </article>
           <article>
-            <span>Vị trí việc làm</span>
+            <span>Việc làm</span>
             <strong>{{ danhSachViTri.length }}</strong>
           </article>
           <article>
-            <span>Điều kiện TN</span>
+            <span>ĐK TN</span>
             <strong>{{ danhSachDieuKien.length }}</strong>
           </article>
           <article>
-            <span>Môn trong kỳ</span>
+            <span>Môn kỳ</span>
             <strong>{{ danhSachMonTrongKy.length }}</strong>
           </article>
-
-          <article class="tong-hop">
+          <article class="total">
             <span>Tổng TC</span>
             <strong>{{ dinhDangSo(tongHopChuongTrinh.soTinChi) }}</strong>
           </article>
-          <article class="tong-hop">
+          <article class="total">
             <span>Tổng giờ</span>
             <strong>{{ dinhDangSo(tongHopChuongTrinh.tongGio) }}</strong>
           </article>
-          <article class="tong-hop">
+          <article class="total">
             <span>Giờ LT</span>
             <strong>{{ dinhDangSo(tongHopChuongTrinh.gioLyThuyet) }}</strong>
           </article>
-          <article class="tong-hop">
+          <article class="total">
             <span>Giờ TH</span>
             <strong>{{ dinhDangSo(tongHopChuongTrinh.gioThucHanh) }}</strong>
           </article>
-          <article class="tong-hop">
+          <article class="total">
             <span>Giờ KT</span>
             <strong>{{ dinhDangSo(tongHopChuongTrinh.gioKiemTra) }}</strong>
           </article>
         </div>
       </section>
 
-      <!-- Cảnh báo môn trong kỳ chưa có syllabus -->
-      <section v-if="soMonChuaCoSyllabus > 0" class="state-card canh-bao-syllabus">
-        <div>
-          <h3>⚠ Tổng giờ/tín chỉ chưa đầy đủ</h3>
-          <p>Có {{ soMonChuaCoSyllabus }} môn trong kỳ chưa có syllabus áp dụng nên tổng giờ/tín chỉ có thể chưa đầy đủ.</p>
-        </div>
+      <section v-if="soMonChuaCoSyllabus > 0" class="state-card warning compact-warning">
+        <strong>⚠ Tổng giờ/tín chỉ chưa đầy đủ</strong>
+        <span>Có {{ soMonChuaCoSyllabus }} môn trong kỳ chưa có syllabus áp dụng.</span>
       </section>
 
       <section v-if="!syllabusChuongTrinh" class="state-card empty">
@@ -114,30 +110,11 @@
         <p>Hiện chưa có bản syllabus chương trình áp dụng cho version đang chọn.</p>
       </section>
 
-      <section v-else class="content-grid">
-        <article class="info-card full hero-card">
-          <div class="card-title-row">
-            <div>
-              <p class="card-eyebrow">Thông tin chính</p>
-              <h3>{{ tenSyllabus }}</h3>
-            </div>
-            <span class="readonly-pill">Chỉ xem</span>
-          </div>
-
-          <dl class="info-list compact">
-            <template v-for="item in thongTinChinh" :key="item.label">
-              <dt>{{ item.label }}</dt>
-              <dd>{{ item.value }}</dd>
-            </template>
-          </dl>
-        </article>
-
-        <article class="info-card full file-card">
-          <div class="card-title-row">
-            <div>
-              <p class="card-eyebrow">Tệp syllabus</p>
-              <h3>Xem tệp / tải tệp</h3>
-            </div>
+      <template v-else>
+        <section class="compact-file-bar">
+          <div class="file-main">
+            <span class="file-label">Tệp syllabus</span>
+            <strong>{{ tenSyllabus }}</strong>
           </div>
 
           <div v-if="duongDanTep" class="file-actions">
@@ -147,109 +124,114 @@
             <a class="file-button" :href="duongDanTep" download>
               Tải về
             </a>
-            <span class="file-path">{{ duongDanTep }}</span>
+            <span class="file-path" :title="duongDanTep">{{ duongDanTep }}</span>
           </div>
 
-          <div v-else class="empty-inline">
-            Chưa có đường dẫn tệp syllabus chương trình.
+          <div v-else class="file-empty">
+            Chưa có đường dẫn tệp.
           </div>
-        </article>
+        </section>
 
-        <article v-for="block in noiDungSyllabus" :key="block.key" class="info-card">
-          <h3>{{ block.title }}</h3>
-          <div v-if="block.value" class="rich-text">
-            {{ block.value }}
-          </div>
-          <div v-else class="empty-inline">
-            Chưa có nội dung.
-          </div>
-        </article>
-      </section>
+        <section class="accordion-list compact-info-list">
+          <article :class="['table-card', { open: isBangDangMo('thongTinChinh') }]">
+            <button type="button" class="accordion-header" @click="toggleBang('thongTinChinh')">
+              <span class="toggle-icon">{{ isBangDangMo('thongTinChinh') ? '−' : '+' }}</span>
+              <span class="accordion-title">
+                <strong>Thông tin chính</strong>
+                <small>{{ tenSyllabus }}</small>
+              </span>
+              <span class="count-pill">{{ thongTinChinh.length }}</span>
+            </button>
+
+            <div v-show="isBangDangMo('thongTinChinh')" class="accordion-body">
+              <div class="info-table">
+                <div v-for="item in thongTinChinh" :key="item.label" class="info-row">
+                  <div class="info-label">{{ item.label }}</div>
+                  <div class="info-value">{{ item.value }}</div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article :class="['table-card', { open: isBangDangMo('noiDungSyllabus') }]">
+            <button type="button" class="accordion-header" @click="toggleBang('noiDungSyllabus')">
+              <span class="toggle-icon">{{ isBangDangMo('noiDungSyllabus') ? '−' : '+' }}</span>
+              <span class="accordion-title">
+                <strong>Nội dung syllabus</strong>
+                <small>Mục tiêu, điều kiện, phương pháp, hướng dẫn, ghi chú...</small>
+              </span>
+              <span class="count-pill">{{ noiDungSyllabusCoNoiDung.length }}</span>
+            </button>
+
+            <div v-show="isBangDangMo('noiDungSyllabus')" class="accordion-body">
+              <div v-if="noiDungSyllabusCoNoiDung.length" class="text-data-table">
+                <div class="text-data-head">
+                  <span>Mục</span>
+                  <span>Nội dung</span>
+                </div>
+
+                <div
+                    v-for="block in noiDungSyllabusCoNoiDung"
+                    :key="block.key"
+                    class="text-data-row"
+                >
+                  <div class="text-data-title">{{ block.title }}</div>
+                  <div class="text-data-content">{{ block.value }}</div>
+                </div>
+              </div>
+
+              <div v-else class="empty-inline small">
+                Chưa có nội dung syllabus.
+              </div>
+            </div>
+          </article>
+        </section>
+      </template>
 
       <section class="related-section">
         <div class="section-title">
           <div>
-            <p>Dữ liệu cùng gắn với version chương trình đang xem.</p>
+            <p class="eyebrow">Dữ liệu liên quan</p>
+            <h2>Các bảng theo version chương trình</h2>
           </div>
-          <span class="badge neutral">{{ tongBangLienQuan }} bảng có dữ liệu</span>
+
+          <div class="section-actions">
+            <button type="button" class="mini-btn" @click="moTatCaBang">Mở tất cả</button>
+            <button type="button" class="mini-btn" @click="thuGonTatCaBang">Thu gọn</button>
+            <span class="badge neutral">{{ tongBangLienQuan }} bảng có dữ liệu</span>
+          </div>
         </div>
 
-        <div class="related-grid">
-          <article class="table-card full">
-            <header>
-              <div>
-                <h3>Mục tiêu chương trình</h3>
-              </div>
-              <span class="count-pill">{{ danhSachMucTieu.length }}</span>
-            </header>
-            <SimpleTable :rows="danhSachMucTieu" :columns="cotMucTieu" empty-text="Chưa có mục tiêu chương trình." />
-          </article>
+        <div class="accordion-list">
+          <article
+              v-for="block in bangLienQuan"
+              :key="block.key"
+              :class="['table-card', { open: isBangDangMo(block.key) }]"
+          >
+            <button type="button" class="accordion-header" @click="toggleBang(block.key)">
+              <span class="toggle-icon">{{ isBangDangMo(block.key) ? '−' : '+' }}</span>
 
-          <article class="table-card full">
-            <header>
-              <div>
-                <p class="card-eyebrow">Năng lực đầu ra</p>
-              </div>
-              <span class="count-pill">{{ danhSachNangLuc.length }}</span>
-            </header>
-            <SimpleTable :rows="danhSachNangLuc" :columns="cotNangLuc" empty-text="Chưa có năng lực đầu ra." />
-          </article>
+              <span class="accordion-title">
+                <strong>{{ block.title }}</strong>
+                <small v-if="block.description">{{ block.description }}</small>
+                <small v-if="block.key === 'monTrongKy' && soMonChuaCoSyllabus > 0" class="canh-bao-inline">
+                  ⚠ {{ soMonChuaCoSyllabus }} môn chưa có syllabus
+                </small>
+              </span>
 
-          <article class="table-card full">
-            <header>
-              <div>
-                <p class="card-eyebrow">Vị trí việc làm</p>
-              </div>
-              <span class="count-pill">{{ danhSachViTri.length }}</span>
-            </header>
-            <SimpleTable :rows="danhSachViTri" :columns="cotViTri" empty-text="Chưa có vị trí việc làm." />
-          </article>
+              <span class="count-pill">{{ block.rows.length }}</span>
+            </button>
 
-          <article class="table-card full">
-            <header>
-              <div>
-                <p class="card-eyebrow">Điệu kiện tốt nghiệp</p>
-              </div>
-              <span class="count-pill">{{ danhSachDieuKien.length }}</span>
-            </header>
-            <SimpleTable :rows="danhSachDieuKien" :columns="cotDieuKien" empty-text="Chưa có điều kiện tốt nghiệp." />
-          </article>
-
-          <article class="table-card full">
-            <header>
-              <div>
-                <p class="card-eyebrow">Nhóm kiến thức</p>
-              </div>
-              <span class="count-pill">{{ danhSachNhomKienThuc.length }}</span>
-            </header>
-            <SimpleTable :rows="danhSachNhomKienThuc" :columns="cotNhomKienThuc" empty-text="Chưa có nhóm kiến thức." />
-          </article>
-
-          <article class="table-card full">
-            <header>
-              <div>
-                <p class="card-eyebrow">Nhóm tự chọn</p>
-              </div>
-              <span class="count-pill">{{ danhSachNhomTuChon.length }}</span>
-            </header>
-            <SimpleTable :rows="danhSachNhomTuChon" :columns="cotNhomTuChon" empty-text="Chưa có nhóm tự chọn." />
-          </article>
-
-          <article class="table-card full">
-            <header>
-              <div>
-                <p class="card-eyebrow">Môn trong kỳ (tổng theo Kỳ → Môn → Syllabus áp dụng)</p>
-                <p v-if="soMonChuaCoSyllabus > 0" class="canh-bao-inline">⚠ {{ soMonChuaCoSyllabus }} môn chưa có syllabus</p>
-              </div>
-              <span class="count-pill">{{ danhSachMonTrongKy.length }}</span>
-            </header>
-            <SimpleTable :rows="danhSachMonTrongKy" :columns="cotMonTrongKy" empty-text="Chưa có môn nào được xếp vào kỳ." />
+            <div v-show="isBangDangMo(block.key)" class="accordion-body">
+              <SimpleTable :rows="block.rows" :columns="block.columns" :empty-text="block.emptyText" />
+            </div>
           </article>
         </div>
       </section>
     </template>
   </div>
 </template>
+
 
 <script setup>
 import { computed, defineComponent, h, onMounted, ref } from 'vue'
@@ -267,7 +249,7 @@ const SimpleTable = defineComponent({
   setup(props) {
     return () => {
       if (!props.rows.length) {
-        return h('div', { class: 'empty-inline' }, props.emptyText)
+        return h('div', { class: 'empty-inline small' }, props.emptyText)
       }
 
       return h('div', { class: 'table-wrap' }, [
@@ -276,7 +258,7 @@ const SimpleTable = defineComponent({
             h('tr', props.columns.map((column) => h('th', { key: column.key }, column.label)))
           ]),
           h('tbody', props.rows.map((row, rowIndex) => h('tr', { key: `row-${rowIndex}` },
-            props.columns.map((column) => h('td', { key: `${rowIndex}-${column.key}` }, column.render(row, rowIndex)))
+              props.columns.map((column) => h('td', { key: `${rowIndex}-${column.key}` }, column.render(row, rowIndex)))
           )))
         ])
       ])
@@ -292,6 +274,7 @@ const TEN_ROUTE_TONG_QUAN = 'dao-tao-chuong-trinh-tong-quan'
 const loading = ref(false)
 const errorMessage = ref('')
 const payload = ref(null)
+const bangDangMo = ref(['monTrongKy'])
 
 const chuongTrinhId = computed(() => route.params.chuongTrinhId || route.query.chuongTrinhId || null)
 const versionId = computed(() => route.params.versionId || route.query.versionId || route.query.chuongTrinhVersionId || null)
@@ -327,49 +310,41 @@ const danhSachViTri = computed(() => layMangDauTien(cauTruc.value, ['viTriViecLa
 const danhSachDieuKien = computed(() => layMangDauTien(cauTruc.value, ['dieuKienTotNghiep', 'dieuKien', 'danhSachDieuKien']))
 const danhSachNhomKienThuc = computed(() => layMangDauTien(cauTruc.value, ['nhomKienThuc', 'danhSachNhomKienThuc']))
 const danhSachNhomTuChon = computed(() => layMangDauTien(cauTruc.value, ['nhomTuChon', 'danhSachNhomTuChon']))
-// Giữ lại để tương thích, không dùng cho tổng/bảng chính nữa
 const danhSachMonTrongChuongTrinh = computed(() => layMangDauTien(cauTruc.value, ['monTrongChuongTrinh', 'danhSachMonHoc', 'monHocList']))
 
-// ===== LUỒNG ĐÚNG: Version → Kỳ → Môn trong kỳ → Syllabus áp dụng =====
-// Lấy syllabus áp dụng từ môn trong kỳ (phần tử đầu tiên trong mảng syllabusMonHoc)
 function laySyllabusApDung(row) {
   const list = Array.isArray(row?.syllabusMonHoc) ? row.syllabusMonHoc : []
   return list?.[0]?.syllabusMonHoc || null
 }
 
-// Gom tất cả môn trong kỳ từ cauTruc.khungKy (chỉ môn đã xếp kỳ)
 const danhSachMonTrongKy = computed(() => {
   const danhSachKy = layMangDauTien(cauTruc.value, ['khungKy', 'danhSachKhungKy'])
   return danhSachKy.flatMap((ky) => {
     const monTrongKy = layMangDauTien(ky, ['monTrongKy', 'danhSachMonTrongKy'])
-    // Gắn thêm thông tin kỳ vào mỗi môn để hiển thị cột Kỳ
     return monTrongKy.map((row) => ({ ...row, _tenKy: ky.tenKy || ky.maKy || null }))
   })
 })
 
 const soMonChuaCoSyllabus = computed(() =>
-  danhSachMonTrongKy.value.filter((row) => !laySyllabusApDung(row)).length
+    danhSachMonTrongKy.value.filter((row) => !laySyllabusApDung(row)).length
 )
 
-// Tổng theo luồng: Kỳ → Môn trong kỳ → Syllabus áp dụng
-// Môn chưa có syllabus KHÔNG cộng số từ chuongTrinhMon
 const tongHopChuongTrinh = computed(() =>
-  danhSachMonTrongKy.value.reduce(
-    (acc, row) => {
-      const syllabus = laySyllabusApDung(row)
-      if (!syllabus) return acc
-      return {
-        soTinChi: acc.soTinChi + (Number(syllabus.soTinChi) || 0),
-        tongGio: acc.tongGio + (Number(syllabus.tongGio) || 0),
-        gioLyThuyet: acc.gioLyThuyet + (Number(syllabus.gioLyThuyet) || 0),
-        gioThucHanh: acc.gioThucHanh + (Number(syllabus.gioThucHanh) || 0),
-        gioKiemTra: acc.gioKiemTra + (Number(syllabus.gioKiemTra) || 0),
-      }
-    },
-    { soTinChi: 0, tongGio: 0, gioLyThuyet: 0, gioThucHanh: 0, gioKiemTra: 0 }
-  )
+    danhSachMonTrongKy.value.reduce(
+        (acc, row) => {
+          const syllabus = laySyllabusApDung(row)
+          if (!syllabus) return acc
+          return {
+            soTinChi: acc.soTinChi + (Number(syllabus.soTinChi) || 0),
+            tongGio: acc.tongGio + (Number(syllabus.tongGio) || 0),
+            gioLyThuyet: acc.gioLyThuyet + (Number(syllabus.gioLyThuyet) || 0),
+            gioThucHanh: acc.gioThucHanh + (Number(syllabus.gioThucHanh) || 0),
+            gioKiemTra: acc.gioKiemTra + (Number(syllabus.gioKiemTra) || 0),
+          }
+        },
+        { soTinChi: 0, tongGio: 0, gioLyThuyet: 0, gioThucHanh: 0, gioKiemTra: 0 }
+    )
 )
-// ===== END LUỒNG ĐÚNG =====
 
 function dinhDangSo(value) {
   const n = Number(value)
@@ -406,6 +381,67 @@ const noiDungSyllabus = computed(() => [
   { key: 'phuongPhapDanhGia', title: 'Phương pháp đánh giá', value: layTruong(syllabusChuongTrinh.value, ['phuongPhapDanhGia']) },
   { key: 'huongDanThucHien', title: 'Hướng dẫn thực hiện', value: layTruong(syllabusChuongTrinh.value, ['huongDanThucHien']) },
   { key: 'ghiChu', title: 'Ghi chú', value: layTruong(syllabusChuongTrinh.value, ['ghiChu']) }
+])
+
+const noiDungSyllabusCoNoiDung = computed(() => noiDungSyllabus.value.filter((item) => coGiaTri(item.value)))
+
+const bangLienQuan = computed(() => [
+  {
+    key: 'mucTieu',
+    title: 'Mục tiêu chương trình',
+    description: 'Các mục tiêu đào tạo gắn với version đang xem.',
+    rows: danhSachMucTieu.value,
+    columns: cotMucTieu,
+    emptyText: 'Chưa có mục tiêu chương trình.'
+  },
+  {
+    key: 'nangLuc',
+    title: 'Năng lực đầu ra',
+    description: 'Chuẩn năng lực đầu ra của chương trình.',
+    rows: danhSachNangLuc.value,
+    columns: cotNangLuc,
+    emptyText: 'Chưa có năng lực đầu ra.'
+  },
+  {
+    key: 'viTri',
+    title: 'Vị trí việc làm',
+    description: 'Vị trí/chức danh việc làm sau đào tạo.',
+    rows: danhSachViTri.value,
+    columns: cotViTri,
+    emptyText: 'Chưa có vị trí việc làm.'
+  },
+  {
+    key: 'dieuKien',
+    title: 'Điều kiện tốt nghiệp',
+    description: 'Các điều kiện xét tốt nghiệp.',
+    rows: danhSachDieuKien.value,
+    columns: cotDieuKien,
+    emptyText: 'Chưa có điều kiện tốt nghiệp.'
+  },
+  {
+    key: 'nhomKienThuc',
+    title: 'Nhóm kiến thức',
+    description: 'Nhóm kiến thức và tổng hợp tín chỉ/giờ.',
+    rows: danhSachNhomKienThuc.value,
+    columns: cotNhomKienThuc,
+    emptyText: 'Chưa có nhóm kiến thức.'
+  },
+  {
+    key: 'nhomTuChon',
+    title: 'Nhóm tự chọn',
+    description: 'Nhóm môn học tự chọn của chương trình.',
+    rows: danhSachNhomTuChon.value,
+    columns: cotNhomTuChon,
+    emptyText: 'Chưa có nhóm tự chọn.'
+  },
+  {
+    key: 'monTrongKy',
+    title: 'Môn trong kỳ',
+    description: 'Tổng theo Kỳ → Môn → Syllabus áp dụng.',
+    rows: danhSachMonTrongKy.value,
+    columns: cotMonTrongKy,
+    emptyText: 'Chưa có môn nào được xếp vào kỳ.'
+  }
 ])
 
 const cotMucTieu = [
@@ -450,10 +486,8 @@ const cotNhomTuChon = [
   { key: 'soMon', label: 'Số môn', render: (row) => hienThi((layMangDauTien(row, ['monTuChon', 'monHoc']).length || null)) }
 ]
 
-// Bảng cũ — giữ lại nhưng không dùng trực tiếp
 const cotMonTrongChuongTrinh = []
 
-// Bảng mới — TC/giờ lấy từ syllabus áp dụng, KHÔNG từ chuongTrinhMon
 const cotMonTrongKy = [
   { key: 'stt', label: 'STT', render: (_row, index) => index + 1 },
   { key: 'ky', label: 'Kỳ', render: (row) => hienThi(row._tenKy) },
@@ -463,42 +497,42 @@ const cotMonTrongKy = [
     key: 'tinChi', label: 'TC',
     render: (row) => {
       const s = laySyllabusApDung(row)
-      return s ? hienThi(s.soTinChi) : h('span', { style: 'color:#94a3b8;' }, '—')
+      return s ? hienThi(s.soTinChi) : h('span', { class: 'text-muted' }, '—')
     }
   },
   {
     key: 'tongGio', label: 'Tổng giờ',
     render: (row) => {
       const s = laySyllabusApDung(row)
-      return s ? hienThi(s.tongGio) : h('span', { style: 'color:#94a3b8;' }, '—')
+      return s ? hienThi(s.tongGio) : h('span', { class: 'text-muted' }, '—')
     }
   },
   {
     key: 'gioLyThuyet', label: 'Giờ LT',
     render: (row) => {
       const s = laySyllabusApDung(row)
-      return s ? hienThi(s.gioLyThuyet) : h('span', { style: 'color:#94a3b8;' }, '—')
+      return s ? hienThi(s.gioLyThuyet) : h('span', { class: 'text-muted' }, '—')
     }
   },
   {
     key: 'gioThucHanh', label: 'Giờ TH',
     render: (row) => {
       const s = laySyllabusApDung(row)
-      return s ? hienThi(s.gioThucHanh) : h('span', { style: 'color:#94a3b8;' }, '—')
+      return s ? hienThi(s.gioThucHanh) : h('span', { class: 'text-muted' }, '—')
     }
   },
   {
     key: 'gioKiemTra', label: 'Giờ KT',
     render: (row) => {
       const s = laySyllabusApDung(row)
-      return s ? hienThi(s.gioKiemTra) : h('span', { style: 'color:#94a3b8;' }, '—')
+      return s ? hienThi(s.gioKiemTra) : h('span', { class: 'text-muted' }, '—')
     }
   },
   {
     key: 'syllabus', label: 'Syllabus môn',
     render: (row) => {
       const syllabusId = laySyllabusApDung(row)?.id
-      if (!syllabusId) return h('span', { style: 'color:#94a3b8;font-size:12px;' }, 'Chưa có')
+      if (!syllabusId) return h('span', { class: 'missing-pill' }, 'Chưa có')
       return h('button', {
         type: 'button',
         class: 'btn-xem-syllabus',
@@ -555,6 +589,26 @@ function xemTep() {
       syllabusChuongTrinhId: syllabusId
     }
   })
+}
+
+function toggleBang(key) {
+  if (isBangDangMo(key)) {
+    bangDangMo.value = bangDangMo.value.filter((item) => item !== key)
+    return
+  }
+  bangDangMo.value = [...bangDangMo.value, key]
+}
+
+function isBangDangMo(key) {
+  return bangDangMo.value.includes(key)
+}
+
+function moTatCaBang() {
+  bangDangMo.value = bangLienQuan.value.map((item) => item.key)
+}
+
+function thuGonTatCaBang() {
+  bangDangMo.value = []
 }
 
 function layDataTuApiResponse(res) {
@@ -639,107 +693,124 @@ function dinhDangNgay(value) {
 <style scoped>
 .dao-tao-xem-syllabus-chuong-trinh-page {
   min-height: calc(100vh - var(--header-height, 60px));
-  padding: 12px 16px 24px;
-  background: linear-gradient(180deg, #eef7ff 0%, #f8fbff 42%, #ffffff 100%);
+  padding: 8px 10px 18px;
+  background:
+      radial-gradient(circle at top left, rgba(7, 113, 73, 0.08), transparent 28%),
+      linear-gradient(180deg, #f3fbf7 0%, #f8fafc 46%, #ffffff 100%);
   color: #0f172a;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
-.page-header,
-.summary-card,
-.info-card,
+.top-shell,
+.overview-strip,
+.compact-file-bar,
 .table-card,
 .state-card {
-  border: 1px solid #bfdbfe;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 10px 28px rgba(15, 82, 143, 0.10);
+  border: 1px solid #d5eadf;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.045);
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 18px;
-  margin-bottom: 14px;
-  background: linear-gradient(135deg, #ffffff 0%, #eaf4ff 56%, #dff0ff 100%);
+.top-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+  border-color: #b8dcc8;
+  background: linear-gradient(135deg, #ffffff 0%, #f1fbf5 58%, #e5f5eb 100%);
+}
+
+.top-left {
+  min-width: 0;
 }
 
 .back-btn {
   border: 0;
   background: transparent;
-  color: #0b5a92;
-  padding: 0 0 8px;
-  font-size: 13px;
+  color: #077149;
+  padding: 0 0 3px;
+  font-size: 12px;
   font-weight: 900;
   cursor: pointer;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
 .back-btn:hover {
-  color: #08456f;
+  color: #055d3d;
   text-decoration: underline;
 }
 
-.eyebrow,
-.card-eyebrow {
-  margin: 0 0 4px;
-  color: #0b5a92;
-  font-size: 12px;
+.top-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  align-items: baseline;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #077149;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.page-header h1,
-.summary-main h2,
-.info-card h3,
-.table-card h3,
+.top-shell h1,
+.overview-name h2,
 .section-title h2 {
   margin: 0;
   color: #0f172a;
-  font-weight: 800;
-  line-height: 1.25;
+  font-weight: 900;
+  line-height: 1.2;
 }
 
-.page-header h1 {
-  font-size: 24px;
+.top-shell h1 {
+  font-size: 20px;
 }
 
-.summary-main h2 {
-  font-size: 21px;
+.overview-name h2 {
+  margin-top: 2px;
+  font-size: 17px;
 }
 
-.info-card h3,
-.table-card h3 {
+.section-title h2 {
+  margin-top: 2px;
   font-size: 16px;
 }
 
-.version-text,
-.subtitle,
-.section-title p {
-  margin: 6px 0 0;
-  color: #42637f;
-  font-size: 13px;
-  line-height: 1.45;
+.top-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 5px;
+  color: #475569;
+  font-size: 11.5px;
 }
 
-.header-actions {
+.top-actions,
+.section-actions {
   display: flex;
-  gap: 8px;
-  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .btn,
-.file-button {
-  min-height: 34px;
-  border: 1px solid #9fc5e8;
-  border-radius: 12px;
+.file-button,
+.mini-btn {
+  min-height: 28px;
+  border: 1px solid #a9d5bd;
+  border-radius: 9px;
   background: #ffffff;
-  color: #0f3d64;
-  padding: 8px 13px;
-  font-size: 12px;
+  color: #064e3b;
+  padding: 5px 10px;
+  font-size: 11.5px;
   font-weight: 900;
   cursor: pointer;
   white-space: nowrap;
@@ -749,11 +820,12 @@ function dinhDangNgay(value) {
 }
 
 .btn:hover,
-.file-button:hover {
-  border-color: #0b5a92;
-  background: #eaf4ff;
-  color: #0b5a92;
-  box-shadow: 0 3px 10px rgba(15, 82, 143, 0.12);
+.file-button:hover,
+.mini-btn:hover {
+  border-color: #077149;
+  background: #effaf4;
+  color: #077149;
+  box-shadow: 0 3px 9px rgba(7, 113, 73, 0.11);
 }
 
 .btn:disabled {
@@ -763,50 +835,39 @@ function dinhDangNgay(value) {
 
 .btn.primary,
 .file-button.primary {
-  border-color: #0b5a92;
-  background: #0b5a92;
+  border-color: #077149;
+  background: #077149;
   color: #ffffff;
 }
 
-.summary-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 1fr);
-  gap: 16px;
-  align-items: stretch;
-  padding: 18px;
-  margin-bottom: 14px;
-  background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.9);
 }
 
-.summary-main {
-  min-width: 0;
-}
-
-.summary-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+.mini-btn {
+  min-height: 25px;
+  padding: 4px 9px;
+  font-size: 10.8px;
+  border-radius: 999px;
 }
 
 .status-badge,
 .badge,
-.count-pill,
-.readonly-pill {
+.count-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 21px;
   border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 11px;
+  padding: 3px 8px;
+  font-size: 10.5px;
   font-weight: 900;
   white-space: nowrap;
 }
 
 .status-badge.success {
-  border: 1px solid #86efac;
+  border: 1px solid #8fd4aa;
   background: #dcfce7;
-  color: #166534;
+  color: #07623f;
 }
 
 .status-badge.muted {
@@ -815,71 +876,93 @@ function dinhDangNgay(value) {
   color: #64748b;
 }
 
-.status-badge.neutral,
 .badge.neutral,
-.count-pill,
-.readonly-pill {
-  border: 1px solid #b7d3ec;
-  background: #f8fbff;
-  color: #0f3d64;
+.count-pill {
+  border: 1px solid #b7dcc8;
+  background: #f7fdf9;
+  color: #065f46;
+}
+
+.overview-strip {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.75fr) minmax(720px, 1.6fr);
+  gap: 10px;
+  align-items: stretch;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+  border-color: #b8dcc8;
+  background: linear-gradient(135deg, #ffffff 0%, #f3fbf7 100%);
+}
+
+.overview-name {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(10, minmax(64px, 1fr));
+  gap: 5px;
 }
 
 .metric-grid article {
-  border: 1px solid #d8ecff;
-  border-radius: 12px;
+  min-width: 0;
+  border: 1px solid #d8ede1;
+  border-radius: 9px;
   background: #ffffff;
-  padding: 8px 10px;
+  padding: 6px 7px;
 }
 
 .metric-grid span {
   display: block;
-  color: #42637f;
-  font-size: 10px;
-  font-weight: 800;
+  overflow: hidden;
+  color: #486456;
+  font-size: 9.2px;
+  font-weight: 900;
+  text-overflow: ellipsis;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .metric-grid strong {
   display: block;
-  margin-top: 3px;
-  color: #0b5a92;
-  font-size: 16px;
+  margin-top: 2px;
+  color: #077149;
+  font-size: 15px;
   font-weight: 900;
+  line-height: 1.1;
 }
 
-.metric-grid article.tong-hop {
-  border-color: #bfdbfe;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e8f4ff 100%);
+.metric-grid article.total {
+  border-color: #a9d5bd;
+  background: linear-gradient(135deg, #f1fbf5 0%, #e6f6ec 100%);
 }
 
-.metric-grid article.tong-hop strong {
-  color: #1e40af;
+.metric-grid article.total strong {
+  color: #055d3d;
 }
 
 .state-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
-  margin-bottom: 14px;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
 }
 
 .state-card h3 {
-  margin: 0 0 4px;
-  font-size: 16px;
+  margin: 0 0 3px;
+  font-size: 14px;
 }
 
-.state-card p {
+.state-card p,
+.state-card span {
   margin: 0;
-  color: #42637f;
-  font-size: 13px;
+  color: #475569;
+  font-size: 12px;
 }
 
 .state-card.error {
@@ -889,42 +972,40 @@ function dinhDangNgay(value) {
 }
 
 .state-card.error p {
-  margin-bottom: 10px;
+  margin-bottom: 9px;
   color: #991b1b;
 }
 
 .state-card.empty {
   display: block;
-  background: #f8fbff;
+  background: #f8fafc;
 }
 
-.state-card.canh-bao-syllabus {
-  border-color: #fcd34d;
+.state-card.warning {
+  border-color: #fde68a;
   background: #fffbeb;
-}
-
-.state-card.canh-bao-syllabus h3 {
-  margin: 0 0 4px;
-  font-size: 14px;
   color: #92400e;
 }
 
-.state-card.canh-bao-syllabus p {
+.compact-warning {
+  justify-content: flex-start;
+  padding: 7px 10px;
+}
+
+.compact-warning strong {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.compact-warning span {
   color: #78350f;
 }
 
-.canh-bao-inline {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #b45309;
-  font-weight: 600;
-}
-
 .spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid #dbeafe;
-  border-top-color: #0b5a92;
+  width: 23px;
+  height: 23px;
+  border: 3px solid #dff4e8;
+  border-top-color: #077149;
   border-radius: 999px;
   animation: spin 0.8s linear infinite;
 }
@@ -933,244 +1014,432 @@ function dinhDangNgay(value) {
   to { transform: rotate(360deg); }
 }
 
-.content-grid,
-.related-grid {
+.compact-file-bar {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  align-items: start;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(360px, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #ffffff;
 }
 
-.content-grid {
-  margin-bottom: 16px;
-}
-
-.info-card,
-.table-card {
+.file-main {
   min-width: 0;
-  padding: 16px;
 }
 
-.info-card.full,
-.table-card.full {
-  grid-column: 1 / -1;
-}
-
-.hero-card {
-  background: linear-gradient(135deg, #ffffff 0%, #eef7ff 100%);
-}
-
-.card-title-row,
-.table-card header,
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.info-list {
-  display: grid;
-  grid-template-columns: 190px minmax(0, 1fr);
-  gap: 8px 14px;
-  margin: 14px 0 0;
-}
-
-.info-list.compact {
-  grid-template-columns: repeat(2, minmax(180px, 1fr));
-}
-
-.info-list dt {
-  color: #0f3d64;
-  font-size: 12px;
+.file-label {
+  display: block;
+  color: #077149;
+  font-size: 10px;
   font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.info-list dd {
-  margin: 0;
+.file-main strong {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
   color: #0f172a;
   font-size: 13px;
-  line-height: 1.45;
-  word-break: break-word;
-}
-
-.info-list.compact dt {
-  margin-bottom: 3px;
-}
-
-.info-list.compact dd {
-  margin-bottom: 8px;
-}
-
-.rich-text {
-  margin-top: 10px;
-  color: #1e293b;
-  font-size: 13px;
-  line-height: 1.7;
-  white-space: pre-line;
-}
-
-.empty-inline {
-  border: 1px dashed #b7d3ec;
-  border-radius: 14px;
-  background: #f8fbff;
-  color: #42637f;
-  padding: 12px;
-  font-size: 13px;
-  font-weight: 700;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .file-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
   align-items: center;
-  margin-top: 12px;
+  min-width: 0;
 }
 
 .file-path {
   flex: 1;
-  min-width: 240px;
-  border: 1px solid #d8ecff;
-  border-radius: 12px;
-  background: #f8fbff;
-  color: #42637f;
-  padding: 8px 10px;
+  min-width: 140px;
+  overflow: hidden;
+  border: 1px solid #d7ecdf;
+  border-radius: 9px;
+  background: #f8fdf9;
+  color: #476455;
+  padding: 6px 8px;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-empty {
+  color: #64748b;
   font-size: 12px;
-  word-break: break-all;
+  font-weight: 700;
+}
+
+.compact-info-list {
+  margin-bottom: 8px;
 }
 
 .related-section {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
-.table-card header {
-  margin-bottom: 12px;
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 2px 1px;
+}
+
+.accordion-list {
+  display: grid;
+  gap: 7px;
+}
+
+.table-card {
+  padding: 0;
+  overflow: hidden;
+  border-color: #d6eadf;
+  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.04);
+}
+
+.table-card.open {
+  border-color: #9fd1b5;
+}
+
+.accordion-header {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f6fcf8 100%);
+  color: #0f172a;
+  padding: 7px 9px;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+}
+
+.accordion-header:hover {
+  background: #effaf4;
+}
+
+.toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border: 1px solid #a9d5bd;
+  border-radius: 7px;
+  background: #077149;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.accordion-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.accordion-title strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accordion-title small {
+  margin-top: 1px;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 10.8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canh-bao-inline {
+  color: #b45309 !important;
+  font-weight: 800;
+}
+
+.accordion-body {
+  border-top: 1px solid #e2f2e8;
+  padding: 7px;
+  background: #ffffff;
+}
+
+.info-table {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  min-width: 0;
+  border: 1px solid #e2f2e8;
+  border-radius: 9px;
+  background: #fbfefc;
+  padding: 7px 8px;
+}
+
+.info-label {
+  color: #065f46;
+  font-size: 10.5px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.info-value {
+  color: #0f172a;
+  font-size: 12px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.text-data-table {
+  overflow: hidden;
+  border: 1px solid #d7ecdf;
+  border-radius: 10px;
+}
+
+.text-data-head,
+.text-data-row {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.text-data-head {
+  background: #e7f6ed;
+  color: #065f46;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.text-data-head span,
+.text-data-title,
+.text-data-content {
+  padding: 7px 8px;
+  border-bottom: 1px solid #edf3f0;
+}
+
+.text-data-row:last-child .text-data-title,
+.text-data-row:last-child .text-data-content {
+  border-bottom: 0;
+}
+
+.text-data-title {
+  background: #fbfefc;
+  color: #065f46;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.text-data-content {
+  color: #0f172a;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.empty-inline {
+  border: 1px dashed #b7dcc8;
+  border-radius: 10px;
+  background: #f8fdf9;
+  color: #476455;
+  padding: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.empty-inline.small {
+  padding: 7px 8px;
+  font-size: 11.5px;
 }
 
 .table-wrap {
   width: 100%;
-  overflow-x: auto;
-  border: 1px solid #d8ecff;
-  border-radius: 14px;
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid #d7ecdf;
+  border-radius: 10px;
 }
 
 :deep(table) {
   width: 100%;
-  border-collapse: collapse;
+  min-width: 980px;
+  border-collapse: separate;
+  border-spacing: 0;
   background: #ffffff;
 }
 
 :deep(th),
 :deep(td) {
-  border-bottom: 1px solid #e5effa;
-  padding: 10px;
+  border-bottom: 1px solid #edf3f0;
+  padding: 6px 8px;
   text-align: left;
   vertical-align: top;
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11.5px;
+  line-height: 1.35;
 }
 
 :deep(th) {
-  background: #eaf4ff;
-  color: #0b5a92;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #e7f6ed;
+  color: #065f46;
   font-weight: 900;
   white-space: nowrap;
+  box-shadow: inset 0 -1px 0 #cfe8da;
 }
 
 :deep(td) {
   color: #0f172a;
 }
 
+:deep(td:first-child),
+:deep(th:first-child) {
+  width: 52px;
+  text-align: center;
+}
+
 :deep(tbody tr:hover) {
-  background: #f8fbff;
+  background: #f7fdf9;
 }
 
 :deep(tbody tr:last-child td) {
   border-bottom: 0;
 }
 
+:deep(.text-muted) {
+  color: #94a3b8;
+}
+
+:deep(.missing-pill) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #94a3b8;
+  padding: 2px 8px;
+  font-size: 10.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .btn-xem-syllabus {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  min-height: 26px;
-  border: 1px solid #93c5fd;
+  min-height: 23px;
+  border: 1px solid #9fd1b5;
   border-radius: 999px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  color: #1d4ed8;
-  padding: 3px 12px;
-  font-size: 11px;
-  font-weight: 700;
+  background: #effaf4;
+  color: #077149;
+  padding: 3px 10px;
+  font-size: 10.5px;
+  font-weight: 900;
   cursor: pointer;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
-  letter-spacing: 0.02em;
-  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.15);
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
   white-space: nowrap;
 }
 
 .btn-xem-syllabus:hover {
-  border-color: #3b82f6;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
-  transform: translateY(-1px);
+  border-color: #077149;
+  background: #077149;
+  color: #ffffff;
 }
 
-.btn-xem-syllabus:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-@media (max-width: 1180px) {
-  .summary-card {
+@media (max-width: 1280px) {
+  .overview-strip {
     grid-template-columns: 1fr;
   }
 
   .metric-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .compact-file-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .info-table {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 860px) {
-  .page-header,
-  .card-title-row,
-  .table-card header,
+  .top-shell,
   .section-title {
-    flex-direction: column;
-  }
-
-  .header-actions {
-    width: 100%;
-  }
-
-  .content-grid,
-  .related-grid {
     grid-template-columns: 1fr;
+  }
+
+  .top-actions,
+  .section-actions {
+    justify-content: flex-start;
   }
 
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .info-list,
-  .info-list.compact {
+  .accordion-header {
+    grid-template-columns: 26px minmax(0, 1fr);
+  }
+
+  .accordion-header .count-pill {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .info-row,
+  .text-data-head,
+  .text-data-row {
     grid-template-columns: 1fr;
+  }
+
+  .text-data-title {
+    border-bottom: 0;
   }
 }
 
 @media (max-width: 640px) {
   .dao-tao-xem-syllabus-chuong-trinh-page {
-    padding: 10px;
+    padding: 8px;
   }
 
-  .page-header h1 {
-    font-size: 20px;
+  .top-shell h1 {
+    font-size: 18px;
   }
 
   .metric-grid {
     grid-template-columns: 1fr;
   }
+
+  .file-actions {
+    flex-wrap: wrap;
+  }
+
+  .file-path {
+    flex-basis: 100%;
+  }
 }
 </style>
+

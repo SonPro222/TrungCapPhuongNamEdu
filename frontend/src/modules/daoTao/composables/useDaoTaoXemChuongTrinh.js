@@ -862,9 +862,9 @@ export function useDaoTaoXemChuongTrinh(options = {}) {
                 ['monHoc', {}]
             ], {force})
 
-            if (khungKyId) {
-                await taiBangTheoScope('chuongTrinhMon', {chuongTrinhVersionId, khungKyId}, {force})
-            }
+            // if (khungKyId) {
+            //     await taiBangTheoScope('chuongTrinhMon', {chuongTrinhVersionId, khungKyId}, {force})
+            // }
         }
 
         if (tang === 8) {
