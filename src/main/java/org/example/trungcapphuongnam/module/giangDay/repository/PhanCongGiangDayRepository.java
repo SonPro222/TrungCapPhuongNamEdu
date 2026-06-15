@@ -39,4 +39,6 @@ public interface PhanCongGiangDayRepository extends JpaRepository<PhanCongGiangD
     );
 
     Optional<PhanCongGiangDay> findByLopHocPhanIdAndGiaoVienId(Long lopHocPhanId, Long giaoVienId);
+
+    boolean existsByLopHocPhanId(Long lopHocPhanId);
 }

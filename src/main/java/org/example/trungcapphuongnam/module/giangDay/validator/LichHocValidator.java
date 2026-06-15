@@ -92,27 +92,7 @@ public class LichHocValidator {
             throw new GiangDayException("Lớp học phần chưa có sinh viên đang học, không được xếp lịch");
         }
 
-        if (lopHocPhan.getNgayBatDau() != null && request.getNgayHoc().isBefore(lopHocPhan.getNgayBatDau())) {
-            throw new GiangDayException("Ngày học không được trước ngày bắt đầu của lớp học phần");
-        }
 
-        if (lopHocPhan.getNgayKetThuc() != null && request.getNgayHoc().isAfter(lopHocPhan.getNgayKetThuc())) {
-            if (!Boolean.TRUE.equals(request.getChoPhepVuotNgayKetThuc())) {
-                throw new GiangDayException("Ngày học không được sau ngày kết thúc của lớp học phần");
-            }
-            request.setVuotKhungKy(true);
-            if (request.getNgayKetThucGoc() == null) {
-                request.setNgayKetThucGoc(lopHocPhan.getNgayKetThuc());
-            }
-            if (request.getSoNgayVuotKhungKy() == null && request.getNgayKetThucGoc() != null) {
-                request.setSoNgayVuotKhungKy((int) java.time.temporal.ChronoUnit.DAYS.between(
-                        request.getNgayKetThucGoc(),
-                        request.getNgayHoc()
-                ));
-            }
-        } else if (request.getVuotKhungKy() == null) {
-            request.setVuotKhungKy(false);
-        }
 
         if (request.getGiaoVienId() != null) {
             GiaoVien giaoVien = giaoVienRepository.findById(request.getGiaoVienId())

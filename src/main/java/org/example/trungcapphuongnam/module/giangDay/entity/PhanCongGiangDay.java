@@ -31,4 +31,16 @@ public class PhanCongGiangDay {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "so_tiet_phan_cong")
+    private Integer soTietPhanCong;
+
+    @Column(name = "trang_thai")
+    private String trangThai;
+
+    @Column(name = "ghi_chu", columnDefinition = "TEXT")
+    private String ghiChu;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
+
 }

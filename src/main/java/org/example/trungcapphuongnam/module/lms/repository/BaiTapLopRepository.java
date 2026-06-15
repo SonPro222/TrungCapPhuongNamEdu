@@ -12,4 +12,6 @@ public interface BaiTapLopRepository extends JpaRepository<BaiTapLop, Long> {
     Page<BaiTapLop> findByBaiTapOnlineId(Long baiTapOnlineId, Pageable pageable);
 
     Page<BaiTapLop> findByTrangThai(TrangThaiBaiTapLop trangThai, Pageable pageable);
+
+    boolean existsByLopHocPhanId(Long lopHocPhanId);
 }

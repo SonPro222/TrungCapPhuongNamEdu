@@ -27,6 +27,8 @@ public interface LichHocRepository extends JpaRepository<LichHoc, Long>, JpaSpec
             @Param("idBoQua") Long idBoQua
     );
 
+    boolean existsByLopHocPhanId(Long lopHocPhanId);
+
     boolean existsByLopHocPhanIdAndNgayHocAndCaHocIdAndTrangThaiNot(
             Long lopHocPhanId,
             LocalDate ngayHoc,

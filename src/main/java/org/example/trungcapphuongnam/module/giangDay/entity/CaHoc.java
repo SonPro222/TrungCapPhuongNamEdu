@@ -33,4 +33,10 @@ public class CaHoc {
     @Column(name = "mo_ta")
     private String moTa;
 
+    @Column(name = "thu_tu")
+    private Integer thuTu;
+
+    @Column(name = "trang_thai")
+    private String trangThai;
+
 }

@@ -37,6 +37,8 @@ public interface ChuongTrinhMonRepository extends JpaRepository<ChuongTrinhMon, 
     List<ChuongTrinhMon> findByMonHocId(Long monHocId);
     List<ChuongTrinhMon> findByChuongTrinhVersionId(Long chuongTrinhVersionId);
 
+    List<ChuongTrinhMon> findByChuongTrinhVersionIdAndKhungKyId(Long chuongTrinhVersionId, Long khungKyId);
+
     boolean existsByChuongTrinhVersionIdAndMonHocId(Long chuongTrinhVersionId, Long monHocId);
 
     boolean existsByChuongTrinhVersionIdAndMonHocIdAndIdNot(Long chuongTrinhVersionId, Long monHocId, Long id);

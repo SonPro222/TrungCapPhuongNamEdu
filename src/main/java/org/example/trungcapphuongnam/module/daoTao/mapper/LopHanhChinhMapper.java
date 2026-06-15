@@ -18,6 +18,9 @@ public class LopHanhChinhMapper {
                 .siSo(request.getSiSo())
                 .trangThai(request.getTrangThai())
                 .ghiChu(request.getGhiChu())
+                .ngayBatDauNhanSinhVien(request.getNgayBatDauNhanSinhVien())
+                .ngayKetThucNhanSinhVien(request.getNgayKetThucNhanSinhVien())
+                .daChotTuyenSinh(request.getDaChotTuyenSinh() != null ? request.getDaChotTuyenSinh() : false)
                 .build();
     }
 
@@ -32,6 +35,10 @@ public class LopHanhChinhMapper {
                 .siSo(entity.getSiSo())
                 .trangThai(entity.getTrangThai())
                 .ghiChu(entity.getGhiChu())
+                .ngayBatDauNhanSinhVien(entity.getNgayBatDauNhanSinhVien())
+                .ngayKetThucNhanSinhVien(entity.getNgayKetThucNhanSinhVien())
+                .daChotTuyenSinh(entity.getDaChotTuyenSinh())
+                .ngayChotTuyenSinh(entity.getNgayChotTuyenSinh())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -46,5 +53,10 @@ public class LopHanhChinhMapper {
         entity.setSiSo(request.getSiSo());
         entity.setTrangThai(request.getTrangThai());
         entity.setGhiChu(request.getGhiChu());
+        entity.setNgayBatDauNhanSinhVien(request.getNgayBatDauNhanSinhVien());
+        entity.setNgayKetThucNhanSinhVien(request.getNgayKetThucNhanSinhVien());
+        if (request.getDaChotTuyenSinh() != null) {
+            entity.setDaChotTuyenSinh(request.getDaChotTuyenSinh());
+        }
     }
 }

@@ -32,4 +32,12 @@ public interface LopHanhChinhService {
     LopHanhChinhResponse update(Long id, LopHanhChinhRequest request);
 
     void delete(Long id);
+
+    LopHanhChinhResponse chotTuyenSinh(Long id);
+
+    /**
+     * Hủy chốt tuyển sinh.
+     * Chỉ cho phép nếu chưa có SV trong LHC này được phân bổ vào LHP nào.
+     */
+    LopHanhChinhResponse huyChoTuyenSinh(Long id);
 }

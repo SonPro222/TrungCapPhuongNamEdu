@@ -81,4 +81,22 @@ public class LopHanhChinhController {
         service.delete(id);
         return ResponseEntity.ok(ApiResponse.deleted());
     }
+
+    /**
+     * POST /api/dao-tao/lop-hanh-chinh/{id}/chot-tuyen-sinh
+     * Chốt tuyển sinh cho lớp hành chính: daChotTuyenSinh=true, ngayChotTuyenSinh=now().
+     */
+    @PostMapping(DaoTaoPath.ID + "/chot-tuyen-sinh")
+    public ResponseEntity<ApiResponse<LopHanhChinhResponse>> chotTuyenSinh(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(service.chotTuyenSinh(id)));
+    }
+
+    /**
+     * POST /api/dao-tao/lop-hanh-chinh/{id}/huy-chot-tuyen-sinh
+     * Hủy chốt tuyển sinh. Chỉ cho phép nếu chưa có SV trong LHC này được phân bổ vào LHP.
+     */
+    @PostMapping(DaoTaoPath.ID + "/huy-chot-tuyen-sinh")
+    public ResponseEntity<ApiResponse<LopHanhChinhResponse>> huyChoTuyenSinh(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(service.huyChoTuyenSinh(id)));
+    }
 }

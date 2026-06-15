@@ -26,8 +26,6 @@ public class LopHocPhanResponse {
     private Integer soLuongToiDa;
     private Integer soLuongHienTai;
     private Integer soBuoiHoc;
-    private LocalDate ngayBatDau;
-    private LocalDate ngayKetThuc;
     private TrangThaiLopHocPhan trangThai;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

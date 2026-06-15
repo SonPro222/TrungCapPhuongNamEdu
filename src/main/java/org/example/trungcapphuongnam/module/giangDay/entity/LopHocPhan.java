@@ -44,11 +44,6 @@ public class LopHocPhan {
     private Integer soLuongHienTai;
     @Column(name = "so_buoi_hoc", nullable = false)
     private Integer soBuoiHoc;
-    @Column(name = "ngay_bat_dau")
-    private LocalDate ngayBatDau;
-
-    @Column(name = "ngay_ket_thuc")
-    private LocalDate ngayKetThuc;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")

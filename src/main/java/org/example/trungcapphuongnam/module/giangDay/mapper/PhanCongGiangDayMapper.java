@@ -18,6 +18,8 @@ public class PhanCongGiangDayMapper {
                 .lopHocPhanId(request.getLopHocPhanId())
                 .giaoVienId(request.getGiaoVienId())
                 .vaiTro(request.getVaiTro())
+                .trangThai(request.getTrangThai() != null ? request.getTrangThai() : "dang_phan_cong")
+                .ghiChu(request.getGhiChu())
                 .build();
     }
 
@@ -29,6 +31,10 @@ public class PhanCongGiangDayMapper {
                 .giaoVienId(entity.getGiaoVienId())
                 .vaiTro(entity.getVaiTro())
                 .createdAt(entity.getCreatedAt())
+                .soTietPhanCong(entity.getSoTietPhanCong())
+                .trangThai(entity.getTrangThai())
+                .ghiChu(entity.getGhiChu())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -60,5 +66,7 @@ public class PhanCongGiangDayMapper {
         entity.setLopHocPhanId(request.getLopHocPhanId());
         entity.setGiaoVienId(request.getGiaoVienId());
         entity.setVaiTro(request.getVaiTro());
+        if (request.getTrangThai() != null) entity.setTrangThai(request.getTrangThai());
+        entity.setGhiChu(request.getGhiChu());
     }
 }

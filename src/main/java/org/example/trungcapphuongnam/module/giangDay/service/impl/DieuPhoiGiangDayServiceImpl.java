@@ -479,12 +479,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         if (request.getTuNgay().isAfter(request.getDenNgay())) {
             throw new GiangDayException("Từ ngày không được sau đến ngày");
         }
-        if (lop.getNgayBatDau() != null && request.getTuNgay().isBefore(lop.getNgayBatDau())) {
-            throw new GiangDayException("Từ ngày không được trước ngày bắt đầu của lớp học phần");
-        }
-        if (lop.getNgayKetThuc() != null && request.getDenNgay().isAfter(lop.getNgayKetThuc())) {
-            throw new GiangDayException("Đến ngày không được sau ngày kết thúc của lớp học phần. Nếu cần bù buổi do ngày nghỉ, hãy giữ đến ngày trong kỳ và bật cho phép lan kỳ.");
-        }
+
     }
 
     private void validateRequest(LopHocPhan lop, SinhLichHocRequest request) {
@@ -551,12 +546,7 @@ public class DieuPhoiGiangDayServiceImpl implements DieuPhoiGiangDayService {
         if (request.getTuNgay().isAfter(request.getDenNgay())) {
             throw new GiangDayException("Từ ngày không được sau đến ngày");
         }
-        if (lop.getNgayBatDau() != null && request.getTuNgay().isBefore(lop.getNgayBatDau())) {
-            throw new GiangDayException("Từ ngày không được trước ngày bắt đầu của lớp học phần");
-        }
-        if (lop.getNgayKetThuc() != null && request.getDenNgay().isAfter(lop.getNgayKetThuc())) {
-            throw new GiangDayException("Đến ngày không được sau ngày kết thúc của lớp học phần. Nếu cần bù buổi do ngày nghỉ, hãy giữ đến ngày trong kỳ và bật cho phép lan kỳ.");
-        }
+
 
         if (request.getThuTrongTuan() == null || request.getThuTrongTuan().isEmpty()) {
             throw new GiangDayException("Phải chọn ít nhất một thứ trong tuần");

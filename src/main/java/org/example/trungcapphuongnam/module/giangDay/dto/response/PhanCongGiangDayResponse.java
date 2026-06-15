@@ -22,5 +22,12 @@ public class PhanCongGiangDayResponse {
     private String tenGiaoVien;
 
     private VaiTroGiangDay vaiTro;
+    private Integer soTietPhanCong;
+    private String trangThai;
+    private String ghiChu;
+    private Long monHocId;
+    private String maMon;
+    private String tenMon;
+    private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
 }

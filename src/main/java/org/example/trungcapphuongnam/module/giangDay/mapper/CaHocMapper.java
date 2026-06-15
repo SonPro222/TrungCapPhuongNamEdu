@@ -16,6 +16,8 @@ public class CaHocMapper {
                 .gioBatDau(request.getGioBatDau())
                 .gioKetThuc(request.getGioKetThuc())
                 .moTa(request.getMoTa())
+                .thuTu(request.getThuTu())
+                .trangThai(request.getTrangThai() != null ? request.getTrangThai() : "dang_su_dung")
                 .build();
     }
 
@@ -28,6 +30,8 @@ public class CaHocMapper {
                 .gioBatDau(entity.getGioBatDau())
                 .gioKetThuc(entity.getGioKetThuc())
                 .moTa(entity.getMoTa())
+                .thuTu(entity.getThuTu())
+                .trangThai(entity.getTrangThai())
                 .build();
     }
 
@@ -38,5 +42,7 @@ public class CaHocMapper {
         entity.setGioBatDau(request.getGioBatDau());
         entity.setGioKetThuc(request.getGioKetThuc());
         entity.setMoTa(request.getMoTa());
+        entity.setThuTu(request.getThuTu());
+        if (request.getTrangThai() != null) entity.setTrangThai(request.getTrangThai());
     }
 }

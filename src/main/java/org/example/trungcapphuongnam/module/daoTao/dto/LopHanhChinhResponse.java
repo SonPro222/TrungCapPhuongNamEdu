@@ -1,8 +1,9 @@
 package org.example.trungcapphuongnam.module.daoTao.dto;
 
 import lombok.*;
-import java.time.LocalDateTime;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,9 +27,15 @@ public class LopHanhChinhResponse {
 
     private String ghiChu;
 
+    private LocalDate ngayBatDauNhanSinhVien;
+
+    private LocalDate ngayKetThucNhanSinhVien;
+
+    private Boolean daChotTuyenSinh;
+
+    private LocalDateTime ngayChotTuyenSinh;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-
 }

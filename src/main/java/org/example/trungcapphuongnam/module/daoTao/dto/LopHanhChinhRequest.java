@@ -3,6 +3,8 @@ package org.example.trungcapphuongnam.module.daoTao.dto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,5 +29,9 @@ public class LopHanhChinhRequest {
 
     private String ghiChu;
 
+    private LocalDate ngayBatDauNhanSinhVien;
 
+    private LocalDate ngayKetThucNhanSinhVien;
+
+    private Boolean daChotTuyenSinh;
 }

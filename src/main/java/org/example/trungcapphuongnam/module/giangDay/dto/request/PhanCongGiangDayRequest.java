@@ -13,4 +13,6 @@ public class PhanCongGiangDayRequest {
     private Long lopHocPhanId;
     private Long giaoVienId;
     private VaiTroGiangDay vaiTro;
+    private String trangThai;
+    private String ghiChu;
 }

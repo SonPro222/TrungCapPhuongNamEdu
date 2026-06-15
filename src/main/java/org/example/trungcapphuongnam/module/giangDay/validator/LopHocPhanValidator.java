@@ -88,18 +88,8 @@ public class LopHocPhanValidator {
             throw new GiangDayException("Số lượng hiện tại không được vượt quá sĩ số tối đa");
         }
 
-        if (request.getNgayBatDau() != null
-                && request.getNgayKetThuc() != null
-                && request.getNgayKetThuc().isBefore(request.getNgayBatDau())) {
-            throw new GiangDayException("Ngày kết thúc không được trước ngày bắt đầu");
-        }
-
-        // Validate lớp học phần không vượt ngoài thời gian kỳ (khi lớp được gán vào kỳ qua chuongTrinhMon)
-        if (request.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH
-                && request.getChuongTrinhMonId() != null
-                && (request.getNgayBatDau() != null || request.getNgayKetThuc() != null)) {
-            validateNgayTrongKhungKy(request);
-        }
+        // ngayBatDau/ngayKetThuc không còn là dữ liệu gốc của LHP - không validate
+        // Thời gian học sẽ được tính từ bảng lịch học
 
         if (request.getLoaiLopHocPhan() == LoaiLopHocPhan.CHUYEN_NGANH) {
             validateLopChuyenNganh(request);
@@ -147,17 +137,7 @@ public class LopHocPhanValidator {
             return;
         }
 
-        if (khungKy.getNgayBatDau() != null && request.getNgayBatDau() != null
-                && request.getNgayBatDau().isBefore(khungKy.getNgayBatDau())) {
-            throw new GiangDayException("Ngày bắt đầu lớp học phần không được trước ngày bắt đầu kỳ ("
-                    + khungKy.getNgayBatDau() + ")");
-        }
 
-        if (khungKy.getNgayKetThuc() != null && request.getNgayKetThuc() != null
-                && request.getNgayKetThuc().isAfter(khungKy.getNgayKetThuc())) {
-            throw new GiangDayException("Ngày kết thúc lớp học phần không được sau ngày kết thúc kỳ ("
-                    + khungKy.getNgayKetThuc() + ")");
-        }
     }
 
     private void validateMotChuongTrinhMonChiCoMotLopHocPhan(Long idDangCapNhat, LopHocPhanRequest request) {
@@ -169,13 +149,7 @@ public class LopHocPhanValidator {
             return;
         }
 
-        boolean daCoLopChuyenNganh = idDangCapNhat == null
-                ? lopHocPhanRepository.existsByChuongTrinhMonId(request.getChuongTrinhMonId())
-                : lopHocPhanRepository.existsByChuongTrinhMonIdAndIdNot(request.getChuongTrinhMonId(), idDangCapNhat);
-
-        if (daCoLopChuyenNganh) {
-            throw new GiangDayException("Môn này đã có lớp học phần chuyên ngành, không được tạo thêm lớp mới");
-        }
+        // Cho phép 1 ChuongTrinhMon có nhiều LopHocPhan chuyên ngành (đã bỏ giới hạn 1 lớp)
 
         if (lopHocPhanChuongTrinhMonRepository.existsByChuongTrinhMonId(request.getChuongTrinhMonId())) {
             throw new GiangDayException("Môn này đã được gắn vào lớp học chung, không được tạo thêm lớp chuyên ngành");

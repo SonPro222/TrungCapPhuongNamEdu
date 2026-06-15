@@ -29,8 +29,7 @@ public class LopHocPhanMapper {
                 .soLuongToiDa(request.getSoLuongToiDa())
                 .soBuoiHoc(request.getSoBuoiHoc())
                 .soLuongHienTai(request.getSoLuongHienTai())
-                .ngayBatDau(request.getNgayBatDau())
-                .ngayKetThuc(request.getNgayKetThuc())
+                // ngayBatDau/ngayKetThuc không còn thuộc dữ liệu gốc LHP, sẽ tính từ lịch học
                 .trangThai(request.getTrangThai())
                 .build();
     }
@@ -65,8 +64,6 @@ public class LopHocPhanMapper {
                 .tenLop(entity.getTenLop())
                 .soLuongToiDa(entity.getSoLuongToiDa())
                 .soLuongHienTai(entity.getSoLuongHienTai())
-                .ngayBatDau(entity.getNgayBatDau())
-                .ngayKetThuc(entity.getNgayKetThuc())
                 .trangThai(entity.getTrangThai())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
@@ -83,8 +80,7 @@ public class LopHocPhanMapper {
         entity.setSoLuongToiDa(request.getSoLuongToiDa());
         entity.setSoBuoiHoc(request.getSoBuoiHoc());
         entity.setSoLuongHienTai(request.getSoLuongHienTai());
-        entity.setNgayBatDau(request.getNgayBatDau());
-        entity.setNgayKetThuc(request.getNgayKetThuc());
+        // ngayBatDau/ngayKetThuc không còn thuộc dữ liệu gốc LHP, sẽ tính từ lịch học
         entity.setTrangThai(request.getTrangThai());
     }
 }

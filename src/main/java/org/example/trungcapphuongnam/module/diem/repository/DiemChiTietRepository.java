@@ -44,4 +44,6 @@ public interface DiemChiTietRepository extends JpaRepository<DiemChiTiet, Long> 
     Page<DiemChiTiet> findByBaiKiemTraId(Long baiKiemTraId, Pageable pageable);
 
     List<DiemChiTiet> findBySinhVienIdAndLopHocPhanId(Long sinhVienId, Long lopHocPhanId);
+
+    boolean existsByLopHocPhanId(Long lopHocPhanId);
 }

@@ -3,6 +3,7 @@ package org.example.trungcapphuongnam.module.daoTao.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -39,6 +40,18 @@ public class LopHanhChinh {
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
 
+    @Column(name = "ngay_bat_dau_nhan_sinh_vien")
+    private LocalDate ngayBatDauNhanSinhVien;
+
+    @Column(name = "ngay_ket_thuc_nhan_sinh_vien")
+    private LocalDate ngayKetThucNhanSinhVien;
+
+    @Column(name = "da_chot_tuyen_sinh")
+    private Boolean daChotTuyenSinh;
+
+    @Column(name = "ngay_chot_tuyen_sinh")
+    private LocalDateTime ngayChotTuyenSinh;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -52,6 +65,7 @@ public class LopHanhChinh {
         updatedAt = now;
         if (siSo == null) siSo = 0;
         if (trangThai == null) trangThai = "dang_hoc";
+        if (daChotTuyenSinh == null) daChotTuyenSinh = false;
     }
 
     @PreUpdate

@@ -12,6 +12,8 @@ import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.entity.PhanCongGiangDay;
 import org.example.trungcapphuongnam.module.giangDay.enums.VaiTroGiangDay;
 import org.example.trungcapphuongnam.module.giangDay.mapper.PhanCongGiangDayMapper;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.GiangVienDangKyGiangDayRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.PhanCongGiangDayRepository;
@@ -39,6 +41,8 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
     private final GiaoVienRepository giaoVienRepository;
     private final PhanCongGiangDayMapper mapper;
     private final PhanCongGiangDayValidator validator;
+    private final ChuongTrinhMonRepository chuongTrinhMonRepository;
+    private final GiangVienDangKyGiangDayRepository giangVienDangKyGiangDayRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -100,7 +104,23 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
     public PhanCongGiangDayResponse create(PhanCongGiangDayRequest request) {
         validator.validateCreate(request);
         PhanCongGiangDay entity = mapper.toEntity(request);
+
+        // Tính và gán soTietPhanCong
+        int soTietPhanCong = tinhSoTietPhanCong(request.getLopHocPhanId());
+        if (soTietPhanCong > 0) {
+            entity.setSoTietPhanCong(soTietPhanCong);
+        }
+        if (entity.getTrangThai() == null) {
+            entity.setTrangThai("dang_phan_cong");
+        }
+
         PhanCongGiangDay saved = repository.save(entity);
+
+        // Cập nhật soTietDaPhanCong trong giang_vien_dang_ky_giang_day
+        if (soTietPhanCong > 0) {
+            capNhatSoTietDaPhanCong(request.getGiaoVienId(), request.getLopHocPhanId(), soTietPhanCong);
+        }
+
         return getById(saved.getId());
     }
 
@@ -116,6 +136,10 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
     @Override
     public void delete(Long id) {
         PhanCongGiangDay entity = findEntity(id);
+        // Hoàn lại soTietDaPhanCong
+        if (entity.getSoTietPhanCong() != null && entity.getSoTietPhanCong() > 0) {
+            capNhatSoTietDaPhanCong(entity.getGiaoVienId(), entity.getLopHocPhanId(), -entity.getSoTietPhanCong());
+        }
         repository.delete(entity);
     }
 
@@ -180,5 +204,34 @@ public class PhanCongGiangDayServiceImpl implements PhanCongGiangDayService {
         };
     }
 
+    private int tinhSoTietPhanCong(Long lopHocPhanId) {
+        if (lopHocPhanId == null) return 0;
+        return lopHocPhanRepository.findById(lopHocPhanId).map(lhp -> {
+            if (lhp.getChuongTrinhMonId() != null) {
+                return chuongTrinhMonRepository.findById(lhp.getChuongTrinhMonId())
+                        .map(ctm -> ctm.getTongGio() != null ? ctm.getTongGio().intValue() : 0)
+                        .orElse(lhp.getSoBuoiHoc() != null ? lhp.getSoBuoiHoc() * 2 : 0);
+            }
+            return lhp.getSoBuoiHoc() != null ? lhp.getSoBuoiHoc() * 2 : 0;
+        }).orElse(0);
+    }
+
+    private void capNhatSoTietDaPhanCong(Long giaoVienId, Long lopHocPhanId, int delta) {
+        if (giaoVienId == null || lopHocPhanId == null || delta == 0) return;
+        lopHocPhanRepository.findById(lopHocPhanId).ifPresent(lhp -> {
+            if (lhp.getChuongTrinhMonId() != null) {
+                chuongTrinhMonRepository.findById(lhp.getChuongTrinhMonId()).ifPresent(ctm -> {
+                    if (ctm.getKhungKyId() != null) {
+                        giangVienDangKyGiangDayRepository.findByGiaoVienIdAndKhungKyId(giaoVienId, ctm.getKhungKyId())
+                                .ifPresent(dk -> {
+                                    int current = dk.getSoTietDaPhanCong() != null ? dk.getSoTietDaPhanCong() : 0;
+                                    dk.setSoTietDaPhanCong(Math.max(0, current + delta));
+                                    giangVienDangKyGiangDayRepository.save(dk);
+                                });
+                    }
+                });
+            }
+        });
+    }
 
 }

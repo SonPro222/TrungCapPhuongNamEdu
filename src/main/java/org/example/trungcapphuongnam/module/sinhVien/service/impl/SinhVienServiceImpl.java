@@ -5,6 +5,8 @@ import org.example.trungcapphuongnam.module.heThong.enums.LoaiNguoiGui;
 import org.example.trungcapphuongnam.module.heThong.enums.LoaiTaiKhoan;
 import org.example.trungcapphuongnam.module.sinhVien.enums.SinhVienChuongTrinhTrangThai;
 import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiTaiKhoan;
+import org.example.trungcapphuongnam.module.daoTao.entity.LopHanhChinh;
+import org.example.trungcapphuongnam.module.daoTao.repository.LopHanhChinhRepository;
 import org.example.trungcapphuongnam.module.sinhVien.SinhVienException;
 import org.example.trungcapphuongnam.module.sinhVien.SinhVienNotFoundException;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinh;
@@ -61,6 +63,7 @@ public class SinhVienServiceImpl implements SinhVienService {
 
     private final SinhVienRepository repository;
     private final SinhVienChuongTrinhRepository sinhVienChuongTrinhRepository;
+    private final LopHanhChinhRepository lopHanhChinhRepository;
     private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
     private final ChuongTrinhRepository chuongTrinhRepository;
     private final CauHinhMaSinhVienRepository cauHinhMaSinhVienRepository;
@@ -244,6 +247,21 @@ public class SinhVienServiceImpl implements SinhVienService {
             }
         }
         savedSinhVien = repository.save(savedSinhVien);
+
+        // Validate sĩ số tối đa: không tiếp nhận SV nếu LHC đã đầy
+        if (request.getLopHanhChinhId() != null) {
+            lopHanhChinhRepository.findById(request.getLopHanhChinhId()).ifPresent(lhc -> {
+                Integer siSo = lhc.getSiSo();
+                if (siSo != null && siSo > 0) {
+                    long svHienTai = sinhVienChuongTrinhRepository.countByLopHanhChinhId(lhc.getId());
+                    if (svHienTai >= siSo) {
+                        throw new SinhVienException(
+                                "Lớp hành chính " + lhc.getMaLop() + " đã đủ sĩ số tối đa ("
+                                + siSo + " sinh viên). Không thể tiếp nhận thêm.");
+                    }
+                }
+            });
+        }
 
         SinhVienChuongTrinh sinhVienChuongTrinh = SinhVienChuongTrinh.builder()
                 .sinhVien(savedSinhVien)
