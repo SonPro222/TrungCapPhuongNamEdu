@@ -34,7 +34,15 @@ export const giangDayApi = {
     lopHocPhan: createCrudApi('lop-hoc-phan'),
     lopHocPhanChuongTrinhMon: createCrudApi('lop-hoc-phan-chuong-trinh-mon'),
     phanCongGiangDay: createCrudApi('phan-cong-giang-day'),
+    giaoVienMonHoc: createCrudApi('giao-vien-mon-hoc'),
+    giangVienDangKyGiangDay: createCrudApi('giang-vien-dang-ky-giang-day'),
     giaoVienKhaDung: createCrudApi('giao-vien-kha-dung'),
+    giaoVienDangKyNhomCa: {
+        ...createCrudApi('giao-vien-dang-ky-nhom-ca'),
+        getByGiaoVien(giaoVienId) {
+            return apiClient.get(`${BASE_URL}/giao-vien-dang-ky-nhom-ca/by-giao-vien/${giaoVienId}`)
+        }
+    },
     ngayNghi: createCrudApi('ngay-nghi'),
 
     dieuPhoi: {

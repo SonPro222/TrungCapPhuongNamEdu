@@ -16,6 +16,8 @@ import SinhVienXemLichHoc from './pages/SinhVienXemLichHoc.vue'
 import GiangVienXemLichDay from './pages/GiangVienXemLichDay.vue'
 import AdminRangBuocLichHoc from './pages/AdminRangBuocLichHoc.vue'
 import NgayNghi from './pages/AdminNgayNghi.vue'
+import AdminGiaoVienMonHoc from './pages/AdminGiaoVienMonHoc.vue'
+import AdminGiangVienDangKyGiangDay from './pages/AdminGiangVienDangKyGiangDay.vue'
 function taoQueryFlow(params = {}) {
     const query = {}
 
@@ -194,7 +196,19 @@ export const giangDayRoutes = [
                     title: 'Quản lý lịch nghỉ',
                     roles: [ROLES.ADMIN, ROLES.DAO_TAO]
                 }
-            }
+            },
+            {
+                path: 'giao-vien-mon-hoc',
+                name: 'GiangDay.GiaoVienMonHoc',
+                component: AdminGiaoVienMonHoc,
+                meta: { title: 'Giảng viên dạy môn', roles: [ROLES.ADMIN] }
+            },
+            {
+                path: 'giang-vien-dang-ky-giang-day',
+                name: 'GiangDay.GiangVienDangKyGiangDay',
+                component: AdminGiangVienDangKyGiangDay,
+                meta: { title: 'Đăng ký số tiết', roles: [ROLES.ADMIN] }
+            },
         ]
     }
 ]

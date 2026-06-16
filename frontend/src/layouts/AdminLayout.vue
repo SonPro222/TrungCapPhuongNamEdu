@@ -14,36 +14,48 @@
         <RouterLink to="/chuong-trinh/tong-quan">
           Xem tổng quan CTĐT - Kho học liệu
         </RouterLink>
-
       </nav>
 
       <div class="admin-auth">
-        <span v-if="user">
-          {{ user.hoTen || user.username || user.email }}
-        </span>
+        <div v-if="user" class="admin-auth-user">
+          <span class="admin-auth-avatar">
+            {{ userInitial }}
+          </span>
 
-        <button type="button" @click="logout">
-          Logout
+          <span class="admin-auth-name">
+            {{ user.hoTen || user.username || user.email }}
+          </span>
+        </div>
+
+        <button type="button" class="admin-logout-btn" @click="logout">
+          Đăng xuất
         </button>
       </div>
     </header>
 
     <main class="admin-main">
-      <RouterView/>
+      <RouterView />
     </main>
   </div>
 </template>
 
 <script setup>
-import {computed} from 'vue'
-import {useRouter} from 'vue-router'
-import {ENV} from '../core/config/env'
-import {authService} from '../core/services/authService'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ENV } from '../core/config/env'
+import { authService } from '../core/services/authService'
 
 const router = useRouter()
 
 const appName = ENV.APP_NAME
 const user = computed(() => authService.getCurrentUser())
+
+const userInitial = computed(() => {
+  const currentUser = user.value
+  const displayName = currentUser?.hoTen || currentUser?.username || currentUser?.email || 'A'
+
+  return displayName.trim().charAt(0).toUpperCase()
+})
 
 function logout() {
   authService.logout()

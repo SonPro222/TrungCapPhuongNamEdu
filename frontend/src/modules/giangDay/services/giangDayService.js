@@ -485,6 +485,65 @@ export const giangDayService = {
         })).content
     },
 
+    // GiaoVienMonHoc
+    async layTrangGiaoVienMonHoc(params = {}) {
+        return giangDayApi.giaoVienMonHoc.getAll({ page: 0, size: 200, ...params })
+    },
+    async layDanhSachGiaoVienMonHoc(params = {}) {
+        const res = await giangDayApi.giaoVienMonHoc.getAll({ page: 0, size: 500, ...params })
+        const data = res?.data?.data ?? res?.data ?? res
+        if (Array.isArray(data?.content)) return data.content
+        if (Array.isArray(data?.data?.content)) return data.data.content
+        if (Array.isArray(data)) return data
+        return []
+    },
+    async taoGiaoVienMonHoc(payload) {
+        return giangDayApi.giaoVienMonHoc.create(payload)
+    },
+    async capNhatGiaoVienMonHoc(id, payload) {
+        return giangDayApi.giaoVienMonHoc.update(id, payload)
+    },
+    async xoaGiaoVienMonHoc(id) {
+        return giangDayApi.giaoVienMonHoc.delete(id)
+    },
+    // GiangVienDangKyGiangDay
+    async layTrangGiangVienDangKyGiangDay(params = {}) {
+        return giangDayApi.giangVienDangKyGiangDay.getAll({ page: 0, size: 200, ...params })
+    },
+    async layDanhSachGiangVienDangKyGiangDay(params = {}) {
+        const res = await giangDayApi.giangVienDangKyGiangDay.getAll({ page: 0, size: 500, ...params })
+        const data = res?.data?.data ?? res?.data ?? res
+        if (Array.isArray(data?.content)) return data.content
+        if (Array.isArray(data?.data?.content)) return data.data.content
+        if (Array.isArray(data)) return data
+        return []
+    },
+    async taoGiangVienDangKyGiangDay(payload) {
+        return giangDayApi.giangVienDangKyGiangDay.create(payload)
+    },
+    async capNhatGiangVienDangKyGiangDay(id, payload) {
+        return giangDayApi.giangVienDangKyGiangDay.update(id, payload)
+    },
+    async xoaGiangVienDangKyGiangDay(id) {
+        return giangDayApi.giangVienDangKyGiangDay.delete(id)
+    },
+
+    // GiaoVienDangKyNhomCa
+    async layDanhSachNhomCaTheoGiaoVien(giaoVienId) {
+        const res = await giangDayApi.giaoVienDangKyNhomCa.getByGiaoVien(giaoVienId)
+        return res?.data?.data || res?.data || []
+    },
+    async taoNhomCa(payload) {
+        return giangDayApi.giaoVienDangKyNhomCa.create(payload)
+    },
+    async capNhatNhomCa(id, payload) {
+        return giangDayApi.giaoVienDangKyNhomCa.update(id, payload)
+    },
+    async xoaNhomCa(id) {
+        return giangDayApi.giaoVienDangKyNhomCa.delete(id)
+    },
+    
+
 }
 
 export default giangDayService

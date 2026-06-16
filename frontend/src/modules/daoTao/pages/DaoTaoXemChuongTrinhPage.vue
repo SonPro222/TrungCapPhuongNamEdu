@@ -456,10 +456,30 @@
                     {{ item.trangThai === 'dang_su_dung' ? 'Đang dùng' : 'Ngừng' }}
                   </span>
               </td>
-              <td class="actions-cell">
-                <button type="button" class="save-status" @click="xemChuongTrinhTuNganhHe(item)">Xem chương trình</button>
-                <button type="button" class="btn tiny" @click="suaNganhHe(item)">Sửa</button>
-                <button type="button" class="btn tiny danger" @click="xoaNganhHe(item.id)">Xóa</button>
+              <td class="actions-cell nganh-he-actions">
+                <button
+                    type="button"
+                    class="nganh-he-action-btn nganh-he-action-primary"
+                    @click="xemChuongTrinhTuNganhHe(item)"
+                >
+                  Xem chương trình
+                </button>
+
+                <button
+                    type="button"
+                    class="nganh-he-action-btn nganh-he-action-normal"
+                    @click="suaNganhHe(item)"
+                >
+                  Sửa
+                </button>
+
+                <button
+                    type="button"
+                    class="nganh-he-action-btn nganh-he-action-danger"
+                    @click="xoaNganhHe(item.id)"
+                >
+                  Xóa
+                </button>
               </td>
             </tr>
             </tbody>
@@ -8020,24 +8040,88 @@ function xemFileSyllabus(fileId) {
 }
 /* Ví dụ cho nút có class .save-status */
 /* Ví dụ cho nút có class .save-status */
+
+
 .save-status {
-  display: inline-block;       /* để nó co theo nội dung */
-  background-color: #2563eb;   /* xanh dương */
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 6px;
   border: none;
-  border-radius: 8px;          /* bo tròn góc */
-  padding: 4px 10px;           /* giảm padding cho gọn */
-  font-size: 14px;
+  border-radius: 5px;
+  background-color: #2563eb;
+  color: #fff;
+  font-size: 11px;
   font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  width: auto;                 /* bỏ width 100% nếu có */
-  min-width: unset;            /* bỏ ép min-width */
 }
 
 .save-status:hover {
-  background-color: #1d4ed8;   /* xanh đậm hơn khi hover */
+  background-color: #1d4ed8;
 }
 
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+
+.nganh-he-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.nganh-he-action-btn {
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nganh-he-action-primary {
+  min-width: 92px;
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+}
+
+.nganh-he-action-primary:hover {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+}
+
+.nganh-he-action-normal {
+  min-width: 34px;
+  background: #fff;
+  color: #111827;
+}
+
+.nganh-he-action-normal:hover {
+  background: #f3f4f6;
+}
+
+.nganh-he-action-danger {
+  min-width: 34px;
+  border-color: #fecaca;
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.nganh-he-action-danger:hover {
+  background: #fecaca;
+}
 /* ===== END FILE SYLLABUS PANEL ===== */
 </style>

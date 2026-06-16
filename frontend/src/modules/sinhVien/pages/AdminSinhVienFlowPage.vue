@@ -179,10 +179,10 @@
                 <table class="sv-table sv-lhc-table">
                   <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Mã lớp</th>
-                    <th>Tên lớp</th>
-                    <th>Sĩ số</th>
+                    <th>STT</th>
+                    <th>Mã lớp học phần</th>
+                    <th>Tên lớp học phần</th>
+                    <th>Sĩ số hiện tại / tối đa</th>
                     <th>Trạng thái</th>
                     <th>Ngày nhận sinh viên</th>
                     <th>Tuyển sinh</th>
@@ -688,60 +688,85 @@
       <!-- ===== BƯỚC 4.2: MỞ LỚP HỌC PHẦN ===== -->
       <template v-if="buoc === 'lopHocPhan'">
 
-        <!-- ── AUTO MỞ LỚP HỌC PHẦN THEO KỲ / VERSION ── -->
-        <div class="sv-card sv-auto-tao-card sv-auto-compact-card">
-          <div class="sv-card-title sv-card-title-toolbar sv-auto-compact-title">
-            <div>
-              <h2>⚡ Auto mở lớp học phần theo kỳ / phiên bản</h2>
-              <p>Hệ thống tự động tính toán và tạo lớp học phần cho từng môn trong kỳ dựa trên sĩ số sinh viên.</p>
+        <!-- AUTO MỞ LỚP HỌC PHẦN THEO KỲ / PHIÊN BẢN -->
+        <div class="sv-card sv-auto-tao-card sv-auto-compact-card sv-lhp-auto-card">
+          <div class="sv-card-title sv-card-title-toolbar sv-lhp-auto-title">
+            <div class="sv-lhp-title-left">
+              <h2>⚡ Tự động mở lớp học phần theo kỳ / phiên bản</h2>
+              <p>Tự động tính toán và tạo lớp học phần theo kỳ học, sĩ số và lớp hành chính đã chọn.</p>
+            </div>
+
+            <div class="sv-auto-tao-actions sv-lhp-auto-actions">
+              <button
+                  type="button"
+                  class="secondary"
+                  :disabled="dangAutoTao"
+                  @click="xuLyAutoTao('PREVIEW')"
+              >
+                🔍 Xem trước
+              </button>
+
+              <button
+                  type="button"
+                  class="sv-btn-du-kien"
+                  :disabled="dangAutoTao"
+                  @click="xuLyAutoTao('DU_KIEN')"
+              >
+                📋 Tạo dự kiến
+              </button>
+
+              <button
+                  type="button"
+                  class="sv-btn-chinh-thuc"
+                  :disabled="dangAutoTao"
+                  @click="xuLyAutoTao('CHINH_THUC')"
+              >
+                ✅ Chốt chính thức
+              </button>
+
+              <span v-if="dangAutoTao" class="sv-note-text sv-lhp-loading">Đang xử lý...</span>
             </div>
           </div>
 
-          <form class="sv-auto-tao-form" @submit.prevent>
-            <!-- Chọn kỳ -->
+          <form class="sv-auto-tao-form sv-lhp-auto-form" @submit.prevent>
             <label class="sv-auto-field sv-auto-field-ky">
               Kỳ học <span class="sv-required">*</span>
               <select v-model="formAutoTao.khungKyId">
-                <option value="">— Chọn kỳ —</option>
+                <option value="">Chọn kỳ học</option>
                 <option v-for="ky in khungKyTheoVersion" :key="ky.id" :value="ky.id">
                   {{ ky.maKy }} - {{ ky.tenKy }}
                 </option>
               </select>
             </label>
 
-            <!-- Sĩ số tối thiểu -->
             <label class="sv-auto-field sv-auto-field-min">
-              Sĩ số tối thiểu / lớp <span class="sv-required">*</span>
-              <input v-model.number="formAutoTao.siSoToiThieu" type="number" min="1" placeholder="VD: 10"/>
+              Sĩ số tối thiểu <span class="sv-required">*</span>
+              <input v-model.number="formAutoTao.siSoToiThieu" type="number" min="1" placeholder="Nhập sĩ số tối thiểu"/>
             </label>
 
-            <!-- Sĩ số tối đa -->
             <label class="sv-auto-field sv-auto-field-max">
-              Sĩ số tối đa / lớp <span class="sv-required">*</span>
-              <input v-model.number="formAutoTao.siSoToiDa" type="number" min="1" placeholder="VD: 40"/>
+              Sĩ số tối đa <span class="sv-required">*</span>
+              <input v-model.number="formAutoTao.siSoToiDa" type="number" min="1" placeholder="Nhập sĩ số tối đa"/>
             </label>
 
-            <!-- Tiền tố mã lớp -->
             <label class="sv-auto-field sv-auto-field-prefix">
               Tiền tố mã lớp
-              <input v-model.trim="formAutoTao.tienToMaLop" placeholder="VD: LHP"/>
+              <input v-model.trim="formAutoTao.tienToMaLop" placeholder="Ví dụ: LHP"/>
             </label>
 
-            <!-- Checkbox phân bổ SV -->
             <label class="sv-auto-check sv-checkbox-label">
               <input type="checkbox" class="sv-check" v-model="formAutoTao.tuDongPhanBoSinhVien"/>
-              Tự động phân bổ sinh viên vào lớp
+              Tự phân bổ sinh viên
             </label>
 
-            <!-- Chọn lớp hành chính: dạng dropdown để tiết kiệm diện tích -->
             <details class="sv-auto-lhc-dropdown sv-lhc-chon-wrap">
               <summary>
                 <span class="sv-auto-lhc-summary-left">
-                  <strong>Lớp hành chính tham gia</strong>
+                  <strong>Lớp hành chính</strong>
                   <span class="sv-required">*</span>
                 </span>
                 <span class="sv-auto-lhc-summary-count">
-                  {{ formAutoTao.lopHanhChinhIds.length }} / {{ danhSachLHC.length }} đã chọn
+                  {{ formAutoTao.lopHanhChinhIds.length }} / {{ danhSachLHC.length }}
                 </span>
               </summary>
 
@@ -768,49 +793,17 @@
             </details>
           </form>
 
-          <!-- 3 Nút hành động -->
-          <div class="sv-auto-tao-actions">
-            <button
-                type="button"
-                class="secondary"
-                :disabled="dangAutoTao"
-                @click="xuLyAutoTao('PREVIEW')"
-            >
-              🔍 Xem trước (Preview)
-            </button>
-            <button
-                type="button"
-                class="sv-btn-du-kien"
-                :disabled="dangAutoTao"
-                @click="xuLyAutoTao('DU_KIEN')"
-            >
-              📋 Auto xếp dự kiến
-            </button>
-            <button
-                type="button"
-                class="sv-btn-chinh-thuc"
-                :disabled="dangAutoTao"
-                @click="xuLyAutoTao('CHINH_THUC')"
-            >
-              ✅ Auto xếp chính thức
-            </button>
-            <span v-if="dangAutoTao" class="sv-note-text" style="margin-left:8px">Đang xử lý...</span>
-          </div>
-
-          <!-- Kết quả -->
           <div v-if="ketQuaAutoTao" class="sv-auto-tao-result">
-            <!-- Tóm tắt -->
             <div class="sv-auto-tao-summary">
-              <span>Mode: <strong>{{ ketQuaAutoTao.mode }}</strong></span>
+              <span>Chế độ: <strong>{{ ketQuaAutoTao.mode }}</strong></span>
               <span>Tổng sinh viên: <strong>{{ ketQuaAutoTao.tongSinhVien }}</strong></span>
-              <span>Số môn trong kỳ: <strong>{{ ketQuaAutoTao.tongMonTrongKy }}</strong></span>
-              <span>Lớp học phần dự kiến tạo: <strong>{{ ketQuaAutoTao.tongLopHocPhanDuKien }}</strong></span>
+              <span>Số môn học: <strong>{{ ketQuaAutoTao.tongMonTrongKy }}</strong></span>
+              <span>Lớp học phần dự kiến: <strong>{{ ketQuaAutoTao.tongLopHocPhanDuKien }}</strong></span>
               <span v-if="ketQuaAutoTao.tongLopHocPhanDaTao !== undefined">
-              Lớp học phần đã tạo/cập nhật: <strong>{{ ketQuaAutoTao.tongLopHocPhanDaTao }}</strong>
-            </span>
+                Đã tạo hoặc cập nhật: <strong>{{ ketQuaAutoTao.tongLopHocPhanDaTao }}</strong>
+              </span>
             </div>
 
-            <!-- Cảnh báo -->
             <div v-if="ketQuaAutoTao.canhBao?.length" class="sv-auto-tao-warnings">
               <strong>⚠ Cảnh báo:</strong>
               <ul>
@@ -818,7 +811,6 @@
               </ul>
             </div>
 
-            <!-- Lỗi -->
             <div v-if="ketQuaAutoTao.loi?.length" class="sv-auto-tao-errors">
               <strong>✘ Lỗi:</strong>
               <ul>
@@ -826,14 +818,13 @@
               </ul>
             </div>
 
-            <!-- Bảng chi tiết theo môn -->
-            <div v-if="ketQuaAutoTao.monResults?.length" class="sv-table-wrap" style="margin-top:12px">
+            <div v-if="ketQuaAutoTao.monResults?.length" class="sv-table-wrap sv-auto-result-table-wrap">
               <table class="sv-table">
                 <thead>
                 <tr>
                   <th>Môn học</th>
                   <th>Tổng sinh viên</th>
-                  <th>Số lớp</th>
+                  <th>Số lớp cần tạo</th>
                   <th>Lớp học phần</th>
                   <th>Cảnh báo / Lỗi</th>
                 </tr>
@@ -847,15 +838,21 @@
                   <td>{{ mon.tongSinhVien }}</td>
                   <td>{{ mon.soLopCanTao }}</td>
                   <td>
-                    <div v-for="lhp in mon.lopHocPhanResults" :key="lhp.maLop" style="margin-bottom:3px">
+                    <div v-for="lhp in mon.lopHocPhanResults" :key="lhp.maLop" class="sv-auto-lhp-result-line">
                       <span class="sv-code">{{ lhp.maLop }}</span>
-                      <span class="sv-note-text"> ({{ lhp.siSoDaPhanBo || lhp.siSoDuKien }} sinh viên)</span>
-                      <span v-if="lhp.trangThai" class="sv-status-pill" :class="`status-${lhp.trangThai}`" style="font-size:10px;padding:1px 5px;margin-left:3px">{{ ({du_kien: 'Dự kiến', dang_mo: 'Đang mở', dang_hoc: 'Đang học', da_ket_thuc: 'Đã kết thúc', huy: 'Hủy'}[lhp.trangThai]) || lhp.trangThai }}</span>
+                      <span class="sv-note-text">({{ lhp.siSoDaPhanBo || lhp.siSoDuKien }} sinh viên)</span>
+                      <span
+                          v-if="lhp.trangThai"
+                          class="sv-status-pill"
+                          :class="`status-${lhp.trangThai}`"
+                      >
+                        {{ ({du_kien: 'Dự kiến', dang_mo: 'Đang mở', dang_hoc: 'Đang học', da_ket_thuc: 'Đã kết thúc', huy: 'Hủy'}[lhp.trangThai]) || lhp.trangThai }}
+                      </span>
                     </div>
                   </td>
                   <td>
-                    <div v-if="mon.canhBao" class="sv-note-text" style="color:#b45309">⚠ {{ mon.canhBao }}</div>
-                    <div v-if="mon.loi" class="sv-note-text" style="color:#dc2626">✘ {{ mon.loi }}</div>
+                    <div v-if="mon.canhBao" class="sv-note-text sv-text-warning">⚠ {{ mon.canhBao }}</div>
+                    <div v-if="mon.loi" class="sv-note-text sv-text-danger">✘ {{ mon.loi }}</div>
                     <span v-if="!mon.canhBao && !mon.loi" class="sv-note-text">—</span>
                   </td>
                 </tr>
@@ -864,27 +861,36 @@
             </div>
           </div>
         </div>
-        <!-- ── KẾT THÚC AUTO MỞ LHP ── -->
 
+        <!-- FORM MỞ / SỬA LỚP HỌC PHẦN -->
         <div class="sv-card sv-lhp-open-card">
           <div class="sv-card-title sv-lhp-open-title">
-            <div><h2>{{ idLHPSua ? 'Sửa lớp học phần' : 'Mở lớp học phần' }}</h2>
-              <p>Phiên bản: <strong>{{ versionDangChon?.maVersion }}</strong> | Lớp hành chính:
-                <strong>{{ lopHanhChinhDangChon?.maLop }} - {{ lopHanhChinhDangChon?.tenLop }}</strong></p></div>
+            <div>
+              <h2>{{ idLHPSua ? 'Sửa lớp học phần' : 'Mở lớp học phần' }}</h2>
+              <p>
+                Phiên bản: <strong>{{ versionDangChon?.maVersion }}</strong>
+                <span>|</span>
+                Lớp hành chính:
+                <strong>{{ lopHanhChinhDangChon?.maLop }} - {{ lopHanhChinhDangChon?.tenLop }}</strong>
+              </p>
+            </div>
           </div>
+
           <form class="sv-lhp-open-form" @submit.prevent="luuLopHocPhan">
-            <label>Khung kỳ
+            <label class="sv-lhp-field-ky">
+              Kỳ học
               <select v-model="formLHP.khungKyId" required @change="khiDoiKhungKyMoLop">
-                <option value="">Chọn kỳ</option>
+                <option value="">Chọn kỳ học</option>
                 <option v-for="ky in khungKyTheoVersion" :key="ky.id" :value="ky.id">
                   {{ ky.maKy }} - {{ ky.tenKy }}
                 </option>
               </select>
             </label>
 
-            <label>Môn trong kỳ
+            <label class="sv-lhp-field-mon">
+              Môn học
               <select v-model="formLHP.chuongTrinhMonId" required :disabled="!formLHP.khungKyId">
-                <option value="">Chọn môn trong kỳ</option>
+                <option value="">Chọn môn học</option>
                 <option v-for="mon in chuongTrinhMonTheoKhungKyDangChon" :key="mon.id" :value="mon.id">
                   {{ mon.maMonTrongCt || mon.maMon || mon.monHocMa || mon.id }} -
                   {{ mon.tenMonHoc || mon.monHocTen || mon.ghiChu || 'Môn thuộc kỳ đã chọn' }}
@@ -892,14 +898,16 @@
               </select>
             </label>
 
-            <label>Loại lớp
+            <label class="sv-lhp-field-loai">
+              Loại lớp học phần
               <select v-model="formLHP.loaiLopHocPhan">
                 <option value="CHUYEN_NGANH">Chuyên ngành</option>
                 <option value="HOC_CHUNG">Học chung</option>
               </select>
             </label>
 
-            <label>Trạng thái
+            <label class="sv-lhp-field-trangthai">
+              Trạng thái
               <select v-model="formLHP.trangThai">
                 <option value="du_kien">Dự kiến</option>
                 <option value="dang_mo">Đang mở</option>
@@ -909,54 +917,58 @@
               </select>
             </label>
 
-            <label>Mã lớp học phần
+            <label class="sv-lhp-field-ma">
+              Mã lớp học phần
               <input v-model.trim="formLHP.maLop" required/>
             </label>
 
-            <label>Tên lớp học phần
+            <label class="sv-lhp-field-ten">
+              Tên lớp học phần
               <input v-model.trim="formLHP.tenLop" required/>
             </label>
 
-            <label>Sĩ số tối thiểu
+            <label class="sv-lhp-field-number">
+              Sĩ số tối thiểu
               <input v-model.number="formLHP.siSoToiThieu" type="number" min="1"/>
             </label>
 
-            <label>Sĩ số tối đa
+            <label class="sv-lhp-field-number">
+              Sĩ số tối đa
               <input v-model.number="formLHP.soLuongToiDa" type="number" min="1"/>
             </label>
 
-            <label>Số buổi học
+            <label class="sv-lhp-field-buoi">
+              Số buổi học
               <input
                   :value="soBuoiHocTuSyllabusDangChon"
                   type="number"
                   readonly
                   disabled
-                  placeholder="Tự lấy từ syllabus"
+                  placeholder="Tự động"
               />
-              <small class="sv-field-hint">
-                Tự lấy từ syllabus môn học đã lưu vào phiên bản.
-              </small>
+              <small class="sv-field-hint">Tự lấy từ đề cương môn học.</small>
             </label>
 
             <div class="sv-actions sv-lhp-open-actions">
               <button type="submit" :disabled="dangLuu">
-                {{ dangLuu ? 'Đang lưu...' : (idLHPSua ? 'Cập nhật' : 'Mở lớp') }}
+                {{ dangLuu ? 'Lưu...' : (idLHPSua ? 'Cập nhật' : 'Mở lớp') }}
               </button>
               <button type="button" class="secondary" @click="resetFormLHP">Làm mới</button>
             </div>
           </form>
         </div>
 
+        <!-- DANH SÁCH LỚP HỌC PHẦN THEO PHIÊN BẢN -->
         <div class="sv-card sv-lhp-list-card">
           <div class="sv-card-title sv-card-title-toolbar">
             <div>
               <h2>Danh sách lớp học phần theo phiên bản</h2>
-              <p>Chọn lớp để phân bổ sinh viên. Danh sách được sắp xếp theo kỳ.</p>
+              <p>Chọn lớp để phân bổ sinh viên. Danh sách được sắp xếp theo kỳ học.</p>
             </div>
 
             <div class="sv-title-tools">
-              <select v-model="filterKhungKyId" class="sv-search-input" style="min-width:140px;max-width:180px">
-                <option value="">Tất cả kỳ</option>
+              <select v-model="filterKhungKyId" class="sv-search-input">
+                <option value="">Tất cả kỳ học</option>
                 <option v-for="ky in khungKyTheoVersion" :key="ky.id" :value="String(ky.id)">
                   {{ ky.maKy }}{{ ky.tenKy ? ' - ' + ky.tenKy : '' }}
                 </option>
@@ -967,62 +979,135 @@
                   placeholder="Lọc mã môn, tên môn, mã lớp..."
               />
               <span class="so-ban-ghi">
-              {{ danhSachLHPTheoVersion.length }} lớp
-            </span>
+                {{ danhSachLHPTheoVersion.length }} lớp
+              </span>
             </div>
           </div>
+
+          <div v-if="versionDangChon && thongKeCanhBaoLopHocPhan.tongMon > 0" class="sv-canh-bao-lhp-wrap">
+            <div class="sv-canh-bao-lhp-panel" :class="{ 'is-ok': !thongKeCanhBaoLopHocPhan.thieu }">
+              <div class="sv-canh-bao-lhp-head">
+                <div class="sv-canh-bao-lhp-title">
+                  <span class="sv-canh-bao-lhp-icon">🔔</span>
+                  <div>
+                    <strong>Cảnh báo lớp học phần</strong>
+                    <p>
+                      Có <b>{{ thongKeCanhBaoLopHocPhan.soMonChuaCoLop }}</b> môn chưa tạo lớp học phần
+                      trên tổng <b>{{ thongKeCanhBaoLopHocPhan.tongMon }}</b> môn.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="sv-canh-bao-lhp-total" :class="{ 'is-zero': !thongKeCanhBaoLopHocPhan.thieu }">
+                  <span>Tổng lỗi</span>
+                  <strong>{{ thongKeCanhBaoLopHocPhan.soMonChuaCoLop }}</strong>
+                </div>
+              </div>
+
+              <div class="sv-hk-warning-buttons" aria-label="Cảnh báo lỗi theo học kỳ">
+                <button
+                    v-for="item in canhBaoLopHocPhanTheoKy"
+                    :key="item.key"
+                    type="button"
+                    class="sv-hk-warning-btn"
+                    :class="{
+                      active: canhBaoHocKyDangChon?.key === item.key,
+                      'has-error': item.soLoi > 0,
+                      'is-ok': item.soLoi === 0
+                    }"
+                    @click="chonCanhBaoHocKy(item)"
+                >
+                  <span class="sv-hk-warning-bell">🔔</span>
+                  <span class="sv-hk-warning-text">Cãnh báo HK {{ item.soThuTuKy }}</span>
+                  <span class="sv-hk-warning-badge">{{ item.soLoi }}</span>
+                </button>
+              </div>
+
+              <div v-if="canhBaoHocKyDangChon" class="sv-hk-warning-detail">
+                <template v-if="canhBaoHocKyDangChon.soLoi > 0">
+                  <div class="sv-hk-warning-detail-title">
+                    <strong>Cảnh báo HK {{ canhBaoHocKyDangChon.soThuTuKy }}</strong>
+                    <span>{{ canhBaoHocKyDangChon.soLoi }} môn chưa tạo lớp học phần</span>
+                  </div>
+
+                  <ul>
+                    <li v-for="mon in canhBaoHocKyDangChon.danhSachMonThieu.slice(0, 6)" :key="mon.id">
+                      <span class="sv-hk-warning-mon-code">{{ mon.maMonHoc || mon.monHocMa || mon.maMon || '—' }}</span>
+                      <span class="sv-hk-warning-mon-name">{{ mon.tenMonHoc || mon.monHocTen || mon.tenMon || '—' }}</span>
+                    </li>
+                    <li v-if="canhBaoHocKyDangChon.soLoi > 6" class="sv-hk-warning-more">
+                      ... và {{ canhBaoHocKyDangChon.soLoi - 6 }} môn khác
+                    </li>
+                  </ul>
+                </template>
+
+                <template v-else>
+                  <div class="sv-hk-warning-empty">
+                    ✓ HK {{ canhBaoHocKyDangChon.soThuTuKy }} chưa phát hiện lỗi thiếu lớp học phần.
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
           <div class="sv-table-wrap sv-lhp-table-wrap">
             <table class="sv-table sv-lhp-table">
               <thead>
               <tr>
-                <th>#</th>
-                <th>Kỳ</th>
-                <th>Mã môn</th>
-                <th>Tên môn</th>
-                <th>Mã lớp</th>
-                <th>Tên lớp</th>
-                <th>Loại</th>
-                <th>Sĩ số</th>
-                <th>Số buổi</th>
+                <th>STT</th>
+                <th>Kỳ học</th>
+                <th>Mã môn học</th>
+                <th>Tên môn học</th>
+                <th>Mã lớp học phần</th>
+                <th>Tên lớp học phần</th>
+                <th>Loại lớp</th>
+                <th>Sĩ số hiện tại / tối đa</th>
+                <th>Số buổi học</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
               </tr>
               </thead>
               <tbody>
               <tr v-for="(lhp, i) in danhSachLHPTheoVersion" :key="lhp.id">
-                <td>{{ i + 1 }}</td>
-                <td>{{ layTenKyCuaLHP(lhp) }}</td>
-                <td>{{ layMaMonCuaLHP(lhp) }}</td>
-                <td>{{ layTenMonCuaLHP(lhp) }}</td>
-                <td>{{ lhp.maLopHocPhan || lhp.maLop }}</td>
-                <td>{{ lhp.tenLopHocPhan || lhp.tenLop }}</td>
-                <td>{{ layLoaiCuaLHP(lhp) }}</td>
-                <td>{{ laySiSoHienTaiLHP(lhp) }} / {{ lhp.soLuongToiDa || lhp.siSoToiDa || 0 }}</td>
-                <td>{{ lhp.soBuoiHoc || '—' }}</td>
-                <td><span class="sv-status-pill" :class="`status-${lhp.trangThai || 'none'}`">{{ ({du_kien: 'Dự kiến', dang_mo: 'Đang mở', dang_hoc: 'Đang học', da_ket_thuc: 'Đã kết thúc', huy: 'Hủy'}[lhp.trangThai]) || lhp.trangThai || '—' }}</span></td>
-                <td>
-                  <div class="sv-row-actions">
+                <td data-label="STT">{{ i + 1 }}</td>
+                <td data-label="Kỳ học">{{ layTenKyCuaLHP(lhp) }}</td>
+                <td data-label="Mã môn học">{{ layMaMonCuaLHP(lhp) }}</td>
+                <td data-label="Tên môn học">{{ layTenMonCuaLHP(lhp) }}</td>
+                <td data-label="Mã lớp học phần">{{ lhp.maLopHocPhan || lhp.maLop }}</td>
+                <td data-label="Tên lớp học phần">{{ lhp.tenLopHocPhan || lhp.tenLop }}</td>
+                <td data-label="Loại lớp">{{ layLoaiCuaLHP(lhp) }}</td>
+                <td data-label="Sĩ số hiện tại / tối đa">{{ laySiSoHienTaiLHP(lhp) }} / {{ lhp.soLuongToiDa || lhp.siSoToiDa || 0 }}</td>
+                <td data-label="Số buổi học">{{ lhp.soBuoiHoc || '—' }}</td>
+                <td data-label="Trạng thái">
+                  <span class="sv-status-pill" :class="`status-${lhp.trangThai || 'none'}`">
+                    {{ ({du_kien: 'Dự kiến', dang_mo: 'Đang mở', dang_hoc: 'Đang học', da_ket_thuc: 'Đã kết thúc', huy: 'Hủy'}[lhp.trangThai]) || lhp.trangThai || '—' }}
+                  </span>
+                </td>
+                <td data-label="Thao tác">
+                  <div class="sv-row-actions sv-lhp-row-actions">
                     <RouterLink
                         class="small btn-xem-sv"
                         :to="{ path: '/giang-day', query: { lopHocPhanId: lhp.id, tab: 'sinh-vien' } }"
-                    >Sinh viên</RouterLink>
+                    >
+                      Sinh viên
+                    </RouterLink>
 
-                    <button type="button" class="small btn-nhanh2" @click="chonLHPPhanBo(lhp)">Phân bổ →</button>
+                    <button type="button" class="small btn-nhanh2" @click="chonLHPPhanBo(lhp)">Phân bổ</button>
 
                     <RouterLink
                         class="small btn-giangday"
                         :to="{
-  name: 'GiangDay.ChiTietLopHocPhan',
-  params: { id: lhp.id },
-  query: {
-    nganhId: nganhDangChon?.id,
-    chuongTrinhId: chuongTrinhDangChon?.id,
-    versionId: versionDangChon?.id,
-    khungKyId: layKhungKyIdCuaChuongTrinhMon(layChuongTrinhMonCuaLHP(lhp))
-  }
-}"
+                          name: 'GiangDay.ChiTietLopHocPhan',
+                          params: { id: lhp.id },
+                          query: {
+                            nganhId: nganhDangChon?.id,
+                            chuongTrinhId: chuongTrinhDangChon?.id,
+                            versionId: versionDangChon?.id,
+                            khungKyId: layKhungKyIdCuaChuongTrinhMon(layChuongTrinhMonCuaLHP(lhp))
+                          }
+                        }"
                     >
-                      Giảng dạy →
+                      Giảng dạy
                     </RouterLink>
 
                     <button type="button" class="secondary small" @click="suaLopHocPhan(lhp)">Sửa</button>
@@ -1030,8 +1115,9 @@
                   </div>
                 </td>
               </tr>
+
               <tr v-if="!danhSachLHPTheoVersion.length">
-                <td colspan="13" class="empty">Chưa có lớp học phần theo phiên bản này.</td>
+                <td colspan="11" class="empty">Chưa có lớp học phần theo phiên bản này.</td>
               </tr>
               </tbody>
             </table>
@@ -1125,6 +1211,7 @@
   </section>
 </template>
 
+
 <script setup>
 import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {sinhVienService} from '../services/sinhVienService'
@@ -1201,6 +1288,7 @@ const tuKhoaSV = ref('')
 const tuKhoaLHC = ref('')
 const tuKhoaLHP = ref('')
 const filterKhungKyId = ref('')
+const khungKyCanhBaoDangChon = ref('')
 
 const danhSachLHCHienThi = computed(() => {
   const kw = tuKhoaLHC.value.trim().toLowerCase()
@@ -1434,6 +1522,139 @@ const svHienThi = computed(() => {
       [sv.maSinhVien, sv.hoTen, sv.email, sv.soDienThoai].some(v => String(v || '').toLowerCase().includes(kw))
   )
 })
+
+// ─── CẢNH BÁO THIẾU LỚP HỌC PHẦN ────────────────────────────────────────────
+const danhSachMonCanCoLopHocPhan = computed(() => {
+  if (!versionDangChon.value) return []
+  const versionId = versionDangChon.value.id
+  const filterKy = filterKhungKyId.value
+  return danhSachChuongTrinhMon.value
+      .filter(mon => {
+        if (String(mon.chuongTrinhVersionId) !== String(versionId)) return false
+        if (filterKy && String(layKhungKyIdCuaChuongTrinhMon(mon)) !== filterKy) return false
+        return true
+      })
+      .sort((a, b) => {
+        const kyA = layThuTuKyCuaMon(a)
+        const kyB = layThuTuKyCuaMon(b)
+        if (kyA !== kyB) return kyA - kyB
+        const maA = String(a.maMonHoc || a.monHocMa || a.maMon || '')
+        const maB = String(b.maMonHoc || b.monHocMa || b.maMon || '')
+        return maA.localeCompare(maB, 'vi', { numeric: true })
+      })
+})
+
+const chuongTrinhMonIdsDaCoLopHocPhan = computed(() => {
+  if (!versionDangChon.value) return new Set()
+  const versionId = versionDangChon.value.id
+  const filterKy = filterKhungKyId.value
+
+  const monIdsTrongScope = new Set(
+      danhSachChuongTrinhMon.value
+          .filter(mon => {
+            if (String(mon.chuongTrinhVersionId) !== String(versionId)) return false
+            if (filterKy && String(layKhungKyIdCuaChuongTrinhMon(mon)) !== filterKy) return false
+            return true
+          })
+          .map(mon => String(mon.id))
+  )
+
+  const lhpKhongHuy = new Set(
+      danhSachLHP.value
+          .filter(lhp => lhp.trangThai !== 'huy')
+          .map(lhp => String(lhp.id))
+  )
+
+  const result = new Set()
+
+  // 1. LHP có chuongTrinhMonId trực tiếp
+  for (const lhp of danhSachLHP.value) {
+    if (lhp.trangThai === 'huy') continue
+    const monId = String(lhp.chuongTrinhMonId || '')
+    if (monId && monIdsTrongScope.has(monId)) result.add(monId)
+  }
+
+  // 2. LHP học chung qua bảng danhSachLHPChuongTrinhMon
+  for (const item of danhSachLHPChuongTrinhMon.value) {
+    const monId = String(item.chuongTrinhMonId || '')
+    if (!monIdsTrongScope.has(monId)) continue
+    if (!lhpKhongHuy.has(String(item.lopHocPhanId))) continue
+    result.add(monId)
+  }
+
+  return result
+})
+
+const danhSachMonChuaCoLopHocPhan = computed(() =>
+    danhSachMonCanCoLopHocPhan.value.filter(mon =>
+        !chuongTrinhMonIdsDaCoLopHocPhan.value.has(String(mon.id))
+    )
+)
+
+const thongKeCanhBaoLopHocPhan = computed(() => {
+  const tongMon = danhSachMonCanCoLopHocPhan.value.length
+  const soMonChuaCoLop = danhSachMonChuaCoLopHocPhan.value.length
+  return {
+    tongMon,
+    soMonDaCoLop: tongMon - soMonChuaCoLop,
+    soMonChuaCoLop,
+    thieu: soMonChuaCoLop > 0
+  }
+})
+
+const canhBaoLopHocPhanTheoKy = computed(() => {
+  return khungKyTheoVersion.value
+      .map((ky, index) => {
+        const soThuTuKy = layThuTuTuKhungKy(ky, index)
+        const khungKyId = ky?.id || null
+
+        const danhSachMonThieu = danhSachMonChuaCoLopHocPhan.value.filter(mon =>
+            String(layKhungKyIdCuaChuongTrinhMon(mon)) === String(khungKyId)
+        )
+
+        return {
+          key: khungKyId ? `ky-${khungKyId}` : `hk-${soThuTuKy}`,
+          khungKyId,
+          soThuTuKy,
+          tenKy: `${ky?.maKy || `HK${soThuTuKy}`} - ${ky?.tenKy || `Học kỳ ${soThuTuKy}`}`,
+          soLoi: danhSachMonThieu.length,
+          danhSachMonThieu
+        }
+      })
+      .sort((a, b) => a.soThuTuKy - b.soThuTuKy)
+})
+
+const canhBaoHocKyDangChon = computed(() => {
+  const danhSach = canhBaoLopHocPhanTheoKy.value
+  if (!danhSach.length) return null
+
+  const dangChon = danhSach.find(item => item.key === khungKyCanhBaoDangChon.value)
+  if (dangChon) return dangChon
+
+  return danhSach.find(item => item.soLoi > 0) || danhSach[0]
+})
+
+function chonCanhBaoHocKy(item) {
+  if (!item) return
+
+  khungKyCanhBaoDangChon.value = item.key
+
+  if (item.khungKyId) {
+    filterKhungKyId.value = String(item.khungKyId)
+  }
+}
+
+function layThuTuTuKhungKy(ky, index = 0) {
+  const raw = ky?.thuTu
+      ?? ky?.soThuTu
+      ?? ky?.hocKy
+      ?? ky?.ky
+      ?? ky?.maKy
+      ?? ''
+
+  const match = String(raw).match(/\d+/)
+  return match ? Number(match[0]) : index + 1
+}
 
 // ─── MOUNTED ──────────────────────────────────────────────────────────────────
 onMounted(async () => {
@@ -1688,6 +1909,7 @@ async function chonVersion(v) {
   buoc.value = 'lopHanhChinh'
   xoaThongBao()
   filterKhungKyId.value = ''
+  khungKyCanhBaoDangChon.value = ''
 
   const versionId = v.id
 
@@ -1851,10 +2073,10 @@ async function xuLyAutoTao(mode) {
   const loi = validateAutoTao()
   if (loi) { baoLoi(loi); return }
   if (mode === 'CHINH_THUC' && !confirm(
-    'Bạn đang xác nhận lớp học phần CHÍNH THỨC.\n' +
-    '- Nếu đã có lớp dự kiến an toàn (chưa có lịch/điểm): sẽ được chốt sang dang_mo.\n' +
-    '- Lớp dư (không đủ SV) sẽ bị hủy.\n' +
-    'Lớp hành chính chưa chốt tuyển sinh sẽ báo lỗi.\nTiếp tục?'
+      'Bạn đang xác nhận lớp học phần CHÍNH THỨC.\n' +
+      '- Nếu đã có lớp dự kiến an toàn (chưa có lịch/điểm): sẽ được chốt sang dang_mo.\n' +
+      '- Lớp dư (không đủ SV) sẽ bị hủy.\n' +
+      'Lớp hành chính chưa chốt tuyển sinh sẽ báo lỗi.\nTiếp tục?'
   )) return
 
   dangAutoTao.value = true
@@ -2046,6 +2268,21 @@ function layKhungKyIdCuaChuongTrinhMon(mon) {
       || mon?.kyId
       || mon?.hocKyId
       || null
+}
+
+function layThuTuKyCuaMon(mon) {
+  const khungKyId = layKhungKyIdCuaChuongTrinhMon(mon)
+  const ky = danhSachKhungKy.value.find(k => String(k.id) === String(khungKyId))
+  if (!ky) return 9999
+  const raw = ky.thuTu ?? ky.soThuTu ?? ky.hocKy ?? ky.ky ?? ky.maKy ?? ''
+  const match = String(raw).match(/\d+/)
+  return match ? Number(match[0]) : 9999
+}
+
+function layTenKyCuaMon(mon) {
+  const khungKyId = layKhungKyIdCuaChuongTrinhMon(mon)
+  const ky = danhSachKhungKy.value.find(k => String(k.id) === String(khungKyId))
+  return ky ? `${ky.maKy || ''} - ${ky.tenKy || ''}` : '—'
 }
 
 function layChuongTrinhMonIdCuaLHP(lhp) {
@@ -2248,7 +2485,12 @@ async function xoaLopHocPhan(lhp) {
     const versionId = versionDangChon.value?.id
     danhSachLHP.value = await sinhVienService.layLopHocPhan({ chuongTrinhVersionId: versionId })
     danhSachLHPChuongTrinhMon.value = await sinhVienService.layLopHocPhanChuongTrinhMon({ chuongTrinhVersionId: versionId })
-    baoThanhCong('Đã xóa')
+    await taiSiSoLopHocPhanTheoVersion()
+    if (danhSachMonChuaCoLopHocPhan.value.length > 0) {
+      baoLoi(`Đã xóa lớp học phần. Hiện còn thiếu lớp học phần cho ${danhSachMonChuaCoLopHocPhan.value.length} môn trong phạm vi đang lọc.`)
+    } else {
+      baoThanhCong('Đã xóa. Danh sách lớp học phần vẫn đủ theo môn trong phạm vi đang lọc.')
+    }
   } catch (e) {
     baoLoi(e.message)
   }
@@ -2523,21 +2765,23 @@ function xoaThongBao() {
 }
 </script>
 
-
-
-
-
-
-
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap');
 
 /* =========================================================
-   Quản lý sinh viên - giao diện compact
-   - Chỉ tinh chỉnh template text + style, không đổi script/logic/API.
-   - Màu chủ đạo Trung cấp Phương Nam: #077149.
+   QUẢN LÝ SINH VIÊN - STYLE FULL FINAL
+   - Form mở lớp học phần luôn 1 dòng.
+   - Không cuộn ngang ở form mở lớp học phần.
+   - Không cuộn ngang ở bảng danh sách lớp học phần.
+   - Các ô nhập tự co gọn theo màn hình/zoom.
+   - Ô số buổi học và nút thao tác nhỏ gọn.
+   - Mobile bảng lớp học phần vẫn dạng thẻ.
    ========================================================= */
+
+/* =========================
+   1. BASE
+   ========================= */
+
 .sv-flow-page,
 .sv-flow-page * {
   box-sizing: border-box;
@@ -2555,12 +2799,16 @@ function xoaThongBao() {
   --pn-border: #d8e2ee;
   --pn-bg: #f6f9fc;
   --pn-card: #ffffff;
+  --pn-danger: #dc2626;
+  --pn-warning: #b45309;
   --pn-blue: #1d4ed8;
   --pn-shadow: 0 8px 24px rgba(15, 23, 42, .055);
 
   display: block;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   background: var(--pn-bg);
   color: var(--pn-text);
   font-size: 13px;
@@ -2568,35 +2816,54 @@ function xoaThongBao() {
 
 .sv-content {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-/* ===== Header gọn ===== */
+.sv-manage-layout,
+.sv-manage-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* =========================
+   2. HEADER + BREADCRUMB
+   ========================= */
+
 .sv-page-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
   padding: 2px 0 0;
+  margin-bottom: -2px;
+  min-width: 0;
 }
 
 .sv-page-header h1 {
   margin: 0;
   color: var(--pn-text);
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.15;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .sv-page-header p {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   color: var(--pn-muted);
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.35;
 }
 
-/* ===== Breadcrumb ===== */
 .sv-summary-bar {
   display: flex;
   flex-wrap: wrap;
@@ -2612,8 +2879,13 @@ function xoaThongBao() {
 
 .sv-breadcrumb-sticky {
   position: sticky;
-  top: 56px;
-  z-index: 50;
+  top: 55px;
+  z-index: 20;
+  margin-bottom: 14px;
+}
+
+.sv-lhp-auto-card {
+  margin-top: 8px;
 }
 
 .sv-summary-chip {
@@ -2629,102 +2901,74 @@ function xoaThongBao() {
   cursor: default;
 }
 
-.sv-summary-chip.clickable { cursor: pointer; }
-.sv-summary-chip.clickable:hover { border-color: var(--pn-green-line); background: var(--pn-green-soft); }
-.sv-summary-chip.active { border-color: var(--pn-green-line); background: var(--pn-green-soft); }
-.sv-summary-name { color: var(--pn-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
-.sv-summary-value { color: var(--pn-text); font-size: 12px; font-weight: 800; }
-.sv-summary-chip.active .sv-summary-value { color: var(--pn-green); }
-
-/* ===== Layout ===== */
-.sv-manage-layout,
-.sv-manage-main {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  min-width: 0;
+.sv-summary-chip.clickable {
+  cursor: pointer;
 }
 
-/* ===== Stats: một hàng, nhỏ gọn ===== */
-.sv-stat-cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+.sv-summary-chip.clickable:hover,
+.sv-summary-chip.active {
+  border-color: var(--pn-green-line);
+  background: var(--pn-green-soft);
 }
 
-.sv-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 66px;
-  padding: 10px 14px;
-  border: 1px solid var(--pn-border);
-  border-radius: 14px;
-  background: var(--pn-card);
-  box-shadow: var(--pn-shadow);
-  overflow: hidden;
+.sv-summary-name {
+  color: var(--pn-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-.sv-stat-icon {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  font-size: 18px;
-}
-
-.stat-blue { background: #e8f6ef; color: var(--pn-green); }
-.stat-violet { background: #eef2ff; color: #4f46e5; }
-.stat-green { background: #dcfce7; color: #15803d; }
-.stat-orange { background: #fff1dd; color: #c2410c; }
-
-.sv-stat-body {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas: 'label value' 'sub value';
-  align-items: center;
-  column-gap: 10px;
-  min-width: 0;
-  width: 100%;
-}
-
-.sv-stat-label {
-  grid-area: label;
-  color: #47617a;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sv-stat-value {
-  grid-area: value;
+.sv-summary-value {
   color: var(--pn-text);
-  font-size: 24px;
-  line-height: 1;
+  font-size: 12px;
   font-weight: 800;
 }
 
-.sv-stat-value-green { color: var(--pn-green); }
-.sv-stat-sub { grid-area: sub; color: #8aa0b5; font-size: 11px; white-space: nowrap; }
+.sv-summary-chip.active .sv-summary-value {
+  color: var(--pn-green);
+}
 
-/* ===== Bộ lọc compact ===== */
+/* =========================
+   3. MESSAGE
+   ========================= */
+
+.sv-message {
+  padding: 9px 12px;
+  border-radius: 11px;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.sv-message.success {
+  border: 1px solid var(--pn-green-line);
+  background: var(--pn-green-soft);
+  color: var(--pn-green);
+}
+
+.sv-message.error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* =========================
+   4. FILTER + MINI STATS
+   ========================= */
+
 .sv-filter-card {
-  padding: 12px 14px;
-  border: 1px solid var(--pn-border);
+  padding: 10px 12px 9px;
+  border: 1px solid #cfe1dc;
   border-radius: 14px;
-  background: #f9fbfd;
+  background: linear-gradient(180deg, #fbfefd 0%, #f6faf8 100%);
   box-shadow: 0 4px 14px rgba(15, 23, 42, .035);
+  min-width: 0;
 }
 
 .sv-filter-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
+  gap: 9px;
   align-items: end;
 }
 
@@ -2740,43 +2984,149 @@ label {
 
 .sv-filter-field > span {
   color: #21314a;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
+  line-height: 1.15;
+}
+
+.sv-filter-card select,
+.sv-filter-card input {
+  min-height: 32px;
+  height: 32px;
+  padding: 5px 9px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.sv-filter-bottom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 7px;
 }
 
 .sv-filter-hint {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-top: 9px;
+  min-width: 0;
+  margin: 0;
   color: var(--pn-green);
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 11.5px;
+  line-height: 1.25;
 }
 
-.sv-filter-hint-ico { flex: 0 0 auto; }
+.sv-filter-hint-ico {
+  flex: 0 0 auto;
+}
 
-/* ===== Card/form ===== */
+.sv-mini-stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.sv-mini-stat {
+  display: grid;
+  grid-template-columns: 22px minmax(72px, auto) auto;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 3px 7px 3px 4px;
+  border: 1px solid #d9e8e3;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 5px rgba(15, 23, 42, .035);
+  white-space: nowrap;
+}
+
+.sv-mini-stat-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.stat-blue {
+  background: #e8f6ef;
+  color: var(--pn-green);
+}
+
+.stat-violet {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.stat-orange {
+  background: #fff1dd;
+  color: #c2410c;
+}
+
+.sv-mini-stat-text {
+  color: #41556c;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.sv-mini-stat strong {
+  color: #071827;
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+/* =========================
+   5. CARD + FORM CHUNG
+   ========================= */
+
 .sv-card {
-  padding: 14px 16px;
+  padding: 11px 13px;
   border: 1px solid var(--pn-border);
   border-radius: 14px;
   background: var(--pn-card);
   box-shadow: var(--pn-shadow);
   min-width: 0;
+  max-width: 100%;
 }
 
 .sv-card-title {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 8px;
+  min-width: 0;
 }
 
-.sv-card-title-toolbar { align-items: center; }
-.sv-card-title h2 { margin: 0; color: var(--pn-text); font-size: 16px; line-height: 1.25; font-weight: 800; }
-.sv-card-title p { margin: 3px 0 0; color: var(--pn-muted); font-size: 12px; line-height: 1.35; }
+.sv-card-title-toolbar {
+  align-items: center;
+}
+
+.sv-card-title > div {
+  min-width: 0;
+}
+
+.sv-card-title h2 {
+  margin: 0;
+  color: var(--pn-text);
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.sv-card-title p {
+  margin: 3px 0 0;
+  color: var(--pn-muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
 
 .sv-title-tools {
   display: flex;
@@ -2787,20 +3137,41 @@ label {
   min-width: 0;
 }
 
-.sv-grid { display: grid; gap: 8px; margin: 0; }
-.sv-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.sv-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.sv-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.sv-span-2 { grid-column: span 2; }
-.sv-span-3 { grid-column: span 3; }
-.sv-span-4 { grid-column: span 4; }
+.sv-grid {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
 
-/* Tạo lớp hành chính: gom về một hàng để tránh phí khoảng trống */
+.sv-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sv-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sv-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sv-span-2 {
+  grid-column: span 2;
+}
+
+.sv-span-3 {
+  grid-column: span 3;
+}
+
+.sv-span-4 {
+  grid-column: span 4;
+}
+
 #form-lhc.sv-grid,
 form#form-lhc {
   display: grid;
-  grid-template-columns: 1fr 1.35fr .72fr 1fr 1.03fr 1.03fr 1.35fr;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, .62fr) minmax(0, .9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: 6px;
   align-items: end;
 }
 
@@ -2809,49 +3180,80 @@ form#form-lhc {
   grid-column: auto;
 }
 
-#form-lhc label { min-width: 0; }
-#form-lhc .sv-chot-tuyen-sinh-info { min-height: 34px; display: flex; align-items: center; gap: 5px; }
+#form-lhc label,
+.sv-grid label {
+  min-width: 0;
+  gap: 3px;
+  font-size: 11.5px;
+}
+
+#form-lhc .sv-chot-tuyen-sinh-info {
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* =========================
+   6. INPUT / BUTTON
+   ========================= */
 
 input,
 select,
 textarea {
   width: 100%;
   min-width: 0;
-  min-height: 34px;
-  padding: 7px 10px;
+  max-width: 100%;
+  min-height: 31px;
+  padding: 5px 8px;
   border: 1px solid #cbd7e4;
-  border-radius: 9px;
+  border-radius: 8px;
   background: #fff;
   color: var(--pn-text);
   font: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.25;
   outline: none;
   transition: border-color .15s, box-shadow .15s, background .15s;
 }
 
-textarea { min-height: 62px; resize: vertical; }
-input::placeholder, textarea::placeholder { color: #8aa0b5; }
-input:focus, select:focus, textarea:focus {
+textarea {
+  min-height: 62px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8aa0b5;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
   border-color: var(--pn-green);
   box-shadow: 0 0 0 3px rgba(7, 113, 73, .12);
 }
-select:disabled, input:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
 
-/* ===== Buttons - giữ màu chức năng hiện có, chỉ nén kích thước ===== */
+select:disabled,
+input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
 button,
 .btn-giangday,
 .btn-xem-sv {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
-  padding: 6px 11px;
+  min-height: 29px;
+  padding: 5px 9px;
   border: 0;
-  border-radius: 9px;
-  background: #1d4ed8;
+  border-radius: 8px;
+  background: var(--pn-blue);
   color: #fff;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 800;
   line-height: 1.2;
   text-decoration: none;
@@ -2862,58 +3264,121 @@ button,
 
 button:hover,
 .btn-giangday:hover,
-.btn-xem-sv:hover { filter: brightness(.96); transform: translateY(-1px); }
-button:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-button.secondary { background: #e2e8f0; color: #334155; }
-button.danger { background: #dc2626; color: #fff; }
+.btn-xem-sv:hover {
+  filter: brightness(.96);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button.secondary {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+button.danger {
+  background: var(--pn-danger);
+  color: #fff;
+}
+
 button.small,
 .btn-giangday.small,
-.btn-xem-sv.small { min-height: 28px; padding: 5px 8px; border-radius: 8px; font-size: 12px; }
-.sv-btn-primary { background: var(--pn-green); color: #fff; }
-.sv-btn-primary:hover { background: var(--pn-green-dark); }
-.btn-nhanh1 { background: #1d4ed8; }
-.btn-nhanh2 { background: #059669; }
-.btn-giangday { background: #f59e0b; }
-.btn-xem-sv { background: #0f766e; }
-.btn-chot-ts { background: #16a34a; }
-.btn-huy-chot-ts { background: #f97316; }
+.btn-xem-sv.small,
+.sv-row-actions .small {
+  min-height: 24px;
+  padding: 3px 6px;
+  border-radius: 7px;
+  font-size: 10.8px;
+  line-height: 1.1;
+}
+
+.sv-btn-primary {
+  background: var(--pn-green);
+  color: #fff;
+}
+
+.sv-btn-primary:hover {
+  background: var(--pn-green-dark);
+}
+
+.btn-nhanh1 {
+  background: var(--pn-blue);
+}
+
+.btn-nhanh2 {
+  background: #059669;
+}
+
+.btn-giangday {
+  background: #f59e0b;
+}
+
+.btn-xem-sv {
+  background: #0f766e;
+}
+
+.btn-chot-ts {
+  background: #16a34a;
+}
+
+.btn-huy-chot-ts {
+  background: #f97316;
+}
 
 .sv-actions,
 .sv-row-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 5px;
+  gap: 4px;
   flex-wrap: wrap;
 }
-.sv-row-actions-nowrap { flex-wrap: nowrap; }
 
-/* ===== Bảng: nhỏ hơn, xem được nhiều dữ liệu hơn ===== */
+.sv-row-actions-nowrap {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+/* =========================
+   7. TABLE CHUNG
+   ========================= */
+
 .sv-table-wrap {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: auto;
   border: 1px solid var(--pn-border);
   border-radius: 12px;
   background: #fff;
 }
 
-.sv-table-wrap-full { border: 0; border-radius: 0; }
+.sv-table-wrap-full {
+  border: 0;
+  border-radius: 0;
+}
 
 .sv-table {
   width: 100%;
   min-width: 900px;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 12px;
-  line-height: 1.3;
+  font-size: 11.5px;
+  line-height: 1.18;
 }
 
 .sv-table th,
 .sv-table td {
-  padding: 6px 8px;
+  height: 34px;
+  padding: 4px 6px;
   border-bottom: 1px solid #e6edf4;
   text-align: left;
   vertical-align: middle;
+  overflow: hidden;
 }
 
 .sv-table th {
@@ -2922,18 +3387,36 @@ button.small,
   z-index: 5;
   background: #edf3f0;
   color: #1f3347;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
   box-shadow: inset 0 -1px 0 #d7e2ec;
 }
 
-.sv-table tbody tr:hover td { background: #f8fbfa; }
-.sv-table tr.da-phan-bo td { color: #94a3b8; }
-.sv-table th:first-child,
-.sv-table td:first-child { width: 44px; text-align: center; }
+.sv-table tbody tr:hover td {
+  background: #f8fbfa;
+}
 
-/* Danh sách lớp hành chính */
+.sv-table tr.da-phan-bo td {
+  color: #94a3b8;
+}
+
+.sv-table th:first-child,
+.sv-table td:first-child {
+  width: 44px;
+  text-align: center;
+}
+
+.empty {
+  padding: 18px 12px !important;
+  color: var(--pn-muted);
+  text-align: center;
+}
+
+/* =========================
+   8. LỚP HÀNH CHÍNH
+   ========================= */
+
 .sv-lhc-list-card {
   width: 100%;
   max-width: none;
@@ -2943,59 +3426,96 @@ button.small,
 
 .sv-lhc-list-card .sv-card-title {
   margin: 0;
-  padding: 12px 16px 10px;
+  padding: 9px 12px 8px;
   border-bottom: 1px solid var(--pn-border);
   background: linear-gradient(180deg, #fff 0%, #f8fbfa 100%);
 }
 
 .sv-lhc-table-wrap {
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 238px);
   overflow: auto;
 }
 
 .sv-lhc-table {
-  min-width: 1240px;
+  min-width: 1120px;
   table-layout: fixed;
 }
 
-.sv-lhc-table th:nth-child(1), .sv-lhc-table td:nth-child(1) { width: 46px; }
-.sv-lhc-table th:nth-child(2), .sv-lhc-table td:nth-child(2) { width: 98px; }
-.sv-lhc-table th:nth-child(3), .sv-lhc-table td:nth-child(3) { width: 230px; }
-.sv-lhc-table th:nth-child(4), .sv-lhc-table td:nth-child(4) { width: 90px; text-align: center; }
-.sv-lhc-table th:nth-child(5), .sv-lhc-table td:nth-child(5) { width: 100px; }
-.sv-lhc-table th:nth-child(6), .sv-lhc-table td:nth-child(6) { width: 120px; }
-.sv-lhc-table th:nth-child(7), .sv-lhc-table td:nth-child(7) { width: 120px; }
-.sv-lhc-table th:nth-child(8), .sv-lhc-table td:nth-child(8) { width: 230px; }
-.sv-lhc-table th:nth-child(9), .sv-lhc-table td:nth-child(9) { width: 370px; }
-
-.sv-lhp-list-card { width: 100%; max-width: none; overflow: hidden; }
-.sv-lhp-table-wrap { max-height: calc(100vh - 320px); overflow: auto; }
-.sv-lhp-table { min-width: 1250px; table-layout: fixed; }
-.sv-lhp-table th, .sv-lhp-table td { padding: 5px 7px; font-size: 11.7px; }
-.sv-lhp-table th:nth-child(1), .sv-lhp-table td:nth-child(1) { width: 42px; }
-.sv-lhp-table th:nth-child(2), .sv-lhp-table td:nth-child(2) { width: 92px; }
-.sv-lhp-table th:nth-child(3), .sv-lhp-table td:nth-child(3) { width: 76px; }
-.sv-lhp-table th:nth-child(4), .sv-lhp-table td:nth-child(4) { width: 170px; }
-.sv-lhp-table th:nth-child(5), .sv-lhp-table td:nth-child(5) { width: 145px; }
-.sv-lhp-table th:nth-child(6), .sv-lhp-table td:nth-child(6) { width: 220px; }
-.sv-lhp-table th:nth-child(7), .sv-lhp-table td:nth-child(7) { width: 150px; }
-.sv-lhp-table th:nth-child(8), .sv-lhp-table td:nth-child(8) { width: 72px; text-align: center; }
-.sv-lhp-table th:nth-child(9), .sv-lhp-table td:nth-child(9) { width: 70px; text-align: center; }
-.sv-lhp-table th:nth-child(10), .sv-lhp-table td:nth-child(10) { width: 100px; }
-.sv-lhp-table th:nth-child(11), .sv-lhp-table td:nth-child(11) { width: 380px; }
-
-.sv-table-footer {
-  padding: 9px 12px;
-  color: var(--pn-muted);
-  font-size: 12px;
+.sv-lhc-table th:nth-child(1),
+.sv-lhc-table td:nth-child(1) {
+  width: 40px;
 }
 
+.sv-lhc-table th:nth-child(2),
+.sv-lhc-table td:nth-child(2) {
+  width: 86px;
+}
+
+.sv-lhc-table th:nth-child(3),
+.sv-lhc-table td:nth-child(3) {
+  width: 190px;
+}
+
+.sv-lhc-table th:nth-child(4),
+.sv-lhc-table td:nth-child(4) {
+  width: 74px;
+  text-align: center;
+}
+
+.sv-lhc-table th:nth-child(5),
+.sv-lhc-table td:nth-child(5) {
+  width: 84px;
+}
+
+.sv-lhc-table th:nth-child(6),
+.sv-lhc-table td:nth-child(6) {
+  width: 110px;
+}
+
+.sv-lhc-table th:nth-child(7),
+.sv-lhc-table td:nth-child(7) {
+  width: 102px;
+}
+
+.sv-lhc-table th:nth-child(8),
+.sv-lhc-table td:nth-child(8) {
+  width: 220px;
+}
+
+.sv-lhc-table th:nth-child(9),
+.sv-lhc-table td:nth-child(9) {
+  width: 314px;
+}
+
+.sv-lhc-table td:nth-child(8) {
+  white-space: nowrap;
+}
+
+.sv-lhc-table td:nth-child(8) .sv-note-text {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-table-footer {
+  padding: 7px 10px;
+  color: var(--pn-muted);
+  font-size: 11.5px;
+}
+
+/* =========================
+   9. SEARCH + BADGE + TEXT
+   ========================= */
+
 .sv-search-input {
-  width: 250px;
-  min-width: 210px;
-  min-height: 34px;
+  width: 220px;
+  min-width: 180px;
+  min-height: 31px;
   padding-left: 13px;
   border-radius: 999px;
+  font-size: 12px;
 }
 
 .so-ban-ghi {
@@ -3005,17 +3525,16 @@ button.small,
   white-space: nowrap;
 }
 
-/* ===== Badges/text ===== */
 .sv-code {
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-  min-height: 24px;
-  padding: 3px 9px;
+  min-height: 21px;
+  padding: 2px 7px;
   border-radius: 999px;
   background: #eff6ff;
-  color: #1d4ed8;
-  font-size: 12px;
+  color: var(--pn-blue);
+  font-size: 11.3px;
   font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
@@ -3023,18 +3542,21 @@ button.small,
 }
 
 .sv-main-text {
+  max-width: 100%;
   color: var(--pn-text);
-  font-size: 12.5px;
+  font-size: 11.8px;
   font-weight: 800;
-  line-height: 1.3;
+  line-height: 1.18;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sv-note-text {
   display: inline-block;
   max-width: 100%;
   color: var(--pn-muted);
-  font-size: 11.5px;
-  line-height: 1.3;
+  font-size: 11px;
+  line-height: 1.18;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3046,35 +3568,76 @@ button.small,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 24px;
-  padding: 3px 9px;
+  min-height: 21px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 11.5px;
-  line-height: 1.2;
+  font-size: 10.8px;
+  line-height: 1.15;
   font-weight: 800;
   white-space: nowrap;
 }
 
-.sv-capacity-badge { gap: 4px; min-width: 66px; background: #e8f6ef; color: var(--pn-green); }
-.sv-capacity-badge strong { font-size: 12.5px; }
-.sv-status-pill { background: #f1f5f9; color: #475569; }
-.sv-status-pill.status-dang_hoc,
-.sv-status.done,
-.sv-status-pill.status-da_chot { background: #e8f6ef; color: var(--pn-green); border: 1px solid var(--pn-green-line); }
-.sv-status-pill.status-du_kien { background: #eff6ff; color: #1d4ed8; }
-.sv-status-pill.status-tam_dung { background: #fffbeb; color: #b45309; }
-.sv-status-pill.status-da_tot_nghiep { background: #f5f3ff; color: #6d28d9; }
-.sv-status-pill.status-huy,
-.sv-status.pending { background: #fef2f2; color: #b91c1c; }
-.sv-status-pill.status-chua_chot { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-
-.empty {
-  padding: 18px 12px !important;
-  color: var(--pn-muted);
-  text-align: center;
+.sv-capacity-badge {
+  gap: 4px;
+  min-width: 56px;
+  background: #e8f6ef;
+  color: var(--pn-green);
 }
 
-/* ===== Tiếp nhận sinh viên ===== */
+.sv-capacity-badge strong {
+  font-size: 11.5px;
+}
+
+.sv-status-pill {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.sv-status-pill.status-dang_hoc,
+.sv-status-pill.status-dang_mo,
+.sv-status.done,
+.sv-status-pill.status-da_chot {
+  background: #e8f6ef;
+  color: var(--pn-green);
+  border: 1px solid var(--pn-green-line);
+}
+
+.sv-status-pill.status-du_kien {
+  background: #eff6ff;
+  color: var(--pn-blue);
+}
+
+.sv-status-pill.status-tam_dung {
+  background: #fffbeb;
+  color: var(--pn-warning);
+}
+
+.sv-status-pill.status-da_tot_nghiep {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.sv-status-pill.status-da_ket_thuc {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.sv-status-pill.status-huy,
+.sv-status.pending {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.sv-status-pill.status-chua_chot {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+/* =========================
+   10. TIẾP NHẬN SINH VIÊN
+   ========================= */
+
 .sv-account-box {
   display: flex;
   gap: 10px;
@@ -3120,775 +3683,329 @@ h3 {
   font-weight: 800;
 }
 
-.sv-file-panel-title p { margin: 2px 0 0; color: var(--pn-muted); font-size: 12px; }
-.sv-document-grid { display: grid; gap: 8px; }
-.sv-document-row { display: grid; grid-template-columns: 70px 1fr; gap: 8px; align-items: center; padding: 8px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
-.sv-document-row-main { grid-template-columns: 88px 1fr; }
-.sv-document-left { position: relative; min-width: 0; }
-.sv-document-preview { width: 70px; height: 48px; display: grid; place-items: center; border: 1px dashed #cbd5e1; border-radius: 9px; overflow: hidden; background: #f8fafc; color: #94a3b8; font-size: 11px; text-align: center; }
-.sv-portrait-preview { width: 88px; height: 88px; border-radius: 12px; }
-.sv-document-preview img { width: 100%; height: 100%; object-fit: cover; }
-.sv-document-title { color: var(--pn-text); font-size: 12px; font-weight: 800; }
-.sv-file-picker { display: inline-flex; align-items: center; justify-content: center; width: fit-content; min-height: 28px; padding: 5px 9px; border-radius: 8px; background: var(--pn-green); color: #fff; font-size: 12px; font-weight: 800; cursor: pointer; }
-.sv-file-picker input { display: none; }
-.sv-file-meta { display: grid; gap: 1px; margin-top: 4px; color: var(--pn-muted); font-size: 11px; }
-.sv-file-meta strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sv-remove-file { position: absolute; top: -6px; right: -6px; min-height: 22px; padding: 2px 6px; border-radius: 999px; background: #ef4444; font-size: 10px; z-index: 2; }
-.sv-other-files { display: grid; gap: 5px; margin-top: 5px; color: var(--pn-muted); font-size: 11px; }
-.sv-other-file-item { display: flex; align-items: center; gap: 5px; justify-content: space-between; padding: 5px 6px; border-radius: 8px; background: #f1f5f9; }
-.sv-document-pdf { font-weight: 800; color: #dc2626; }
-
-.sv-info-panel { display: grid; gap: 10px; }
-.sv-section-box { padding: 12px; border: 1px solid var(--pn-border); border-radius: 12px; background: #fff; }
-.sv-form-table { display: grid; gap: 8px; }
-.sv-form-table-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.sv-form-table-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.sv-col-span-3 { grid-column: span 3; }
-.sv-receive-actions { justify-content: flex-end; padding-top: 4px; }
-
-.sv-avatar { width: 34px; height: 34px; object-fit: cover; border: 1px solid var(--pn-border); border-radius: 8px; }
-
-/* ===== Auto tạo lớp học phần ===== */
-.sv-auto-tao-card { border-left: 4px solid var(--pn-green); }
-.sv-checkbox-label { display: flex; align-items: center; gap: 7px; }
-.sv-check { width: 15px; min-width: 15px; height: 15px; min-height: 15px; padding: 0; margin: 0; accent-color: var(--pn-green); cursor: pointer; }
-.sv-check-all { width: 16px; min-width: 16px; height: 16px; min-height: 16px; }
-.sv-check:disabled { cursor: not-allowed; opacity: .45; }
-.sv-lhc-checkbox-list { display: flex; flex-wrap: wrap; gap: 6px; }
-.sv-lhc-chon-item { display: inline-flex; align-items: center; gap: 4px; width: auto; padding: 6px 8px; border: 1px solid var(--pn-border); border-radius: 999px; background: #fff; font-size: 12px; font-weight: 700; }
-.sv-lhc-chon-item--chot { border-color: var(--pn-green-line); background: var(--pn-green-soft); }
-.sv-auto-tao-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.sv-btn-du-kien { background: #2563eb; }
-.sv-btn-chinh-thuc { background: var(--pn-green); }
-.sv-auto-tao-result { margin-top: 10px; display: grid; gap: 8px; }
-.sv-auto-tao-summary { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #f1f5f9; color: #334155; font-size: 12px; }
-.sv-auto-tao-warnings, .sv-auto-tao-errors { padding: 8px 10px; border-radius: 10px; font-size: 12px; }
-.sv-auto-tao-warnings { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-.sv-auto-tao-errors { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
-.sv-auto-tao-warnings ul, .sv-auto-tao-errors ul { margin: 4px 0 0 16px; padding: 0; }
-
-/* ===== Misc ===== */
-.sv-empty-state { padding: 28px 18px; text-align: center; }
-.sv-empty-ico { font-size: 32px; }
-.sv-empty-state h2 { margin: 8px 0 4px; color: var(--pn-text); font-size: 16px; }
-.sv-empty-state p { margin: 0; color: var(--pn-muted); font-size: 13px; }
-.sv-message { padding: 9px 12px; border-radius: 11px; font-size: 12.5px; font-weight: 700; }
-.sv-message.success { border: 1px solid var(--pn-green-line); background: var(--pn-green-soft); color: var(--pn-green); }
-.sv-message.error { border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; }
-.bat-buoc, .sv-required { color: #dc2626; font-weight: 800; }
-.sv-field-hint { color: var(--pn-muted); font-size: 11px; font-weight: 500; }
-
-/* ===== Responsive ===== */
-@media (max-width: 1280px) {
-  #form-lhc.sv-grid,
-  form#form-lhc { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  #form-lhc .sv-span-4 { grid-column: span 4; }
-  .sv-row-actions-nowrap { flex-wrap: wrap; }
-}
-
-@media (max-width: 1100px) {
-  .sv-stat-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .sv-filter-grid { grid-template-columns: 1fr; }
-  .sv-grid-4, .sv-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .sv-span-3, .sv-span-4 { grid-column: span 2; }
-  .sv-receive-layout { grid-template-columns: 1fr; }
-  .sv-file-panel { position: static; }
-  .sv-form-table-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 760px) {
-  .sv-page-header, .sv-card-title { flex-direction: column; align-items: stretch; }
-  .sv-stat-cards { grid-template-columns: 1fr; }
-  .sv-grid-2, .sv-grid-3, .sv-grid-4,
-  #form-lhc.sv-grid,
-  form#form-lhc,
-  .sv-form-table-3,
-  .sv-form-table-4 { grid-template-columns: 1fr; }
-  .sv-span-2, .sv-span-3, .sv-span-4, .sv-col-span-3,
-  #form-lhc .sv-span-2, #form-lhc .sv-span-4 { grid-column: span 1; }
-  .sv-title-tools { flex-wrap: wrap; justify-content: flex-start; }
-  .sv-search-input { width: 100%; min-width: 0; }
-}
-
-
-/* ===== OVERRIDE COMPACT V2: gom thống kê vào bộ lọc + bảng dày dữ liệu hơn ===== */
-.sv-content,
-.sv-manage-main {
-  gap: 10px;
-}
-
-.sv-page-header {
-  margin-bottom: -2px;
-}
-
-.sv-page-header h1 {
-  font-size: 22px;
-}
-
-.sv-page-header p {
-  margin-top: 3px;
-  font-size: 12.5px;
-}
-
-.sv-filter-card-with-stats {
-  padding: 10px 12px 9px;
-  border-color: #cfe1dc;
-  background: linear-gradient(180deg, #fbfefd 0%, #f6faf8 100%);
-}
-
-.sv-filter-card-with-stats .sv-filter-grid {
-  grid-template-columns: minmax(220px, 1.1fr) minmax(220px, 1.1fr) minmax(260px, 1.1fr);
-  gap: 9px;
-}
-
-.sv-filter-card-with-stats .sv-filter-field > span {
-  font-size: 11.5px;
-  line-height: 1.15;
-}
-
-.sv-filter-card-with-stats select,
-.sv-filter-card-with-stats input {
-  min-height: 32px;
-  height: 32px;
-  padding: 5px 9px;
-  border-radius: 9px;
-  font-size: 12.5px;
-  font-weight: 700;
-}
-
-.sv-filter-bottom-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  margin-top: 7px;
-}
-
-.sv-filter-bottom-row .sv-filter-hint {
-  margin: 0;
-  min-width: 0;
-  font-size: 11.5px;
-  line-height: 1.25;
-}
-
-.sv-mini-stats {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  min-width: 0;
-}
-
-.sv-mini-stat {
-  display: grid;
-  grid-template-columns: 22px minmax(72px, auto) auto;
-  align-items: center;
-  gap: 5px;
-  min-height: 28px;
-  padding: 3px 7px 3px 4px;
-  border: 1px solid #d9e8e3;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 1px 5px rgba(15, 23, 42, .035);
-  white-space: nowrap;
-}
-
-.sv-mini-stat-icon {
-  width: 22px;
-  height: 22px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 999px;
+.sv-file-panel-title p {
+  margin: 2px 0 0;
+  color: var(--pn-muted);
   font-size: 12px;
 }
 
-.sv-mini-stat-text {
-  color: #41556c;
+.sv-document-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.sv-document-row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.sv-document-row-main {
+  grid-template-columns: 88px 1fr;
+}
+
+.sv-document-left {
+  position: relative;
+  min-width: 0;
+}
+
+.sv-document-preview {
+  width: 70px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed #cbd5e1;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #f8fafc;
+  color: #94a3b8;
   font-size: 11px;
+  text-align: center;
+}
+
+.sv-portrait-preview {
+  width: 88px;
+  height: 88px;
+  border-radius: 12px;
+}
+
+.sv-document-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sv-document-title {
+  color: var(--pn-text);
+  font-size: 12px;
   font-weight: 800;
 }
 
-.sv-mini-stat strong {
-  color: #071827;
-  font-size: 17px;
-  line-height: 1;
-  font-weight: 900;
-}
-
-/* Form tạo lớp hành chính gọn hơn */
-.sv-card {
-  padding: 11px 13px;
-}
-
-.sv-card-title {
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.sv-card-title h2 {
-  font-size: 15px;
-}
-
-.sv-card-title p {
-  font-size: 11.5px;
-}
-
-#form-lhc.sv-grid,
-form#form-lhc {
-  grid-template-columns: 1fr 1.25fr .62fr .9fr 1fr 1fr 1.35fr;
-  gap: 6px;
-}
-
-#form-lhc label,
-.sv-grid label {
-  gap: 3px;
-  font-size: 11.5px;
-}
-
-input,
-select,
-textarea {
-  min-height: 31px;
-  padding: 5px 8px;
-  border-radius: 8px;
-  font-size: 12.5px;
-}
-
-/* Bảng lớp hành chính: chống đè ghi chú, giảm khoảng trống, nút nhỏ lại */
-.sv-lhc-list-card .sv-card-title {
-  padding: 9px 12px 8px;
-}
-
-.sv-lhc-table-wrap {
-  max-height: calc(100vh - 238px);
-}
-
-.sv-table {
-  font-size: 11.5px;
-  line-height: 1.18;
-}
-
-.sv-table th,
-.sv-table td {
-  padding: 4px 6px;
-  height: 34px;
-  overflow: hidden;
-}
-
-.sv-table th {
-  font-size: 11px;
-}
-
-.sv-lhc-table {
-  min-width: 1120px;
-  table-layout: fixed;
-}
-
-.sv-lhc-table th:nth-child(1), .sv-lhc-table td:nth-child(1) { width: 40px; }
-.sv-lhc-table th:nth-child(2), .sv-lhc-table td:nth-child(2) { width: 86px; }
-.sv-lhc-table th:nth-child(3), .sv-lhc-table td:nth-child(3) { width: 190px; }
-.sv-lhc-table th:nth-child(4), .sv-lhc-table td:nth-child(4) { width: 74px; text-align: center; }
-.sv-lhc-table th:nth-child(5), .sv-lhc-table td:nth-child(5) { width: 84px; }
-.sv-lhc-table th:nth-child(6), .sv-lhc-table td:nth-child(6) { width: 110px; }
-.sv-lhc-table th:nth-child(7), .sv-lhc-table td:nth-child(7) { width: 102px; }
-.sv-lhc-table th:nth-child(8), .sv-lhc-table td:nth-child(8) { width: 220px; }
-.sv-lhc-table th:nth-child(9), .sv-lhc-table td:nth-child(9) { width: 314px; }
-
-.sv-lhc-table td:nth-child(8) {
-  white-space: nowrap;
-}
-
-.sv-lhc-table td:nth-child(8) .sv-note-text {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sv-code {
-  min-height: 21px;
-  padding: 2px 7px;
-  font-size: 11.3px;
-}
-
-.sv-main-text {
-  font-size: 11.8px;
-  line-height: 1.18;
-}
-
-.sv-note-text {
-  font-size: 11px;
-  line-height: 1.18;
-}
-
-.sv-capacity-badge,
-.sv-status,
-.sv-status-pill {
-  min-height: 21px;
-  padding: 2px 7px;
-  font-size: 10.8px;
-}
-
-.sv-capacity-badge {
-  min-width: 56px;
-}
-
-.sv-capacity-badge strong {
-  font-size: 11.5px;
-}
-
-button,
-.btn-giangday,
-.btn-xem-sv {
-  min-height: 29px;
-  padding: 5px 9px;
-  border-radius: 8px;
-  font-size: 11.5px;
-}
-
-button.small,
-.btn-giangday.small,
-.btn-xem-sv.small,
-.sv-row-actions .small {
-  min-height: 24px;
-  padding: 3px 6px;
-  border-radius: 7px;
-  font-size: 10.8px;
-  line-height: 1.1;
-}
-
-.sv-row-actions {
-  gap: 4px;
-}
-
-.sv-row-actions-nowrap {
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-}
-
-.sv-search-input {
-  min-height: 31px;
-  width: 220px;
-  min-width: 180px;
-  font-size: 12px;
-}
-
-.sv-table-footer {
-  padding: 7px 10px;
-  font-size: 11.5px;
-}
-
-/* Bảng lớp học phần cũng nén đồng bộ */
-.sv-lhp-table-wrap {
-  max-height: calc(100vh - 260px);
-}
-
-.sv-lhp-table {
-  min-width: 1160px;
-}
-
-.sv-lhp-table th,
-.sv-lhp-table td {
-  padding: 4px 6px;
-  font-size: 11px;
-}
-
-.sv-lhp-table th:nth-child(11), .sv-lhp-table td:nth-child(11) { width: 318px; }
-
-@media (max-width: 1280px) {
-  .sv-filter-bottom-row {
-    grid-template-columns: 1fr;
-    gap: 7px;
-  }
-
-  .sv-mini-stats {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  #form-lhc.sv-grid,
-  form#form-lhc {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 920px) {
-  .sv-filter-card-with-stats .sv-filter-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .sv-mini-stat {
-    grid-template-columns: 22px 1fr auto;
-    flex: 1 1 180px;
-  }
-}
-
-
-/* ===== OVERRIDE COMPACT V3: auto mở lớp, mở lớp học phần và bảng lớp học phần ===== */
-.sv-auto-compact-card {
-  padding: 9px 11px;
-  border-left-width: 3px;
-}
-
-.sv-auto-compact-title {
-  margin-bottom: 6px;
-}
-
-.sv-auto-compact-title h2 {
-  font-size: 14px;
-  line-height: 1.15;
-}
-
-.sv-auto-compact-title p {
-  font-size: 11px;
-  margin-top: 2px;
-}
-
-.sv-auto-tao-form {
-  display: grid;
-  grid-template-columns: minmax(150px, 1.08fr) 92px 92px 86px minmax(145px, .8fr) minmax(320px, 2fr);
-  gap: 6px;
-  align-items: end;
-  min-width: 0;
-}
-
-.sv-auto-tao-form label,
-.sv-auto-tao-form .sv-auto-lhc-inline {
-  min-width: 0;
-}
-
-.sv-auto-tao-form .sv-auto-field > span,
-.sv-auto-tao-form label {
-  font-size: 10.8px;
-  line-height: 1.1;
-}
-
-.sv-auto-tao-form input,
-.sv-auto-tao-form select {
-  height: 29px;
-  min-height: 29px;
-  padding: 4px 7px;
-  font-size: 11.5px;
-  border-radius: 8px;
-}
-
-.sv-auto-check {
+.sv-file-picker {
   display: inline-flex;
   align-items: center;
-  align-self: end;
-  gap: 5px;
-  height: 29px;
-  min-height: 29px;
-  padding: 0 7px;
-  border: 1px solid #cfe1dc;
+  justify-content: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 5px 9px;
   border-radius: 8px;
-  background: #fff;
-  color: #0f5134;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  background: var(--pn-green);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.sv-auto-lhc-inline {
-  align-self: stretch;
-  display: grid;
-  gap: 4px;
-}
-
-.sv-auto-lhc-inline > label {
-  display: flex !important;
-  align-items: center;
-  gap: 5px;
-  margin: 0 !important;
-  font-size: 10.8px !important;
-  line-height: 1.1;
-}
-
-.sv-auto-lhc-inline > label .sv-note-text {
-  font-size: 10.5px;
-}
-
-.sv-auto-lhc-inline .sv-lhc-checkbox-list {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 4px;
-  overflow-x: auto;
-  padding-bottom: 1px;
-}
-
-.sv-auto-lhc-inline .sv-lhc-chon-item {
-  flex: 0 0 auto;
-  max-width: 220px;
-  min-height: 25px;
-  padding: 3px 7px;
-  border-radius: 999px;
-  font-size: 10.8px;
-  line-height: 1.1;
-  white-space: nowrap;
-}
-
-.sv-auto-lhc-inline .sv-lhc-chon-item .sv-status-pill {
-  min-height: 18px !important;
-  padding: 1px 5px !important;
-  font-size: 9.5px !important;
-}
-
-.sv-auto-tao-actions {
-  margin-top: 7px;
-  gap: 5px;
-}
-
-.sv-auto-tao-actions button {
-  min-height: 25px;
-  padding: 3px 7px;
-  border-radius: 7px;
-  font-size: 10.8px;
-}
-
-.sv-lhp-open-card {
-  padding: 9px 11px;
-}
-
-.sv-lhp-open-title {
-  margin-bottom: 6px;
-}
-
-.sv-lhp-open-title h2 {
-  font-size: 14px;
-}
-
-.sv-lhp-open-title p {
-  font-size: 11px;
-}
-
-.sv-lhp-open-form {
-  display: grid;
-  grid-template-columns: minmax(128px, 1fr) minmax(160px, 1.25fr) minmax(110px, .9fr) minmax(98px, .8fr) minmax(120px, .95fr) minmax(150px, 1.15fr) 74px 74px 94px auto;
-  gap: 6px;
-  align-items: end;
-  min-width: 0;
-}
-
-.sv-lhp-open-form label {
-  min-width: 0;
-  gap: 2px;
-  font-size: 10.8px;
-  line-height: 1.1;
-}
-
-.sv-lhp-open-form input,
-.sv-lhp-open-form select {
-  min-height: 29px;
-  height: 29px;
-  padding: 4px 7px;
-  border-radius: 8px;
-  font-size: 11.5px;
-}
-
-.sv-lhp-open-form .sv-field-hint {
+.sv-file-picker input {
   display: none;
 }
 
-.sv-lhp-open-actions {
-  align-self: end;
-  display: inline-flex;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-  gap: 5px;
-  min-width: max-content;
-}
-
-.sv-lhp-open-actions button {
-  min-height: 29px;
-  padding: 4px 8px;
+.sv-file-meta {
+  display: grid;
+  gap: 1px;
+  margin-top: 4px;
+  color: var(--pn-muted);
   font-size: 11px;
 }
 
-.sv-lhp-list-card .sv-card-title {
-  padding: 9px 11px 8px;
-  margin: -11px -13px 8px;
-  border-bottom: 1px solid var(--pn-border);
-  background: linear-gradient(180deg, #fff 0%, #f8fbfa 100%);
-}
-
-.sv-lhp-table-wrap {
-  max-height: calc(100vh - 244px);
-  overflow: auto;
-}
-
-.sv-lhp-table {
-  min-width: 1390px;
-  table-layout: fixed;
-}
-
-.sv-lhp-table th,
-.sv-lhp-table td {
-  height: 30px;
-  padding: 3px 5px;
-  font-size: 10.8px;
-  line-height: 1.12;
-  vertical-align: middle;
-}
-
-.sv-lhp-table th:nth-child(1), .sv-lhp-table td:nth-child(1) { width: 38px; }
-.sv-lhp-table th:nth-child(2), .sv-lhp-table td:nth-child(2) { width: 82px; }
-.sv-lhp-table th:nth-child(3), .sv-lhp-table td:nth-child(3) { width: 68px; }
-.sv-lhp-table th:nth-child(4), .sv-lhp-table td:nth-child(4) { width: 158px; }
-.sv-lhp-table th:nth-child(5), .sv-lhp-table td:nth-child(5) { width: 130px; }
-.sv-lhp-table th:nth-child(6), .sv-lhp-table td:nth-child(6) { width: 200px; }
-.sv-lhp-table th:nth-child(7), .sv-lhp-table td:nth-child(7) { width: 136px; }
-.sv-lhp-table th:nth-child(8), .sv-lhp-table td:nth-child(8) { width: 64px; text-align: center; }
-.sv-lhp-table th:nth-child(9), .sv-lhp-table td:nth-child(9) { width: 62px; text-align: center; }
-.sv-lhp-table th:nth-child(10), .sv-lhp-table td:nth-child(10) { width: 88px; }
-.sv-lhp-table th:nth-child(11), .sv-lhp-table td:nth-child(11) {
-  width: 364px;
-  min-width: 364px;
-  overflow: visible;
-}
-
-.sv-lhp-table td:nth-child(4),
-.sv-lhp-table td:nth-child(5),
-.sv-lhp-table td:nth-child(6),
-.sv-lhp-table td:nth-child(7) {
-  white-space: nowrap;
+.sv-file-meta strong {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.sv-lhp-table td:nth-child(10) .sv-status-pill {
-  min-height: 20px;
+.sv-remove-file {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-height: 22px;
   padding: 2px 6px;
-  font-size: 10.2px;
+  border-radius: 999px;
+  background: #ef4444;
+  font-size: 10px;
+  z-index: 2;
 }
 
-.sv-lhp-table td:nth-child(11) .sv-row-actions {
+.sv-other-files {
+  display: grid;
+  gap: 5px;
+  margin-top: 5px;
+  color: var(--pn-muted);
+  font-size: 11px;
+}
+
+.sv-other-file-item {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  gap: 3px;
-  width: 100%;
-  min-width: 0;
+  gap: 5px;
+  justify-content: space-between;
+  padding: 5px 6px;
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+
+.sv-document-pdf {
+  font-weight: 800;
+  color: var(--pn-danger);
+}
+
+.sv-info-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.sv-section-box {
+  padding: 12px;
+  border: 1px solid var(--pn-border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.sv-form-table {
+  display: grid;
+  gap: 8px;
+}
+
+.sv-form-table-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sv-form-table-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sv-col-span-3 {
+  grid-column: span 3;
+}
+
+.sv-receive-actions {
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.sv-avatar {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border: 1px solid var(--pn-border);
+  border-radius: 8px;
+}
+
+/* =========================
+   11. AUTO MỞ LỚP HỌC PHẦN
+   Không cuộn ngang, tự co gọn.
+   ========================= */
+
+.sv-auto-tao-card {
+  border-left: 4px solid var(--pn-green);
   overflow: visible;
 }
 
-.sv-lhp-table td:nth-child(11) button.small,
-.sv-lhp-table td:nth-child(11) .btn-giangday.small,
-.sv-lhp-table td:nth-child(11) .btn-xem-sv.small {
-  min-height: 22px;
-  padding: 3px 5px;
-  border-radius: 6px;
-  font-size: 10px;
-  line-height: 1;
-  flex: 0 0 auto;
-}
-
-.sv-lhp-table .sv-status-pill.status-dang_mo {
-  background: #e8f6ef;
-  color: var(--pn-green);
-  border: 1px solid var(--pn-green-line);
-}
-
-@media (max-width: 1360px) {
-  .sv-auto-tao-form,
-  .sv-lhp-open-form {
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .sv-auto-tao-form {
-    grid-template-columns: 170px 96px 96px 88px 160px 410px;
-  }
-
-  .sv-lhp-open-form {
-    grid-template-columns: 138px 190px 120px 105px 130px 170px 80px 80px 100px 130px;
-  }
-}
-
-@media (max-width: 920px) {
-  .sv-auto-compact-title,
-  .sv-lhp-open-title {
-    align-items: flex-start;
-  }
-
-  .sv-lhp-list-card .sv-card-title {
-    margin: -11px -13px 8px;
-  }
-}
-
-/* ===== OVERRIDE COMPACT V4: dropdown lớp hành chính + bảng lớp học phần cân bằng màu ===== */
 .sv-auto-compact-card {
-  padding: 9px 11px 10px;
+  padding: 8px 10px;
 }
 
-.sv-auto-compact-title {
-  margin-bottom: 6px;
+.sv-lhp-auto-title {
+  margin-bottom: 7px;
 }
 
-.sv-auto-compact-title h2 {
-  font-size: 14.5px;
+.sv-lhp-auto-title h2,
+.sv-lhp-open-title h2,
+.sv-lhp-list-card h2 {
+  font-size: 15px;
+  line-height: 1.2;
 }
 
-.sv-auto-compact-title p {
-  font-size: 11.2px;
+.sv-lhp-auto-title p,
+.sv-lhp-open-title p,
+.sv-lhp-list-card p {
   margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.3;
 }
 
-.sv-auto-tao-form {
-  display: grid;
-  grid-template-columns: 220px 118px 118px 120px minmax(220px, 1fr) 420px;
-  gap: 7px;
-  align-items: end;
+.sv-lhp-auto-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.sv-lhp-auto-actions button {
+  min-height: 28px;
+  padding: 4px 9px;
+  font-size: 10.8px;
+}
+
+.sv-btn-du-kien {
+  background: #2563eb;
+}
+
+.sv-btn-chinh-thuc {
+  background: var(--pn-green);
+}
+
+.sv-auto-tao-form,
+.sv-lhp-auto-form {
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(0, .72fr)
+    minmax(0, .72fr)
+    minmax(0, .9fr)
+    minmax(0, 1.05fr)
+    minmax(0, 1.32fr) !important;
+  gap: 7px !important;
+  align-items: end !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: visible !important;
 }
 
 .sv-auto-field,
 .sv-auto-check,
 .sv-auto-lhc-dropdown {
-  min-width: 0;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
-.sv-auto-field-ky select {
-  max-width: 220px;
+.sv-lhp-auto-form label,
+.sv-lhp-auto-form .sv-auto-check {
+  gap: 3px;
+  color: #1f3347;
+  font-size: 10.6px;
+  font-weight: 800;
 }
 
-.sv-auto-field-min input,
-.sv-auto-field-max input,
-.sv-auto-field-prefix input {
-  text-align: left;
+.sv-lhp-auto-form input,
+.sv-lhp-auto-form select {
+  height: 31px;
+  min-height: 31px;
+  padding: 4px 8px;
+  border-radius: 9px;
+  font-size: 11.5px;
+  font-weight: 700;
 }
 
 .sv-auto-check {
-  align-self: end;
-  min-height: 31px;
-  padding: 6px 8px;
-  border: 1px solid #dbe8e2;
-  border-radius: 9px;
-  background: #fbfefd;
-  color: #064e3b;
-  font-size: 11.6px;
-  white-space: nowrap;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  height: 31px !important;
+  min-height: 31px !important;
+  padding: 4px 8px !important;
+  border: 1px solid #cbd7e4 !important;
+  border-radius: 9px !important;
+  background: #fff !important;
+  color: #1f3347 !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.sv-auto-check input,
+.sv-check {
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  min-height: 15px !important;
+  flex: 0 0 auto !important;
+  padding: 0 !important;
+  accent-color: var(--pn-green);
 }
 
 .sv-auto-lhc-dropdown {
   position: relative;
-  align-self: end;
+  display: block;
 }
 
 .sv-auto-lhc-dropdown summary {
-  min-height: 31px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 10px;
-  border: 1px solid #b7e1cc;
-  border-radius: 9px;
-  background: linear-gradient(180deg, #ffffff 0%, #eefaf4 100%);
-  color: #064e3b;
-  font-size: 11.8px;
-  font-weight: 800;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: 31px !important;
+  min-height: 31px !important;
+  padding: 4px 9px !important;
+  border: 1px solid var(--pn-green-line) !important;
+  border-radius: 9px !important;
+  background: #f7fffb !important;
+  color: var(--pn-green) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
   cursor: pointer;
   list-style: none;
 }
@@ -3897,309 +4014,21 @@ button.small,
   display: none;
 }
 
-.sv-auto-lhc-dropdown summary::after {
-  content: '▾';
-  color: #077149;
-  font-size: 12px;
-  transition: transform .15s ease;
-}
-
-.sv-auto-lhc-dropdown[open] summary::after {
-  transform: rotate(180deg);
-}
-
-.sv-auto-lhc-summary-left,
-.sv-auto-lhc-summary-count {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  white-space: nowrap;
-}
-
-.sv-auto-lhc-summary-count {
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.sv-lhc-checkbox-dropdown-list {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  z-index: 30;
-  width: min(620px, calc(100vw - 48px));
-  max-height: 260px;
-  overflow: auto;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  padding: 8px;
-  border: 1px solid #b7e1cc;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, .16);
-}
-
-.sv-lhc-checkbox-dropdown-list .sv-lhc-chon-item {
-  width: 100%;
-  justify-content: flex-start;
-  border-radius: 10px;
-  padding: 6px 8px;
-  background: #fbfefd;
-}
-
-.sv-lhc-checkbox-dropdown-list .sv-lhc-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sv-auto-tao-actions {
-  margin-top: 7px;
-  gap: 7px;
-}
-
-.sv-auto-tao-actions button {
-  min-height: 29px;
-  padding: 5px 10px;
-  font-size: 11.5px;
-}
-
-/* Mở lớp học phần: tiếp tục nén form ngang */
-.sv-lhp-open-card {
-  padding: 9px 11px;
-}
-
-.sv-lhp-open-title {
-  margin-bottom: 6px;
-}
-
-.sv-lhp-open-form {
-  grid-template-columns: 150px minmax(260px, 1fr) 135px 118px 150px minmax(210px, 1fr) 92px 92px 92px auto;
-  gap: 6px;
-  align-items: end;
-}
-
-.sv-lhp-open-form label {
-  gap: 2px;
-  font-size: 11.2px;
-}
-
-.sv-lhp-open-form input,
-.sv-lhp-open-form select {
-  min-height: 30px;
-  height: 30px;
-  padding: 5px 8px;
-  font-size: 12px;
-}
-
-.sv-lhp-open-actions {
-  align-self: end;
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 6px;
-  justify-content: flex-end;
-}
-
-.sv-lhp-open-actions button {
-  min-height: 30px;
-  padding: 5px 9px;
-  font-size: 11.5px;
-}
-
-/* Danh sách lớp học phần: màu cột nhẹ, dễ quét mắt */
-.sv-lhp-table {
-  min-width: 1460px;
-}
-
-.sv-lhp-table th,
-.sv-lhp-table td {
-  border-right: 1px solid #edf2f7;
-}
-
-.sv-lhp-table th:last-child,
-.sv-lhp-table td:last-child {
-  border-right: 0;
-}
-
-.sv-lhp-table th:nth-child(1),
-.sv-lhp-table td:nth-child(1) { width: 42px; background-color: #fbfcfe; }
-.sv-lhp-table th:nth-child(2),
-.sv-lhp-table td:nth-child(2) { width: 105px; background-color: #f0fdf4; }
-.sv-lhp-table th:nth-child(3),
-.sv-lhp-table td:nth-child(3) { width: 88px; background-color: #eff6ff; }
-.sv-lhp-table th:nth-child(4),
-.sv-lhp-table td:nth-child(4) { width: 190px; background-color: #f8fafc; }
-.sv-lhp-table th:nth-child(5),
-.sv-lhp-table td:nth-child(5) { width: 155px; background-color: #fff7ed; }
-.sv-lhp-table th:nth-child(6),
-.sv-lhp-table td:nth-child(6) { width: 235px; background-color: #f7fee7; }
-.sv-lhp-table th:nth-child(7),
-.sv-lhp-table td:nth-child(7) { width: 165px; background-color: #faf5ff; }
-.sv-lhp-table th:nth-child(8),
-.sv-lhp-table td:nth-child(8) { width: 82px; text-align: center; background-color: #ecfdf5; }
-.sv-lhp-table th:nth-child(9),
-.sv-lhp-table td:nth-child(9) { width: 78px; text-align: center; background-color: #fefce8; }
-.sv-lhp-table th:nth-child(10),
-.sv-lhp-table td:nth-child(10) { width: 116px; background-color: #eef2ff; }
-.sv-lhp-table th:nth-child(11),
-.sv-lhp-table td:nth-child(11) { width: 430px; background-color: #ffffff; }
-
-.sv-lhp-table thead th {
-  color: #123047;
-  background-image: linear-gradient(180deg, rgba(255,255,255,.72), rgba(232,246,239,.72));
-}
-
-.sv-lhp-table tbody tr:hover td {
-  filter: saturate(1.04) brightness(.985);
-}
-
-.sv-lhp-table .sv-row-actions {
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  gap: 7px;
-  min-width: max-content;
-}
-
-.sv-lhp-table .sv-row-actions .small,
-.sv-lhp-table .sv-row-actions button.small,
-.sv-lhp-table .sv-row-actions a.small {
-  min-height: 26px;
-  padding: 5px 8px;
-  border-radius: 7px;
-  font-size: 11px;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, .06);
-}
-
-.sv-lhp-table td:nth-child(11) {
-  overflow: visible;
-}
-
-@media (max-width: 1500px) {
-  .sv-auto-tao-form {
-    grid-template-columns: 190px 104px 104px 110px minmax(210px, 1fr) 360px;
-  }
-
-  .sv-lhp-open-form {
-    grid-template-columns: 140px minmax(240px, 1fr) 125px 110px 140px minmax(190px, 1fr) 86px 86px 86px auto;
-  }
-}
-
-@media (max-width: 1180px) {
-  .sv-auto-tao-form,
-  .sv-lhp-open-form {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .sv-auto-lhc-dropdown,
-  .sv-auto-check,
-  .sv-lhp-open-actions {
-    grid-column: span 3;
-  }
-
-  .sv-lhc-checkbox-dropdown-list {
-    left: 0;
-    right: auto;
-    width: min(620px, calc(100vw - 48px));
-  }
-}
-
-@media (max-width: 760px) {
-  .sv-auto-tao-form,
-  .sv-lhp-open-form {
-    grid-template-columns: 1fr;
-  }
-
-  .sv-auto-lhc-dropdown,
-  .sv-auto-check,
-  .sv-lhp-open-actions {
-    grid-column: span 1;
-  }
-
-  .sv-lhc-checkbox-dropdown-list {
-    position: static;
-    width: 100%;
-    max-height: 240px;
-    grid-template-columns: 1fr;
-    margin-top: 6px;
-    box-shadow: none;
-  }
-}
-
-
-
-/* ===== OVERRIDE COMPACT V5: dropdown lớp dọc + thao tác dễ nhìn, ít phải kéo ngang ===== */
-.sv-auto-compact-card {
-  overflow: visible;
-}
-
-.sv-auto-tao-form {
-  grid-template-columns: 168px 88px 88px 96px minmax(190px, 1fr) minmax(260px, 300px) !important;
-  gap: 6px !important;
-  align-items: end;
-}
-
-.sv-auto-field-ky select {
-  min-width: 0;
-}
-
-.sv-auto-lhc-dropdown {
-  position: relative;
-  align-self: end;
-  min-width: 0;
-  max-width: 300px;
-}
-
-.sv-auto-lhc-dropdown summary {
-  min-height: 31px;
-  padding: 5px 10px;
-  border: 1px solid #b7e1cc;
-  border-radius: 9px;
-  background: linear-gradient(180deg, #fbfffd 0%, #eefaf4 100%);
-  color: #075f3e;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 12px;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  box-shadow: 0 2px 7px rgba(7, 113, 73, .08);
-}
-
-.sv-auto-lhc-dropdown summary::-webkit-details-marker {
-  display: none;
-}
-
-.sv-auto-lhc-dropdown summary::after {
-  content: '▾';
-  font-size: 10px;
-  color: #077149;
-  transform: translateY(-1px);
-}
-
-.sv-auto-lhc-dropdown[open] summary::after {
-  content: '▴';
-}
-
 .sv-auto-lhc-summary-left,
 .sv-auto-lhc-summary-count {
   min-width: 0;
   white-space: nowrap;
+}
+
+.sv-auto-lhc-summary-left {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sv-auto-lhc-summary-left strong {
-  font-size: 11.3px;
+.sv-auto-lhc-summary-count {
+  flex: 0 0 auto;
+  color: #475569;
   font-weight: 900;
-}
-
-.sv-auto-lhc-summary-count {
-  color: #64748b;
-  font-size: 10.8px;
-  font-weight: 800;
 }
 
 .sv-lhc-checkbox-dropdown-list {
@@ -4207,189 +4036,1355 @@ button.small,
   top: calc(100% + 6px);
   right: 0;
   z-index: 80;
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 6px !important;
-  width: min(430px, calc(100vw - 54px)) !important;
-  max-height: 288px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  width: min(440px, 92vw);
+  max-height: 280px;
   padding: 8px;
-  border: 1px solid #b7e1cc;
+  overflow: auto;
+  border: 1px solid var(--pn-green-line);
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 16px 36px rgba(15, 23, 42, .16);
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, .14);
 }
 
-.sv-lhc-checkbox-dropdown-list .sv-lhc-chon-item {
-  width: 100%;
+.sv-lhc-chon-item {
   display: grid !important;
-  grid-template-columns: 16px minmax(0, 1fr) auto;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: 11.6px;
-  line-height: 1.25;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 9px;
+  font-size: 12px;
 }
 
-.sv-lhc-checkbox-dropdown-list .sv-lhc-chon-item:hover {
-  border-color: #8fd2b2;
-  background: #f2fbf6;
+.sv-lhc-chon-item:hover {
+  background: #f8fbfa;
 }
 
-.sv-lhc-checkbox-dropdown-list .sv-lhc-name {
+.sv-lhc-name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sv-lhc-checkbox-dropdown-list .sv-status-pill {
-  min-height: 21px;
-  padding: 2px 7px;
+/* =========================
+   12. FORM MỞ LỚP HỌC PHẦN
+   Luôn 1 dòng, không cuộn ngang.
+   Các cột tự co theo container.
+   ========================= */
+
+.sv-lhp-open-card {
+  padding: 8px 10px;
+  overflow: visible !important;
+}
+
+.sv-lhp-open-card .sv-card-title {
+  margin-bottom: 6px;
+}
+
+.sv-lhp-open-title {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.sv-lhp-open-form {
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, .78fr)
+    minmax(0, 1.28fr)
+    minmax(0, .78fr)
+    minmax(0, .72fr)
+    minmax(0, .86fr)
+    minmax(0, 1.12fr)
+    minmax(0, .62fr)
+    minmax(0, .62fr)
+    minmax(0, .46fr)
+    minmax(0, .78fr) !important;
+  gap: 6px !important;
+  align-items: end !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+
+.sv-lhp-open-form label {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: 2px !important;
+  color: #1f3347 !important;
+  font-size: clamp(7px, .62vw, 10.2px) !important;
+  font-weight: 800 !important;
+  line-height: 1.08 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.sv-lhp-open-form input,
+.sv-lhp-open-form select {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: clamp(22px, 2.05vw, 29px) !important;
+  min-height: clamp(22px, 2.05vw, 29px) !important;
+  padding: 2px clamp(3px, .45vw, 7px) !important;
+  border-radius: 7px !important;
+  font-size: clamp(7.5px, .7vw, 11px) !important;
+  font-weight: 700 !important;
+}
+
+.sv-lhp-field-ky,
+.sv-lhp-field-mon,
+.sv-lhp-field-loai,
+.sv-lhp-field-trangthai,
+.sv-lhp-field-ma,
+.sv-lhp-field-ten,
+.sv-lhp-field-number,
+.sv-lhp-field-buoi {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  grid-column: auto !important;
+}
+
+.sv-lhp-field-buoi input {
+  text-align: center !important;
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+  color: #64748b !important;
+  font-size: clamp(7px, .62vw, 10px) !important;
+}
+
+.sv-lhp-field-buoi .sv-field-hint,
+.sv-field-hint {
+  display: none !important;
+}
+
+.sv-lhp-open-actions {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  align-items: end !important;
+  gap: 4px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  justify-content: stretch !important;
+  grid-column: auto !important;
+}
+
+.sv-lhp-open-actions button {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: clamp(22px, 2.05vw, 29px) !important;
+  min-height: clamp(22px, 2.05vw, 29px) !important;
+  padding: 2px 3px !important;
+  border-radius: 7px !important;
+  font-size: clamp(6.8px, .58vw, 10px) !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* =========================
+   13. CẢNH BÁO LỚP HỌC PHẦN
+   ========================= */
+
+.sv-canh-bao-lhp-wrap {
+  width: 100%;
+  max-width: 100%;
+  padding: 9px 12px 5px;
+}
+
+.sv-canh-bao-lhp-panel {
+  display: grid;
+  gap: 8px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #f59e0b;
+  border-left: 5px solid #f97316;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff7ed 0%, #fffbeb 100%);
+  color: #7c2d12;
+  box-shadow: 0 8px 18px rgba(245, 158, 11, .12);
+}
+
+.sv-canh-bao-lhp-panel.is-ok {
+  border-color: #86efac;
+  border-left-color: #16a34a;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 100%);
+  color: #14532d;
+}
+
+.sv-canh-bao-lhp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sv-canh-bao-lhp-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.sv-canh-bao-lhp-icon {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #fed7aa;
+  color: #c2410c;
+  font-size: 16px;
+  box-shadow: inset 0 0 0 1px #fdba74;
+}
+
+.sv-canh-bao-lhp-title strong {
+  display: block;
+  color: #7c2d12;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.sv-canh-bao-lhp-panel.is-ok .sv-canh-bao-lhp-title strong {
+  color: #14532d;
+}
+
+.sv-canh-bao-lhp-title p {
+  margin: 2px 0 0;
+  color: #9a3412;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.sv-canh-bao-lhp-panel.is-ok .sv-canh-bao-lhp-title p {
+  color: #166534;
+}
+
+.sv-canh-bao-lhp-total {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, .12);
+}
+
+.sv-canh-bao-lhp-total.is-zero {
+  border-color: #bbf7d0;
+  color: #166534;
+  box-shadow: none;
+}
+
+.sv-canh-bao-lhp-total span {
   font-size: 10.5px;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
-/* Bảng lớp học phần: giảm độ rộng tổng, giữ cột thao tác luôn nhìn thấy */
-.sv-lhp-table {
-  min-width: 1180px !important;
-  table-layout: fixed;
+.sv-canh-bao-lhp-total strong {
+  display: inline-grid;
+  place-items: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
 }
 
-.sv-lhp-table th,
-.sv-lhp-table td {
-  padding: 5px 6px !important;
+.sv-canh-bao-lhp-total.is-zero strong {
+  background: #16a34a;
 }
 
-.sv-lhp-table th:nth-child(1),
-.sv-lhp-table td:nth-child(1) { width: 38px !important; }
-.sv-lhp-table th:nth-child(2),
-.sv-lhp-table td:nth-child(2) { width: 78px !important; }
-.sv-lhp-table th:nth-child(3),
-.sv-lhp-table td:nth-child(3) { width: 70px !important; }
-.sv-lhp-table th:nth-child(4),
-.sv-lhp-table td:nth-child(4) { width: 145px !important; }
-.sv-lhp-table th:nth-child(5),
-.sv-lhp-table td:nth-child(5) { width: 120px !important; }
-.sv-lhp-table th:nth-child(6),
-.sv-lhp-table td:nth-child(6) { width: 175px !important; }
-.sv-lhp-table th:nth-child(7),
-.sv-lhp-table td:nth-child(7) { width: 120px !important; }
-.sv-lhp-table th:nth-child(8),
-.sv-lhp-table td:nth-child(8) { width: 72px !important; }
-.sv-lhp-table th:nth-child(9),
-.sv-lhp-table td:nth-child(9) { width: 64px !important; }
-.sv-lhp-table th:nth-child(10),
-.sv-lhp-table td:nth-child(10) { width: 94px !important; }
-.sv-lhp-table th:nth-child(11),
-.sv-lhp-table td:nth-child(11) {
-  width: 275px !important;
-  min-width: 275px !important;
-  position: sticky;
-  right: 0;
-  z-index: 6;
-  background: linear-gradient(90deg, #ffffff 0%, #f8fffb 100%) !important;
-  box-shadow: -8px 0 14px rgba(15, 23, 42, .06);
+.sv-hk-warning-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
 }
 
-.sv-lhp-table thead th:nth-child(11) {
-  z-index: 12;
-  background: linear-gradient(180deg, #edf8f2 0%, #e6f5ee 100%) !important;
+.sv-hk-warning-btn {
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 6px 9px;
+  border: 1px solid #fed7aa;
+  border-radius: 11px;
+  background: #fff;
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .045);
 }
 
-.sv-lhp-table td:nth-child(4),
-.sv-lhp-table td:nth-child(5),
-.sv-lhp-table td:nth-child(6),
-.sv-lhp-table td:nth-child(7) {
+.sv-hk-warning-btn.has-error {
+  border-color: #fb923c;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.sv-hk-warning-btn.active,
+.sv-hk-warning-btn.has-error.active {
+  border-color: #dc2626;
+  background: linear-gradient(180deg, #fff1f2 0%, #fff7ed 100%);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, .12);
+}
+
+.sv-hk-warning-btn.is-ok {
+  border-color: #bbf7d0;
+  background: #f8fff9;
+  color: #166534;
+}
+
+.sv-hk-warning-bell {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #ffedd5;
+  font-size: 13px;
+}
+
+.sv-hk-warning-btn.is-ok .sv-hk-warning-bell {
+  background: #dcfce7;
+}
+
+.sv-hk-warning-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sv-hk-warning-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 2px 7px rgba(220, 38, 38, .24);
+}
+
+.sv-hk-warning-btn.is-ok .sv-hk-warning-badge {
+  background: #16a34a;
+  box-shadow: none;
+}
+
+.sv-hk-warning-detail {
+  padding: 8px 10px;
+  border: 1px dashed #fdba74;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .76);
+}
+
+.sv-hk-warning-detail-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+  color: #7c2d12;
+  font-size: 11.8px;
+  font-weight: 800;
+}
+
+.sv-hk-warning-detail-title span {
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.sv-hk-warning-detail ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sv-hk-warning-detail li {
+  display: grid;
+  grid-template-columns: minmax(92px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: 11.5px;
+  line-height: 1.2;
+}
+
+.sv-hk-warning-mon-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 10.8px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.sv-hk-warning-mon-name {
+  min-width: 0;
+  color: #7c2d12;
+  font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sv-lhp-table td:nth-child(11) .sv-row-actions,
-.sv-lhp-table .sv-row-actions {
+.sv-hk-warning-more,
+.sv-hk-warning-empty {
+  color: #92400e;
+  font-size: 11.5px;
+  font-weight: 900;
+}
+
+.sv-hk-warning-empty {
+  color: #166534;
+}
+
+/* =========================
+   14. DANH SÁCH LỚP HỌC PHẦN
+   Không dùng thanh cuộn ngang.
+   ========================= */
+
+.sv-lhp-list-card {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.sv-lhp-list-card .sv-card-title {
+  margin: 0;
+  padding: 11px 13px 9px;
+  border-bottom: 1px solid var(--pn-border);
+  background: linear-gradient(180deg, #fff 0%, #f8fbfa 100%);
+}
+
+.sv-lhp-list-card .sv-title-tools {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 6px !important;
-  flex-wrap: nowrap !important;
-  min-width: 0 !important;
-  width: max-content;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
-.sv-lhp-table td:nth-child(11) button.small,
-.sv-lhp-table td:nth-child(11) .btn-giangday.small,
-.sv-lhp-table td:nth-child(11) .btn-xem-sv.small,
-.sv-lhp-table .sv-row-actions .small,
-.sv-lhp-table .sv-row-actions button.small,
-.sv-lhp-table .sv-row-actions a.small {
-  min-height: 25px !important;
-  padding: 5px 7px !important;
-  border-radius: 7px !important;
-  font-size: 10.8px !important;
-  letter-spacing: -.1px;
-}
-
-.sv-lhp-table .btn-xem-sv.small {
-  min-width: 60px;
-}
-
-.sv-lhp-table .btn-nhanh2.small {
-  min-width: 68px;
-}
-
-.sv-lhp-table .btn-giangday.small {
-  min-width: 72px;
-}
-
-.sv-lhp-table td:nth-child(11) button.secondary.small,
-.sv-lhp-table td:nth-child(11) button.danger.small {
-  min-width: 34px;
+.sv-lhp-list-card .sv-search-input {
+  width: 230px;
+  min-width: 190px;
+  min-height: 32px;
+  font-size: 12px;
 }
 
 .sv-lhp-table-wrap {
-  overflow-x: auto;
-  scrollbar-gutter: stable;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  max-height: calc(100vh - 315px);
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  border: 0 !important;
+  border-radius: 0 0 14px 14px;
+  background: #fff;
+  -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 1500px) {
-  .sv-auto-tao-form {
-    grid-template-columns: 158px 84px 84px 92px minmax(170px, 1fr) minmax(250px, 292px) !important;
-  }
+.sv-lhp-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: clamp(8px, .72vw, 10.8px);
+  line-height: 1.22;
 }
+
+.sv-lhp-table th,
+.sv-lhp-table td {
+  height: 35px;
+  min-width: 0 !important;
+  padding: 4px 5px;
+  border-bottom: 1px solid #e6edf4;
+  text-align: left;
+  vertical-align: middle;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.sv-lhp-table th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #edf3f0;
+  color: #1f3347;
+  font-size: clamp(7px, .68vw, 9.8px);
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.sv-lhp-table td {
+  color: var(--pn-text);
+  font-size: clamp(7.4px, .7vw, 10.5px);
+}
+
+.sv-lhp-table th:nth-child(1),
+.sv-lhp-table td:nth-child(1) {
+  width: 3.2% !important;
+  text-align: center !important;
+}
+
+.sv-lhp-table th:nth-child(2),
+.sv-lhp-table td:nth-child(2) {
+  width: 8.5% !important;
+}
+
+.sv-lhp-table th:nth-child(3),
+.sv-lhp-table td:nth-child(3) {
+  width: 6% !important;
+}
+
+.sv-lhp-table th:nth-child(4),
+.sv-lhp-table td:nth-child(4) {
+  width: 12% !important;
+}
+
+.sv-lhp-table th:nth-child(5),
+.sv-lhp-table td:nth-child(5) {
+  width: 9% !important;
+}
+
+.sv-lhp-table th:nth-child(6),
+.sv-lhp-table td:nth-child(6) {
+  width: 12% !important;
+}
+
+.sv-lhp-table th:nth-child(7),
+.sv-lhp-table td:nth-child(7) {
+  width: 11.5% !important;
+}
+
+.sv-lhp-table th:nth-child(8),
+.sv-lhp-table td:nth-child(8) {
+  width: 7% !important;
+  text-align: center !important;
+}
+
+.sv-lhp-table th:nth-child(9),
+.sv-lhp-table td:nth-child(9) {
+  width: 5.3% !important;
+  text-align: center !important;
+}
+
+.sv-lhp-table th:nth-child(10),
+.sv-lhp-table td:nth-child(10) {
+  width: 7.5% !important;
+  text-align: center !important;
+}
+
+.sv-lhp-table th:nth-child(11),
+.sv-lhp-table td:nth-child(11) {
+  width: 18% !important;
+}
+
+.sv-lhp-table .sv-code,
+.sv-lhp-table .sv-main-text,
+.sv-lhp-table .sv-note-text,
+.sv-lhp-table .sv-status-pill {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.sv-lhp-table .sv-code {
+  padding: 1px 5px;
+  font-size: clamp(7px, .62vw, 9.6px);
+}
+
+.sv-lhp-table .sv-status-pill {
+  min-height: 20px !important;
+  padding: 2px 6px !important;
+  font-size: clamp(7px, .62vw, 9.8px) !important;
+}
+
+.sv-lhp-table td:nth-child(11) .sv-row-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr .72fr .72fr !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 3px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex-wrap: nowrap !important;
+}
+
+.sv-lhp-table td:nth-child(11) .small,
+.sv-lhp-table td:nth-child(11) button.small,
+.sv-lhp-table td:nth-child(11) a.small,
+.sv-lhp-table td:nth-child(11) .btn-xem-sv.small,
+.sv-lhp-table td:nth-child(11) .btn-giangday.small {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 23px !important;
+  min-height: 23px !important;
+  padding: 0 2px !important;
+  border-radius: 6px !important;
+  font-size: clamp(6px, .52vw, 8.4px) !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================
+   15. KẾT QUẢ TỰ ĐỘNG TẠO
+   ========================= */
+
+.sv-auto-tao-result {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.sv-auto-tao-summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border: 1px solid #dbe7df;
+  border-radius: 11px;
+  background: #f8fbfa;
+  font-size: 12px;
+}
+
+.sv-auto-tao-summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.sv-auto-tao-summary strong {
+  color: var(--pn-green);
+}
+
+.sv-auto-tao-warnings,
+.sv-auto-tao-errors {
+  padding: 8px 10px;
+  border-radius: 11px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sv-auto-tao-warnings {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.sv-auto-tao-errors {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.sv-auto-result-table-wrap {
+  max-height: 360px;
+}
+
+.sv-auto-result-table-wrap .sv-table {
+  min-width: 760px;
+}
+
+/* =========================
+   16. PHÂN BỔ SINH VIÊN
+   ========================= */
+
+.sv-check-all,
+.sv-check-row {
+  cursor: pointer;
+}
+
+/* =========================
+   17. RESPONSIVE TABLET
+   Không làm form mở lớp học phần xuống dòng.
+   Không ép bảng lớp học phần width max-content.
+   ========================= */
 
 @media (max-width: 1180px) {
-  .sv-auto-tao-form {
-    grid-template-columns: 150px 82px 82px 92px minmax(170px, 1fr) minmax(230px, 280px) !important;
+  .sv-page-header {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
-  .sv-auto-lhc-dropdown {
-    max-width: 280px;
+  .sv-filter-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .sv-lhc-checkbox-dropdown-list {
-    right: 0;
-    left: auto;
-    width: min(390px, calc(100vw - 42px)) !important;
+  .sv-filter-bottom-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sv-mini-stats {
+    justify-content: flex-start;
+  }
+
+  .sv-lhp-auto-title,
+  .sv-lhp-open-title,
+  .sv-lhp-list-card .sv-card-title {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .sv-lhp-auto-actions {
+    justify-content: flex-start;
+  }
+
+  .sv-lhp-auto-form {
+    grid-template-columns:
+      minmax(0, 1.08fr)
+      minmax(0, .62fr)
+      minmax(0, .62fr)
+      minmax(0, .78fr)
+      minmax(0, .92fr)
+      minmax(0, 1.15fr) !important;
+    gap: 6px !important;
+  }
+
+  .sv-lhp-open-form {
+    grid-template-columns:
+      minmax(0, .72fr)
+      minmax(0, 1.18fr)
+      minmax(0, .72fr)
+      minmax(0, .66fr)
+      minmax(0, .8fr)
+      minmax(0, 1.02fr)
+      minmax(0, .56fr)
+      minmax(0, .56fr)
+      minmax(0, .4fr)
+      minmax(0, .72fr) !important;
+    gap: 5px !important;
+  }
+
+  .sv-lhp-open-form label {
+    font-size: clamp(6.4px, .6vw, 9.6px) !important;
+  }
+
+  .sv-lhp-open-form input,
+  .sv-lhp-open-form select,
+  .sv-lhp-open-actions button {
+    height: clamp(21px, 2vw, 28px) !important;
+    min-height: clamp(21px, 2vw, 28px) !important;
+    font-size: clamp(6.8px, .65vw, 10.2px) !important;
+  }
+
+  .sv-lhp-list-card .sv-title-tools {
+    justify-content: flex-start;
+  }
+
+  .sv-lhp-table-wrap {
+    max-height: calc(100vh - 290px);
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .sv-lhp-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  .sv-lhp-table th,
+  .sv-lhp-table td {
+    padding: 3px 4px !important;
+    font-size: clamp(6.5px, .68vw, 9px) !important;
+  }
+
+  .sv-lhp-table .sv-status-pill {
+    padding: 1px 4px !important;
+    font-size: clamp(6px, .55vw, 8px) !important;
+  }
+
+  .sv-lhp-table td:nth-child(11) .small,
+  .sv-lhp-table td:nth-child(11) button.small,
+  .sv-lhp-table td:nth-child(11) a.small {
+    height: 21px !important;
+    min-height: 21px !important;
+    font-size: clamp(5.4px, .5vw, 7.2px) !important;
   }
 }
 
-@media (max-width: 760px) {
-  .sv-auto-tao-form {
-    grid-template-columns: 1fr 1fr !important;
+/* =========================
+   18. RESPONSIVE MOBILE LỚN
+   Form mở lớp học phần vẫn 1 dòng, không cuộn ngang.
+   ========================= */
+
+@media (max-width: 900px) {
+  .sv-flow-page {
+    font-size: 12px;
   }
 
-  .sv-auto-lhc-dropdown,
-  .sv-auto-check {
-    grid-column: span 2;
+  .sv-content {
+    gap: 8px;
+  }
+
+  .sv-page-header h1 {
+    font-size: 19px;
+  }
+
+  .sv-page-header p {
+    font-size: 11.5px;
+  }
+
+  .sv-summary-bar {
+    padding: 7px 8px;
+    gap: 5px;
+  }
+
+  .sv-summary-chip {
     max-width: 100%;
+  }
+
+  .sv-summary-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sv-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sv-card {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  #form-lhc.sv-grid,
+  form#form-lhc {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #form-lhc .sv-span-4 {
+    grid-column: span 2;
+  }
+
+  .sv-title-tools {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .sv-search-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sv-receive-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sv-file-panel {
+    position: static;
+  }
+
+  .sv-form-table-3,
+  .sv-form-table-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sv-col-span-3 {
+    grid-column: span 2;
+  }
+
+  .sv-lhp-auto-title,
+  .sv-lhp-open-title,
+  .sv-lhp-list-card .sv-card-title {
+    gap: 8px;
+  }
+
+  .sv-lhp-auto-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 6px;
+  }
+
+  .sv-lhp-auto-actions button {
+    width: 100%;
+    min-width: 0;
+    padding: 5px 4px;
+    font-size: 10.5px;
+  }
+
+  .sv-lhp-loading {
+    grid-column: span 3;
   }
 
   .sv-lhc-checkbox-dropdown-list {
     left: 0;
     right: auto;
-    width: min(100%, calc(100vw - 32px)) !important;
+    width: min(100%, 92vw);
+  }
+
+  .sv-lhp-open-card {
+    padding: 8px;
+  }
+
+  .sv-lhp-open-form {
+    grid-template-columns:
+      minmax(0, .66fr)
+      minmax(0, 1.08fr)
+      minmax(0, .64fr)
+      minmax(0, .58fr)
+      minmax(0, .72fr)
+      minmax(0, .92fr)
+      minmax(0, .5fr)
+      minmax(0, .5fr)
+      minmax(0, .36fr)
+      minmax(0, .68fr) !important;
+    gap: 4px !important;
+  }
+
+  .sv-lhp-open-form label {
+    font-size: clamp(5.8px, 1.1vw, 8.6px) !important;
+  }
+
+  .sv-lhp-open-form input,
+  .sv-lhp-open-form select,
+  .sv-lhp-open-actions button {
+    height: clamp(19px, 3.5vw, 26px) !important;
+    min-height: clamp(19px, 3.5vw, 26px) !important;
+    font-size: clamp(5.8px, 1.15vw, 8.8px) !important;
+    border-radius: 5px !important;
+  }
+
+  .sv-lhp-open-actions {
+    gap: 2px !important;
+  }
+
+  .sv-lhp-open-actions button {
+    padding: 1px 2px !important;
+  }
+
+  .sv-canh-bao-lhp-wrap {
+    padding: 8px 8px 0;
+  }
+
+  .sv-canh-bao-lhp-panel {
+    padding: 9px;
+  }
+
+  .sv-canh-bao-lhp-head {
+    align-items: flex-start;
+  }
+
+  .sv-hk-warning-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .sv-hk-warning-detail li {
+    grid-template-columns: minmax(82px, auto) minmax(0, 1fr);
+  }
+
+  .sv-lhp-list-card .sv-card-title {
+    padding: 10px;
+  }
+
+  .sv-lhp-list-card .sv-title-tools {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 7px;
+  }
+
+  .sv-lhp-list-card .sv-search-input,
+  .sv-lhp-list-card select.sv-search-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sv-lhp-table-wrap {
+    overflow-x: hidden !important;
+  }
+
+  .sv-lhp-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* =========================
+   19. MOBILE NHỎ
+   Bảng lớp học phần chuyển dạng thẻ.
+   ========================= */
+
+@media (max-width: 640px) {
+  .sv-flow-page {
+    overflow-x: hidden !important;
+  }
+
+  .sv-content {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+  }
+
+  .sv-page-header {
+    padding: 0;
+  }
+
+  .sv-page-header h1 {
+    font-size: 18px;
+  }
+
+  .sv-card-title {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .sv-filter-card,
+  .sv-card,
+  .sv-lhp-list-card {
+    border-radius: 12px;
+  }
+
+  #form-lhc.sv-grid,
+  form#form-lhc,
+  .sv-form-table-3,
+  .sv-form-table-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  #form-lhc .sv-span-4,
+  .sv-col-span-3 {
+    grid-column: span 1 !important;
+  }
+
+  .sv-lhp-auto-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sv-lhp-loading {
+    grid-column: span 1;
+  }
+
+  .sv-lhc-checkbox-dropdown-list {
+    position: static;
+    width: 100%;
+    max-height: 240px;
+    margin-top: 6px;
+    box-shadow: none;
+  }
+
+  .sv-auto-lhc-dropdown[open] summary {
+    border-radius: 9px 9px 0 0 !important;
+  }
+
+  .sv-auto-tao-summary {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .sv-auto-tao-summary span {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .sv-lhp-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  .sv-lhp-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    background: transparent !important;
+  }
+
+  .sv-lhp-table thead {
+    display: none !important;
+  }
+
+  .sv-lhp-table tbody {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    padding: 10px !important;
+  }
+
+  .sv-lhp-table tr {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 10px 12px !important;
+    border: 1px solid var(--pn-border) !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, .045) !important;
+    overflow: visible !important;
+  }
+
+  .sv-lhp-table tr:hover td {
+    background: transparent !important;
+  }
+
+  .sv-lhp-table th,
+  .sv-lhp-table td,
+  .sv-lhp-table th:nth-child(n),
+  .sv-lhp-table td:nth-child(n) {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: 126px minmax(0, 1fr) !important;
+    align-items: start !important;
+    column-gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 32px !important;
+    padding: 7px 0 !important;
+    border-bottom: 1px dashed #e2e8f0 !important;
+    background: transparent !important;
+    color: var(--pn-text) !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    text-align: left !important;
+    vertical-align: top !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .sv-lhp-table td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .sv-lhp-table td::before {
+    content: attr(data-label);
+    display: block !important;
+    min-width: 0 !important;
+    color: var(--pn-muted) !important;
+    font-size: 11.5px !important;
+    font-weight: 900 !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .sv-lhp-table td:empty::after {
+    content: "—";
+    color: var(--pn-muted);
+  }
+
+  .sv-lhp-table td.empty {
+    display: block !important;
+    padding: 18px 12px !important;
+    text-align: center !important;
+  }
+
+  .sv-lhp-table td.empty::before {
+    content: "" !important;
+    display: none !important;
+  }
+
+  .sv-lhp-table td > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .sv-lhp-table .sv-code,
+  .sv-lhp-table .sv-main-text,
+  .sv-lhp-table .sv-note-text,
+  .sv-lhp-table .sv-status-pill {
+    display: inline-flex !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    font-size: 11.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  .sv-lhp-table td:nth-child(11) .sv-row-actions,
+  .sv-lhp-table td[data-label="Thao tác"] .sv-row-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+
+  .sv-lhp-table td:nth-child(11) .small,
+  .sv-lhp-table td:nth-child(11) button.small,
+  .sv-lhp-table td:nth-child(11) a.small,
+  .sv-lhp-table td[data-label="Thao tác"] .small,
+  .sv-lhp-table td[data-label="Thao tác"] button.small,
+  .sv-lhp-table td[data-label="Thao tác"] a.small {
+    width: 100% !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 5px 6px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* =========================
+   20. MOBILE RẤT NHỎ
+   ========================= */
+
+@media (max-width: 420px) {
+  .sv-flow-page {
+    font-size: 12px;
+  }
+
+  .sv-page-header h1 {
+    font-size: 17px;
+  }
+
+  .sv-summary-chip {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .sv-mini-stat {
+    width: 100%;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+  }
+
+  .sv-lhp-auto-actions button {
+    min-height: 34px;
+  }
+
+  .sv-lhp-open-form {
+    gap: 3px !important;
+  }
+
+  .sv-lhp-open-form label {
+    font-size: 5.5px !important;
+  }
+
+  .sv-lhp-open-form input,
+  .sv-lhp-open-form select,
+  .sv-lhp-open-actions button {
+    height: 18px !important;
+    min-height: 18px !important;
+    padding: 1px 2px !important;
+    font-size: 5.8px !important;
+    border-radius: 4px !important;
+  }
+
+  .sv-lhp-open-actions {
+    gap: 1px !important;
+  }
+
+  .sv-lhp-table tbody {
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  .sv-lhp-table tr {
+    padding: 9px 10px !important;
+  }
+
+  .sv-lhp-table th,
+  .sv-lhp-table td,
+  .sv-lhp-table th:nth-child(n),
+  .sv-lhp-table td:nth-child(n) {
+    grid-template-columns: 110px minmax(0, 1fr) !important;
+    column-gap: 8px !important;
+    font-size: 11.5px !important;
+  }
+
+  .sv-lhp-table td::before {
+    font-size: 11px !important;
+  }
+
+  .sv-lhp-table td:nth-child(11) .sv-row-actions,
+  .sv-lhp-table td[data-label="Thao tác"] .sv-row-actions {
+    grid-template-columns: 1fr !important;
   }
 }
 </style>
@@ -4397,4 +5392,14 @@ button.small,
 
 
 
+
+
+
+
+
+
+
+
+
+`
 
