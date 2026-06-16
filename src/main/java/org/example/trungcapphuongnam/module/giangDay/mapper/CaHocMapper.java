@@ -1,8 +1,9 @@
 package org.example.trungcapphuongnam.module.giangDay.mapper;
 
-import org.example.trungcapphuongnam.module.giangDay.entity.CaHoc;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.CaHocRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.CaHocResponse;
+import org.example.trungcapphuongnam.module.giangDay.entity.CaHoc;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiCaHoc;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +18,7 @@ public class CaHocMapper {
                 .gioKetThuc(request.getGioKetThuc())
                 .moTa(request.getMoTa())
                 .thuTu(request.getThuTu())
-                .trangThai(request.getTrangThai() != null ? request.getTrangThai() : "dang_su_dung")
+                .trangThai(parseTrangThai(request.getTrangThai(), TrangThaiCaHoc.dang_su_dung))
                 .build();
     }
 
@@ -31,7 +32,7 @@ public class CaHocMapper {
                 .gioKetThuc(entity.getGioKetThuc())
                 .moTa(entity.getMoTa())
                 .thuTu(entity.getThuTu())
-                .trangThai(entity.getTrangThai())
+                .trangThai(entity.getTrangThai() != null ? entity.getTrangThai().name() : null)
                 .build();
     }
 
@@ -43,6 +44,18 @@ public class CaHocMapper {
         entity.setGioKetThuc(request.getGioKetThuc());
         entity.setMoTa(request.getMoTa());
         entity.setThuTu(request.getThuTu());
-        if (request.getTrangThai() != null) entity.setTrangThai(request.getTrangThai());
+        if (request.getTrangThai() != null) {
+            entity.setTrangThai(parseTrangThai(request.getTrangThai(), entity.getTrangThai()));
+        }
+    }
+
+    // Convert String → enum, fallback về defaultValue nếu null hoặc không hợp lệ
+    private TrangThaiCaHoc parseTrangThai(String value, TrangThaiCaHoc defaultValue) {
+        if (value == null || value.isBlank()) return defaultValue;
+        try {
+            return TrangThaiCaHoc.valueOf(value.trim());
+        } catch (IllegalArgumentException e) {
+            return defaultValue;
+        }
     }
 }

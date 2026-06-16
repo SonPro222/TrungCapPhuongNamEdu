@@ -3,8 +3,11 @@ package org.example.trungcapphuongnam.module.giangDay.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.GiangDayPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhVersionRepository;
+import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyRepository;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.entity.NgayNghi;
+import org.example.trungcapphuongnam.module.giangDay.enums.LoaiNgayNghi;
 import org.example.trungcapphuongnam.module.giangDay.repository.NgayNghiRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +26,8 @@ import java.util.List;
 public class NgayNghiController {
 
     private final NgayNghiRepository ngayNghiRepository;
+    private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
+    private final KhungKyRepository khungKyRepository;
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<NgayNghi>>> getAll(
@@ -96,6 +101,34 @@ public class NgayNghiController {
         if (request == null) {
             throw new GiangDayException("Dữ liệu ngày nghỉ không hợp lệ");
         }
+
+        // Validate: khungKyId phải có chuongTrinhVersionId
+        if (request.getKhungKyId() != null && request.getChuongTrinhVersionId() == null) {
+            throw new GiangDayException("Ngày nghỉ theo kỳ phải chọn chương trình version.");
+        }
+
+        // Validate: NGHI_GIUA_KY bắt buộc phải có cả version lẫn kỳ
+        if (LoaiNgayNghi.NGHI_GIUA_KY.equals(request.getLoaiNgayNghi())) {
+            if (request.getChuongTrinhVersionId() == null || request.getKhungKyId() == null) {
+                throw new GiangDayException("Ngày nghỉ giữa kỳ phải chọn chương trình version và khung kỳ.");
+            }
+        }
+
+        // Validate chuongTrinhVersionId tồn tại
+        if (request.getChuongTrinhVersionId() != null
+                && !chuongTrinhVersionRepository.existsById(request.getChuongTrinhVersionId())) {
+            throw new GiangDayException("Chương trình version không tồn tại.");
+        }
+
+        // Validate khungKyId tồn tại và thuộc đúng version
+        if (request.getKhungKyId() != null) {
+            var khungKy = khungKyRepository.findById(request.getKhungKyId())
+                    .orElseThrow(() -> new GiangDayException("Khung kỳ không tồn tại."));
+            if (!khungKy.getChuongTrinhVersionId().equals(request.getChuongTrinhVersionId())) {
+                throw new GiangDayException("Khung kỳ không thuộc chương trình version đã chọn.");
+            }
+        }
+
         request.chuanHoaKhoangNgay();
         if (request.getNgayBatDau() == null || request.getNgayKetThuc() == null) {
             throw new GiangDayException("Ngày bắt đầu và ngày kết thúc nghỉ không được để trống");

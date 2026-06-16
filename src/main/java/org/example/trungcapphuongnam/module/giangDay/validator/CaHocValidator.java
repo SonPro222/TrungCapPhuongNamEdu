@@ -3,6 +3,7 @@ package org.example.trungcapphuongnam.module.giangDay.validator;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.CaHocRequest;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiCaHoc;
 import org.example.trungcapphuongnam.module.giangDay.repository.CaHocRepository;
 import org.springframework.stereotype.Component;
 
@@ -59,6 +60,14 @@ public class CaHocValidator {
 
         if (!request.getGioKetThuc().isAfter(request.getGioBatDau())) {
             throw new GiangDayException("Giờ kết thúc phải sau giờ bắt đầu");
+        }
+
+        if (request.getTrangThai() != null && !request.getTrangThai().isBlank()) {
+            try {
+                TrangThaiCaHoc.valueOf(request.getTrangThai().trim());
+            } catch (IllegalArgumentException e) {
+                throw new GiangDayException("Trạng thái ca học không hợp lệ. Giá trị cho phép: dang_su_dung, ngung_su_dung");
+            }
         }
     }
 }

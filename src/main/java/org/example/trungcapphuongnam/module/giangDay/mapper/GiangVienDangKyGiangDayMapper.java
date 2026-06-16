@@ -1,7 +1,10 @@
 package org.example.trungcapphuongnam.module.giangDay.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhVersionRepository;
 import org.example.trungcapphuongnam.module.daoTao.repository.KhungKyRepository;
+import org.example.trungcapphuongnam.module.daoTao.repository.NganhRepository;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.GiangVienDangKyGiangDayRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.GiangVienDangKyGiangDayResponse;
 import org.example.trungcapphuongnam.module.giangDay.entity.GiangVienDangKyGiangDay;
@@ -14,6 +17,9 @@ public class GiangVienDangKyGiangDayMapper {
 
     private final GiaoVienRepository giaoVienRepository;
     private final KhungKyRepository khungKyRepository;
+    private final ChuongTrinhVersionRepository chuongTrinhVersionRepository;
+    private final ChuongTrinhRepository chuongTrinhRepository;
+    private final NganhRepository nganhRepository;
 
     public GiangVienDangKyGiangDay toEntity(GiangVienDangKyGiangDayRequest request) {
         if (request == null) return null;
@@ -56,6 +62,32 @@ public class GiangVienDangKyGiangDayMapper {
             khungKyRepository.findById(entity.getKhungKyId()).ifPresent(ky -> {
                 response.setMaKy(ky.getMaKy());
                 response.setTenKy(ky.getTenKy());
+                response.setChuongTrinhVersionId(ky.getChuongTrinhVersionId());
+
+                // Enrich: version -> chương trình -> ngành
+                if (ky.getChuongTrinhVersionId() != null) {
+                    chuongTrinhVersionRepository.findById(ky.getChuongTrinhVersionId()).ifPresent(ver -> {
+                        response.setTenVersion(ver.getTenVersion());
+                        response.setChuongTrinhId(ver.getChuongTrinhId());
+
+                        if (ver.getChuongTrinhId() != null) {
+                            chuongTrinhRepository.findById(ver.getChuongTrinhId()).ifPresent(ct -> {
+                                response.setTenChuongTrinh(ct.getTenChuongTrinh());
+                                response.setNganhId(ct.getNganhId());
+
+                                if (ct.getNganhId() != null) {
+                                    nganhRepository.findById(ct.getNganhId()).ifPresent(nganh ->
+                                            response.setTenNganh(nganh.getTenNganh()));
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Build label đầy đủ
+                response.setLabelKhungKyDayDu(buildLabel(
+                        response.getTenNganh(), response.getTenChuongTrinh(),
+                        response.getTenVersion(), ky.getTenKy()));
             });
         }
 
@@ -69,5 +101,23 @@ public class GiangVienDangKyGiangDayMapper {
         entity.setSoTietDangKy(request.getSoTietDangKy());
         if (request.getTrangThai() != null) entity.setTrangThai(request.getTrangThai());
         entity.setGhiChu(request.getGhiChu());
+    }
+
+    private String buildLabel(String tenNganh, String tenChuongTrinh, String tenVersion, String tenKy) {
+        StringBuilder sb = new StringBuilder();
+        if (tenNganh != null && !tenNganh.isBlank()) sb.append(tenNganh);
+        if (tenChuongTrinh != null && !tenChuongTrinh.isBlank()) {
+            if (sb.length() > 0) sb.append(" / ");
+            sb.append(tenChuongTrinh);
+        }
+        if (tenVersion != null && !tenVersion.isBlank()) {
+            if (sb.length() > 0) sb.append(" / ");
+            sb.append(tenVersion);
+        }
+        if (tenKy != null && !tenKy.isBlank()) {
+            if (sb.length() > 0) sb.append(" / ");
+            sb.append(tenKy);
+        }
+        return sb.length() > 0 ? sb.toString() : tenKy;
     }
 }

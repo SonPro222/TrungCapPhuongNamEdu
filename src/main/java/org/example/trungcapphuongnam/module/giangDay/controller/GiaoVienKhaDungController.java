@@ -53,6 +53,9 @@ public class GiaoVienKhaDungController {
         entity.setTuNgay(request.getTuNgay());
         entity.setDenNgay(request.getDenNgay());
         entity.setKhaDung(request.getKhaDung());
+        entity.setKhungKyId(request.getKhungKyId());
+        entity.setLoaiDangKy(request.getLoaiDangKy());
+        entity.setMucDoUuTien(request.getMucDoUuTien());
         entity.setGhiChu(request.getGhiChu());
         return ResponseEntity.ok(ApiResponse.ok(giaoVienKhaDungRepository.save(entity)));
     }

@@ -34,4 +34,13 @@ public class KhungKyResponse {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    // Enriched fields — ngữ cảnh đầy đủ cho dropdown giảng viên
+    private String maVersion;
+    private String tenVersion;
+    private Long chuongTrinhId;
+    private String tenChuongTrinh;
+    private Long nganhId;
+    private String tenNganh;
+    private String labelDayDu;
 }

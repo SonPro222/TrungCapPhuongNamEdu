@@ -19,4 +19,13 @@ public class GiangVienDangKyGiangDayResponse {
     private String ghiChu;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Enriched khung kỳ — ngữ cảnh đầy đủ
+    private Long chuongTrinhVersionId;
+    private String tenVersion;
+    private Long chuongTrinhId;
+    private String tenChuongTrinh;
+    private Long nganhId;
+    private String tenNganh;
+    private String labelKhungKyDayDu;
 }

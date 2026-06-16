@@ -2,9 +2,7 @@ package org.example.trungcapphuongnam.module.giangDay.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.module.giangDay.enums.LoaiDangKyGiangVien;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,8 +11,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "giao_vien_kha_dung")
-public class GiaoVienKhaDung {
+@Table(name = "giao_vien_dang_ky_nhom_ca")
+public class GiaoVienDangKyNhomCa {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,27 +21,17 @@ public class GiaoVienKhaDung {
     @Column(name = "giao_vien_id", nullable = false)
     private Long giaoVienId;
 
-    @Column(name = "thu_trong_tuan")
-    private Integer thuTrongTuan;
-
-    @Column(name = "ca_hoc_id")
-    private Long caHocId;
-
-    @Column(name = "tu_ngay")
-    private LocalDate tuNgay;
-
-    @Column(name = "den_ngay")
-    private LocalDate denNgay;
-
-    @Column(name = "kha_dung")
-    private Boolean khaDung;
-
     @Column(name = "khung_ky_id")
     private Long khungKyId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "loai_dang_ky", length = 50)
-    private LoaiDangKyGiangVien loaiDangKy;
+    @Column(name = "thu_trong_tuan")
+    private Integer thuTrongTuan;
+
+    @Column(name = "ca_bat_dau_id", nullable = false)
+    private Long caBatDauId;
+
+    @Column(name = "ca_ket_thuc_id", nullable = false)
+    private Long caKetThucId;
 
     @Column(name = "muc_do_uu_tien")
     private Integer mucDoUuTien;

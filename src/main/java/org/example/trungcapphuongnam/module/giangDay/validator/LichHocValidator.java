@@ -11,7 +11,10 @@ import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLichHoc;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLopHocPhan;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiPhongHoc;
 import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiSinhVienLopHocPhan;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.ChuongTrinhMon;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.ChuongTrinhMonRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.CaHocRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienKhaDungRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.GiaoVienRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LichHocRepository;
 import org.example.trungcapphuongnam.module.giangDay.repository.LopHocPhanRepository;
@@ -21,7 +24,9 @@ import org.example.trungcapphuongnam.module.giangDay.repository.PhongHocReposito
 import org.example.trungcapphuongnam.module.giangDay.repository.SinhVienLopHocPhanRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -35,6 +40,8 @@ public class LichHocValidator {
     private final SinhVienLopHocPhanRepository sinhVienLopHocPhanRepository;
     private final PhanCongGiangDayRepository phanCongGiangDayRepository;
     private final NgayNghiRepository ngayNghiRepository;
+    private final GiaoVienKhaDungRepository giaoVienKhaDungRepository;
+    private final ChuongTrinhMonRepository chuongTrinhMonRepository;
 
     public void validateCreate(LichHocRequest request) {
         validateCommon(null, request);
@@ -138,8 +145,11 @@ public class LichHocValidator {
             throw new GiangDayException("Ca học không được để trống khi xếp lịch học");
         }
 
-        if (ngayNghiRepository.existsNgayNghiApDung(request.getNgayHoc())) {
-            throw new GiangDayException("Ngày học nằm trong lịch nghỉ, không được xếp buổi học");
+        // Lấy version/kỳ của lớp học phần để check ngày nghỉ đúng phạm vi
+        Long[] versionKy = layChuongTrinhVersionVaKhungKy(lopHocPhan);
+        if (ngayNghiRepository.existsNgayNghiApDungTheoPhamVi(
+                request.getNgayHoc(), versionKy[0], versionKy[1])) {
+            throw new GiangDayException("Ngày học rơi vào ngày nghỉ áp dụng cho lớp học phần này, không thể xếp lịch.");
         }
 
         Integer soBuoiHoc = lopHocPhan.getSoBuoiHoc();
@@ -168,6 +178,16 @@ public class LichHocValidator {
         }
 
         if (request.getGiaoVienId() != null) {
+            // Kiểm tra giáo viên đã đăng ký bận (loaiDangKy = ban) cho slot này
+            if (giaoVienKhaDungRepository.existsGiaoVienBan(
+                    request.getGiaoVienId(),
+                    tinhThuTrongTuan(request.getNgayHoc()),
+                    request.getCaHocId(),
+                    request.getNgayHoc()
+            )) {
+                throw new GiangDayException("Giáo viên đã đăng ký bận trong thời điểm này, không được xếp lịch");
+            }
+
             boolean trungGiaoVien = idDangCapNhat == null
                     ? lichHocRepository.existsByGiaoVienIdAndNgayHocAndCaHocIdAndTrangThaiNot(
                     request.getGiaoVienId(), request.getNgayHoc(), request.getCaHocId(), TrangThaiLichHoc.nghi)
@@ -199,5 +219,26 @@ public class LichHocValidator {
         )) {
             throw new GiangDayException("Có sinh viên trong lớp bị trùng lịch học ở ngày và ca này");
         }
+    }
+
+    private int tinhThuTrongTuan(LocalDate ngayHoc) {
+        if (ngayHoc == null) return 0;
+        int dayOfWeek = ngayHoc.getDayOfWeek().getValue();
+        return dayOfWeek == 7 ? 8 : dayOfWeek + 1;
+    }
+
+    /**
+     * Lấy [chuongTrinhVersionId, khungKyId] của lớp học phần.
+     * Ưu tiên lấy từ chuongTrinhMonId trực tiếp trên LopHocPhan.
+     * Nếu không có, trả về [null, null] → chỉ check nghỉ toàn trường.
+     */
+    private Long[] layChuongTrinhVersionVaKhungKy(LopHocPhan lop) {
+        if (lop.getChuongTrinhMonId() != null) {
+            Optional<ChuongTrinhMon> ctm = chuongTrinhMonRepository.findById(lop.getChuongTrinhMonId());
+            if (ctm.isPresent()) {
+                return new Long[]{ctm.get().getChuongTrinhVersionId(), ctm.get().getKhungKyId()};
+            }
+        }
+        return new Long[]{null, null};
     }
 }

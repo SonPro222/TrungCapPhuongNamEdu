@@ -2,6 +2,8 @@ package org.example.trungcapphuongnam.common.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
+import org.example.trungcapphuongnam.module.donTu.DonTuException;
+import org.example.trungcapphuongnam.module.donTu.DonTuNotFoundException;
 import org.example.trungcapphuongnam.module.heThong.HeThongException;
 import org.example.trungcapphuongnam.module.heThong.HeThongNotFoundException;
 import org.example.trungcapphuongnam.module.sinhVien.SinhVienException;
@@ -37,7 +39,8 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException.class,
             HeThongNotFoundException.class,
             SinhVienNotFoundException.class,
-            GiangDayNotFoundException.class
+            GiangDayNotFoundException.class,
+            DonTuNotFoundException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleNotFound(RuntimeException ex) {
         log.warn("NOT_FOUND type={} message={}", ex.getClass().getSimpleName(), ex.getMessage());
@@ -53,6 +56,7 @@ public class GlobalExceptionHandler {
             HeThongException.class,
             SinhVienException.class,
             GiangDayException.class,
+            DonTuException.class,
             IllegalArgumentException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(RuntimeException ex) {
