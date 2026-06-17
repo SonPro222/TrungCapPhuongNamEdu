@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.sinhVien.dto.response;
 
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.SinhVien.SinhVienChuongTrinhTrangThai;
+import org.example.trungcapphuongnam.module.sinhVien.enums.SinhVienChuongTrinhTrangThai;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

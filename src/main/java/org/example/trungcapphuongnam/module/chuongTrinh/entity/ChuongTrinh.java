@@ -17,14 +17,12 @@ public class ChuongTrinh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "nganh_he_dao_tao_id")
+    private Long nganhHeDaoTaoId;
+
+
     @Column(name = "nganh_id")
     private Long nganhId;
-
-    @Column(name = "trinh_do_id")
-    private Long trinhDoId;
-
-    @Column(name = "loai_chuong_trinh_id")
-    private Long loaiChuongTrinhId;
 
     @Column(name = "ma_chuong_trinh")
     private String maChuongTrinh;
@@ -43,5 +41,22 @@ public class ChuongTrinh {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+
+        if (this.updatedAt == null) {
+            this.updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

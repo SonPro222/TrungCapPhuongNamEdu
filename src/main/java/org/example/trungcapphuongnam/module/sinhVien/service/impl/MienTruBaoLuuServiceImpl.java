@@ -4,7 +4,7 @@ import org.example.trungcapphuongnam.module.sinhVien.dto.request.MienTruBaoLuuRe
 import org.example.trungcapphuongnam.module.sinhVien.dto.response.MienTruBaoLuuResponse;
 import org.example.trungcapphuongnam.module.sinhVien.entity.MienTruBaoLuu;
 import org.example.trungcapphuongnam.module.sinhVien.entity.SinhVien;
-import org.example.trungcapphuongnam.common.exception.SinhVienNotFoundException;
+import org.example.trungcapphuongnam.module.sinhVien.SinhVienNotFoundException;
 import org.example.trungcapphuongnam.module.sinhVien.mapper.MienTruBaoLuuMapper;
 import org.example.trungcapphuongnam.module.sinhVien.repository.MienTruBaoLuuRepository;
 import org.example.trungcapphuongnam.module.sinhVien.repository.SinhVienRepository;

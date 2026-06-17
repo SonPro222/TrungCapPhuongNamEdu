@@ -2,7 +2,7 @@ package org.example.trungcapphuongnam.module.diem.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.trungcapphuongnam.common.enums.KetQuaHocTap;
+import org.example.trungcapphuongnam.module.diem.enums.KetQuaHocTap;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
@@ -32,6 +32,36 @@ public class KetQuaMonHocServiceImpl implements KetQuaMonHocService {
     @Transactional(readOnly = true)
     public Page<KetQuaMonHocResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(mapper::toResponse);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<KetQuaMonHocResponse> findTheoBoLoc(
+            Long sinhVienId,
+            Long chuongTrinhMonId,
+            Long lopHocPhanId,
+            Pageable pageable
+    ) {
+        if (sinhVienId != null && chuongTrinhMonId != null) {
+            return repository.findBySinhVienIdAndChuongTrinhMonId(sinhVienId, chuongTrinhMonId, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        if (sinhVienId != null) {
+            return repository.findBySinhVienId(sinhVienId, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        if (chuongTrinhMonId != null) {
+            return repository.findByChuongTrinhMonId(chuongTrinhMonId, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        if (lopHocPhanId != null) {
+            return repository.findByLopHocPhanId(lopHocPhanId, pageable)
+                    .map(mapper::toResponse);
+        }
+
+        return findAll(pageable);
     }
 
     @Override

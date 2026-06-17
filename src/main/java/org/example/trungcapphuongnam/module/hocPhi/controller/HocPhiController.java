@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.HocPhiPath;
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiHocPhi;
+import org.example.trungcapphuongnam.module.hocPhi.enums.TrangThaiHocPhi;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
 import org.example.trungcapphuongnam.module.hocPhi.dto.request.HocPhiRequest;
 import org.example.trungcapphuongnam.module.hocPhi.dto.response.HocPhiResponse;

@@ -12,7 +12,7 @@ public final class CauTraLoiSinhVienMapper {
         return CauTraLoiSinhVienResponse.builder()
             .id(entity.getId())
             .lanLamBaiId(entity.getLanLamBaiId())
-            .cauHoiId(entity.getCauHoiId())
+            .lanLamBaiCauHoiId(entity.getLanLamBaiCauHoiId())
             .noiDungTraLoi(entity.getNoiDungTraLoi())
             .diem(entity.getDiem())
             .laDung(entity.getLaDung())
@@ -26,7 +26,7 @@ public final class CauTraLoiSinhVienMapper {
         if (request == null) return null;
         return CauTraLoiSinhVien.builder()
             .lanLamBaiId(request.getLanLamBaiId())
-            .cauHoiId(request.getCauHoiId())
+            .lanLamBaiCauHoiId(request.getLanLamBaiCauHoiId())
             .noiDungTraLoi(request.getNoiDungTraLoi())
             .diem(request.getDiem())
             .laDung(request.getLaDung())
@@ -37,7 +37,7 @@ public final class CauTraLoiSinhVienMapper {
     public static void updateEntity(CauTraLoiSinhVien entity, CauTraLoiSinhVienRequest request) {
         if (entity == null || request == null) return;
         entity.setLanLamBaiId(request.getLanLamBaiId());
-        entity.setCauHoiId(request.getCauHoiId());
+        entity.setLanLamBaiCauHoiId(request.getLanLamBaiCauHoiId());
         entity.setNoiDungTraLoi(request.getNoiDungTraLoi());
         entity.setDiem(request.getDiem());
         entity.setLaDung(request.getLaDung());

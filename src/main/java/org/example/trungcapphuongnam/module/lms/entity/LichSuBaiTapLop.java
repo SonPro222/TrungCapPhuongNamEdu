@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.HanhDongBaiTapLop;
-import org.example.trungcapphuongnam.common.enums.Lms.VaiTroThucHienLms;
+import org.example.trungcapphuongnam.module.lms.enums.HanhDongBaiTapLop;
+import org.example.trungcapphuongnam.module.lms.enums.VaiTroThucHienLms;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 @Getter

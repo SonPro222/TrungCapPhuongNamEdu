@@ -1,11 +1,8 @@
 package org.example.trungcapphuongnam.module.giangDay.dto.request;
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.LoaiPhong;
-import org.example.trungcapphuongnam.common.enums.TrangThaiPhongHoc;
-
-import java.time.*;
-import java.math.BigDecimal;
+import org.example.trungcapphuongnam.module.giangDay.enums.LoaiPhong;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiPhongHoc;
 
 
 @Getter

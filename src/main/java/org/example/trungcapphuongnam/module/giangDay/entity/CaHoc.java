@@ -2,8 +2,9 @@ package org.example.trungcapphuongnam.module.giangDay.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiCaHoc;
+
 import java.time.*;
-import java.math.BigDecimal;
 
 
 @Getter
@@ -33,4 +34,10 @@ public class CaHoc {
     @Column(name = "mo_ta")
     private String moTa;
 
+    @Column(name = "thu_tu")
+    private Integer thuTu;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trang_thai")
+    private TrangThaiCaHoc trangThai;
 }

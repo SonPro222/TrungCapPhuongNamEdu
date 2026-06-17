@@ -4,8 +4,8 @@ import org.example.trungcapphuongnam.module.sinhVien.dto.request.SinhVienChuongT
 import org.example.trungcapphuongnam.module.sinhVien.dto.response.SinhVienChuongTrinhResponse;
 import org.example.trungcapphuongnam.module.sinhVien.entity.SinhVien;
 import org.example.trungcapphuongnam.module.sinhVien.entity.SinhVienChuongTrinh;
-import org.example.trungcapphuongnam.common.exception.SinhVienException;
-import org.example.trungcapphuongnam.common.exception.SinhVienNotFoundException;
+import org.example.trungcapphuongnam.module.sinhVien.SinhVienException;
+import org.example.trungcapphuongnam.module.sinhVien.SinhVienNotFoundException;
 import org.example.trungcapphuongnam.module.sinhVien.mapper.SinhVienChuongTrinhMapper;
 import org.example.trungcapphuongnam.module.sinhVien.repository.SinhVienChuongTrinhRepository;
 import org.example.trungcapphuongnam.module.sinhVien.repository.SinhVienRepository;
@@ -15,6 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +41,15 @@ public class SinhVienChuongTrinhServiceImpl implements SinhVienChuongTrinhServic
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<SinhVienChuongTrinhResponse> findBySinhVienId(Long sinhVienId) {
+        return repository.findBySinhVienId(sinhVienId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public SinhVienChuongTrinhResponse create(SinhVienChuongTrinhRequest request) {
         if (repository.existsBySinhVienIdAndChuongTrinhVersionId(request.getSinhVienId(), request.getChuongTrinhVersionId())) {
             throw new SinhVienException("Sinh viên đã đăng ký chương trình version này");
@@ -50,11 +62,11 @@ public class SinhVienChuongTrinhServiceImpl implements SinhVienChuongTrinhServic
     @Override
     public SinhVienChuongTrinhResponse update(Long id, SinhVienChuongTrinhRequest request) {
         SinhVienChuongTrinh entity = getById(id);
-        boolean duplicated = repository.findAll().stream()
-                .filter(item -> !item.getId().equals(id))
-                .anyMatch(item -> item.getSinhVien().getId().equals(request.getSinhVienId())
-                        && item.getChuongTrinhVersionId().equals(request.getChuongTrinhVersionId()));
-        if (duplicated) {
+        if (repository.existsBySinhVienIdAndChuongTrinhVersionIdAndIdNot(
+                request.getSinhVienId(),
+                request.getChuongTrinhVersionId(),
+                id
+        )) {
             throw new SinhVienException("Sinh viên đã đăng ký chương trình version này");
         }
         SinhVien sinhVien = getSinhVien(request.getSinhVienId());

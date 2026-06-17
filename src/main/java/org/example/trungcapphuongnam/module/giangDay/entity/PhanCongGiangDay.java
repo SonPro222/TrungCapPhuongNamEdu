@@ -2,10 +2,9 @@ package org.example.trungcapphuongnam.module.giangDay.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.VaiTroGiangDay;
+import org.example.trungcapphuongnam.module.giangDay.enums.VaiTroGiangDay;
 
 import java.time.*;
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -31,5 +30,17 @@ public class PhanCongGiangDay {
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "so_tiet_phan_cong")
+    private Integer soTietPhanCong;
+
+    @Column(name = "trang_thai")
+    private String trangThai;
+
+    @Column(name = "ghi_chu", columnDefinition = "TEXT")
+    private String ghiChu;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
 
 }

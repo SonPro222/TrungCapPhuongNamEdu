@@ -14,8 +14,6 @@ public class MonHocMapper {
                 .maMon(request.getMaMon())
                 .tenMon(request.getTenMon())
                 .moTa(request.getMoTa())
-                .createdAt(request.getCreatedAt())
-                .updatedAt(request.getUpdatedAt())
                 .build();
     }
 

@@ -13,9 +13,13 @@ public class NhomTuChonMapper {
         return NhomTuChon.builder()
                 .chuongTrinhVersionId(request.getChuongTrinhVersionId())
                 .ten(request.getTen())
+                .nhomTuChonMauId(request.getNhomTuChonMauId())
                 .soMonChon(request.getSoMonChon())
                 .soTinChiCanDat(request.getSoTinChiCanDat())
                 .ghiChu(request.getGhiChu())
+                .ma(request.getMa())
+                .moTa(request.getMoTa())
+
                 .build();
     }
 
@@ -24,10 +28,15 @@ public class NhomTuChonMapper {
         return NhomTuChonResponse.builder()
                 .id(entity.getId())
                 .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
+                .nhomTuChonMauId(entity.getNhomTuChonMauId())
                 .ten(entity.getTen())
                 .soMonChon(entity.getSoMonChon())
                 .soTinChiCanDat(entity.getSoTinChiCanDat())
                 .ghiChu(entity.getGhiChu())
+                .ma(entity.getMa())
+                .moTa(entity.getMoTa())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
@@ -35,8 +44,13 @@ public class NhomTuChonMapper {
         if (entity == null || request == null) return;
         entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
         entity.setTen(request.getTen());
+        entity.setNhomTuChonMauId(request.getNhomTuChonMauId());
         entity.setSoMonChon(request.getSoMonChon());
         entity.setSoTinChiCanDat(request.getSoTinChiCanDat());
         entity.setGhiChu(request.getGhiChu());
+        entity.setMa(request.getMa());
+        entity.setMoTa(request.getMoTa());
+
+
     }
 }

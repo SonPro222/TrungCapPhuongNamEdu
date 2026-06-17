@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -19,7 +20,10 @@ public class SyllabusChuongTrinh {
 
     @Column(name = "chuong_trinh_version_id")
     private Long chuongTrinhVersionId;
-
+    @Column(name = "syllabus_chuong_trinh_mau_id")
+    private Long syllabusChuongTrinhMauId;
+    @Column(name = "duong_dan", columnDefinition = "TEXT")
+    private String duongDan;
     @Column(name = "mo_ta_tong_quan")
     private String moTaTongQuan;
 
@@ -34,5 +38,49 @@ public class SyllabusChuongTrinh {
 
     @Column(name = "ghi_chu")
     private String ghiChu;
+
+    @Column(name = "ma")
+    private String ma;
+
+    @Column(name = "ten")
+    private String ten;
+
+    @Column(name = "muc_tieu")
+    private String mucTieu;
+
+    @Column(name = "doi_tuong_tuyen_sinh")
+    private String doiTuongTuyenSinh;
+
+    @Column(name = "thoi_gian_dao_tao")
+    private String thoiGianDaoTao;
+
+    @Column(name = "khoi_luong_kien_thuc")
+    private String khoiLuongKienThuc;
+
+    @Column(name = "dieu_kien_tot_nghiep")
+    private String dieuKienTotNghiep;
+
+    @Column(name = "phuong_phap_danh_gia")
+    private String phuongPhapDanhGia;
+
+    @Column(name = "huong_dan_thuc_hien")
+    private String huongDanThucHien;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

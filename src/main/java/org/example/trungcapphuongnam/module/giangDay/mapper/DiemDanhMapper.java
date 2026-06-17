@@ -1,9 +1,14 @@
 package org.example.trungcapphuongnam.module.giangDay.mapper;
 
-import org.example.trungcapphuongnam.module.giangDay.entity.DiemDanh;
 import org.example.trungcapphuongnam.module.giangDay.dto.request.DiemDanhRequest;
 import org.example.trungcapphuongnam.module.giangDay.dto.response.DiemDanhResponse;
+import org.example.trungcapphuongnam.module.giangDay.entity.DiemDanh;
+import org.example.trungcapphuongnam.module.giangDay.entity.LichHoc;
+import org.example.trungcapphuongnam.module.giangDay.entity.LopHocPhan;
+import org.example.trungcapphuongnam.module.sinhVien.entity.SinhVien;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class DiemDanhMapper {
@@ -29,6 +34,37 @@ public class DiemDanhMapper {
                 .ghiChu(entity.getGhiChu())
                 .thoiGianDiemDanh(entity.getThoiGianDiemDanh())
                 .build();
+    }
+
+    public DiemDanhResponse toResponse(
+            DiemDanh entity,
+            Map<Long, LichHoc> lichHocMap,
+            Map<Long, LopHocPhan> lopHocPhanMap,
+            Map<Long, SinhVien> sinhVienMap
+    ) {
+        DiemDanhResponse response = toResponse(entity);
+        if (response == null || entity == null) return response;
+
+        LichHoc lichHoc = lichHocMap == null ? null : lichHocMap.get(entity.getLichHocId());
+        if (lichHoc != null) {
+            response.setNgayHoc(lichHoc.getNgayHoc());
+            response.setNoiDungBuoiHoc(lichHoc.getNoiDungBuoiHoc());
+            response.setLopHocPhanId(lichHoc.getLopHocPhanId());
+
+            LopHocPhan lopHocPhan = lopHocPhanMap == null ? null : lopHocPhanMap.get(lichHoc.getLopHocPhanId());
+            if (lopHocPhan != null) {
+                response.setMaLop(lopHocPhan.getMaLop());
+                response.setTenLop(lopHocPhan.getTenLop());
+            }
+        }
+
+        SinhVien sinhVien = sinhVienMap == null ? null : sinhVienMap.get(entity.getSinhVienId());
+        if (sinhVien != null) {
+            response.setMaSinhVien(sinhVien.getMaSinhVien());
+            response.setTenSinhVien(sinhVien.getHoTen());
+        }
+
+        return response;
     }
 
     public void updateEntity(DiemDanh entity, DiemDanhRequest request) {

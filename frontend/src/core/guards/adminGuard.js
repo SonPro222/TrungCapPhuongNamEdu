@@ -1,8 +1,26 @@
-import { canAccessPath, getHomeByRole, normalizeRole } from '@/utils/permission.js';
-import tokenService from '@/core/services/tokenService.js';
+import { authService } from '../services/authService'
+import { ROLES } from '../constants/roles'
 
-export const adminGuard = (to, from, next) => {
-  const role = normalizeRole(tokenService.getRole());
-  if (role && canAccessPath(to.path, role)) return next();
-  return next(getHomeByRole(role));
-};
+export function requireAdmin(to) {
+    if (!authService.isLoggedIn()) {
+        return '/auth/login'
+    }
+
+    const requiredRoles = to.meta?.roles || []
+
+    // Nếu route chưa khai báo quyền thì chỉ cần login là được vào.
+    if (!requiredRoles.length) {
+        return true
+    }
+
+    // Admin được vào tất cả.
+    if (authService.hasRole(ROLES.ADMIN)) {
+        return true
+    }
+
+    if (!authService.hasAnyRole(requiredRoles)) {
+        return '/admin'
+    }
+
+    return true
+}

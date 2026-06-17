@@ -1,0 +1,411 @@
+/* global.css
+   CSS nền toàn hệ thống:
+   reset, body, link, input/button mặc định, layout admin/auth.
+   Không viết CSS của shared component hoặc module ở đây.
+*/
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Roboto', Arial, sans-serif;
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+}
+
+.admin-layout {
+    min-height: 100vh;
+    background: var(--color-bg);
+}
+
+.admin-header {
+    height: var(--header-height);
+    background: #077149;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+
+    position: sticky;
+    top: 0;
+    z-index: 3000;
+    isolation: isolate;
+
+    box-shadow: 0 4px 14px rgba(7, 113, 73, 0.18);
+
+    transition:
+            box-shadow 0.22s ease,
+            background-color 0.22s ease;
+}
+
+.admin-brand {
+    font-weight: bold;
+    white-space: nowrap;
+    position: relative;
+    z-index: 3001;
+
+    color: white;
+    letter-spacing: 0.2px;
+
+    transition:
+            transform 0.18s ease,
+            opacity 0.18s ease;
+}
+
+.admin-brand:hover {
+    transform: translateY(-1px);
+    opacity: 0.96;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+
+    position: relative;
+    z-index: 3001;
+}
+
+.admin-nav a {
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    position: relative;
+    z-index: 3002;
+
+    padding: 0 10px;
+    border-radius: 8px;
+
+    font-weight: 500;
+    line-height: 1;
+
+    background: transparent;
+
+    transition:
+            background-color 0.18s ease,
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+}
+
+.admin-nav a:hover {
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.10);
+    transform: translateY(-1px);
+}
+
+.admin-nav a:active {
+    transform: translateY(0);
+}
+
+.admin-nav a.router-link-active,
+.admin-nav a.router-link-exact-active {
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.admin-auth {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 3001;
+
+    color: white;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.admin-auth-user {
+    height: 36px;
+    max-width: 220px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 4px 10px 4px 4px;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+
+    backdrop-filter: blur(8px);
+}
+
+.admin-auth-avatar {
+    width: 28px;
+    height: 28px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.96);
+    color: #077149;
+
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.admin-auth-name {
+    min-width: 0;
+    max-width: 160px;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.admin-logout-btn {
+    height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 14px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.96);
+    color: #077149;
+
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+
+    box-shadow:
+            0 4px 10px rgba(0, 0, 0, 0.12);
+
+    transition:
+            background-color 0.18s ease,
+            color 0.18s ease,
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+}
+
+.admin-logout-btn:hover {
+    background: #ffffff;
+    color: #055f3d;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+            0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.admin-logout-btn:active {
+    transform: translateY(0);
+
+    box-shadow:
+            0 3px 8px rgba(0, 0, 0, 0.14);
+}
+
+.admin-logout-btn:focus-visible {
+    outline: none;
+
+    box-shadow:
+            0 0 0 3px rgba(255, 255, 255, 0.36),
+            0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.admin-main {
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+}
+
+.auth-public-panel {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 64px;
+}
+
+.auth-form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    padding: 24px;
+}
+
+.error-text {
+    color: var(--color-danger);
+}
+
+/*==================LOGIN===================*/
+
+.login-divider {
+    text-align: center;
+    color: var(--color-muted);
+    margin: 8px 0;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 380px;
+
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 40px;
+
+    border: 1px solid var(--color-border);
+
+    box-shadow:
+            0 10px 30px rgba(0,0,0,0.08);
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.login-header {
+    margin-bottom: 8px;
+}
+
+.login-header h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.login-header p {
+    margin-top: 8px;
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+.login-box input {
+    height: 44px;
+
+    border-radius: 10px;
+
+    border: 1px solid var(--color-border);
+
+    transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
+}
+
+.login-box input:focus {
+    outline: none;
+
+    border-color: var(--color-primary);
+
+    box-shadow:
+            0 0 0 4px rgba(15, 76, 129, 0.12);
+}
+
+.login-submit {
+    height: 46px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--color-primary);
+
+    color: white;
+
+    font-weight: 600;
+
+    transition:
+            transform 0.15s,
+            opacity 0.2s;
+}
+
+.login-submit:hover {
+    opacity: 0.95;
+}
+
+.login-submit:active {
+    transform: scale(0.99);
+}
+
+.login-divider {
+    position: relative;
+
+    text-align: center;
+
+    margin: 6px 0;
+
+    color: var(--color-muted);
+
+    font-size: 14px;
+}
+
+.login-divider::before {
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+    top: 50%;
+
+    width: 100%;
+    height: 1px;
+
+    background: var(--color-border);
+
+    z-index: 1;
+}
+
+.login-divider span {
+    position: relative;
+
+    z-index: 2;
+
+    background: white;
+
+    padding: 0 12px;
+}

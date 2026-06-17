@@ -11,9 +11,15 @@ public class DieuKienMonHocMapper {
         if (request == null) return null;
         return DieuKienMonHoc.builder()
                 .syllabusMonId(request.getSyllabusMonId())
+                .ten(request.getTen())
+                .soLuong(request.getSoLuong())
+                .yeuCau(request.getYeuCau())
                 .loai(request.getLoai())
                 .noiDung(request.getNoiDung())
                 .thuTu(request.getThuTu())
+                .ma(request.getMa())
+                .ghiChu(request.getGhiChu())
+
                 .build();
     }
 
@@ -22,17 +28,31 @@ public class DieuKienMonHocMapper {
         return DieuKienMonHocResponse.builder()
                 .id(entity.getId())
                 .syllabusMonId(entity.getSyllabusMonId())
+                .ten(entity.getTen())
+                .soLuong(entity.getSoLuong())
+                .yeuCau(entity.getYeuCau())
                 .loai(entity.getLoai())
                 .noiDung(entity.getNoiDung())
                 .thuTu(entity.getThuTu())
+                .ma(entity.getMa())
+                .ghiChu(entity.getGhiChu())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
     public void updateEntity(DieuKienMonHoc entity, DieuKienMonHocRequest request) {
         if (entity == null || request == null) return;
         entity.setSyllabusMonId(request.getSyllabusMonId());
+        entity.setTen(request.getTen());
+        entity.setSoLuong(request.getSoLuong());
+        entity.setYeuCau(request.getYeuCau());
         entity.setLoai(request.getLoai());
         entity.setNoiDung(request.getNoiDung());
         entity.setThuTu(request.getThuTu());
+        entity.setMa(request.getMa());
+        entity.setGhiChu(request.getGhiChu());
+
+
     }
 }

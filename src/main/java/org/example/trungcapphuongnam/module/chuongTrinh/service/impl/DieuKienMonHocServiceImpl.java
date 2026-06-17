@@ -6,25 +6,33 @@ import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.DieuKienMon
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.DieuKienMonHoc;
 import org.example.trungcapphuongnam.module.chuongTrinh.mapper.DieuKienMonHocMapper;
 import org.example.trungcapphuongnam.module.chuongTrinh.repository.DieuKienMonHocRepository;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.DieuKienMonHocService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class DieuKienMonHocServiceImpl implements DieuKienMonHocService {
-
+    private final ChuongTrinhNghiepVuValidator validator;
     private final DieuKienMonHocRepository repository;
     private final DieuKienMonHocMapper mapper;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<DieuKienMonHocResponse> findAll(Pageable pageable) {
-        return repository.findAll(pageable).map(mapper::toResponse);
+    public Page<DieuKienMonHocResponse> findAll(Long syllabusMonId, String loai, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<DieuKienMonHoc>empty()
+                    .and(LocJpa.eq("syllabusMonId", syllabusMonId))
+                    .and(LocJpa.like("loai", loai))
+                    .and(LocJpa.keyword(keyword, "loai", "noiDung")),
+                pageable
+        ).map(mapper::toResponse);
     }
 
     @Override
@@ -38,6 +46,7 @@ public class DieuKienMonHocServiceImpl implements DieuKienMonHocService {
     @Override
     public DieuKienMonHocResponse create(DieuKienMonHocRequest request) {
         DieuKienMonHoc entity = mapper.toEntity(request);
+        validator.validateDieuKienMonHoc(request, null);
         return mapper.toResponse(repository.save(entity));
     }
 
@@ -45,6 +54,7 @@ public class DieuKienMonHocServiceImpl implements DieuKienMonHocService {
     public DieuKienMonHocResponse update(Long id, DieuKienMonHocRequest request) {
         DieuKienMonHoc entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("DieuKienMonHoc không tồn tại: " + id));
+        validator.validateDieuKienMonHoc(request, id);
         mapper.updateEntity(entity, request);
         return mapper.toResponse(repository.save(entity));
     }

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.TrangThaiChuongTrinhVersion;
 
 @Getter
 @Setter
@@ -34,17 +35,19 @@ public class ChuongTrinhVersionRequest {
 
     private String fileQuyetDinh;
 
-    private BigDecimal tongTinChi;
-
-    private BigDecimal tongSoGio;
-
-    private BigDecimal tongGioLyThuyet;
-
-    private BigDecimal tongGioThucHanh;
-
-    private BigDecimal tongGioKiemTra;
+//    private BigDecimal tongTinChi;
+//
+//    private BigDecimal tongSoGio;
+//
+//    private BigDecimal tongGioLyThuyet;
+//
+//    private BigDecimal tongGioThucHanh;
+//
+//    private BigDecimal tongGioKiemTra;
 
     private Boolean laHienHanh;
+
+    private TrangThaiChuongTrinhVersion trangThai;
 
     private LocalDateTime createdAt;
 

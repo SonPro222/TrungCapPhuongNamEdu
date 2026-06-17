@@ -19,12 +19,19 @@ public class ChuongTrinhMonController {
     private final ChuongTrinhMonService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAll(Pageable pageable,
-                                                                @RequestParam(required = false) Long chuongTrinhVersionId) {
-        Page<ChuongTrinhMonResponse> result = chuongTrinhVersionId == null
-                ? service.findAll(pageable)
-                : service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(result));
+    public ResponseEntity<ApiResponse<Page<ChuongTrinhMonResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) Long khungKyId,
+            @RequestParam(required = false) Long monHocId,
+            @RequestParam(required = false) Long nhomKienThucId,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String loaiHocPhan,
+            @RequestParam(required = false) Boolean batBuoc,
+            @RequestParam(required = false) Boolean laMonDieuKien,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(chuongTrinhVersionId, khungKyId, monHocId, nhomKienThucId, loai, loaiHocPhan, batBuoc, laMonDieuKien, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

@@ -20,13 +20,24 @@ public class SyllabusMonHoc {
 
     @Column(name = "chuong_trinh_mon_id")
     private Long chuongTrinhMonId;
+    @Column(name = "so_tin_chi", precision = 6, scale = 1)
+    private BigDecimal soTinChi;
+    @Column(name = "syllabus_mon_hoc_mau_id")
+    private Long syllabusMonHocMauId;
 
     @Column(name = "vi_tri")
     private String viTri;
 
     @Column(name = "tinh_chat")
     private String tinhChat;
+    @Column(name = "so_buoi_hoc", nullable = false)
+    private Integer soBuoiHoc;
 
+    @Column(name = "so_tiet_moi_buoi", nullable = false, precision = 4, scale = 1)
+    private BigDecimal soTietMoiBuoi;
+
+    @Column(name = "so_phut_mot_tiet", nullable = false)
+    private Integer soPhutMotTiet;
     @Column(name = "muc_tieu")
     private String mucTieu;
 
@@ -59,5 +70,34 @@ public class SyllabusMonHoc {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "mon_hoc_id")
+    private Long monHocId;
+
+    @Column(name = "ma")
+    private String ma;
+
+    @Column(name = "ten")
+    private String ten;
+
+    @Column(name = "ghi_chu")
+    private String ghiChu;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+
+        if (this.updatedAt == null) {
+            this.updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

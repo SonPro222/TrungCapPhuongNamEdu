@@ -2,6 +2,7 @@ package org.example.trungcapphuongnam.module.chuongTrinh.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -17,13 +18,36 @@ public class DieuKienTotNghiep {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "chuong_trinh_version_id")
-    private Long chuongTrinhVersionId;
+    @Column(name = "syllabus_chuong_trinh_id")
+    private Long syllabusChuongTrinhId;
 
     @Column(name = "noi_dung")
     private String noiDung;
 
     @Column(name = "thu_tu")
     private Integer thuTu;
+
+    @Column(name = "ma")
+    private String ma;
+
+    @Column(name = "ghi_chu")
+    private String ghiChu;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

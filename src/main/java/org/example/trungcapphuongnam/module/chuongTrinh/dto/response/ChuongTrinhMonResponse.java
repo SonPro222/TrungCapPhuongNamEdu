@@ -16,17 +16,22 @@ public class ChuongTrinhMonResponse {
     private Long chuongTrinhVersionId;
 
     private Long monHocId;
-
+    private String maMonHoc;
+    private String tenMonHoc;
     private String maMonTrongCt;
 
     private Long khungKyId;
+    private Integer thuTuKy;
+    private String tenKy;
+    private String maKy;
+    private String tenKyDaGan;
 
     private Long nhomKienThucId;
 
     private String loai;
 
     private String loaiHocPhan;
-
+    private String loaiPhamVi;
     private Boolean batBuoc;
 
     private Boolean laMonDieuKien;

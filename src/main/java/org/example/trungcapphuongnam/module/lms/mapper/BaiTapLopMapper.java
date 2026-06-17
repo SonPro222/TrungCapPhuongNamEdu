@@ -29,6 +29,11 @@ public final class BaiTapLopMapper {
             .giaoVienDuocChinhSua(entity.getGiaoVienDuocChinhSua())
             .trangThai(entity.getTrangThai())
             .ghiChu(entity.getGhiChu())
+            .diemToiDa(entity.getDiemToiDa())
+            .yeuCauToanManHinh(entity.getYeuCauToanManHinh())
+            .gioiHanRoiTab(entity.getGioiHanRoiTab())
+            .tuDongNopKhiViPham(entity.getTuDongNopKhiViPham())
+            .matKhauLamBai(entity.getMatKhauLamBai())
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
             .build();
@@ -55,6 +60,11 @@ public final class BaiTapLopMapper {
             .giaoVienDuocChinhSua(request.getGiaoVienDuocChinhSua())
             .trangThai(request.getTrangThai())
             .ghiChu(request.getGhiChu())
+            .diemToiDa(request.getDiemToiDa())
+            .yeuCauToanManHinh(request.getYeuCauToanManHinh())
+            .gioiHanRoiTab(request.getGioiHanRoiTab())
+            .tuDongNopKhiViPham(request.getTuDongNopKhiViPham())
+            .matKhauLamBai(request.getMatKhauLamBai())
             .build();
     }
 
@@ -78,5 +88,10 @@ public final class BaiTapLopMapper {
         entity.setGiaoVienDuocChinhSua(request.getGiaoVienDuocChinhSua());
         entity.setTrangThai(request.getTrangThai());
         entity.setGhiChu(request.getGhiChu());
+        entity.setDiemToiDa(request.getDiemToiDa());
+        entity.setYeuCauToanManHinh(request.getYeuCauToanManHinh());
+        entity.setGioiHanRoiTab(request.getGioiHanRoiTab());
+        entity.setTuDongNopKhiViPham(request.getTuDongNopKhiViPham());
+        entity.setMatKhauLamBai(request.getMatKhauLamBai());
     }
 }

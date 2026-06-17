@@ -1,9 +1,7 @@
 package org.example.trungcapphuongnam.module.heThong.dto.request;
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.TrangThaiNhanVien;
-
-import java.time.*;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiNhanVien;
 
 
 @Getter

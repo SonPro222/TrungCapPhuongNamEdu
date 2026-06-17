@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
+
 import lombok.*;
 import jakarta.validation.constraints.*;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -10,14 +10,8 @@ import java.time.LocalDateTime;
 @Builder
 public class ChuongTrinhRequest {
 
-    @NotNull(message = "nganh_id không được để trống")
-    private Long nganhId;
-
-    @NotNull(message = "trinh_do_id không được để trống")
-    private Long trinhDoId;
-
-    @NotNull(message = "loai_chuong_trinh_id không được để trống")
-    private Long loaiChuongTrinhId;
+    /** Mô hình mới: chọn ngành hệ đào tạo thay vì chọn rời trinhDo + loaiChuongTrinh */
+    private Long nganhHeDaoTaoId;
 
     @NotBlank(message = "ma_chuong_trinh không được để trống")
     private String maChuongTrinh;
@@ -28,9 +22,4 @@ public class ChuongTrinhRequest {
     private String doiTuongTuyenSinh;
 
     private String thoiGianDaoTao;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
 }

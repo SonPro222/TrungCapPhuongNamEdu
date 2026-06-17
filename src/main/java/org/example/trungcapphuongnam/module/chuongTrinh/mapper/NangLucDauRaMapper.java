@@ -10,11 +10,13 @@ public class NangLucDauRaMapper {
     public NangLucDauRa toEntity(NangLucDauRaRequest request) {
         if (request == null) return null;
         return NangLucDauRa.builder()
-                .chuongTrinhVersionId(request.getChuongTrinhVersionId())
+                .syllabusChuongTrinhId(request.getSyllabusChuongTrinhId())
                 .ma(request.getMa())
                 .noiDung(request.getNoiDung())
                 .loai(request.getLoai())
                 .thuTu(request.getThuTu())
+                .ghiChu(request.getGhiChu())
+
                 .build();
     }
 
@@ -22,20 +24,26 @@ public class NangLucDauRaMapper {
         if (entity == null) return null;
         return NangLucDauRaResponse.builder()
                 .id(entity.getId())
-                .chuongTrinhVersionId(entity.getChuongTrinhVersionId())
+                .syllabusChuongTrinhId(entity.getSyllabusChuongTrinhId())
                 .ma(entity.getMa())
                 .noiDung(entity.getNoiDung())
                 .loai(entity.getLoai())
                 .thuTu(entity.getThuTu())
+                .ghiChu(entity.getGhiChu())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
     public void updateEntity(NangLucDauRa entity, NangLucDauRaRequest request) {
         if (entity == null || request == null) return;
-        entity.setChuongTrinhVersionId(request.getChuongTrinhVersionId());
+        entity.setSyllabusChuongTrinhId(request.getSyllabusChuongTrinhId());
         entity.setMa(request.getMa());
         entity.setNoiDung(request.getNoiDung());
         entity.setLoai(request.getLoai());
         entity.setThuTu(request.getThuTu());
+        entity.setGhiChu(request.getGhiChu());
+
+
     }
 }

@@ -19,13 +19,13 @@ public class CauTraLoiSinhVien {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "lan_lam_bai_id")
+    @Column(name = "lan_lam_bai_id", nullable = false)
     private Long lanLamBaiId;
 
-    @Column(name = "cau_hoi_id")
-    private Long cauHoiId;
+    @Column(name = "lan_lam_bai_cau_hoi_id", nullable = false)
+    private Long lanLamBaiCauHoiId;
 
-    @Column(name = "noi_dung_tra_loi")
+    @Column(name = "noi_dung_tra_loi", columnDefinition = "TEXT")
     private String noiDungTraLoi;
 
     @Column(name = "diem")
@@ -34,7 +34,7 @@ public class CauTraLoiSinhVien {
     @Column(name = "la_dung")
     private Boolean laDung;
 
-    @Column(name = "nhan_xet")
+    @Column(name = "nhan_xet", columnDefinition = "TEXT")
     private String nhanXet;
 
     @CreationTimestamp
@@ -44,5 +44,4 @@ public class CauTraLoiSinhVien {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 }

@@ -4,8 +4,8 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Lms.KetQuaDat;
-import org.example.trungcapphuongnam.common.enums.Lms.TrangThaiKetQuaBaiTap;
+import org.example.trungcapphuongnam.module.lms.enums.KetQuaDat;
+import org.example.trungcapphuongnam.module.lms.enums.TrangThaiKetQuaBaiTap;
 
 @Getter
 @Setter
@@ -22,7 +22,6 @@ public class KetQuaBaiTapLopRequest {
 
     private Long sinhVienId;
 
-    @NotNull
 
     private Long lanLamDuocChonId;
 
@@ -42,7 +41,6 @@ public class KetQuaBaiTapLopRequest {
 
     private TrangThaiKetQuaBaiTap trangThai;
 
-    @NotNull
 
     private Long diemChiTietId;
 
@@ -52,13 +50,10 @@ public class KetQuaBaiTapLopRequest {
 
     private LocalDateTime ngayChot;
 
-    @NotNull
 
     private Long nguoiChotId;
 
     private LocalDateTime ngayDaySangDiem;
-
-    @NotNull
 
     private Long nguoiDaySangDiemId;
 

@@ -1,5 +1,6 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.response;
 import lombok.*;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -11,6 +12,7 @@ public class ViTriViecLamResponse {
 
     private Long id;
 
+    private Long syllabusChuongTrinhId;
     private Long chuongTrinhVersionId;
 
     private String ten;
@@ -18,5 +20,13 @@ public class ViTriViecLamResponse {
     private String moTa;
 
     private Integer thuTu;
+
+    private String ma;
+
+    private String ghiChu;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

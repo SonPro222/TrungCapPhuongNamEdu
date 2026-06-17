@@ -1,0 +1,103 @@
+package org.example.trungcapphuongnam.module.giangDay.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.giangDay.GiangDayException;
+import org.example.trungcapphuongnam.module.giangDay.dto.request.LichHocRequest;
+import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocPreviewItemResponse;
+import org.example.trungcapphuongnam.module.giangDay.dto.response.LichHocResponse;
+import org.example.trungcapphuongnam.module.giangDay.dto.response.SinhLichHocPreviewResponse;
+import org.example.trungcapphuongnam.module.giangDay.entity.LichHoc;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiDiemDanh;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLichHoc;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiSinhVienLopHocPhan;
+import org.example.trungcapphuongnam.module.giangDay.mapper.LichHocMapper;
+import org.example.trungcapphuongnam.module.giangDay.repository.DiemDanhRepository;
+import org.example.trungcapphuongnam.module.giangDay.repository.LichHocRepository;
+import org.example.trungcapphuongnam.module.giangDay.validator.LichHocValidator;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+@Service
+@RequiredArgsConstructor
+public class LichHocTuDongTransactionService {
+
+    private final LichHocRepository lichHocRepository;
+    private final LichHocMapper lichHocMapper;
+    private final LichHocValidator lichHocValidator;
+    private final DiemDanhRepository diemDanhRepository;
+
+    /**
+     * Luu lich tu dong trong transaction rieng cho tung lop hoc phan.
+     * Dieu nay tranh loi rollback-only cua batch lon: lop nao loi thi rollback rieng lop do,
+     * cac lop khac khong bi anh huong.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<LichHocResponse> luuLichTuDongTuPreview(Long lopHocPhanId, SinhLichHocPreviewResponse preview) {
+        if (lopHocPhanId == null) {
+            throw new GiangDayException("Lớp học phần không hợp lệ");
+        }
+        if (preview == null || !Boolean.TRUE.equals(preview.getHopLe())) {
+            throw new GiangDayException("Lịch preview chưa hợp lệ, không thể lưu");
+        }
+        if (preview.getItems() == null || preview.getItems().isEmpty()) {
+            return List.of();
+        }
+
+        List<LichHocRequest> requests = new ArrayList<>();
+        for (LichHocPreviewItemResponse item : preview.getItems()) {
+            LichHocRequest request = lichHocMapper.toRequestFromPreviewItem(lopHocPhanId, item);
+            if (request != null) {
+                requests.add(request);
+            }
+        }
+
+        if (requests.isEmpty()) {
+            return List.of();
+        }
+
+        // Validate tat ca truoc khi save bat ky ban ghi nao de tranh save mot phan roi rollback.
+        for (LichHocRequest request : requests) {
+            lichHocValidator.validateCreate(request);
+        }
+
+        List<LichHoc> lichHocs = requests.stream()
+                .map(lichHocMapper::toEntity)
+                .toList();
+
+        List<LichHoc> saved = lichHocRepository.saveAllAndFlush(lichHocs);
+        taoDiemDanhChoCacBuoiHoc(saved);
+
+        return saved.stream()
+                .map(lichHocMapper::toResponse)
+                .toList();
+    }
+
+    private void taoDiemDanhChoCacBuoiHoc(List<LichHoc> lichHocs) {
+        if (lichHocs == null || lichHocs.isEmpty()) {
+            return;
+        }
+
+        List<String> trangThaiSinhVien = List.of(
+                TrangThaiSinhVienLopHocPhan.da_dang_ky.name(),
+                TrangThaiSinhVienLopHocPhan.dang_hoc.name(),
+                TrangThaiSinhVienLopHocPhan.hoc_lai.name()
+        );
+
+        lichHocs.stream()
+                .filter(Objects::nonNull)
+                .filter(lichHoc -> lichHoc.getId() != null)
+                .filter(lichHoc -> lichHoc.getLopHocPhanId() != null)
+                .filter(lichHoc -> lichHoc.getTrangThai() != TrangThaiLichHoc.nghi)
+                .forEach(lichHoc -> diemDanhRepository.insertMissingDiemDanhForLichHoc(
+                        lichHoc.getId(),
+                        lichHoc.getLopHocPhanId(),
+                        trangThaiSinhVien,
+                        TrangThaiDiemDanh.chua_diem_danh.name()
+                ));
+    }
+}

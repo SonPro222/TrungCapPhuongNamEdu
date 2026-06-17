@@ -17,4 +17,6 @@ public class CaHocResponse {
     private LocalTime gioBatDau;
     private LocalTime gioKetThuc;
     private String moTa;
+    private Integer thuTu;
+    private String trangThai;
 }

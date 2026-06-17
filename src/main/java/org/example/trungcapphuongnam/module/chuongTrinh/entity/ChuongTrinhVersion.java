@@ -5,6 +5,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.example.trungcapphuongnam.module.chuongTrinh.enums.TrangThaiChuongTrinhVersion;
 
 @Getter
 @Setter
@@ -67,10 +68,31 @@ public class ChuongTrinhVersion {
     @Column(name = "la_hien_hanh")
     private Boolean laHienHanh;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trang_thai")
+    private TrangThaiChuongTrinhVersion trangThai;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+
+        if (this.updatedAt == null) {
+            this.updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

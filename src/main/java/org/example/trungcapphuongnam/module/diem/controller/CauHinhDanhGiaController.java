@@ -8,9 +8,12 @@ import org.example.trungcapphuongnam.module.diem.dto.request.CauHinhDanhGiaReque
 import org.example.trungcapphuongnam.module.diem.dto.response.CauHinhDanhGiaResponse;
 import org.example.trungcapphuongnam.module.diem.service.CauHinhDanhGiaService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(DiemPath.CAU_HINH_DANH_GIA)
@@ -19,8 +22,26 @@ public class CauHinhDanhGiaController {
 
     private final CauHinhDanhGiaService service;
 
+    /**
+     * Flow mới: ?syllabusMonHocId=X.
+     * Flow cũ tương thích: ?lopHocPhanId=X -> BE resolve lớp -> chương trình môn -> syllabus môn.
+     */
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<CauHinhDanhGiaResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<CauHinhDanhGiaResponse>>> findAll(
+            @RequestParam(required = false) Long syllabusMonHocId,
+            @RequestParam(required = false) Long lopHocPhanId,
+            Pageable pageable
+    ) {
+        if (syllabusMonHocId != null) {
+            List<CauHinhDanhGiaResponse> list = service.findBySyllabusMonHocId(syllabusMonHocId);
+            return ResponseEntity.ok(ApiResponse.ok(new PageImpl<>(list, pageable, list.size())));
+        }
+
+        if (lopHocPhanId != null) {
+            List<CauHinhDanhGiaResponse> list = service.findByLopHocPhanId(lopHocPhanId);
+            return ResponseEntity.ok(ApiResponse.ok(new PageImpl<>(list, pageable, list.size())));
+        }
+
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
     }
 
@@ -30,12 +51,15 @@ public class CauHinhDanhGiaController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CauHinhDanhGiaResponse>> create(@Valid @RequestBody CauHinhDanhGiaRequest request) {
+    public ResponseEntity<ApiResponse<CauHinhDanhGiaResponse>> create(
+            @Valid @RequestBody CauHinhDanhGiaRequest request) {
         return ResponseEntity.status(201).body(ApiResponse.created(service.create(request)));
     }
 
     @PutMapping(DiemPath.ID)
-    public ResponseEntity<ApiResponse<CauHinhDanhGiaResponse>> update(@PathVariable Long id, @Valid @RequestBody CauHinhDanhGiaRequest request) {
+    public ResponseEntity<ApiResponse<CauHinhDanhGiaResponse>> update(
+            @PathVariable Long id,
+            @Valid @RequestBody CauHinhDanhGiaRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(service.update(id, request)));
     }
 

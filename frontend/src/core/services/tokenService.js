@@ -1,29 +1,61 @@
-import { ENV } from '@/core/config/env.js';
-import storage from './storageService.js';
+import { storageService } from './storageService'
 
-const TOKEN_KEYS = [ENV.tokenKey, 'token', 'access_token'];
-const REFRESH_KEYS = [ENV.refreshTokenKey, 'refresh_token'];
-const ROLE_KEYS = [ENV.roleKey, 'userRole', 'authorities'];
+const TOKEN_KEY = 'access_token'
+const REFRESH_TOKEN_KEY = 'refresh_token'
+const USER_KEY = 'auth_user'
 
-const firstValue = (keys) => keys.map((key) => storage.get(key)).find(Boolean) || '';
+function decodeJwt(token) {
+    try {
+        const payload = token.split('.')[1]
+        return JSON.parse(atob(payload))
+    } catch {
+        return null
+    }
+}
 
 export const tokenService = {
-  getAccessToken: () => firstValue(TOKEN_KEYS),
-  setAccessToken(token) {
-    storage.set(ENV.tokenKey, token);
-    storage.set('token', token);
-  },
-  getRefreshToken: () => firstValue(REFRESH_KEYS),
-  setRefreshToken(token) {
-    storage.set(ENV.refreshTokenKey, token);
-  },
-  getRole: () => firstValue(ROLE_KEYS),
-  setRole(role) {
-    storage.set(ENV.roleKey, role);
-  },
-  clear() {
-    storage.clear([...TOKEN_KEYS, ...REFRESH_KEYS, ...ROLE_KEYS, 'user', 'userInfo']);
-  },
-};
+    getToken() {
+        return storageService.get(TOKEN_KEY)
+    },
 
-export default tokenService;
+    setToken(token) {
+        storageService.set(TOKEN_KEY, token)
+    },
+
+    getRefreshToken() {
+        return storageService.get(REFRESH_TOKEN_KEY)
+    },
+
+    setRefreshToken(token) {
+        storageService.set(REFRESH_TOKEN_KEY, token)
+    },
+
+    getUser() {
+        const raw = storageService.get(USER_KEY)
+        return raw ? JSON.parse(raw) : null
+    },
+
+    setUser(user) {
+        storageService.set(USER_KEY, JSON.stringify(user))
+    },
+
+    isTokenExpired() {
+        const token = this.getToken()
+
+        if (!token) return true
+
+        const decoded = decodeJwt(token)
+
+        if (!decoded?.exp) return true
+
+        const now = Math.floor(Date.now() / 1000)
+
+        return decoded.exp <= now
+    },
+
+    clearAuth() {
+        storageService.remove(TOKEN_KEY)
+        storageService.remove(REFRESH_TOKEN_KEY)
+        storageService.remove(USER_KEY)
+    }
+}

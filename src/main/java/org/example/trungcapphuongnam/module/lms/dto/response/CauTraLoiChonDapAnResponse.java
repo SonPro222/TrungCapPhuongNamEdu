@@ -1,6 +1,5 @@
 package org.example.trungcapphuongnam.module.lms.dto.response;
 
-import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import lombok.*;
 
@@ -10,13 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CauTraLoiChonDapAnResponse {
-
     private Long id;
-
     private Long cauTraLoiId;
-
-    private Long dapAnId;
-
+    private Long lanLamBaiDapAnId;
     private LocalDateTime createdAt;
-
 }

@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.thi.service.impl;
 import org.example.trungcapphuongnam.module.thi.dto.request.DeThiRequest;
 import org.example.trungcapphuongnam.module.thi.dto.response.DeThiResponse;
 import org.example.trungcapphuongnam.module.thi.entity.DeThi;
-import org.example.trungcapphuongnam.common.exception.ThiNotFoundException;
+import org.example.trungcapphuongnam.module.thi.ThiNotFoundException;
 import org.example.trungcapphuongnam.module.thi.mapper.DeThiMapper;
 import org.example.trungcapphuongnam.module.thi.repository.DeThiRepository;
 import org.example.trungcapphuongnam.module.thi.service.DeThiService;

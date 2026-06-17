@@ -16,4 +16,12 @@ public class NhatKyDangNhapResponse {
     private String userAgent;
     private Boolean thanhCong;
     private String lyDoThatBai;
+    private String emailNhap;
+    private String taiKhoanEmail;
+    private String tenTaiKhoan;
+    private String loaiTaiKhoan;
+    private String doiTuongLoai;
+    private Long doiTuongId;
+    private String doiTuongTen;
+    private String phuongThuc;
 }

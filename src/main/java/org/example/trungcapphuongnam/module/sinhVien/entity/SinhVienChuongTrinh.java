@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.sinhVien.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.SinhVien.SinhVienChuongTrinhTrangThai;
+import org.example.trungcapphuongnam.module.sinhVien.enums.SinhVienChuongTrinhTrangThai;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

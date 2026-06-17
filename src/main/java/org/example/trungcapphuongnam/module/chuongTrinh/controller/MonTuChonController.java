@@ -20,8 +20,12 @@ public class MonTuChonController {
     private final MonTuChonService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MonTuChonResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<MonTuChonResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long nhomId,
+            @RequestParam(required = false) Long chuongTrinhMonId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(nhomId, chuongTrinhMonId, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

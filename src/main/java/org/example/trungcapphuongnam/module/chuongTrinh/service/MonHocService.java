@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface MonHocService {
-    Page<MonHocResponse> findAll(Pageable pageable);
+    Page<MonHocResponse> findAll(String keyword, Pageable pageable);
     MonHocResponse findById(Long id);
     MonHocResponse create(MonHocRequest request);
     MonHocResponse update(Long id, MonHocRequest request);

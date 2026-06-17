@@ -20,8 +20,14 @@ public class MucTieuChuongTrinhController {
     private final MucTieuChuongTrinhService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MucTieuChuongTrinhResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<MucTieuChuongTrinhResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long syllabusChuongTrinhId,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusChuongTrinhId, chuongTrinhVersionId, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

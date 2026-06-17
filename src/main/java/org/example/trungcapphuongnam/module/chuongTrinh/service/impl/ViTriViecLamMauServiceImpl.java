@@ -1,0 +1,75 @@
+package org.example.trungcapphuongnam.module.chuongTrinh.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.example.trungcapphuongnam.module.chuongTrinh.validator.ChuongTrinhNghiepVuValidator;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.XoaChuongTrinhCascadeService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.ViTriViecLamMauRequest;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.ViTriViecLamMauResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.entity.ViTriViecLamMau;
+import org.example.trungcapphuongnam.module.chuongTrinh.mapper.ViTriViecLamMauMapper;
+import org.example.trungcapphuongnam.module.chuongTrinh.repository.*;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ViTriViecLamMauService;
+import org.example.trungcapphuongnam.common.spec.LocJpa;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ViTriViecLamMauServiceImpl implements ViTriViecLamMauService {
+    private final ChuongTrinhNghiepVuValidator validator;
+    private final ViTriViecLamMauRepository repository;
+    private final ViTriViecLamMauMapper mapper;
+    private final XoaChuongTrinhCascadeService xoaChuongTrinhCascadeService;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ViTriViecLamMauResponse> findAll(Long syllabusChuongTrinhMauId, String ma, String keyword, Pageable pageable) {
+        return repository.findAll(
+                LocJpa.<ViTriViecLamMau>empty()
+                    .and(LocJpa.eq("syllabusChuongTrinhMauId", syllabusChuongTrinhMauId))
+                    .and(LocJpa.like("ma", ma))
+                    .and(LocJpa.keyword(keyword, "ma", "ten", "moTa", "ghiChu")),
+                pageable
+        ).map(mapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ViTriViecLamMauResponse findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Vi Tri Viec Lam Mau không tồn tại: " + id));
+    }
+
+    @Override
+    public ViTriViecLamMauResponse create(ViTriViecLamMauRequest request) {
+        validator.validateViTriViecLamMau(request, null);
+        ViTriViecLamMau entity = mapper.toEntity(request);
+        return mapper.toResponse(repository.save(entity));
+    }
+
+    @Override
+    public ViTriViecLamMauResponse update(Long id, ViTriViecLamMauRequest request) {
+        ViTriViecLamMau entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vi Tri Viec Lam Mau không tồn tại: " + id));
+        validator.validateViTriViecLamMau(request, id);
+        mapper.updateEntity(entity, request);
+        return mapper.toResponse(repository.save(entity));
+    }
+
+    @Override
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Vi Tri Viec Lam Mau không tồn tại: " + id);
+        }
+
+        xoaChuongTrinhCascadeService.xoaTheoViTriMauId(id);
+
+        repository.deleteById(id);
+    }
+
+}

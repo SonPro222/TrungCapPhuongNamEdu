@@ -1,7 +1,7 @@
 package org.example.trungcapphuongnam.module.hocPhi.service;
 
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiHocPhi;
+import org.example.trungcapphuongnam.module.hocPhi.enums.TrangThaiHocPhi;
 import org.example.trungcapphuongnam.module.hocPhi.dto.request.HocPhiRequest;
 import org.example.trungcapphuongnam.module.hocPhi.dto.response.HocPhiResponse;
 

@@ -3,7 +3,11 @@ package org.example.trungcapphuongnam.module.chuongTrinh.repository;
 import org.example.trungcapphuongnam.module.chuongTrinh.entity.MonHoc;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Repository
-public interface MonHocRepository extends JpaRepository<MonHoc, Long> {
+public interface MonHocRepository extends JpaRepository<MonHoc, Long>, JpaSpecificationExecutor<MonHoc> {
+    boolean existsByMaMon(String maMon);
+
+    boolean existsByMaMonAndIdNot(String maMon, Long id);
 }

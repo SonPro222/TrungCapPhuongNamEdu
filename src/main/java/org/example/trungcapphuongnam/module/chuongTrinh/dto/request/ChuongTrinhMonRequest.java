@@ -21,6 +21,7 @@ public class ChuongTrinhMonRequest {
     @NotBlank(message = "ma_mon_trong_ct không được để trống")
     private String maMonTrongCt;
 
+    // Cho phép null: copy môn gốc vào version trước, gán kỳ sau (nghiệp vụ tái sử dụng).
     private Long khungKyId;
 
     private Long nhomKienThucId;
@@ -30,22 +31,22 @@ public class ChuongTrinhMonRequest {
 
     @NotBlank(message = "loai_hoc_phan không được để trống")
     private String loaiHocPhan;
-
+    private String loaiPhamVi;
     private Boolean batBuoc;
 
     private Boolean laMonDieuKien;
 
     private Integer thuTu;
 
-    private BigDecimal soTinChi;
-
-    private BigDecimal tongGio;
-
-    private BigDecimal gioLyThuyet;
-
-    private BigDecimal gioThucHanh;
-
-    private BigDecimal gioKiemTra;
+//    private BigDecimal soTinChi;
+//
+//    private BigDecimal tongGio;
+//
+//    private BigDecimal gioLyThuyet;
+//
+//    private BigDecimal gioThucHanh;
+//
+//    private BigDecimal gioKiemTra;
 
     private String ghiChu;
 

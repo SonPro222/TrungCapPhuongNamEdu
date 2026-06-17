@@ -1,8 +1,8 @@
 package org.example.trungcapphuongnam.module.heThong.mapper;
 
 
-import org.example.trungcapphuongnam.common.enums.LoaiTaiKhoan;
-import org.example.trungcapphuongnam.common.enums.TrangThaiTaiKhoan;
+import org.example.trungcapphuongnam.module.heThong.enums.LoaiTaiKhoan;
+import org.example.trungcapphuongnam.module.heThong.enums.TrangThaiTaiKhoan;
 import org.example.trungcapphuongnam.module.heThong.dto.request.TaiKhoanRequest;
 import org.example.trungcapphuongnam.module.heThong.dto.response.TaiKhoanResponse;
 import org.example.trungcapphuongnam.module.heThong.entity.TaiKhoan;

@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.diem.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.trungcapphuongnam.common.enums.TrangThaiBaiNop;
+import org.example.trungcapphuongnam.module.diem.enums.TrangThaiBaiNop;
 import org.example.trungcapphuongnam.common.exception.BadRequestException;
 import org.example.trungcapphuongnam.common.exception.DuplicateResourceException;
 import org.example.trungcapphuongnam.common.exception.ResourceNotFoundException;

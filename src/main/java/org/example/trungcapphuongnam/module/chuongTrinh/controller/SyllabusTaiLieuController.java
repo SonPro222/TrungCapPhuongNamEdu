@@ -20,8 +20,13 @@ public class SyllabusTaiLieuController {
     private final SyllabusTaiLieuService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SyllabusTaiLieuResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<SyllabusTaiLieuResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long syllabusMonId,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusMonId, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

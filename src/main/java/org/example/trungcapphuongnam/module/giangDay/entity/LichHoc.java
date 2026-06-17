@@ -2,10 +2,9 @@ package org.example.trungcapphuongnam.module.giangDay.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.TrangThaiLichHoc;
+import org.example.trungcapphuongnam.module.giangDay.enums.TrangThaiLichHoc;
 
 import java.time.*;
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -43,6 +42,15 @@ public class LichHoc {
 
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
+
+    @Column(name = "vuot_khung_ky")
+    private Boolean vuotKhungKy;
+
+    @Column(name = "ngay_ket_thuc_goc")
+    private LocalDate ngayKetThucGoc;
+
+    @Column(name = "so_ngay_vuot_khung_ky")
+    private Integer soNgayVuotKhungKy;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

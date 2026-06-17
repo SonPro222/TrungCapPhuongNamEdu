@@ -4,13 +4,20 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.trungcapphuongnam.common.constant.Path.DaoTaoPath;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.ChuongTrinhVersionNghiChuyenKyBulkRequest;
+import org.example.trungcapphuongnam.module.daoTao.dto.ChuongTrinhVersionNghiChuyenKyResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyCanhBaoTaiHocResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyGoiYResponse;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyRequest;
 import org.example.trungcapphuongnam.module.daoTao.dto.KhungKyResponse;
+import org.example.trungcapphuongnam.module.daoTao.dto.KhungKySinhTuDongRequest;
 import org.example.trungcapphuongnam.module.daoTao.service.KhungKyService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(DaoTaoPath.KHUNG_KY)
@@ -20,8 +27,67 @@ public class KhungKyController {
     private final KhungKyService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<KhungKyResponse>>> findAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<KhungKyResponse>>> findAll(
+            Pageable pageable
+    ) {
         return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}")
+    public ResponseEntity<ApiResponse<Page<KhungKyResponse>>> findAllByChuongTrinhVersionId(
+            @PathVariable Long chuongTrinhVersionId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAllByChuongTrinhVersionId(chuongTrinhVersionId, pageable)
+        ));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}/goi-y")
+    public ResponseEntity<ApiResponse<KhungKyGoiYResponse>> goiYTheoVersion(
+            @PathVariable Long chuongTrinhVersionId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.goiYTheoVersion(chuongTrinhVersionId)));
+    }
+
+    @PostMapping("/theo-version/{chuongTrinhVersionId}/goi-y-sinh-tu-dong")
+    public ResponseEntity<ApiResponse<KhungKyGoiYResponse>> goiYSinhTuDongTheoVersion(
+            @PathVariable Long chuongTrinhVersionId,
+            @RequestBody(required = false) KhungKySinhTuDongRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.goiYTheoVersion(chuongTrinhVersionId, request)));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}/nghi-chuyen-ky")
+    public ResponseEntity<ApiResponse<List<ChuongTrinhVersionNghiChuyenKyResponse>>> findNghiChuyenKyTheoVersion(
+            @PathVariable Long chuongTrinhVersionId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findNghiChuyenKyTheoVersion(chuongTrinhVersionId)));
+    }
+
+    @PutMapping("/theo-version/{chuongTrinhVersionId}/nghi-chuyen-ky")
+    public ResponseEntity<ApiResponse<List<ChuongTrinhVersionNghiChuyenKyResponse>>> saveNghiChuyenKyTheoVersion(
+            @PathVariable Long chuongTrinhVersionId,
+            @RequestBody(required = false) ChuongTrinhVersionNghiChuyenKyBulkRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.saveNghiChuyenKyTheoVersion(chuongTrinhVersionId, request)));
+    }
+
+    @GetMapping("/theo-version/{chuongTrinhVersionId}/canh-bao-tai-hoc")
+    public ResponseEntity<ApiResponse<KhungKyCanhBaoTaiHocResponse>> canhBaoTaiHocTheoVersion(
+            @PathVariable Long chuongTrinhVersionId
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.canhBaoTaiHocTheoVersion(chuongTrinhVersionId)));
+    }
+
+    @PostMapping("/theo-version/{chuongTrinhVersionId}/tao-du-ky-con-thieu")
+    public ResponseEntity<ApiResponse<List<KhungKyResponse>>> taoCacKyConThieuTheoVersion(
+            @PathVariable Long chuongTrinhVersionId,
+            @RequestBody(required = false) KhungKySinhTuDongRequest request
+    ) {
+        return ResponseEntity.status(201).body(ApiResponse.created(
+                service.taoCacKyConThieuTheoVersion(chuongTrinhVersionId, request)
+        ));
     }
 
     @GetMapping(DaoTaoPath.ID)

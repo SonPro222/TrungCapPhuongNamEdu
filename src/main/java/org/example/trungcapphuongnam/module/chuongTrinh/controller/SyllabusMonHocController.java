@@ -3,6 +3,8 @@ package org.example.trungcapphuongnam.module.chuongTrinh.controller;
 import org.example.trungcapphuongnam.common.response.ApiResponse;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.request.SyllabusMonHocRequest;
 import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.SyllabusMonHocResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.dto.response.cauTruc.SyllabusMonHocCauTrucResponse;
+import org.example.trungcapphuongnam.module.chuongTrinh.service.ChuongTrinhCauTrucService;
 import org.example.trungcapphuongnam.module.chuongTrinh.service.SyllabusMonHocService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +20,24 @@ import org.example.trungcapphuongnam.common.constant.Path.ChuongTrinhPath;
 public class SyllabusMonHocController {
 
     private final SyllabusMonHocService service;
+    private final ChuongTrinhCauTrucService cauTrucService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<SyllabusMonHocResponse>>> findAll(Pageable pageable,
-                                                                @RequestParam(required = false) Long chuongTrinhMonId) {
-        Page<SyllabusMonHocResponse> result = chuongTrinhMonId == null
-                ? service.findAll(pageable)
-                : service.findAllByChuongTrinhMonId(chuongTrinhMonId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(result));
+    public ResponseEntity<ApiResponse<Page<SyllabusMonHocResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long chuongTrinhMonId,
+            @RequestParam(required = false) Long syllabusMonHocMauId,
+            @RequestParam(required = false) Boolean batBuocDuThi,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                service.findAll(chuongTrinhMonId, syllabusMonHocMauId, batBuocDuThi, keyword, pageable)
+        ));
+    }
+
+    @GetMapping("/{id}/xem")
+    public ResponseEntity<ApiResponse<SyllabusMonHocCauTrucResponse>> findChiTietDeXem(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(cauTrucService.findSyllabusChiTietById(id)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

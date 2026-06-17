@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface NangLucDauRaService {
-    Page<NangLucDauRaResponse> findAll(Pageable pageable);
+    Page<NangLucDauRaResponse> findAll(Long syllabusChuongTrinhId, Long chuongTrinhVersionId, String ma, String loai, String keyword, Pageable pageable);
     NangLucDauRaResponse findById(Long id);
     NangLucDauRaResponse create(NangLucDauRaRequest request);
     NangLucDauRaResponse update(Long id, NangLucDauRaRequest request);

@@ -1,10 +1,9 @@
 package org.example.trungcapphuongnam.module.sinhVien.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.SinhVien.GioiTinh;
-import org.example.trungcapphuongnam.common.enums.SinhVien.SinhVienTrangThai;
+import org.example.trungcapphuongnam.module.sinhVien.enums.GioiTinh;
+import org.example.trungcapphuongnam.module.sinhVien.enums.SinhVienTrangThai;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,6 +42,78 @@ public class SinhVien {
 
     @Column(name = "dia_chi", columnDefinition = "TEXT")
     private String diaChi;
+
+    @Column(name = "dia_chi_thuong_tru", columnDefinition = "TEXT")
+    private String diaChiThuongTru;
+
+    @Column(name = "so_cccd", length = 50)
+    private String soCccd;
+
+    @Column(name = "ngay_cap_cccd")
+    private LocalDate ngayCapCccd;
+
+    @Column(name = "noi_cap_cccd", length = 255)
+    private String noiCapCccd;
+
+    @Column(name = "anh_chan_dung_tep_id")
+    private Long anhChanDungTepId;
+
+    @Column(name = "cccd_truoc_tep_id")
+    private Long cccdTruocTepId;
+
+    @Column(name = "cccd_sau_tep_id")
+    private Long cccdSauTepId;
+
+    @Column(name = "bang_cap_tep_id")
+    private Long bangCapTepId;
+
+    @Column(name = "bang_cap", length = 255)
+    private String bangCap;
+
+    @Column(name = "nam_tot_nghiep")
+    private Integer namTotNghiep;
+
+    @Column(name = "truong_tot_nghiep", length = 255)
+    private String truongTotNghiep;
+
+    @Column(name = "ho_ten_cha", length = 255)
+    private String hoTenCha;
+
+    @Column(name = "nghe_nghiep_cha", length = 255)
+    private String ngheNghiepCha;
+
+    @Column(name = "sdt_cha", length = 50)
+    private String sdtCha;
+
+    @Column(name = "email_cha", length = 255)
+    private String emailCha;
+
+    @Column(name = "ho_ten_me", length = 255)
+    private String hoTenMe;
+
+    @Column(name = "nghe_nghiep_me", length = 255)
+    private String ngheNghiepMe;
+
+    @Column(name = "sdt_me", length = 50)
+    private String sdtMe;
+
+    @Column(name = "email_me", length = 255)
+    private String emailMe;
+
+    @Column(name = "ho_ten_nguoi_than", length = 255)
+    private String hoTenNguoiThan;
+
+    @Column(name = "quan_he_nguoi_than", length = 100)
+    private String quanHeNguoiThan;
+
+    @Column(name = "sdt_nguoi_than", length = 50)
+    private String sdtNguoiThan;
+
+    @Column(name = "email_nguoi_than", length = 255)
+    private String emailNguoiThan;
+
+    @Column(name = "ghi_chu_ho_so", columnDefinition = "TEXT")
+    private String ghiChuHoSo;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai", length = 50)

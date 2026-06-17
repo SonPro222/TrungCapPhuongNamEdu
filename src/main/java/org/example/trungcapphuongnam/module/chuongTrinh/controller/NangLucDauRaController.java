@@ -20,8 +20,15 @@ public class NangLucDauRaController {
     private final NangLucDauRaService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<NangLucDauRaResponse>>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(service.findAll(pageable)));
+    public ResponseEntity<ApiResponse<Page<NangLucDauRaResponse>>> findAll(
+            Pageable pageable,
+            @RequestParam(required = false) Long syllabusChuongTrinhId,
+            @RequestParam(required = false) Long chuongTrinhVersionId,
+            @RequestParam(required = false) String ma,
+            @RequestParam(required = false) String loai,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(ApiResponse.ok(service.findAll(syllabusChuongTrinhId, chuongTrinhVersionId, ma, loai, keyword, pageable)));
     }
 
     @GetMapping(ChuongTrinhPath.ID)

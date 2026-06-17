@@ -3,7 +3,7 @@ package org.example.trungcapphuongnam.module.thi.dto.request;
 import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.Thi.BaiThiSinhVienTrangThai;
+import org.example.trungcapphuongnam.module.thi.enums.BaiThiSinhVienTrangThai;
 
 @Getter
 @Setter

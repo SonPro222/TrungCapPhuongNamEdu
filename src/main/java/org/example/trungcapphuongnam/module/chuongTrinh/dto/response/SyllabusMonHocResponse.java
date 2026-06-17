@@ -13,10 +13,25 @@ public class SyllabusMonHocResponse {
     private Long id;
 
     private Long chuongTrinhMonId;
-
+    private Long syllabusMonHocMauId;
     private String viTri;
+    private BigDecimal soTinChi;
 
+    private BigDecimal tongGio;
+
+    private BigDecimal gioLyThuyet;
+
+    private BigDecimal gioThucHanh;
+
+    private BigDecimal gioKiemTra;
     private String tinhChat;
+
+    private Integer soBuoiHoc;
+
+    private BigDecimal soTietMoiBuoi;
+
+    private Integer soPhutMotTiet;
+
 
     private String mucTieu;
 
@@ -39,5 +54,13 @@ public class SyllabusMonHocResponse {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private Long monHocId;
+
+    private String ma;
+
+    private String ten;
+
+    private String ghiChu;
 
 }

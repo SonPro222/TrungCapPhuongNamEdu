@@ -1,6 +1,7 @@
 package org.example.trungcapphuongnam.module.chuongTrinh.dto.request;
 import lombok.*;
 import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -9,7 +10,7 @@ import jakarta.validation.constraints.*;
 @Builder
 public class NangLucDauRaRequest {
 
-    @NotNull(message = "chuong_trinh_version_id không được để trống")
+    private Long syllabusChuongTrinhId;
     private Long chuongTrinhVersionId;
 
     private String ma;
@@ -21,5 +22,11 @@ public class NangLucDauRaRequest {
     private String loai;
 
     private Integer thuTu;
+
+    private String ghiChu;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

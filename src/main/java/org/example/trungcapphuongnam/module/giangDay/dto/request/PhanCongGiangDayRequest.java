@@ -1,10 +1,7 @@
 package org.example.trungcapphuongnam.module.giangDay.dto.request;
 
 import lombok.*;
-import org.example.trungcapphuongnam.common.enums.VaiTroGiangDay;
-
-import java.time.*;
-import java.math.BigDecimal;
+import org.example.trungcapphuongnam.module.giangDay.enums.VaiTroGiangDay;
 
 
 @Getter
@@ -16,4 +13,6 @@ public class PhanCongGiangDayRequest {
     private Long lopHocPhanId;
     private Long giaoVienId;
     private VaiTroGiangDay vaiTro;
+    private String trangThai;
+    private String ghiChu;
 }
